@@ -17,7 +17,7 @@ COPY server server/
 COPY handler handler/
 COPY crypto crypto/
 COPY dto dto/
-COPY ee/saml ee/saml/
+COPY saml saml/
 COPY session session/
 COPY mail mail/
 COPY audit_log audit_log/

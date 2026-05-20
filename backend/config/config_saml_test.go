@@ -1,9 +1,10 @@
 package config
 
 import (
+	"testing"
+
 	"github.com/gobwas/glob"
 	"github.com/stretchr/testify/assert"
-	"testing"
 )
 
 func TestSamlConfig_PostProcess(t *testing.T) {
@@ -57,7 +58,7 @@ func TestSamlConfig_ValidateWithDisabledSaml(t *testing.T) {
 		Enabled: false,
 	}
 
-	err := cfg.Validate()
+	err := cfg.Validate(false)
 	assert.NoError(t, err)
 }
 
@@ -77,7 +78,7 @@ func TestSamlConfig_ValidateWithEnabledSaml(t *testing.T) {
 		}},
 	}
 
-	err := cfg.Validate()
+	err := cfg.Validate(false)
 	assert.NoError(t, err)
 }
 

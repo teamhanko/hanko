@@ -1,0 +1,17 @@
+create_table("saml_providers") {
+	t.Column("id", "uuid", {primary: true})
+	t.Column("tenant_id", "uuid", {"null": false})
+	t.Column("name", "string", {"null": false})
+	t.Column("entity_id", "string", {"null": false})
+	t.Column("metadata_url", "string", {"null": false})
+	t.Column("domain", "string", {"null": false})
+	t.Column("enabled", "bool", {"null": false, "default": true})
+	t.Column("skip_email_verification", "bool", {"null": false, "default": false})
+	t.Column("attribute_map", "jsonb", {"null": true})
+	t.Timestamps()
+
+	t.ForeignKey("tenant_id", {"tenants": ["id"]}, {"on_delete": "cascade", "on_update": "cascade"})
+	t.Index(["tenant_id", "entity_id"], {"unique": true})
+	t.Index(["tenant_id", "domain"], {"unique": true})
+	t.Index(["tenant_id"])
+}

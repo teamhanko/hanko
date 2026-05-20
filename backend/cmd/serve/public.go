@@ -11,6 +11,7 @@ import (
 	"github.com/teamhanko/hanko/backend/v2/config"
 	"github.com/teamhanko/hanko/backend/v2/mapper"
 	"github.com/teamhanko/hanko/backend/v2/persistence"
+	"github.com/teamhanko/hanko/backend/v2/saml"
 	"github.com/teamhanko/hanko/backend/v2/server"
 )
 
@@ -37,6 +38,17 @@ func NewServePublicCommand() *cobra.Command {
 				log.Fatal(err)
 			}
 			persister := persistence.New(dbConnection)
+
+			// Sync SAML providers from config to database for backward compatibility
+			if cfg.Saml.Enabled {
+				log.Println("Syncing SAML providers from config to database...")
+				err := saml.SyncProviderConfigToDatabase(cfg, persister)
+				if err != nil {
+					log.Printf("SAML config sync failed: %v", err)
+					// Don't fail startup - just log the error
+				}
+			}
+
 			var wg sync.WaitGroup
 			wg.Add(1)
 

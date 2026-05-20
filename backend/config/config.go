@@ -8,7 +8,6 @@ import (
 	"github.com/knadh/koanf/parsers/yaml"
 	"github.com/knadh/koanf/providers/file"
 	"github.com/knadh/koanf/v2"
-	"github.com/teamhanko/hanko/backend/v2/ee/saml/config"
 )
 
 type ApplicationConfig struct {
@@ -59,7 +58,7 @@ type TenantConfig struct {
 	Password Password `yaml:"password" json:"password,omitempty" koanf:"password" jsonschema:"title=password"`
 	// `saml` configures modalities of SAML (Security Assertion Markup Language) SSO authentication and SAML identity
 	// providers.
-	Saml config.Saml `yaml:"saml" json:"saml,omitempty" koanf:"saml" jsonschema:"title=saml"`
+	Saml Saml `yaml:"saml" json:"saml,omitempty" koanf:"saml" jsonschema:"title=saml"`
 	// `secrets` configures the keys used for cryptographically signing tokens issued by the API.
 	Secrets Secrets `yaml:"secrets" json:"secrets,omitempty" koanf:"secrets" jsonschema:"title=secrets"`
 	// `security_notifications` configures security notifications for important security-related events.
@@ -169,7 +168,7 @@ func (c *ApplicationConfig) Validate() error {
 	return nil
 }
 
-func (c *TenantConfig) Validate() error {
+func (c *TenantConfig) Validate(multiTenancy bool) error {
 	err := c.Webauthn.Validate()
 	if err != nil {
 		return fmt.Errorf("failed to validate webauthn settings: %w", err)
@@ -196,7 +195,7 @@ func (c *TenantConfig) Validate() error {
 	if err != nil {
 		return fmt.Errorf("failed to validate third_party settings: %w", err)
 	}
-	err = c.Saml.Validate()
+	err = c.Saml.Validate(multiTenancy)
 	if err != nil {
 		return fmt.Errorf("failed to validate saml settings: %w", err)
 	}
@@ -217,7 +216,11 @@ func (c *Config) Validate() error {
 		return fmt.Errorf("failed to validate application config: %w", err)
 	}
 
-	err = c.TenantConfig.Validate()
+	if c.ApplicationConfig.MultiTenancy.Enabled {
+		err = c.TenantConfig.Validate(true)
+	} else {
+		err = c.TenantConfig.Validate(false)
+	}
 	if err != nil {
 		return fmt.Errorf("failed to validate tenant config: %w", err)
 	}

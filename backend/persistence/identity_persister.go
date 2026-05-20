@@ -3,6 +3,8 @@ package persistence
 import (
 	"database/sql"
 	"fmt"
+	"strings"
+
 	"github.com/gobuffalo/pop/v6"
 	"github.com/gofrs/uuid"
 	"github.com/pkg/errors"
@@ -12,9 +14,11 @@ import (
 type IdentityPersister interface {
 	Get(providerUserID string, providerID string, tenantID uuid.UUID) (*models.Identity, error)
 	GetByID(identityID uuid.UUID, tenantID uuid.UUID) (*models.Identity, error)
+	GetAllByDomain(tenantID uuid.UUID, domain string) ([]models.Identity, error)
 	Create(identity models.Identity) error
 	Update(identity models.Identity) error
 	Delete(identity models.Identity) error
+	DeleteAll(identities []models.Identity) error
 }
 
 type identityPersister struct {
@@ -31,6 +35,18 @@ func (p identityPersister) GetByID(identityID uuid.UUID, tenantID uuid.UUID) (*m
 		}
 		return nil, fmt.Errorf("failed to get identity: %w", err)
 	}
+
+	var samlProvider models.SamlProvider
+	if identity.SamlIdentity != nil {
+		q2 := p.db.RawQuery("select * from saml_providers where tenant_id = $1 and domain = $2", tenantID, identity.SamlIdentity.Domain)
+		if err := q2.First(&samlProvider); err != nil {
+			if errors.Is(err, sql.ErrNoRows) {
+				return nil, nil
+			}
+			return nil, fmt.Errorf("failed to get samlProvider: %w", err)
+		}
+	}
+	identity.SamlIdentity.SamlProvider = &samlProvider
 	return identity, nil
 }
 
@@ -44,7 +60,35 @@ func (p identityPersister) Get(providerUserID string, providerID string, tenantI
 		}
 		return nil, fmt.Errorf("failed to get identity: %w", err)
 	}
+
+	var samlProvider models.SamlProvider
+	if identity.SamlIdentity != nil {
+		q2 := p.db.RawQuery("select * from saml_providers where tenant_id = $1 and domain = $2", tenantID.String(), identity.SamlIdentity.Domain)
+		if err := q2.First(&samlProvider); err != nil {
+			if errors.Is(err, sql.ErrNoRows) {
+				return nil, nil
+			}
+			return nil, fmt.Errorf("failed to get samlProvider: %w", err)
+		}
+	}
+	identity.SamlIdentity.SamlProvider = &samlProvider
 	return identity, nil
+}
+
+func (p identityPersister) GetAllByDomain(tenantID uuid.UUID, domain string) ([]models.Identity, error) {
+	identities := []models.Identity{}
+	query := p.db.EagerPreload("SamlIdentity").
+		Join("saml_identities", "saml_identities.identity_id = identities.id").
+		Where("identities.tenant_id = ?", tenantID).
+		Where("saml_identities.domain = ?", strings.TrimSpace(domain))
+	if err := query.All(&identities); err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			return nil, nil
+		}
+		return nil, fmt.Errorf("failed to get identities: %w", err)
+	}
+
+	return identities, nil
 }
 
 func (p identityPersister) Create(identity models.Identity) error {
@@ -77,6 +121,15 @@ func (p identityPersister) Delete(identity models.Identity) error {
 	err := p.db.Destroy(&identity)
 	if err != nil {
 		return fmt.Errorf("failed to delete identity: %w", err)
+	}
+
+	return nil
+}
+
+func (p identityPersister) DeleteAll(identities []models.Identity) error {
+	err := p.db.Q().Delete(identities)
+	if err != nil {
+		return fmt.Errorf("failed to delete identities: %w", err)
 	}
 
 	return nil

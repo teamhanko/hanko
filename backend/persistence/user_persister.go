@@ -56,6 +56,29 @@ func (p *userPersister) Get(id uuid.UUID, tenantID uuid.UUID) (*models.User, err
 		return nil, fmt.Errorf("failed to get user: %w", err)
 	}
 
+	for _, identity := range user.Identities {
+		var samlProvider models.SamlProvider
+		if identity.SamlIdentity != nil {
+			q2 := p.db.RawQuery("select * from saml_providers where tenant_id = $1 and domain = $2", tenantID.String(), identity.SamlIdentity.Domain)
+			if err := q2.First(&samlProvider); err != nil {
+				if errors.Is(err, sql.ErrNoRows) {
+					return nil, nil
+				}
+				return nil, fmt.Errorf("failed to get samlProvider: %w", err)
+			}
+		}
+		identity.SamlIdentity.SamlProvider = &samlProvider
+		for i, email := range user.Emails {
+			for j, emailIdentity := range email.Identities {
+				if emailIdentity.ID == identity.SamlIdentity.IdentityID {
+					emailIdentity.SamlIdentity.SamlProvider = &samlProvider
+					email.Identities[j] = emailIdentity
+				}
+				user.Emails[i] = email
+			}
+		}
+	}
+
 	return &user, nil
 }
 

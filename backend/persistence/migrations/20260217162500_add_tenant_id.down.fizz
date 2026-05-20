@@ -1,3 +1,7 @@
+sql("
+DELETE FROM tenants where id = '00000000-0000-0000-0000-000000000001'
+;")
+
 sql("ALTER TABLE webauthn_credential_user_handles DROP CONSTRAINT IF EXISTS webauthn_credential_user_handles_tenant_user_fkey;")
 drop_foreign_key("webauthn_credential_user_handles", "webauthn_credential_user_handles_tenants_id_fk", {})
 drop_column("webauthn_credential_user_handles", "tenant_id")

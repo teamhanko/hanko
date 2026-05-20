@@ -104,9 +104,11 @@ func (a RegisterLoginIdentifier) Execute(c flowpilot.ExecutionContext) error {
 	if email != "" {
 		if deps.Cfg.Saml.Enabled {
 			domain := strings.Split(email, "@")[1]
-			if provider, err := deps.SamlService.GetProviderByDomain(domain); err == nil && provider != nil {
+			// Try to get SAML provider by domain
+			providerModel, err := deps.Persister.GetSamlProviderPersister().GetByDomain(deps.TenantID, domain)
+			if err == nil && providerModel != nil {
 				var authUrl string
-				authUrl, err = deps.SamlService.GetAuthUrl(provider, deps.Cfg.Saml.DefaultRedirectUrl, true, deps.TenantID)
+				authUrl, err = deps.SamlService.GetAuthUrl(deps.TenantID, deps.Cfg.TenantConfig, providerModel.ID, deps.Cfg.Saml.DefaultRedirectUrl, true)
 
 				if err != nil {
 					return fmt.Errorf("failed to get auth url: %w", err)

@@ -56,10 +56,8 @@ func FromIdentityModel(identity *models.Identity, cfg *config.TenantConfig) *Ide
 
 func getProviderDisplayName(identity *models.Identity, cfg *config.TenantConfig) string {
 	if identity.SamlIdentity != nil {
-		for _, ip := range cfg.Saml.IdentityProviders {
-			if ip.Enabled && ip.Domain == identity.SamlIdentity.Domain {
-				return ip.Name
-			}
+		if identity.SamlIdentity.SamlProvider.Enabled {
+			return identity.SamlIdentity.SamlProvider.Name
 		}
 	} else if strings.HasPrefix(identity.ProviderID, "custom_") {
 		providerNameWithoutPrefix := strings.TrimPrefix(identity.ProviderID, "custom_")

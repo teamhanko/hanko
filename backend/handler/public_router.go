@@ -13,6 +13,7 @@ import (
 	"github.com/teamhanko/hanko/backend/v2/mapper"
 	hankoMiddleware "github.com/teamhanko/hanko/backend/v2/middleware"
 	"github.com/teamhanko/hanko/backend/v2/persistence"
+	"github.com/teamhanko/hanko/backend/v2/saml"
 	"github.com/teamhanko/hanko/backend/v2/template"
 )
 
@@ -76,14 +77,15 @@ func NewPublicRouter(cfg *config.Config, persister persistence.Persister, promet
 	tenantGroup.POST("/login", flowAPIHandler.LoginFlowHandler, webhookMiddleware)
 	tenantGroup.POST("/profile", flowAPIHandler.ProfileFlowHandler, webhookMiddleware)
 
-	//if cfg.Saml.Enabled {
-	//	samlHandler := saml.NewSamlHandler(auditLogger, samlService)
-	//	samlGroup := tenantGroup.Group("/saml")
-	//	samlGroup.GET("/metadata", samlHandler.Metadata)
-	//	samlGroup.GET("/auth", samlHandler.Auth)
-	//	samlGroup.POST("/callback", samlHandler.CallbackPost)
-	//	tenantGroup.POST("/token_exchange", flowAPIHandler.TokenExchangeFlowHandler, webhookMiddleware)
-	//}
+	if cfg.Saml.Enabled {
+		samlProviderService := saml.NewSamlProviderService(persister)
+		samlHandler := NewSamlHandler(auditLogger, samlProviderService)
+		samlGroup := tenantGroup.Group("/saml")
+		samlGroup.GET("/metadata", samlHandler.Metadata)
+		samlGroup.GET("/auth", samlHandler.Auth)
+		samlGroup.POST("/callback", samlHandler.CallbackPost)
+		tenantGroup.POST("/token_exchange", flowAPIHandler.TokenExchangeFlowHandler, webhookMiddleware)
+	}
 
 	tenantGroup.GET("/", statusHandler.Status)
 	tenantGroup.GET("/me", userHandler.Me, sessionMiddleware)

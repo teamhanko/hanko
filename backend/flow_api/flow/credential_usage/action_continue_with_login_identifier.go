@@ -54,7 +54,7 @@ func (a ContinueWithLoginIdentifier) Initialize(c flowpilot.InitializationContex
 
 	if !deps.Cfg.Password.Enabled &&
 		!deps.Cfg.Email.UseForAuthentication &&
-		!(emailEnabled && deps.Cfg.Saml.Enabled && len(deps.SamlService.Providers()) > 0) {
+		!(emailEnabled && deps.Cfg.Saml.Enabled) {
 		c.SuspendAction()
 	}
 
@@ -87,8 +87,10 @@ func (a ContinueWithLoginIdentifier) Execute(c flowpilot.ExecutionContext) error
 
 		if deps.Cfg.Saml.Enabled {
 			domain := strings.Split(identifierInputValue, "@")[1]
-			if provider, err := deps.SamlService.GetProviderByDomain(domain); err == nil && provider != nil {
-				authUrl, err := deps.SamlService.GetAuthUrl(provider, deps.Cfg.Saml.DefaultRedirectUrl, true, deps.TenantID)
+			// Try to get SAML provider by domain
+			providerModel, err := deps.Persister.GetSamlProviderPersister().GetByDomain(deps.TenantID, domain)
+			if err == nil && providerModel != nil {
+				authUrl, err := deps.SamlService.GetAuthUrl(deps.TenantID, deps.Cfg.TenantConfig, providerModel.ID, deps.Cfg.Saml.DefaultRedirectUrl, true)
 
 				if err != nil {
 					return fmt.Errorf("failed to get auth url: %w", err)

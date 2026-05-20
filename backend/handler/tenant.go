@@ -111,6 +111,25 @@ func (h *TenantHandler) Create(c echo.Context) error {
 			return echo.NewHTTPError(http.StatusNotFound, "tenant not found after creation")
 		}
 
+		cert, err := h.persister.GetSamlCertificatePersisterWithConnection(tx).GetFirst(tenantID)
+		if err != nil {
+			return fmt.Errorf("failed to fetch SAML certificate: %w", err)
+		}
+
+		if cert == nil {
+			cert, err = models.NewSamlCertificate(tenantConfig.Service.Name)
+			if err != nil {
+				return fmt.Errorf("unable to create SAML certificate: %w", err)
+			}
+
+			cert.TenantID = tenantID
+
+			err = h.persister.GetSamlCertificatePersisterWithConnection(tx).Create(cert)
+			if err != nil {
+				return fmt.Errorf("unable to persist SAML certificate: %w", err)
+			}
+		}
+
 		return c.JSON(http.StatusCreated, createdTenant)
 	})
 }
@@ -281,7 +300,7 @@ func (h *TenantHandler) validateTenantConfig(configJSON json.RawMessage) (json.R
 		return nil, nil, fmt.Errorf("failed to post process tenant settings: %w", err)
 	}
 
-	err = tenantConfig.Validate()
+	err = tenantConfig.Validate(true)
 	if err != nil {
 		return nil, nil, fmt.Errorf("failed to validate tenant settings: %w", err)
 	}

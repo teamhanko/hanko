@@ -3,9 +3,10 @@ package config
 import (
 	"errors"
 	"fmt"
-	"github.com/gobwas/glob"
 	"net/url"
 	"strings"
+
+	"github.com/gobwas/glob"
 )
 
 type Saml struct {
@@ -40,16 +41,6 @@ type Saml struct {
 
 	// `identity_providers` is a list of SAML identity providers.
 	IdentityProviders []IdentityProvider `yaml:"identity_providers" json:"identity_providers,omitempty" koanf:"identity_providers"`
-}
-
-func (s Saml) GetProviderByDomain(domain string) *IdentityProvider {
-	for _, ip := range s.IdentityProviders {
-		if ip.Domain == domain {
-			return &ip
-		}
-	}
-
-	return nil
 }
 
 type Options struct {
@@ -123,7 +114,7 @@ func (s *Saml) PostProcess() error {
 	return nil
 }
 
-func (s *Saml) Validate() error {
+func (s *Saml) Validate(multiTenancy bool) error {
 	if s.Enabled {
 		validationErrors := s.ValidateEmpty()
 		if validationErrors != nil {
@@ -135,25 +126,27 @@ func (s *Saml) Validate() error {
 			return validationErrors
 		}
 
-		if len(s.IdentityProviders) == 0 {
-			return errors.New("at least one SAML provider is needed")
-		}
-
-		configuredDomains := make(map[string]int)
-		for _, provider := range s.IdentityProviders {
-			if provider.Enabled {
-				validationErrors = provider.Validate()
-				if validationErrors != nil {
-					return validationErrors
-				}
-
-				configuredDomains[provider.Domain] += 1
+		if !multiTenancy {
+			if len(s.IdentityProviders) == 0 {
+				return errors.New("at least one SAML provider is needed")
 			}
-		}
 
-		for configuredDomain, configuredDomainCount := range configuredDomains {
-			if configuredDomainCount > 1 {
-				return fmt.Errorf("provider domains must be unique, found domain %s configured %d times", configuredDomain, configuredDomainCount)
+			configuredDomains := make(map[string]int)
+			for _, provider := range s.IdentityProviders {
+				if provider.Enabled {
+					validationErrors = provider.Validate()
+					if validationErrors != nil {
+						return validationErrors
+					}
+
+					configuredDomains[provider.Domain] += 1
+				}
+			}
+
+			for configuredDomain, configuredDomainCount := range configuredDomains {
+				if configuredDomainCount > 1 {
+					return fmt.Errorf("provider domains must be unique, found domain %s configured %d times", configuredDomain, configuredDomainCount)
+				}
 			}
 		}
 	}
@@ -196,6 +189,22 @@ func (s *Saml) ValidateUrls() error {
 	}
 
 	return nil
+}
+
+func (s *Saml) IsAllowedRedirect(redirectTo string) bool {
+	if redirectTo == "" {
+		return false
+	}
+
+	redirectTo = strings.TrimSuffix(redirectTo, "/")
+
+	for _, pattern := range s.AllowedRedirectURLMap {
+		if pattern.Match(redirectTo) {
+			return true
+		}
+	}
+
+	return false
 }
 
 func (idp *IdentityProvider) Validate() error {

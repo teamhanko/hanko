@@ -19,7 +19,6 @@ import (
 	"github.com/teamhanko/hanko/backend/v2/config"
 	context2 "github.com/teamhanko/hanko/backend/v2/context"
 	"github.com/teamhanko/hanko/backend/v2/dto"
-	"github.com/teamhanko/hanko/backend/v2/ee/saml"
 	"github.com/teamhanko/hanko/backend/v2/flow_api/flow"
 	"github.com/teamhanko/hanko/backend/v2/flow_api/flow/shared"
 	"github.com/teamhanko/hanko/backend/v2/flow_api/flow_locker"
@@ -28,6 +27,7 @@ import (
 	"github.com/teamhanko/hanko/backend/v2/mapper"
 	"github.com/teamhanko/hanko/backend/v2/persistence"
 	"github.com/teamhanko/hanko/backend/v2/rate_limiter"
+	"github.com/teamhanko/hanko/backend/v2/saml"
 	"github.com/teamhanko/hanko/backend/v2/session"
 )
 
@@ -38,7 +38,7 @@ type FlowPilotHandler struct {
 	PasscodeService             services.Passcode
 	PasswordService             services.Password
 	WebauthnService             services.WebauthnService
-	SamlService                 saml.Service
+	SamlService                 saml.SamlProviderService
 	SessionManager              session.Manager
 	OTPRateLimiter              limiter.Store
 	PasscodeRateLimiter         limiter.Store
@@ -66,7 +66,7 @@ func NewFlowAPIHandler(cfg config.Config, persister persistence.Persister, audit
 	passwordService := services.NewPasswordService(persister)
 	webauthnService := services.NewWebauthnService(cfg, persister)
 	securityNotificationService := services.NewSecurityNotificationService(*emailService, persister, auditLogger)
-	//samlService := saml.NewSamlService(&cfg, persister)
+	samlService := saml.NewSamlProviderService(persister)
 
 	flowLocker, err := flow_locker.NewFlowLocker(cfg.FlowLocker)
 	if err != nil {
@@ -80,7 +80,7 @@ func NewFlowAPIHandler(cfg config.Config, persister persistence.Persister, audit
 		PasscodeService:             passcodeService,
 		PasswordService:             passwordService,
 		WebauthnService:             webauthnService,
-		SamlService:                 nil,
+		SamlService:                 samlService,
 		SessionManager:              nil, // Populated in executeFlow() from session manager middleware
 		OTPRateLimiter:              otpRateLimiter,
 		PasscodeRateLimiter:         passcodeRateLimiter,

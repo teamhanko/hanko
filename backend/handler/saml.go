@@ -1,6 +1,7 @@
-package saml
+package handler
 
 import (
+	"encoding/xml"
 	"errors"
 	"fmt"
 	"net/http"
@@ -13,20 +14,19 @@ import (
 	saml2 "github.com/russellhaering/gosaml2"
 	auditlog "github.com/teamhanko/hanko/backend/v2/audit_log"
 	"github.com/teamhanko/hanko/backend/v2/context"
-	"github.com/teamhanko/hanko/backend/v2/ee/saml/dto"
-	"github.com/teamhanko/hanko/backend/v2/ee/saml/provider"
-	samlUtils "github.com/teamhanko/hanko/backend/v2/ee/saml/utils"
+	"github.com/teamhanko/hanko/backend/v2/dto"
 	"github.com/teamhanko/hanko/backend/v2/persistence/models"
+	"github.com/teamhanko/hanko/backend/v2/saml"
 	"github.com/teamhanko/hanko/backend/v2/thirdparty"
 	"github.com/teamhanko/hanko/backend/v2/utils"
 )
 
 type Handler struct {
 	auditLogger auditlog.Logger
-	samlService Service
+	samlService saml.SamlProviderService
 }
 
-func NewSamlHandler(auditLogger auditlog.Logger, samlService Service) *Handler {
+func NewSamlHandler(auditLogger auditlog.Logger, samlService saml.SamlProviderService) *Handler {
 	return &Handler{
 		auditLogger: auditLogger,
 		samlService: samlService,
@@ -45,7 +45,7 @@ func (handler *Handler) Metadata(c echo.Context) error {
 		return c.JSON(http.StatusBadRequest, thirdparty.ErrorInvalidRequest("domain is missing"))
 	}
 
-	foundProvider, err := handler.samlService.GetProviderByDomain(request.Domain)
+	foundProvider, _, err := handler.samlService.GetProviderByDomain(tenant.ID, tenant.Config, request.Domain)
 	if err != nil {
 		return c.NoContent(http.StatusNotFound)
 	}
@@ -60,16 +60,22 @@ func (handler *Handler) Metadata(c echo.Context) error {
 			return c.NoContent(http.StatusNotFound)
 		}
 
-		c.Response().Header().Set(echo.HeaderContentDisposition, fmt.Sprintf("attachment; filename=%s-service-provider.pem", handler.samlService.Config().Service.Name))
+		c.Response().Header().Set(echo.HeaderContentDisposition, fmt.Sprintf("attachment; filename=%s-service-provider.pem", tenant.Config.Service.Name))
 		return c.Blob(http.StatusOK, echo.MIMEOctetStream, []byte(cert.CertData))
 	}
 
-	xmlMetadata, err := foundProvider.ProvideMetadataAsXml()
+	metadata, err := foundProvider.Metadata()
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, thirdparty.ErrorServer("unable to provide metadata").WithCause(err))
 	}
 
-	c.Response().Header().Set(echo.HeaderContentDisposition, fmt.Sprintf("attachment; filename=%s-metadata.xml", handler.samlService.Config().Service.Name))
+	// Marshal the metadata to XML
+	xmlMetadata, err := xml.MarshalIndent(metadata, "", "  ")
+	if err != nil {
+		return c.JSON(http.StatusInternalServerError, thirdparty.ErrorServer("unable to marshal metadata").WithCause(err))
+	}
+
+	c.Response().Header().Set(echo.HeaderContentDisposition, fmt.Sprintf("attachment; filename=%s-metadata.xml", tenant.Config.Service.Name))
 	return c.Blob(http.StatusOK, echo.MIMEOctetStream, xmlMetadata)
 }
 
@@ -81,7 +87,7 @@ func (handler *Handler) Auth(c echo.Context) error {
 
 	errorRedirectTo := c.Request().Header.Get("Referer")
 	if errorRedirectTo == "" {
-		errorRedirectTo = handler.samlService.Config().Saml.DefaultRedirectUrl
+		errorRedirectTo = tenant.Config.Saml.DefaultRedirectUrl
 	}
 
 	var request dto.SamlAuthRequest
@@ -95,12 +101,13 @@ func (handler *Handler) Auth(c echo.Context) error {
 		return handler.redirectError(c, thirdparty.ErrorInvalidRequest(err.Error()).WithCause(err), errorRedirectTo)
 	}
 
-	foundProvider, err := handler.samlService.GetProviderByDomain(request.Domain)
-	if err != nil {
-		return handler.redirectError(c, thirdparty.ErrorInvalidRequest(err.Error()).WithCause(err), errorRedirectTo)
+	// Get provider by domain to obtain provider ID
+	providerModel, err := handler.samlService.Persister().GetSamlProviderPersister().GetByDomain(tenant.ID, request.Domain)
+	if err != nil || providerModel == nil {
+		return handler.redirectError(c, thirdparty.ErrorInvalidRequest("provider not found").WithCause(err), errorRedirectTo)
 	}
 
-	redirectUrl, err := handler.samlService.GetAuthUrl(foundProvider, request.RedirectTo, false, tenant.ID)
+	redirectUrl, err := handler.samlService.GetAuthUrl(tenant.ID, tenant.Config, providerModel.ID, request.RedirectTo, false)
 	if err != nil {
 		return handler.redirectError(c, thirdparty.ErrorServer("could not generate auth url").WithCause(err), errorRedirectTo)
 	}
@@ -115,14 +122,14 @@ func (handler *Handler) callbackPostIdPInitiated(c echo.Context, samlResponse st
 	}
 
 	// ignore URL parse error because config validation already ensures it is a parseable URL
-	redirectTo, _ := url.Parse(handler.samlService.Config().Saml.DefaultRedirectUrl)
+	redirectTo, _ := url.Parse(tenant.Config.Saml.DefaultRedirectUrl)
 
 	// We need to already parse the response to be able to extract information (a response's ID, Issuer, InResponseTo
 	// nodes/values) to ensure protection against replaying IDP initiated responses as well as using service provider
 	// issued responses as IDP initiated responses, even though we later also use the gosaml2 library to parse (and then
 	// also validate) the response _again_. The reason is that the gosaml2 library does not make this information
 	// easily/publicly accessible through its API.
-	parsedSamlResponseDocument, _, err := samlUtils.ParseSamlResponse(samlResponse)
+	parsedSamlResponseDocument, _, err := saml.ParseSamlResponse(samlResponse)
 	if err != nil {
 		return handler.redirectError(
 			c,
@@ -151,7 +158,7 @@ func (handler *Handler) callbackPostIdPInitiated(c echo.Context, samlResponse st
 
 	issuer := issuerElement.Text()
 
-	serviceProvider, err := handler.samlService.GetProviderByIssuer(issuer)
+	serviceProvider, providerConfig, err := handler.samlService.GetProviderByIssuer(tenant.ID, tenant.Config, issuer)
 	if err != nil {
 		return handler.redirectError(
 			c,
@@ -220,7 +227,7 @@ func (handler *Handler) callbackPostIdPInitiated(c echo.Context, samlResponse st
 	}
 
 	// If no request exists we create a new IDP initiated request model and persist it.
-	samlIDPInitiatedRequest, err := models.NewSamlIDPInitiatedRequest(samlResponseID, issuer, expiresAt)
+	samlIDPInitiatedRequest, err := models.NewSamlIDPInitiatedRequest(tenant.ID, samlResponseID, issuer, expiresAt)
 	if err != nil {
 		return handler.redirectError(
 			c,
@@ -238,7 +245,7 @@ func (handler *Handler) callbackPostIdPInitiated(c echo.Context, samlResponse st
 		)
 	}
 
-	redirectUrl, samlError := handler.linkAccount(c, redirectTo, true, serviceProvider, assertionInfo)
+	redirectUrl, samlError := handler.linkAccount(c, redirectTo, true, serviceProvider, providerConfig, assertionInfo)
 	if samlError != nil {
 		return handler.redirectError(
 			c,
@@ -268,23 +275,18 @@ func (handler *Handler) CallbackPost(c echo.Context) error {
 	if handler.isIDPInitiated(relayState) {
 		return handler.callbackPostIdPInitiated(c, samlResponse)
 	} else {
-		state, err := VerifyState(
-			handler.samlService.Config(),
-			handler.samlService.Persister().GetSamlStatePersister(),
-			strings.TrimPrefix(relayState, statePrefixServiceProviderInitiated),
-			tenant.ID,
-		)
+		state, err := saml.VerifyState(tenant.ID, tenant.Config.Secrets, handler.samlService.Persister().GetSamlStatePersister(), strings.TrimPrefix(relayState, saml.StatePrefixServiceProviderInitiated))
 
 		if err != nil {
 			return handler.redirectError(
 				c,
 				thirdparty.ErrorInvalidRequest(err.Error()).WithCause(err),
-				handler.samlService.Config().Saml.DefaultRedirectUrl,
+				tenant.Config.Saml.DefaultRedirectUrl,
 			)
 		}
 
 		if strings.TrimSpace(state.RedirectTo) == "" {
-			state.RedirectTo = handler.samlService.Config().Saml.DefaultRedirectUrl
+			state.RedirectTo = tenant.Config.Saml.DefaultRedirectUrl
 		}
 
 		redirectTo, err := url.Parse(state.RedirectTo)
@@ -292,11 +294,11 @@ func (handler *Handler) CallbackPost(c echo.Context) error {
 			return handler.redirectError(
 				c,
 				thirdparty.ErrorServer("unable to parse redirect url").WithCause(err),
-				handler.samlService.Config().Saml.DefaultRedirectUrl,
+				tenant.Config.Saml.DefaultRedirectUrl,
 			)
 		}
 
-		foundProvider, err := handler.samlService.GetProviderByDomain(state.Provider)
+		foundProvider, providerConfig, err := handler.samlService.GetProviderByDomain(tenant.ID, tenant.Config, state.Provider)
 		if err != nil {
 			return handler.redirectError(
 				c,
@@ -304,7 +306,7 @@ func (handler *Handler) CallbackPost(c echo.Context) error {
 				redirectTo.String(),
 			)
 		}
-
+		time.Sleep(2 * time.Second)
 		assertionInfo, err := handler.getAssertionInfo(foundProvider, samlResponse)
 		if err != nil {
 			return handler.redirectError(
@@ -314,7 +316,7 @@ func (handler *Handler) CallbackPost(c echo.Context) error {
 			)
 		}
 
-		redirectUrl, err := handler.linkAccount(c, redirectTo, state.IsFlow, foundProvider, assertionInfo)
+		redirectUrl, err := handler.linkAccount(c, redirectTo, state.IsFlow, foundProvider, providerConfig, assertionInfo)
 		if err != nil {
 			return handler.redirectError(
 				c,
@@ -328,10 +330,10 @@ func (handler *Handler) CallbackPost(c echo.Context) error {
 }
 
 func (handler *Handler) isIDPInitiated(relayState string) bool {
-	return !strings.HasPrefix(relayState, statePrefixServiceProviderInitiated)
+	return !strings.HasPrefix(relayState, saml.StatePrefixServiceProviderInitiated)
 }
 
-func (handler *Handler) linkAccount(c echo.Context, redirectTo *url.URL, isFlow bool, provider provider.ServiceProvider, assertionInfo *saml2.AssertionInfo) (*url.URL, error) {
+func (handler *Handler) linkAccount(c echo.Context, redirectTo *url.URL, isFlow bool, samlProvider *saml2.SAMLServiceProvider, providerConfig *saml.ProviderConfig, assertionInfo *saml2.AssertionInfo) (*url.URL, error) {
 	tenant, err := context.GetTenant(c)
 	if err != nil {
 		return nil, fmt.Errorf("failed to get tenant from context: %w", err)
@@ -339,18 +341,19 @@ func (handler *Handler) linkAccount(c echo.Context, redirectTo *url.URL, isFlow 
 
 	var accountLinkingResult *thirdparty.AccountLinkingResult
 	err = handler.samlService.Persister().Transaction(func(tx *pop.Connection) error {
-		userdata := provider.GetUserData(assertionInfo)
+		// Extract user data using the new helper
+		userData := saml.ExtractUserData(assertionInfo, providerConfig, samlProvider.AudienceURI)
 		identityProviderIssuer := assertionInfo.Assertions[0].Issuer
-		samlDomain := provider.GetDomain()
-		linkResult, errTx := thirdparty.LinkAccount(tx, &handler.samlService.Config().TenantConfig, handler.samlService.Persister(), userdata, identityProviderIssuer.Value, true, &samlDomain, isFlow, nil, tenant.ID)
+		samlDomain := providerConfig.Domain
+		linkResult, errTx := thirdparty.LinkAccount(tx, &tenant.Config, handler.samlService.Persister(), userData, identityProviderIssuer.Value, true, &samlDomain, isFlow, nil, tenant.ID)
 		if errTx != nil {
 			return errTx
 		}
 
 		accountLinkingResult = linkResult
 
-		emailModel := linkResult.User.Emails.GetEmailByAddress(userdata.Metadata.Email)
-		identityModel := emailModel.Identities.GetIdentity(identityProviderIssuer.Value, userdata.Metadata.Subject)
+		emailModel := linkResult.User.Emails.GetEmailByAddress(userData.Metadata.Email)
+		identityModel := emailModel.Identities.GetIdentity(identityProviderIssuer.Value, userData.Metadata.Subject)
 
 		token, errTx := models.NewToken(
 			linkResult.User.ID,
@@ -387,8 +390,8 @@ func (handler *Handler) linkAccount(c echo.Context, redirectTo *url.URL, isFlow 
 	return redirectTo, nil
 }
 
-func (handler *Handler) getAssertionInfo(provider provider.ServiceProvider, samlResponse string) (*saml2.AssertionInfo, error) {
-	assertionInfo, err := provider.GetService().RetrieveAssertionInfo(samlResponse)
+func (handler *Handler) getAssertionInfo(samlProvider *saml2.SAMLServiceProvider, samlResponse string) (*saml2.AssertionInfo, error) {
+	assertionInfo, err := samlProvider.RetrieveAssertionInfo(samlResponse)
 	if err != nil {
 		return nil, thirdparty.ErrorServer("unable to parse SAML response").WithCause(err)
 	}
