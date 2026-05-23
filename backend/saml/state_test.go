@@ -23,9 +23,11 @@ type samlSuite struct {
 }
 
 func (s *samlSuite) TestSaml_GenerateState() {
-	cfg := &config.Config{
+	cfg := config.Config{
+		ApplicationConfig: config.ApplicationConfig{
+			SecretKeys: []string{"thirty-two-byte-long-test-secret"},
+		},
 		TenantConfig: config.TenantConfig{
-			Secrets: config.Secrets{Keys: []string{"thirty-two-byte-long-test-secret"}},
 			Saml: config.Saml{
 				DefaultRedirectUrl: "https://example.com",
 			},
@@ -34,15 +36,17 @@ func (s *samlSuite) TestSaml_GenerateState() {
 
 	persister := s.Storage.GetSamlStatePersister()
 
-	state, err := GenerateState(cfg.TenantConfig, persister, "test-provider", "https://example.com", uuid.FromStringOrNil(config.DefaultTenantID))
+	state, err := GenerateState(cfg, persister, "test-provider", "https://example.com", uuid.FromStringOrNil(config.DefaultTenantID))
 	assert.NoError(s.T(), err)
 	assert.NotNil(s.T(), state)
 }
 
 func (s *samlSuite) TestSaml_GenerateStateWithDefaultRedirect() {
-	cfg := &config.Config{
+	cfg := config.Config{
+		ApplicationConfig: config.ApplicationConfig{
+			SecretKeys: []string{"thirty-two-byte-long-test-secret"},
+		},
 		TenantConfig: config.TenantConfig{
-			Secrets: config.Secrets{Keys: []string{"thirty-two-byte-long-test-secret"}},
 			Saml: config.Saml{
 				DefaultRedirectUrl: "https://example.com",
 			},
@@ -51,7 +55,7 @@ func (s *samlSuite) TestSaml_GenerateStateWithDefaultRedirect() {
 
 	persister := s.Storage.GetSamlStatePersister()
 
-	state, err := GenerateState(cfg.TenantConfig, persister, "test-provider", "", uuid.FromStringOrNil(config.DefaultTenantID))
+	state, err := GenerateState(cfg, persister, "test-provider", "", uuid.FromStringOrNil(config.DefaultTenantID))
 	assert.NoError(s.T(), err)
 	assert.NotNil(s.T(), state)
 }
@@ -87,15 +91,15 @@ func (s *samlSuite) TestSaml_GenerateState_Error() {
 	}
 	for _, testData := range tests {
 		s.T().Run(testData.name, func(t *testing.T) {
-			cfg := &config.Config{
-				TenantConfig: config.TenantConfig{
-					Secrets: config.Secrets{Keys: []string{testData.secret}},
+			cfg := config.Config{
+				ApplicationConfig: config.ApplicationConfig{
+					SecretKeys: []string{testData.secret},
 				},
 			}
 
 			persister := s.Storage.GetSamlStatePersister()
 
-			_, err := GenerateState(cfg.TenantConfig, persister, testData.provider, testData.redirectTo, uuid.FromStringOrNil(config.DefaultTenantID))
+			_, err := GenerateState(cfg, persister, testData.provider, testData.redirectTo, uuid.FromStringOrNil(config.DefaultTenantID))
 			assert.NotNil(t, err)
 			assert.True(t, strings.Contains(err.Error(), testData.expectedError))
 		})
@@ -103,19 +107,19 @@ func (s *samlSuite) TestSaml_GenerateState_Error() {
 }
 
 func (s *samlSuite) TestSaml_VerifyState() {
-	cfg := &config.Config{
-		TenantConfig: config.TenantConfig{
-			Secrets: config.Secrets{Keys: []string{"thirty-two-byte-long-test-secret"}},
+	cfg := config.Config{
+		ApplicationConfig: config.ApplicationConfig{
+			SecretKeys: []string{"thirty-two-byte-long-test-secret"},
 		},
 	}
 
-	err := s.LoadFixtures("../../test/fixtures/saml_state")
+	err := s.LoadFixtures("../test/fixtures/saml_state")
 	s.Require().NoError(err)
 
 	state := "HmD7wlGQ7bF_4MGtmFRQuuSGTshHETDs4RQa64JAx-6EsmNsUjaQwYNOnjWUs6qIOuQMBTKapDGVXVCk00pX2vSS-x-WVqdzZ8KyeQ-9IHu2mwb-AeRbb2QPE-GFnvp2wrbCskKvWvtOfipyeTsnYY5iM90DxssaUtvKnawaB5_MNNekfKyiOeepIkKjUfSJ6-yTR7AAA4B9jwOfDRB4zdV8kKPVJlGVBJFosL11YWJaLxRGQR69nah3Jf9Z6bSAGXxWp24PoBYhij-dH4JyDCcU7D-NeT2A8qFFFjQ1m28C8fsr6zqb4w=="
 
 	persister := s.Storage.GetSamlStatePersister()
-	validState, err := VerifyState(uuid.FromStringOrNil(config.DefaultTenantID), cfg.TenantConfig.Secrets, persister, state)
+	validState, err := VerifyState(uuid.FromStringOrNil(config.DefaultTenantID), cfg.SecretKeys, persister, state)
 	require.NoError(s.T(), err)
 	require.NotNil(s.T(), validState)
 	require.Equal(s.T(), "test-provider", validState.Provider)
@@ -125,7 +129,7 @@ func (s *samlSuite) TestSaml_VerifyState() {
 }
 
 func (s *samlSuite) TestSaml_VerifyState_Error() {
-	err := s.LoadFixtures("../../test/fixtures/saml_state")
+	err := s.LoadFixtures("../test/fixtures/saml_state")
 	s.Require().NoError(err)
 
 	tests := []struct {
@@ -156,15 +160,15 @@ func (s *samlSuite) TestSaml_VerifyState_Error() {
 	}
 	for _, testData := range tests {
 		s.T().Run(testData.name, func(t *testing.T) {
-			cfg := &config.Config{
-				TenantConfig: config.TenantConfig{
-					Secrets: config.Secrets{Keys: []string{"thirty-two-byte-long-test-secret"}},
+			cfg := config.Config{
+				ApplicationConfig: config.ApplicationConfig{
+					SecretKeys: []string{"thirty-two-byte-long-test-secret"},
 				},
 			}
 
 			persister := s.Storage.GetSamlStatePersister()
 
-			_, err := VerifyState(uuid.FromStringOrNil(config.DefaultTenantID), cfg.TenantConfig.Secrets, persister, testData.state)
+			_, err := VerifyState(uuid.FromStringOrNil(config.DefaultTenantID), cfg.SecretKeys, persister, testData.state)
 			assert.NotNil(s.T(), err)
 			assert.True(s.T(), strings.Contains(err.Error(), testData.expectedError))
 		})

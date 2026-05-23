@@ -32,13 +32,13 @@ func GenerateStateForFlowAPI(isFlow bool) func(*State) {
 	}
 }
 
-func GenerateState(tenantConfig config.TenantConfig, persister persistence.SamlStatePersister, provider string, redirectTo string, tenantID uuid.UUID, options ...func(*State)) ([]byte, error) {
+func GenerateState(config config.Config, persister persistence.SamlStatePersister, provider string, redirectTo string, tenantID uuid.UUID, options ...func(*State)) ([]byte, error) {
 	if strings.TrimSpace(provider) == "" {
 		return nil, errors.New("provider must be present")
 	}
 
 	if strings.TrimSpace(redirectTo) == "" {
-		redirectTo = tenantConfig.Saml.DefaultRedirectUrl
+		redirectTo = config.TenantConfig.Saml.DefaultRedirectUrl
 	}
 
 	nonce, err := crypto.GenerateRandomStringURLSafe(32)
@@ -61,7 +61,7 @@ func GenerateState(tenantConfig config.TenantConfig, persister persistence.SamlS
 
 	stateJson, err := json.Marshal(state)
 
-	aes, err := aes_gcm.NewAESGCM(tenantConfig.Secrets.Keys)
+	aes, err := aes_gcm.NewAESGCM(config.ApplicationConfig.SecretKeys)
 	if err != nil {
 		return nil, fmt.Errorf("could not instantiate aesgcm: %w", err)
 	}
@@ -86,8 +86,8 @@ func GenerateState(tenantConfig config.TenantConfig, persister persistence.SamlS
 	return []byte(result), nil
 }
 
-func VerifyState(tenantID uuid.UUID, secrets config.Secrets, persister persistence.SamlStatePersister, state string) (*State, error) {
-	decodedState, err := decodeState(secrets, state)
+func VerifyState(tenantID uuid.UUID, keys []string, persister persistence.SamlStatePersister, state string) (*State, error) {
+	decodedState, err := decodeState(keys, state)
 	if err != nil {
 		return nil, fmt.Errorf("could not decode state: %w", err)
 	}
@@ -97,7 +97,7 @@ func VerifyState(tenantID uuid.UUID, secrets config.Secrets, persister persisten
 		return nil, fmt.Errorf("could not fetch expected state from db: %w", err)
 	}
 
-	decodedExpectedState, err := decodeState(secrets, expectedState.State)
+	decodedExpectedState, err := decodeState(keys, expectedState.State)
 	if err != nil {
 		return nil, fmt.Errorf("could not decode expectedState: %w", err)
 	}
@@ -115,8 +115,8 @@ func VerifyState(tenantID uuid.UUID, secrets config.Secrets, persister persisten
 	return decodedState, nil
 }
 
-func decodeState(secrets config.Secrets, state string) (*State, error) {
-	aes, err := aes_gcm.NewAESGCM(secrets.Keys)
+func decodeState(keys []string, state string) (*State, error) {
+	aes, err := aes_gcm.NewAESGCM(keys)
 	if err != nil {
 		return nil, fmt.Errorf("could not instantiate aesgcm: %w", err)
 	}

@@ -13,6 +13,7 @@ import (
 	"github.com/labstack/echo/v4"
 	saml2 "github.com/russellhaering/gosaml2"
 	auditlog "github.com/teamhanko/hanko/backend/v2/audit_log"
+	"github.com/teamhanko/hanko/backend/v2/config"
 	"github.com/teamhanko/hanko/backend/v2/context"
 	"github.com/teamhanko/hanko/backend/v2/dto"
 	"github.com/teamhanko/hanko/backend/v2/persistence/models"
@@ -22,12 +23,14 @@ import (
 )
 
 type Handler struct {
+	appConfig   config.ApplicationConfig
 	auditLogger auditlog.Logger
 	samlService saml.SamlProviderService
 }
 
-func NewSamlHandler(auditLogger auditlog.Logger, samlService saml.SamlProviderService) *Handler {
+func NewSamlHandler(appConfig config.ApplicationConfig, auditLogger auditlog.Logger, samlService saml.SamlProviderService) *Handler {
 	return &Handler{
+		appConfig:   appConfig,
 		auditLogger: auditLogger,
 		samlService: samlService,
 	}
@@ -107,7 +110,10 @@ func (handler *Handler) Auth(c echo.Context) error {
 		return handler.redirectError(c, thirdparty.ErrorInvalidRequest("provider not found").WithCause(err), errorRedirectTo)
 	}
 
-	redirectUrl, err := handler.samlService.GetAuthUrl(tenant.ID, tenant.Config, providerModel.ID, request.RedirectTo, false)
+	redirectUrl, err := handler.samlService.GetAuthUrl(tenant.ID, config.Config{
+		ApplicationConfig: handler.appConfig,
+		TenantConfig:      tenant.Config,
+	}, providerModel.ID, request.RedirectTo, false)
 	if err != nil {
 		return handler.redirectError(c, thirdparty.ErrorServer("could not generate auth url").WithCause(err), errorRedirectTo)
 	}
@@ -275,7 +281,7 @@ func (handler *Handler) CallbackPost(c echo.Context) error {
 	if handler.isIDPInitiated(relayState) {
 		return handler.callbackPostIdPInitiated(c, samlResponse)
 	} else {
-		state, err := saml.VerifyState(tenant.ID, tenant.Config.Secrets, handler.samlService.Persister().GetSamlStatePersister(), strings.TrimPrefix(relayState, saml.StatePrefixServiceProviderInitiated))
+		state, err := saml.VerifyState(tenant.ID, handler.appConfig.SecretKeys, handler.samlService.Persister().GetSamlStatePersister(), strings.TrimPrefix(relayState, saml.StatePrefixServiceProviderInitiated))
 
 		if err != nil {
 			return handler.redirectError(

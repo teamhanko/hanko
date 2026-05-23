@@ -64,7 +64,7 @@ func NewCreateCommand() *cobra.Command {
 				}
 			}
 			persister := persistence.New(dbConnection)
-			jwkManager, err := jwk.NewManager(cfg.Secrets, persister, cfg.MultiTenancy.Enabled)
+			jwkManager, err := jwk.NewManager(*cfg, persister, cfg.MultiTenancy.Enabled)
 			if err != nil {
 				fmt.Printf("failed to create jwk persister: %s", err)
 				return

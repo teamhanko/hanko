@@ -39,7 +39,7 @@ func (s *thirdPartySuite) TestThirdPartyHandler_Callback_Error_LinkingNotAllowed
 	cfg := s.setUpConfig([]string{"google"}, []string{"https://example.com"})
 	cfg.ThirdParty.Providers.Google.AllowLinking = false
 
-	state, err := thirdparty.GenerateState(&cfg.TenantConfig, "google", "https://example.com")
+	state, err := thirdparty.GenerateState(cfg, "google", "https://example.com")
 	s.NoError(err)
 
 	req := httptest.NewRequest(http.MethodGet, fmt.Sprintf("/thirdparty/callback?code=abcde&state=%s", state), nil)
@@ -90,7 +90,7 @@ func (s *thirdPartySuite) TestThirdPartyHandler_Callback_Error_SignInMultipleAcc
 
 	cfg := s.setUpConfig([]string{"google"}, []string{"https://example.com"})
 
-	state, err := thirdparty.GenerateState(&cfg.TenantConfig, "google", "https://example.com")
+	state, err := thirdparty.GenerateState(cfg, "google", "https://example.com")
 	s.NoError(err)
 
 	req := httptest.NewRequest(http.MethodGet, fmt.Sprintf("/thirdparty/callback?code=abcde&state=%s", state), nil)
@@ -149,10 +149,10 @@ func (s *thirdPartySuite) TestThirdPartyHandler_Callback_Error_StateMismatch() {
 
 	cfg := s.setUpConfig([]string{"google"}, []string{"https://example.com"})
 
-	state, err := thirdparty.GenerateState(&cfg.TenantConfig, "google", "https://example.com")
+	state, err := thirdparty.GenerateState(cfg, "google", "https://example.com")
 	s.NoError(err)
 
-	mismatchedState, err := thirdparty.GenerateState(&cfg.TenantConfig, "github", "https://foo.com")
+	mismatchedState, err := thirdparty.GenerateState(cfg, "github", "https://foo.com")
 	s.NoError(err)
 
 	req := httptest.NewRequest(http.MethodGet, fmt.Sprintf("/thirdparty/callback?code=abcde&state=%s", state), nil)
@@ -185,7 +185,7 @@ func (s *thirdPartySuite) TestThirdPartyHandler_Callback_Error_NoThirdPartyCooki
 
 	cfg := s.setUpConfig([]string{"google"}, []string{"https://example.com"})
 
-	state, err := thirdparty.GenerateState(&cfg.TenantConfig, "google", "https://example.com")
+	state, err := thirdparty.GenerateState(cfg, "google", "https://example.com")
 	s.NoError(err)
 
 	req := httptest.NewRequest(http.MethodGet, fmt.Sprintf("/thirdparty/callback?code=abcde&state=%s", state), nil)
@@ -214,7 +214,7 @@ func (s *thirdPartySuite) TestThirdPartyHandler_Callback_Error_ProviderError() {
 
 	cfg := s.setUpConfig([]string{"google"}, []string{"https://example.com"})
 
-	state, err := thirdparty.GenerateState(&cfg.TenantConfig, "google", "https://example.com")
+	state, err := thirdparty.GenerateState(cfg, "google", "https://example.com")
 	s.NoError(err)
 
 	providerError := "access_denied"
@@ -247,7 +247,7 @@ func (s *thirdPartySuite) TestThirdPartyHandler_Callback_Error_ProviderDisabled(
 
 	cfg := s.setUpConfig([]string{"github"}, []string{"https://example.com"})
 
-	state, err := thirdparty.GenerateState(&cfg.TenantConfig, "google", "https://example.com")
+	state, err := thirdparty.GenerateState(cfg, "google", "https://example.com")
 	s.NoError(err)
 
 	req := httptest.NewRequest(http.MethodGet, fmt.Sprintf("/thirdparty/callback?code=abcde&state=%s", state), nil)
@@ -280,7 +280,7 @@ func (s *thirdPartySuite) TestThirdPartyHandler_Callback_Error_NoAuthCode() {
 
 	cfg := s.setUpConfig([]string{"google"}, []string{"https://example.com"})
 
-	state, err := thirdparty.GenerateState(&cfg.TenantConfig, "google", "https://example.com")
+	state, err := thirdparty.GenerateState(cfg, "google", "https://example.com")
 	s.NoError(err)
 
 	req := httptest.NewRequest(http.MethodGet, fmt.Sprintf("/thirdparty/callback?state=%s", state), nil)
@@ -319,7 +319,7 @@ func (s *thirdPartySuite) TestThirdPartyHandler_Callback_Error_OAuthTokenExchang
 
 	cfg := s.setUpConfig([]string{"google"}, []string{"https://example.com"})
 
-	state, err := thirdparty.GenerateState(&cfg.TenantConfig, "google", "https://example.com")
+	state, err := thirdparty.GenerateState(cfg, "google", "https://example.com")
 	s.NoError(err)
 
 	req := httptest.NewRequest(http.MethodGet, fmt.Sprintf("/thirdparty/callback?code=abcde&state=%s", state), nil)
@@ -367,7 +367,7 @@ func (s *thirdPartySuite) TestThirdPartyHandler_Callback_Error_VerificationRequi
 	cfg := s.setUpConfig([]string{"google"}, []string{"https://example.com"})
 	cfg.Email.RequireVerification = true
 
-	state, err := thirdparty.GenerateState(&cfg.TenantConfig, "google", "https://example.com")
+	state, err := thirdparty.GenerateState(cfg, "google", "https://example.com")
 	s.NoError(err)
 
 	req := httptest.NewRequest(http.MethodGet, fmt.Sprintf("/thirdparty/callback?code=abcde&state=%s", state), nil)
@@ -416,7 +416,7 @@ func (s *thirdPartySuite) TestThirdPartyHandler_Callback_Error_MicrosoftUnverifi
 	cfg := s.setUpConfig([]string{"microsoft"}, []string{"https://example.com"})
 	cfg.Emails.RequireVerification = true
 
-	state, err := thirdparty.GenerateState(&cfg.TenantConfig, "microsoft", "https://example.com")
+	state, err := thirdparty.GenerateState(cfg, "microsoft", "https://example.com")
 	s.NoError(err)
 
 	req := httptest.NewRequest(http.MethodGet, fmt.Sprintf("/thirdparty/callback?code=abcde&state=%s", state), nil)

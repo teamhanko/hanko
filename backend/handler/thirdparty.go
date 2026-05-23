@@ -9,6 +9,7 @@ import (
 	"github.com/gobuffalo/pop/v6"
 	"github.com/labstack/echo/v4"
 	auditlog "github.com/teamhanko/hanko/backend/v2/audit_log"
+	"github.com/teamhanko/hanko/backend/v2/config"
 	"github.com/teamhanko/hanko/backend/v2/context"
 	"github.com/teamhanko/hanko/backend/v2/dto"
 	"github.com/teamhanko/hanko/backend/v2/dto/admin"
@@ -21,12 +22,14 @@ import (
 )
 
 type ThirdPartyHandler struct {
+	appConfig   config.ApplicationConfig
 	auditLogger auditlog.Logger
 	persister   persistence.Persister
 }
 
-func NewThirdPartyHandler(persister persistence.Persister, auditLogger auditlog.Logger) *ThirdPartyHandler {
+func NewThirdPartyHandler(appConfig config.ApplicationConfig, persister persistence.Persister, auditLogger auditlog.Logger) *ThirdPartyHandler {
 	return &ThirdPartyHandler{
+		appConfig:   appConfig,
 		auditLogger: auditLogger,
 		persister:   persister,
 	}
@@ -83,7 +86,7 @@ func (h *ThirdPartyHandler) Callback(c echo.Context) error {
 			expectedState = expectedStateCookie.Value
 		}
 		var state *thirdparty.State
-		state, terr = thirdparty.VerifyState(&tenant.Config, callback.State, expectedState)
+		state, terr = thirdparty.VerifyState(h.appConfig, callback.State, expectedState)
 		if terr != nil {
 			return thirdparty.ErrorInvalidRequest(terr.Error()).WithCause(terr)
 		}

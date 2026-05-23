@@ -34,6 +34,9 @@ func (s *userSuite) TestUserHandler_Me() {
 	tenantID := uuid.FromStringOrNil("00000000-0000-0000-0000-000000000001")
 
 	cfg := test.DefaultConfig
+	err = cfg.PostProcess()
+	s.Require().NoError(err)
+
 	cfg.Passkey.Enabled = true
 	cfg.MFA.Enabled = true
 	cfg.MFA.TOTP.Enabled = true
@@ -91,7 +94,11 @@ func (s *userSuite) TestUserHandler_Logout() {
 	userId := uuid.FromStringOrNil("b5dd5267-b462-48be-b70d-bcd6f1bbe7a5")
 	tenantID := uuid.FromStringOrNil("00000000-0000-0000-0000-000000000001")
 
-	e := NewPublicRouter(&test.DefaultConfig, s.Storage, nil, nil)
+	cfg := test.DefaultConfig
+	err = cfg.PostProcess()
+	s.Require().NoError(err)
+
+	e := NewPublicRouter(&cfg, s.Storage, nil, nil)
 
 	cookie, err := generateSessionCookie(s.Storage, userId, tenantID)
 	s.Require().NoError(err)

@@ -14,7 +14,7 @@ type SamlProviderService interface {
 	Persister() persistence.Persister
 	GetProviderByDomain(tenantID uuid.UUID, tenantConfig config.TenantConfig, domain string) (*saml2.SAMLServiceProvider, *ProviderConfig, error)
 	GetProviderByIssuer(tenantID uuid.UUID, tenantConfig config.TenantConfig, issuer string) (*saml2.SAMLServiceProvider, *ProviderConfig, error)
-	GetAuthUrl(tenantID uuid.UUID, tenantConfig config.TenantConfig, providerID uuid.UUID, redirectTo string, isFlow bool) (string, error)
+	GetAuthUrl(tenantID uuid.UUID, config config.Config, providerID uuid.UUID, redirectTo string, isFlow bool) (string, error)
 }
 
 type defaultService struct {
@@ -74,9 +74,9 @@ func (s *defaultService) GetProviderByIssuer(tenantID uuid.UUID, tenantConfig co
 }
 
 // GetAuthUrl generates a SAML authentication URL for a given provider
-func (s *defaultService) GetAuthUrl(tenantID uuid.UUID, tenantConfig config.TenantConfig, providerID uuid.UUID, redirectTo string, isFlow bool) (string, error) {
+func (s *defaultService) GetAuthUrl(tenantID uuid.UUID, config config.Config, providerID uuid.UUID, redirectTo string, isFlow bool) (string, error) {
 	// Validate redirect URL using tenant-specific config
-	if ok := tenantConfig.Saml.IsAllowedRedirect(redirectTo); !ok {
+	if ok := config.TenantConfig.Saml.IsAllowedRedirect(redirectTo); !ok {
 		return "", thirdparty.ErrorInvalidRequest(fmt.Sprintf("redirect to '%s' not allowed", redirectTo))
 	}
 
@@ -91,7 +91,7 @@ func (s *defaultService) GetAuthUrl(tenantID uuid.UUID, tenantConfig config.Tena
 
 	// Generate state using tenant-specific SAML config and secrets
 	state, err := GenerateState(
-		tenantConfig,
+		config,
 		s.persister.GetSamlStatePersister(),
 		providerModel.Domain,
 		redirectTo,
@@ -103,7 +103,7 @@ func (s *defaultService) GetAuthUrl(tenantID uuid.UUID, tenantConfig config.Tena
 	}
 
 	// GetProvider runtime provider using tenant-specific config
-	samlProvider, _, err := s.runtimeBuilder.GetProvider(tenantID, providerID, tenantConfig.Saml, tenantConfig.Service.Name)
+	samlProvider, _, err := s.runtimeBuilder.GetProvider(tenantID, providerID, config.TenantConfig.Saml, config.TenantConfig.Service.Name)
 	if err != nil {
 		return "", thirdparty.ErrorServer("could not build SAML provider").WithCause(err)
 	}

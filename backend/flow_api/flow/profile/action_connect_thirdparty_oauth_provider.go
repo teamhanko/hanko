@@ -117,7 +117,7 @@ func (a ConnectThirdpartyOauthProvider) Execute(c flowpilot.ExecutionContext) er
 
 	codeVerifier := c.Input().Get("code_verifier")
 	state, err := thirdparty.GenerateState(
-		&deps.Cfg.TenantConfig,
+		&deps.Cfg,
 		providerName,
 		redirectTo,
 		thirdparty.GenerateStateForFlowAPI(true),

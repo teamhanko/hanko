@@ -64,6 +64,7 @@ func DefaultApplicationConfig() ApplicationConfig {
 			Enabled: true,
 			Store:   FLOW_LOCKER_STORE_IN_MEMORY,
 		},
+		SecretKeys: []string{"abcedfghijklmnopqrstuvwxyz"}, // TODO: should we really set this?
 	}
 }
 
@@ -79,7 +80,7 @@ func DefaultTenantConfig() TenantConfig {
 			Name: "Hanko Authentication Service",
 		},
 		Secrets: Secrets{
-			Keys: []string{"abcedfghijklmnopqrstuvwxyz"},
+			// Keys: []string{"abcedfghijklmnopqrstuvwxyz"},
 			KeyManagement: KeyManagement{
 				Type: "local",
 			},

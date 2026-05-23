@@ -45,8 +45,8 @@ func (p identityPersister) GetByID(identityID uuid.UUID, tenantID uuid.UUID) (*m
 			}
 			return nil, fmt.Errorf("failed to get samlProvider: %w", err)
 		}
+		identity.SamlIdentity.SamlProvider = &samlProvider
 	}
-	identity.SamlIdentity.SamlProvider = &samlProvider
 	return identity, nil
 }
 
@@ -70,8 +70,8 @@ func (p identityPersister) Get(providerUserID string, providerID string, tenantI
 			}
 			return nil, fmt.Errorf("failed to get samlProvider: %w", err)
 		}
+		identity.SamlIdentity.SamlProvider = &samlProvider
 	}
-	identity.SamlIdentity.SamlProvider = &samlProvider
 	return identity, nil
 }
 

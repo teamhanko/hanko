@@ -210,6 +210,9 @@ func (s *sessionSuite) TestSessionHandler_ValidateSessionFromBody_IdleExpiresAt(
 
 func (s *sessionSuite) setupConfig(idleTimeout string) *config.Config {
 	cfg := test.DefaultConfig
+	err := cfg.PostProcess()
+	s.Require().NoError(err)
+
 	cfg.Session.IdleTimeout = idleTimeout
 	return &cfg
 }

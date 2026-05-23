@@ -184,6 +184,13 @@
           "title": "default_email_delivery",
           "description": "`default_email_delivery` configures how outgoing mails are delivered by default, when no `email_delivery` is configured as TenantConfig."
         },
+        "secretkeys": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array",
+          "description": "You can use this list for key rotation: add a new key to the beginning of the list and the corresponding\nJWK will then be used for signing JWTs. All tokens signed with the previous JWK(s) will still\nbe valid until they expire. Removing a key from the list does not remove the corresponding\ndatabase record. If you remove a key, you also have to remove the database record, otherwise\napplication startup will fail."
+        },
         "account": {
           "$ref": "#/$defs/Account",
           "title": "account",
@@ -1273,7 +1280,7 @@
             "title": "keys"
           },
           "type": "array",
-          "description": "`keys` are used to en- and decrypt the JWKs which get used to sign the JWTs issued by the API.\nFor every key a JWK is generated, encrypted with the key and persisted in the database.\n\nYou can use this list for key rotation: add a new key to the beginning of the list and the corresponding\nJWK will then be used for signing JWTs. All tokens signed with the previous JWK(s) will still\nbe valid until they expire. Removing a key from the list does not remove the corresponding\ndatabase record. If you remove a key, you also have to remove the database record, otherwise\napplication startup will fail."
+          "description": "`keys` are used to en- and decrypt the JWKs which get used to sign the JWTs issued by the API.\nFor every key a JWK is generated, encrypted with the key and persisted in the database.\n\nYou can use this list for key rotation: add a new key to the beginning of the list and the corresponding\nJWK will then be used for signing JWTs. All tokens signed with the previous JWK(s) will still\nbe valid until they expire. Removing a key from the list does not remove the corresponding\ndatabase record. If you remove a key, you also have to remove the database record, otherwise\napplication startup will fail.\nDeprecated: use top level \"SecretKeys\" instead"
         }
       },
       "additionalProperties": false,

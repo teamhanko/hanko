@@ -48,7 +48,7 @@ func (s *thirdPartySuite) setUpHandler(cfg *config.Config) *ThirdPartyHandler {
 	s.T().Helper()
 	auditLogger := auditlog.NewLogger(s.Storage, cfg.AuditLog)
 
-	handler := NewThirdPartyHandler(s.Storage, auditLogger)
+	handler := NewThirdPartyHandler(cfg.ApplicationConfig, s.Storage, auditLogger)
 	return handler
 }
 

@@ -84,7 +84,7 @@ func (a ThirdPartyOAuth) Execute(c flowpilot.ExecutionContext) error {
 	}
 
 	codeVerifier := c.Input().Get("code_verifier")
-	state, err := thirdparty.GenerateState(&deps.Cfg.TenantConfig, providerName, redirectTo, thirdparty.GenerateStateForFlowAPI(true), thirdparty.GenerateStateWithPKCECodeVerifier(codeVerifier.String()))
+	state, err := thirdparty.GenerateState(&deps.Cfg, providerName, redirectTo, thirdparty.GenerateStateForFlowAPI(true), thirdparty.GenerateStateWithPKCECodeVerifier(codeVerifier.String()))
 	if err != nil {
 		return c.Error(flowpilot.ErrorTechnical.Wrap(err))
 	}

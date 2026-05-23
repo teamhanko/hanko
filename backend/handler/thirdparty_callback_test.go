@@ -35,7 +35,7 @@ func (s *thirdPartySuite) TestThirdPartyHandler_Callback_SignUp_Google() {
 
 	cfg := s.setUpConfig([]string{"google"}, []string{"https://example.com"})
 
-	state, err := thirdparty.GenerateState(&cfg.TenantConfig, "google", "https://example.com")
+	state, err := thirdparty.GenerateState(cfg, "google", "https://example.com")
 	s.NoError(err)
 
 	req := httptest.NewRequest(http.MethodGet, fmt.Sprintf("/thirdparty/callback?code=abcde&state=%s", state), nil)
@@ -96,7 +96,7 @@ func (s *thirdPartySuite) TestThirdPartyHandler_Callback_SignIn_Google() {
 
 	cfg := s.setUpConfig([]string{"google"}, []string{"https://example.com"})
 
-	state, err := thirdparty.GenerateState(&cfg.TenantConfig, "google", "https://example.com")
+	state, err := thirdparty.GenerateState(cfg, "google", "https://example.com")
 	s.NoError(err)
 
 	req := httptest.NewRequest(http.MethodGet, fmt.Sprintf("/thirdparty/callback?code=abcde&state=%s", state), nil)
@@ -164,7 +164,7 @@ func (s *thirdPartySuite) TestThirdPartyHandler_Callback_SignUp_GitHub() {
 
 	cfg := s.setUpConfig([]string{"github"}, []string{"https://example.com"})
 
-	state, err := thirdparty.GenerateState(&cfg.TenantConfig, "github", "https://example.com")
+	state, err := thirdparty.GenerateState(cfg, "github", "https://example.com")
 	s.NoError(err)
 
 	req := httptest.NewRequest(http.MethodGet, fmt.Sprintf("/thirdparty/callback?code=abcde&state=%s", state), nil)
@@ -235,7 +235,7 @@ func (s *thirdPartySuite) TestThirdPartyHandler_Callback_SignIn_GitHub() {
 
 	cfg := s.setUpConfig([]string{"github"}, []string{"https://example.com"})
 
-	state, err := thirdparty.GenerateState(&cfg.TenantConfig, "github", "https://example.com")
+	state, err := thirdparty.GenerateState(cfg, "github", "https://example.com")
 	s.NoError(err)
 
 	req := httptest.NewRequest(http.MethodGet, fmt.Sprintf("/thirdparty/callback?code=abcde&state=%s", state), nil)
@@ -291,7 +291,7 @@ func (s *thirdPartySuite) TestThirdPartyHandler_Callback_SignUp_Apple() {
 
 	cfg := s.setUpConfig([]string{"apple"}, []string{"https://example.com"})
 
-	state, err := thirdparty.GenerateState(&cfg.TenantConfig, "apple", "https://example.com")
+	state, err := thirdparty.GenerateState(cfg, "apple", "https://example.com")
 	s.NoError(err)
 
 	req := httptest.NewRequest(http.MethodGet, fmt.Sprintf("/thirdparty/callback?code=abcde&state=%s", state), nil)
@@ -350,7 +350,7 @@ func (s *thirdPartySuite) TestThirdPartyHandler_Callback_SignIn_Apple() {
 
 	cfg := s.setUpConfig([]string{"apple"}, []string{"https://example.com"})
 
-	state, err := thirdparty.GenerateState(&cfg.TenantConfig, "apple", "https://example.com")
+	state, err := thirdparty.GenerateState(cfg, "apple", "https://example.com")
 	s.NoError(err)
 
 	req := httptest.NewRequest(http.MethodGet, fmt.Sprintf("/thirdparty/callback?code=abcde&state=%s", state), nil)
@@ -409,7 +409,7 @@ func (s *thirdPartySuite) TestThirdPartyHandler_Callback_SignIn_Apple_WithBoolea
 
 	cfg := s.setUpConfig([]string{"apple"}, []string{"https://example.com"})
 
-	state, err := thirdparty.GenerateState(&cfg.TenantConfig, "apple", "https://example.com")
+	state, err := thirdparty.GenerateState(cfg, "apple", "https://example.com")
 	s.NoError(err)
 
 	req := httptest.NewRequest(http.MethodGet, fmt.Sprintf("/thirdparty/callback?code=abcde&state=%s", state), nil)
@@ -467,7 +467,7 @@ func (s *thirdPartySuite) TestThirdPartyHandler_Callback_SignUp_Discord() {
 
 	cfg := s.setUpConfig([]string{"discord"}, []string{"https://example.com"})
 
-	state, err := thirdparty.GenerateState(&cfg.TenantConfig, "discord", "https://example.com")
+	state, err := thirdparty.GenerateState(cfg, "discord", "https://example.com")
 	s.NoError(err)
 
 	req := httptest.NewRequest(http.MethodGet, fmt.Sprintf("/thirdparty/callback?code=abcde&state=%s", state), nil)
@@ -528,7 +528,7 @@ func (s *thirdPartySuite) TestThirdPartyHandler_Callback_SignIn_Discord() {
 
 	cfg := s.setUpConfig([]string{"discord"}, []string{"https://example.com"})
 
-	state, err := thirdparty.GenerateState(&cfg.TenantConfig, "discord", "https://example.com")
+	state, err := thirdparty.GenerateState(cfg, "discord", "https://example.com")
 	s.NoError(err)
 
 	req := httptest.NewRequest(http.MethodGet, fmt.Sprintf("/thirdparty/callback?code=abcde&state=%s", state), nil)
@@ -584,7 +584,7 @@ func (s *thirdPartySuite) TestThirdPartyHandler_Callback_SignUp_Microsoft() {
 
 	cfg := s.setUpConfig([]string{"microsoft"}, []string{"https://example.com"})
 
-	state, err := thirdparty.GenerateState(&cfg.TenantConfig, "microsoft", "https://example.com")
+	state, err := thirdparty.GenerateState(cfg, "microsoft", "https://example.com")
 	s.NoError(err)
 
 	req := httptest.NewRequest(http.MethodGet, fmt.Sprintf("/thirdparty/callback?code=abcde&state=%s", state), nil)
@@ -643,7 +643,7 @@ func (s *thirdPartySuite) TestThirdPartyHandler_Callback_SignIn_Microsoft() {
 
 	cfg := s.setUpConfig([]string{"microsoft"}, []string{"https://example.com"})
 
-	state, err := thirdparty.GenerateState(&cfg.TenantConfig, "microsoft", "https://example.com")
+	state, err := thirdparty.GenerateState(cfg, "microsoft", "https://example.com")
 	s.NoError(err)
 
 	req := httptest.NewRequest(http.MethodGet, fmt.Sprintf("/thirdparty/callback?code=abcde&state=%s", state), nil)
@@ -700,7 +700,7 @@ func (s *thirdPartySuite) TestThirdPartyHandler_Callback_SignUp_Facebook() {
 
 	cfg := s.setUpConfig([]string{"facebook"}, []string{"https://example.com"})
 
-	state, err := thirdparty.GenerateState(&cfg.TenantConfig, "facebook", "https://example.com")
+	state, err := thirdparty.GenerateState(cfg, "facebook", "https://example.com")
 	s.NoError(err)
 
 	req := httptest.NewRequest(http.MethodGet, fmt.Sprintf("/thirdparty/callback?code=abcde&state=%s", state), nil)
@@ -760,7 +760,7 @@ func (s *thirdPartySuite) TestThirdPartyHandler_Callback_SignIn_Facebook() {
 
 	cfg := s.setUpConfig([]string{"facebook"}, []string{"https://example.com"})
 
-	state, err := thirdparty.GenerateState(&cfg.TenantConfig, "facebook", "https://example.com")
+	state, err := thirdparty.GenerateState(cfg, "facebook", "https://example.com")
 	s.NoError(err)
 
 	req := httptest.NewRequest(http.MethodGet, fmt.Sprintf("/thirdparty/callback?code=abcde&state=%s", state), nil)
@@ -821,7 +821,7 @@ func (s *thirdPartySuite) TestThirdPartyHandler_Callback_SignUp_WithUnclaimedEma
 
 	cfg := s.setUpConfig([]string{"google"}, []string{"https://example.com"})
 
-	state, err := thirdparty.GenerateState(&cfg.TenantConfig, "google", "https://example.com")
+	state, err := thirdparty.GenerateState(cfg, "google", "https://example.com")
 	s.NoError(err)
 
 	req := httptest.NewRequest(http.MethodGet, fmt.Sprintf("/thirdparty/callback?code=abcde&state=%s", state), nil)
@@ -882,7 +882,7 @@ func (s *thirdPartySuite) TestThirdPartyHandler_Callback_SignIn_ProviderEMailCha
 
 	cfg := s.setUpConfig([]string{"google"}, []string{"https://example.com"})
 
-	state, err := thirdparty.GenerateState(&cfg.TenantConfig, "google", "https://example.com")
+	state, err := thirdparty.GenerateState(cfg, "google", "https://example.com")
 	s.NoError(err)
 
 	req := httptest.NewRequest(http.MethodGet, fmt.Sprintf("/thirdparty/callback?code=abcde&state=%s", state), nil)
@@ -943,7 +943,7 @@ func (s *thirdPartySuite) TestThirdPartyHandler_Callback_SignIn_ProviderEMailCha
 
 	cfg := s.setUpConfig([]string{"google"}, []string{"https://example.com"})
 
-	state, err := thirdparty.GenerateState(&cfg.TenantConfig, "google", "https://example.com")
+	state, err := thirdparty.GenerateState(cfg, "google", "https://example.com")
 	s.NoError(err)
 
 	req := httptest.NewRequest(http.MethodGet, fmt.Sprintf("/thirdparty/callback?code=abcde&state=%s", state), nil)
@@ -1004,7 +1004,7 @@ func (s *thirdPartySuite) TestThirdPartyHandler_Callback_SignIn_ProviderEMailCha
 
 	cfg := s.setUpConfig([]string{"google"}, []string{"https://example.com"})
 
-	state, err := thirdparty.GenerateState(&cfg.TenantConfig, "google", "https://example.com")
+	state, err := thirdparty.GenerateState(cfg, "google", "https://example.com")
 	s.NoError(err)
 
 	req := httptest.NewRequest(http.MethodGet, fmt.Sprintf("/thirdparty/callback?code=abcde&state=%s", state), nil)
@@ -1066,7 +1066,7 @@ func (s *thirdPartySuite) TestThirdPartyHandler_Callback_Link_ExistingAccountNoI
 
 	cfg := s.setUpConfig([]string{"google"}, []string{"https://example.com"})
 
-	state, err := thirdparty.GenerateState(&cfg.TenantConfig, "google", "https://example.com")
+	state, err := thirdparty.GenerateState(cfg, "google", "https://example.com")
 	s.NoError(err)
 
 	req := httptest.NewRequest(http.MethodGet, fmt.Sprintf("/thirdparty/callback?code=abcde&state=%s", state), nil)
@@ -1128,7 +1128,7 @@ func (s *thirdPartySuite) TestThirdPartyHandler_Callback_Link_GoogleToAccountWit
 
 	cfg := s.setUpConfig([]string{"google", "github"}, []string{"https://example.com"})
 
-	state, err := thirdparty.GenerateState(&cfg.TenantConfig, "google", "https://example.com")
+	state, err := thirdparty.GenerateState(cfg, "google", "https://example.com")
 	s.NoError(err)
 
 	req := httptest.NewRequest(http.MethodGet, fmt.Sprintf("/thirdparty/callback?code=abcde&state=%s", state), nil)

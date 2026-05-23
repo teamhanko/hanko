@@ -89,7 +89,7 @@ func (h *TenantHandler) Create(c echo.Context) error {
 		}
 
 		if tenantConfig.Secrets.KeyManagement.Type == "local" {
-			manager, err := local_db.NewDefaultManager(tenantConfig.Secrets.Keys, h.persister.GetJwkPersisterWithConnection(tx), h.cfg.MultiTenancy.Enabled)
+			manager, err := local_db.NewDefaultManager(h.cfg.SecretKeys, h.persister.GetJwkPersisterWithConnection(tx), h.cfg.MultiTenancy.Enabled)
 			if err != nil {
 				return dto.ToHttpError(err)
 			}
@@ -300,8 +300,12 @@ func (h *TenantHandler) validateTenantConfig(configJSON json.RawMessage) (json.R
 		return nil, nil, fmt.Errorf("failed to post process tenant settings: %w", err)
 	}
 
-	err = tenantConfig.Validate(true)
-	if err != nil {
+	cfg := config.Config{
+		ApplicationConfig: h.cfg.ApplicationConfig,
+		TenantConfig:      *tenantConfig,
+	}
+
+	if err = cfg.ValidateTenantAndCrossConfig(); err != nil {
 		return nil, nil, fmt.Errorf("failed to validate tenant settings: %w", err)
 	}
 

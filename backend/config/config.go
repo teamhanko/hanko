@@ -1,6 +1,7 @@
 package config
 
 import (
+	"errors"
 	"fmt"
 	"log"
 
@@ -29,6 +30,12 @@ type ApplicationConfig struct {
 	Server Server `yaml:"server" json:"server,omitempty" koanf:"server" jsonschema:"title=server"`
 	// `default_email_delivery` configures how outgoing mails are delivered by default, when no `email_delivery` is configured as TenantConfig.
 	DefaultEmailDelivery EmailDelivery `yaml:"default_email_delivery" json:"default_email_delivery,omitempty" koanf:"default_email_delivery" split_words:"true" jsonschema:"title=default_email_delivery"`
+	// You can use this list for key rotation: add a new key to the beginning of the list and the corresponding
+	// JWK will then be used for signing JWTs. All tokens signed with the previous JWK(s) will still
+	// be valid until they expire. Removing a key from the list does not remove the corresponding
+	// database record. If you remove a key, you also have to remove the database record, otherwise
+	// application startup will fail.
+	SecretKeys []string `yaml:"secretkeys" json:"secretkeys,omitempty" koanf:"secretkeys"`
 }
 
 type TenantConfig struct {
@@ -216,15 +223,40 @@ func (c *Config) Validate() error {
 		return fmt.Errorf("failed to validate application config: %w", err)
 	}
 
-	if c.ApplicationConfig.MultiTenancy.Enabled {
-		err = c.TenantConfig.Validate(true)
-	} else {
+	if !c.ApplicationConfig.MultiTenancy.Enabled {
 		err = c.TenantConfig.Validate(false)
-	}
-	if err != nil {
-		return fmt.Errorf("failed to validate tenant config: %w", err)
+		if err != nil {
+			return fmt.Errorf("failed to validate tenant config: %w", err)
+		}
+		err = c.ValidateCrossConfig()
+		if err != nil {
+			return fmt.Errorf("failed to validate cross config settings: %w", err)
+		}
 	}
 
+	return nil
+}
+
+func (c *Config) ValidateTenantAndCrossConfig() error {
+	if c.ApplicationConfig.MultiTenancy.Enabled {
+		err := c.TenantConfig.Validate(true)
+		if err != nil {
+			return fmt.Errorf("failed to validate tenant config: %w", err)
+		}
+		err = c.ValidateCrossConfig()
+		if err != nil {
+			return fmt.Errorf("failed to validate cross config settings: %w", err)
+		}
+	}
+	return nil
+}
+
+func (c *Config) ValidateCrossConfig() error {
+	if c.TenantConfig.Secrets.KeyManagement.Type == KEY_MANAGEMENT_STORE_LOCAL {
+		if len(c.ApplicationConfig.SecretKeys) == 0 {
+			return errors.New("at least one key must be defined")
+		}
+	}
 	return nil
 }
 
@@ -286,6 +318,10 @@ func (c *TenantConfig) PostProcess() error {
 }
 
 func (c *Config) PostProcess() error {
+	if len(c.SecretKeys) == 0 {
+		c.SecretKeys = c.Secrets.Keys
+	}
+
 	err := c.TenantConfig.PostProcess()
 	if err != nil {
 		return fmt.Errorf("failed to post process tenant settings: %w", err)

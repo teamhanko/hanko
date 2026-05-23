@@ -1,6 +1,7 @@
 package middleware
 
 import (
+	"fmt"
 	"net/http"
 
 	"github.com/labstack/echo/v4"
@@ -18,9 +19,15 @@ func JWKMiddleware(appConfig config.ApplicationConfig, persister persistence.Per
 				return echo.NewHTTPError(http.StatusBadRequest, "tenant ID required")
 			}
 
-			secrets := tenant.Config.Secrets
-			jwkManager, err := jwk.NewManager(secrets, persister, appConfig.MultiTenancy.Enabled)
+			cfg := config.Config{
+				ApplicationConfig: appConfig,
+				TenantConfig:      tenant.Config,
+			}
 
+			jwkManager, err := jwk.NewManager(cfg, persister, appConfig.MultiTenancy.Enabled)
+			if err != nil {
+				return echo.NewHTTPError(http.StatusInternalServerError, fmt.Sprintf("failed to create JWK manager: %w", err))
+			}
 			ctx.Set("jwk_manager", jwkManager)
 
 			return next(ctx)

@@ -79,7 +79,7 @@ func NewPublicRouter(cfg *config.Config, persister persistence.Persister, promet
 
 	if cfg.Saml.Enabled {
 		samlProviderService := saml.NewSamlProviderService(persister)
-		samlHandler := NewSamlHandler(auditLogger, samlProviderService)
+		samlHandler := NewSamlHandler(cfg.ApplicationConfig, auditLogger, samlProviderService)
 		samlGroup := tenantGroup.Group("/saml")
 		samlGroup.GET("/metadata", samlHandler.Metadata)
 		samlGroup.GET("/auth", samlHandler.Auth)
@@ -102,7 +102,7 @@ func NewPublicRouter(cfg *config.Config, persister persistence.Persister, promet
 	wellKnown := tenantGroup.Group("/.well-known")
 	wellKnown.GET("/jwks.json", wellKnownHandler.GetPublicKeys)
 
-	thirdPartyHandler := NewThirdPartyHandler(persister, auditLogger)
+	thirdPartyHandler := NewThirdPartyHandler(cfg.ApplicationConfig, persister, auditLogger)
 	thirdparty := tenantGroup.Group("/thirdparty")
 	thirdparty.GET("/callback", thirdPartyHandler.Callback, webhookMiddleware)
 	thirdparty.POST("/callback", thirdPartyHandler.CallbackPost, webhookMiddleware)

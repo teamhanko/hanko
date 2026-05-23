@@ -90,7 +90,7 @@ func (a ContinueWithLoginIdentifier) Execute(c flowpilot.ExecutionContext) error
 			// Try to get SAML provider by domain
 			providerModel, err := deps.Persister.GetSamlProviderPersister().GetByDomain(deps.TenantID, domain)
 			if err == nil && providerModel != nil {
-				authUrl, err := deps.SamlService.GetAuthUrl(deps.TenantID, deps.Cfg.TenantConfig, providerModel.ID, deps.Cfg.Saml.DefaultRedirectUrl, true)
+				authUrl, err := deps.SamlService.GetAuthUrl(deps.TenantID, deps.Cfg, providerModel.ID, deps.Cfg.Saml.DefaultRedirectUrl, true)
 
 				if err != nil {
 					return fmt.Errorf("failed to get auth url: %w", err)
