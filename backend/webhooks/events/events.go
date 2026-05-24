@@ -21,6 +21,10 @@ const (
 	UserPasswordChange Event = "user.update.password.update"
 
 	EmailSend Event = "email.send"
+	// Session events
+	Session       Event = "session"
+	SessionCreate Event = "session.create"
+	SessionDelete Event = "session.delete"
 )
 
 func StringIsValidEvent(value string) bool {
@@ -31,7 +35,7 @@ func StringIsValidEvent(value string) bool {
 func IsValidEvent(evt Event) bool {
 	var isValid bool
 	switch evt {
-	case User, UserLogin, UserCreate, UserUpdate, UserDelete, UserEmail, UserEmailCreate, UserEmailPrimary, UserEmailDelete, UserUsername, UserUsernameCreate, UserUsernameUpdate, UserUsernameDelete, UserPasswordChange, EmailSend:
+	case User, UserLogin, UserCreate, UserUpdate, UserDelete, UserEmail, UserEmailCreate, UserEmailPrimary, UserEmailDelete, UserUsername, UserUsernameCreate, UserUsernameUpdate, UserUsernameDelete, UserPasswordChange, EmailSend, Session, SessionCreate, SessionDelete:
 		isValid = true
 	default:
 		isValid = false

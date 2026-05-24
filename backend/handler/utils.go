@@ -10,6 +10,8 @@ import (
 	"github.com/teamhanko/hanko/backend/v2/config"
 	"github.com/teamhanko/hanko/backend/v2/persistence"
 	"github.com/teamhanko/hanko/backend/v2/persistence/models"
+	webhookutils "github.com/teamhanko/hanko/backend/v2/webhooks/utils"
+	"github.com/teamhanko/hanko/backend/v2/webhooks/events"
 	"net/http"
 )
 
@@ -43,6 +45,8 @@ func storeSession(cfg *config.Config, persister persistence.Persister, userId uu
 			if err != nil {
 				return fmt.Errorf("failed to remove latest session: %w", err)
 			}
+			// notify webhook about deleted session
+			webhookutils.NotifySessionDelete(httpContext, tx, activeSessions[i])
 		}
 	}
 
@@ -70,6 +74,9 @@ func storeSession(cfg *config.Config, persister persistence.Persister, userId uu
 	if err != nil {
 		return fmt.Errorf("failed to store session: %w", err)
 	}
+
+	// notify webhook about created session
+	webhookutils.NotifySessionCreate(httpContext, tx, sessionModel)
 
 	return nil
 }

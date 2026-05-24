@@ -2,8 +2,9 @@ package mail
 
 import (
 	"strings"
-	"github.com/stretchr/testify/assert"
 	"testing"
+
+	"github.com/stretchr/testify/assert"
 )
 
 func TestNewRenderer(t *testing.T) {

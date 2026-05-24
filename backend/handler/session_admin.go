@@ -14,6 +14,8 @@ import (
 	"github.com/teamhanko/hanko/backend/v2/dto/admin"
 	"github.com/teamhanko/hanko/backend/v2/persistence"
 	"github.com/teamhanko/hanko/backend/v2/persistence/models"
+    webhookutils "github.com/teamhanko/hanko/backend/v2/webhooks/utils"
+    "github.com/teamhanko/hanko/backend/v2/webhooks/events"
 	"github.com/teamhanko/hanko/backend/v2/session"
 )
 
@@ -102,6 +104,9 @@ func (h *SessionAdminHandler) Generate(ctx echo.Context) error {
 		return fmt.Errorf("failed to store session: %w", err)
 	}
 
+	// notify webhook about created session
+	webhookutils.NotifySessionCreate(ctx, nil, sessionModel)
+
 	response := admin.CreateSessionTokenResponse{
 		SessionToken: encodedToken,
 	}
@@ -182,6 +187,9 @@ func (h *SessionAdminHandler) Delete(ctx echo.Context) error {
 	if err != nil {
 		return err
 	}
+
+	// notify webhook about deleted session
+	webhookutils.NotifySessionDelete(ctx, nil, *sessionModel)
 
 	return ctx.NoContent(http.StatusNoContent)
 }

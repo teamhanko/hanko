@@ -2,11 +2,13 @@ package utils
 
 import (
 	"fmt"
+
 	"github.com/gobuffalo/pop/v6"
 	"github.com/gofrs/uuid"
 	"github.com/labstack/echo/v4"
 	"github.com/teamhanko/hanko/backend/v2/dto/admin"
 	"github.com/teamhanko/hanko/backend/v2/persistence"
+	models "github.com/teamhanko/hanko/backend/v2/persistence/models"
 	"github.com/teamhanko/hanko/backend/v2/webhooks"
 	"github.com/teamhanko/hanko/backend/v2/webhooks/events"
 )
@@ -35,6 +37,44 @@ func NotifyUserChange(ctx echo.Context, tx *pop.Connection, persister persistenc
 	user.SetIPAddress(ctx.RealIP())
 
 	err = TriggerWebhooks(ctx, tx, event, user)
+	if err != nil {
+		ctx.Logger().Warn(err)
+	}
+}
+
+type SessionWebhookPayload struct {
+	SessionID string `json:"session_id"`
+	UserID    string `json:"user_id"`
+	Exp       int64  `json:"exp"`
+}
+
+func NotifySessionCreate(ctx echo.Context, tx *pop.Connection, session models.Session) {
+	payload := SessionWebhookPayload{
+		SessionID: session.ID.String(),
+		UserID:    session.UserID.String(),
+		Exp:       0,
+	}
+	if session.ExpiresAt != nil {
+		payload.Exp = session.ExpiresAt.Unix()
+	}
+
+	err := TriggerWebhooks(ctx, tx, events.SessionCreate, payload)
+	if err != nil {
+		ctx.Logger().Warn(err)
+	}
+}
+
+func NotifySessionDelete(ctx echo.Context, tx *pop.Connection, session models.Session) {
+	payload := SessionWebhookPayload{
+		SessionID: session.ID.String(),
+		UserID:    session.UserID.String(),
+		Exp:       0,
+	}
+	if session.ExpiresAt != nil {
+		payload.Exp = session.ExpiresAt.Unix()
+	}
+
+	err := TriggerWebhooks(ctx, tx, events.SessionDelete, payload)
 	if err != nil {
 		ctx.Logger().Warn(err)
 	}
