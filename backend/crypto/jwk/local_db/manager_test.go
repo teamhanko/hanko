@@ -23,11 +23,15 @@ type jwkManagerSuite struct {
 }
 
 func (s *jwkManagerSuite) TestDefaultManager() {
-	keys := []string{"asfnoadnfoaegnq3094intoaegjnoadjgnoadng", "apdisfoaiegnoaiegnbouaebgn982"}
+	cfg := config.DefaultConfig()
+	cfg.SecretKeys = []string{"asfnoadnfoaegnq3094intoaegjnoadjgnoadng", "apdisfoaiegnoaiegnbouaebgn982"}
 
 	persister := s.Storage.GetJwkPersister()
 
-	dm, err := NewDefaultManager(keys, persister, false)
+	err := SyncSecretKeys(cfg, s.Storage)
+	s.Require().NoError(err)
+
+	dm, err := NewDefaultManager(cfg.SecretKeys, persister)
 	require.NoError(s.T(), err)
 	all, err := persister.GetAll(uuid.FromStringOrNil(config.DefaultTenantID))
 

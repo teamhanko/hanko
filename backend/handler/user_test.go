@@ -10,6 +10,7 @@ import (
 	"github.com/gofrs/uuid"
 	_ "github.com/lib/pq"
 	"github.com/stretchr/testify/suite"
+	"github.com/teamhanko/hanko/backend/v2/crypto/jwk/local_db"
 	"github.com/teamhanko/hanko/backend/v2/dto"
 	"github.com/teamhanko/hanko/backend/v2/test"
 )
@@ -35,6 +36,9 @@ func (s *userSuite) TestUserHandler_Me() {
 
 	cfg := test.DefaultConfig
 	err = cfg.PostProcess()
+	s.Require().NoError(err)
+
+	err = local_db.SyncSecretKeys(&cfg, s.Storage)
 	s.Require().NoError(err)
 
 	cfg.Passkey.Enabled = true
@@ -96,6 +100,9 @@ func (s *userSuite) TestUserHandler_Logout() {
 
 	cfg := test.DefaultConfig
 	err = cfg.PostProcess()
+	s.Require().NoError(err)
+
+	err = local_db.SyncSecretKeys(&cfg, s.Storage)
 	s.Require().NoError(err)
 
 	e := NewPublicRouter(&cfg, s.Storage, nil, nil)

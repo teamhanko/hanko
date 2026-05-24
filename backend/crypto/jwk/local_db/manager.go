@@ -9,7 +9,6 @@ import (
 	"github.com/lestrrat-go/jwx/v2/jwa"
 	"github.com/lestrrat-go/jwx/v2/jwk"
 	"github.com/lestrrat-go/jwx/v2/jwt"
-	"github.com/teamhanko/hanko/backend/v2/config"
 	"github.com/teamhanko/hanko/backend/v2/crypto/aes_gcm"
 	"github.com/teamhanko/hanko/backend/v2/persistence"
 	"github.com/teamhanko/hanko/backend/v2/persistence/models"
@@ -23,7 +22,7 @@ type DefaultManager struct {
 
 // NewDefaultManager creates a DefaultManager that reads and persists private keys to the database and generates new private keys when a new secret is added to the config.
 // It manages the lifecycle of JSON Web Keys, handling encryption, persistence and retrieval.
-func NewDefaultManager(keys []string, persister persistence.JwkPersister, multitenancy bool) (*DefaultManager, error) {
+func NewDefaultManager(keys []string, persister persistence.JwkPersister) (*DefaultManager, error) {
 	encrypter, err := aes_gcm.NewAESGCM(keys)
 	if err != nil {
 		return nil, err
@@ -31,21 +30,6 @@ func NewDefaultManager(keys []string, persister persistence.JwkPersister, multit
 	manager := &DefaultManager{
 		encrypter: encrypter,
 		persister: persister,
-	}
-
-	if !multitenancy {
-		// for every key we should check if a jwk with index exists and create one if not.
-		for i := range keys {
-			j, err := persister.Get(i+1, uuid.FromStringOrNil(config.DefaultTenantID))
-			if j == nil && err == nil {
-				_, err := manager.GenerateKey(uuid.FromStringOrNil(config.DefaultTenantID))
-				if err != nil {
-					return nil, err
-				}
-			} else if err != nil {
-				return nil, err
-			}
-		}
 	}
 
 	return manager, nil

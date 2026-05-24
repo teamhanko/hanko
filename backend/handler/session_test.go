@@ -12,6 +12,7 @@ import (
 	"github.com/lestrrat-go/jwx/v2/jwt"
 	"github.com/stretchr/testify/suite"
 	"github.com/teamhanko/hanko/backend/v2/config"
+	"github.com/teamhanko/hanko/backend/v2/crypto/jwk/local_db"
 	"github.com/teamhanko/hanko/backend/v2/dto"
 	"github.com/teamhanko/hanko/backend/v2/persistence/models"
 	"github.com/teamhanko/hanko/backend/v2/session"
@@ -67,6 +68,9 @@ func (s *sessionSuite) TestSessionHandler_ValidateSession_IdleExpiresAt() {
 	for _, currentTest := range tests {
 		s.Run(currentTest.name, func() {
 			cfg := s.setupConfig(currentTest.idleTimeout)
+
+			err = local_db.SyncSecretKeys(cfg, s.Storage)
+			s.Require().NoError(err)
 
 			// Create sess with cookie
 			cookie, _ := s.createSessionWithCookie(testUserID, testTenantID, cfg, currentTest.sessionExpiresAt)
@@ -148,6 +152,9 @@ func (s *sessionSuite) TestSessionHandler_ValidateSessionFromBody_IdleExpiresAt(
 	for _, currentTest := range tests {
 		s.Run(currentTest.name, func() {
 			cfg := s.setupConfig(currentTest.idleTimeout)
+
+			err = local_db.SyncSecretKeys(cfg, s.Storage)
+			s.Require().NoError(err)
 
 			// Create session and get token
 			token, sessionID := s.createSessionWithToken(testUserID, testTenantID, cfg, currentTest.sessionExpiresAt)

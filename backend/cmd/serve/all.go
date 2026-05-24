@@ -11,6 +11,7 @@ import (
 	"github.com/labstack/echo-contrib/echoprometheus"
 	"github.com/spf13/cobra"
 	"github.com/teamhanko/hanko/backend/v2/config"
+	"github.com/teamhanko/hanko/backend/v2/crypto/jwk/local_db"
 	"github.com/teamhanko/hanko/backend/v2/mapper"
 	"github.com/teamhanko/hanko/backend/v2/persistence"
 	"github.com/teamhanko/hanko/backend/v2/saml"
@@ -50,6 +51,11 @@ func NewServeAllCommand() *cobra.Command {
 					log.Printf("SAML config sync failed: %v", err)
 					// Don't fail startup - just log the error
 				}
+			}
+
+			err = local_db.SyncSecretKeys(cfg, persister)
+			if err != nil {
+				log.Fatalf("Failed to sync secret keys: %v", err)
 			}
 
 			var wg sync.WaitGroup

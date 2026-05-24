@@ -89,7 +89,7 @@ func (h *TenantHandler) Create(c echo.Context) error {
 		}
 
 		if tenantConfig.Secrets.KeyManagement.Type == "local" {
-			manager, err := local_db.NewDefaultManager(h.cfg.SecretKeys, h.persister.GetJwkPersisterWithConnection(tx), h.cfg.MultiTenancy.Enabled)
+			manager, err := local_db.NewDefaultManager(h.cfg.SecretKeys, h.persister.GetJwkPersisterWithConnection(tx))
 			if err != nil {
 				return dto.ToHttpError(err)
 			}

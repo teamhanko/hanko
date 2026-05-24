@@ -24,9 +24,9 @@ func JWKMiddleware(appConfig config.ApplicationConfig, persister persistence.Per
 				TenantConfig:      tenant.Config,
 			}
 
-			jwkManager, err := jwk.NewManager(cfg, persister, appConfig.MultiTenancy.Enabled)
+			jwkManager, err := jwk.NewManager(cfg, persister)
 			if err != nil {
-				return echo.NewHTTPError(http.StatusInternalServerError, fmt.Sprintf("failed to create JWK manager: %w", err))
+				return echo.NewHTTPError(http.StatusInternalServerError, fmt.Sprintf("failed to create JWK manager: %s", err))
 			}
 			ctx.Set("jwk_manager", jwkManager)
 

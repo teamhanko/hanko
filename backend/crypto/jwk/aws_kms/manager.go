@@ -19,7 +19,7 @@ type AWSKMSManager struct {
 	algorithm  jwa.SignatureAlgorithm
 }
 
-func NewAWSKMSManager(cfg config.KeyManagement, multitenancy bool) (*AWSKMSManager, error) {
+func NewAWSKMSManager(cfg config.KeyManagement) (*AWSKMSManager, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
 	defer cancel()
 
