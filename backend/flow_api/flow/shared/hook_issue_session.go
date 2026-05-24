@@ -12,6 +12,7 @@ import (
 	"github.com/teamhanko/hanko/backend/v2/flowpilot"
 	"github.com/teamhanko/hanko/backend/v2/persistence/models"
 	"github.com/teamhanko/hanko/backend/v2/session"
+	webhookutils "github.com/teamhanko/hanko/backend/v2/webhooks/utils"
 )
 
 type IssueSession struct {
@@ -79,6 +80,8 @@ func (h IssueSession) Execute(c flowpilot.HookExecutionContext) error {
 			if err != nil {
 				return fmt.Errorf("failed to remove latest session: %w", err)
 			}
+
+			webhookutils.NotifySessionDelete(deps.HttpContext, deps.Tx, activeSessions[i])
 		}
 	}
 
@@ -106,6 +109,8 @@ func (h IssueSession) Execute(c flowpilot.HookExecutionContext) error {
 	if err != nil {
 		return fmt.Errorf("failed to store session: %w", err)
 	}
+
+	webhookutils.NotifySessionCreate(deps.HttpContext, deps.Tx, sessionModel)
 
 	rememberMeSelected := c.Stash().Get(StashPathRememberMeSelected).Bool()
 	cookie, err := deps.SessionManager.GenerateCookie(signedSessionToken)

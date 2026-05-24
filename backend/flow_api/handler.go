@@ -27,6 +27,7 @@ import (
 	"github.com/teamhanko/hanko/backend/v2/mapper"
 	"github.com/teamhanko/hanko/backend/v2/persistence"
 	"github.com/teamhanko/hanko/backend/v2/session"
+	webhookutils "github.com/teamhanko/hanko/backend/v2/webhooks/utils"
 )
 
 type FlowPilotHandler struct {
@@ -124,6 +125,8 @@ func (h *FlowPilotHandler) validateSession(c echo.Context) error {
 				if sessionDeletionErr != nil {
 					return fmt.Errorf("failed to delete session: %w", sessionDeletionErr)
 				}
+
+				webhookutils.NotifySessionDelete(c, nil, *sessionModel)
 
 				cookie, cookieDeletionErr := h.SessionManager.DeleteCookie()
 				if cookieDeletionErr != nil {

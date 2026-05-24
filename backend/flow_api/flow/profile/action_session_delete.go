@@ -2,10 +2,12 @@ package profile
 
 import (
 	"fmt"
+
 	"github.com/gofrs/uuid"
 	"github.com/teamhanko/hanko/backend/v2/flow_api/flow/shared"
 	"github.com/teamhanko/hanko/backend/v2/flowpilot"
 	"github.com/teamhanko/hanko/backend/v2/persistence/models"
+	webhookutils "github.com/teamhanko/hanko/backend/v2/webhooks/utils"
 )
 
 type SessionDelete struct {
@@ -76,6 +78,9 @@ func (a SessionDelete) Execute(c flowpilot.ExecutionContext) error {
 
 	if session != nil {
 		err = deps.Persister.GetSessionPersisterWithConnection(deps.Tx).Delete(*session)
+		if err == nil {
+			webhookutils.NotifySessionDelete(deps.HttpContext, deps.Tx, *session)
+		}
 	}
 
 	return c.Continue(shared.StateProfileInit)

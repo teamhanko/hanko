@@ -3,8 +3,6 @@ package config
 import (
 	"fmt"
 	"log"
-	"os"
-	"strconv"
 
 	"github.com/kelseyhightower/envconfig"
 	"github.com/knadh/koanf/parsers/yaml"
@@ -117,30 +115,9 @@ func Load(cfgFile *string) (*Config, error) {
 		}
 	}
 
-	// Some environments (CI or developer machines) may set a non-boolean DEBUG env value
-	// which would cause envconfig.Process to fail early and prevent other env vars
-	// from being applied. Temporarily sanitize DEBUG if it's present but not parseable.
-	var debugOrig string
-	var hadDebug bool
-	if v, ok := os.LookupEnv("DEBUG"); ok {
-		hadDebug = true
-		debugOrig = v
-		if _, parseErr := strconv.ParseBool(v); parseErr != nil {
-			// unset DEBUG temporarily
-			_ = os.Unsetenv("DEBUG")
-		}
-	}
-
 	err = envconfig.Process("", c)
-
-	// restore DEBUG if we unset it
-	if hadDebug {
-		_ = os.Setenv("DEBUG", debugOrig)
-	}
-
 	if err != nil {
-		// don't fail on env var parse errors during tests or local envs; log and continue
-		log.Printf("failed to load config from env vars, skipping: %v", err)
+		return nil, fmt.Errorf("failed to load config from env vars: %w", err)
 	}
 
 	err = c.PostProcess()

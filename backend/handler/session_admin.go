@@ -14,8 +14,7 @@ import (
 	"github.com/teamhanko/hanko/backend/v2/dto/admin"
 	"github.com/teamhanko/hanko/backend/v2/persistence"
 	"github.com/teamhanko/hanko/backend/v2/persistence/models"
-    webhookutils "github.com/teamhanko/hanko/backend/v2/webhooks/utils"
-    "github.com/teamhanko/hanko/backend/v2/webhooks/events"
+	webhookutils "github.com/teamhanko/hanko/backend/v2/webhooks/utils"
 	"github.com/teamhanko/hanko/backend/v2/session"
 )
 
@@ -76,6 +75,8 @@ func (h *SessionAdminHandler) Generate(ctx echo.Context) error {
 			if err != nil {
 				return fmt.Errorf("failed to remove latest session: %w", err)
 			}
+
+			webhookutils.NotifySessionDelete(ctx, nil, activeSessions[i])
 		}
 	}
 
