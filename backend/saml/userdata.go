@@ -5,8 +5,8 @@ import (
 
 	"github.com/fatih/structs"
 	saml2 "github.com/russellhaering/gosaml2"
-	samlConfig "github.com/teamhanko/hanko/backend/v2/config"
-	"github.com/teamhanko/hanko/backend/v2/thirdparty"
+	samlConfig "github.com/teamhanko/hanko/backend/v3/config"
+	"github.com/teamhanko/hanko/backend/v3/thirdparty"
 )
 
 // ExtractUserData extracts user data from SAML assertion using attribute mapping

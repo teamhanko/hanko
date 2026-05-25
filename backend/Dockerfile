@@ -16,6 +16,7 @@ COPY persistence persistence/
 COPY server server/
 COPY handler handler/
 COPY crypto crypto/
+COPY context context/
 COPY dto dto/
 COPY saml saml/
 COPY session session/

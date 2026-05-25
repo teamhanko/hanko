@@ -14,9 +14,6 @@ import (
 	"github.com/teamhanko/hanko/backend/v3/persistence"
 	"github.com/teamhanko/hanko/backend/v3/persistence/models"
 	"github.com/teamhanko/hanko/backend/v3/utils"
-	"os"
-	"strconv"
-	"time"
 )
 
 type Logger interface {

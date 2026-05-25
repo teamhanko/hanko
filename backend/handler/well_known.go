@@ -5,7 +5,7 @@ import (
 	"net/http"
 
 	"github.com/labstack/echo/v4"
-	"github.com/teamhanko/hanko/backend/v2/context"
+	"github.com/teamhanko/hanko/backend/v3/context"
 )
 
 type WellKnownHandler struct{}

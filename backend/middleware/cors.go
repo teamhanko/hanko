@@ -6,7 +6,7 @@ import (
 	"github.com/labstack/echo/v4"
 	echomiddleware "github.com/labstack/echo/v4/middleware"
 	"github.com/sethvargo/go-limiter/httplimit"
-	"github.com/teamhanko/hanko/backend/v2/context"
+	"github.com/teamhanko/hanko/backend/v3/context"
 )
 
 func TenantAwareCORS() echo.MiddlewareFunc {

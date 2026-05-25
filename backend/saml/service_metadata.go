@@ -15,8 +15,8 @@ import (
 	"github.com/gofrs/uuid"
 	"github.com/russellhaering/gosaml2/types"
 	dsigTypes "github.com/russellhaering/goxmldsig/types"
-	"github.com/teamhanko/hanko/backend/v2/persistence"
-	"github.com/teamhanko/hanko/backend/v2/persistence/models"
+	"github.com/teamhanko/hanko/backend/v3/persistence"
+	"github.com/teamhanko/hanko/backend/v3/persistence/models"
 )
 
 // ParsedMetadata contains the extracted metadata from IdP XML

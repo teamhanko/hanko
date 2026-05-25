@@ -2,14 +2,12 @@ package schema
 
 import (
 	"fmt"
-	"github.com/spf13/cobra"
-	"github.com/teamhanko/hanko/backend/v3/config"
 	"log"
 	"os/exec"
 	"path/filepath"
 
 	"github.com/spf13/cobra"
-	"github.com/teamhanko/hanko/backend/v2/config"
+	"github.com/teamhanko/hanko/backend/v3/config"
 )
 
 func NewMarkdownConfigCommand() *cobra.Command {

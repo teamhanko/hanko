@@ -9,7 +9,6 @@ import (
 	"github.com/knadh/koanf/parsers/yaml"
 	"github.com/knadh/koanf/providers/file"
 	"github.com/knadh/koanf/v2"
-	"github.com/teamhanko/hanko/backend/v3/ee/saml/config"
 )
 
 type ApplicationConfig struct {

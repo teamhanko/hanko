@@ -5,9 +5,9 @@ import (
 
 	"github.com/gofrs/uuid"
 	saml2 "github.com/russellhaering/gosaml2"
-	"github.com/teamhanko/hanko/backend/v2/config"
-	"github.com/teamhanko/hanko/backend/v2/persistence"
-	"github.com/teamhanko/hanko/backend/v2/thirdparty"
+	"github.com/teamhanko/hanko/backend/v3/config"
+	"github.com/teamhanko/hanko/backend/v3/persistence"
+	"github.com/teamhanko/hanko/backend/v3/thirdparty"
 )
 
 type SamlProviderService interface {

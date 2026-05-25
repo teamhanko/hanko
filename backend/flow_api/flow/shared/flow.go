@@ -7,11 +7,11 @@ import (
 	"github.com/sethvargo/go-limiter"
 	auditlog "github.com/teamhanko/hanko/backend/v3/audit_log"
 	"github.com/teamhanko/hanko/backend/v3/config"
-	"github.com/teamhanko/hanko/backend/v3/ee/saml"
 	"github.com/teamhanko/hanko/backend/v3/flow_api/services"
 	"github.com/teamhanko/hanko/backend/v3/flowpilot"
 	"github.com/teamhanko/hanko/backend/v3/mapper"
 	"github.com/teamhanko/hanko/backend/v3/persistence"
+	"github.com/teamhanko/hanko/backend/v3/saml"
 	"github.com/teamhanko/hanko/backend/v3/session"
 )
 
