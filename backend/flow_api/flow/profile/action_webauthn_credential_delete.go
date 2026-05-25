@@ -58,6 +58,7 @@ func (a WebauthnCredentialDelete) Execute(c flowpilot.ExecutionContext) error {
 		models.AuditLogPasskeyDeleted,
 		&models.User{ID: userModel.ID},
 		nil,
+		deps.TenantID,
 		auditlog.Detail("credential_id", webauthnCredentialModel.ID),
 		auditlog.Detail("flow_id", c.GetFlowID()))
 

@@ -31,7 +31,7 @@ type RequestMeta struct {
 	UserAgent     string
 }
 
-func NewAuditLog(auditLogType AuditLogType, requestMeta RequestMeta, details Details, user *User, logError error) (AuditLog, error) {
+func NewAuditLog(auditLogType AuditLogType, requestMeta RequestMeta, details Details, user *User, logError error, tenantID uuid.UUID) (AuditLog, error) {
 	id, err := uuid.NewV4()
 	if err != nil {
 		return AuditLog{}, fmt.Errorf("failed to create id: %w", err)
@@ -39,6 +39,7 @@ func NewAuditLog(auditLogType AuditLogType, requestMeta RequestMeta, details Det
 
 	auditLog := AuditLog{
 		ID:                id,
+		TenantID:          tenantID,
 		Type:              auditLogType,
 		Error:             nil,
 		MetaHttpRequestId: requestMeta.HttpRequestId,

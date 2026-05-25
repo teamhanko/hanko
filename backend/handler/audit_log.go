@@ -8,10 +8,10 @@ import (
 	"time"
 
 	"github.com/labstack/echo/v4"
-	"github.com/teamhanko/hanko/backend/v3/dto"
-	"github.com/teamhanko/hanko/backend/v3/pagination"
-	"github.com/teamhanko/hanko/backend/v3/persistence"
-	"github.com/teamhanko/hanko/backend/v3/utils"
+	"github.com/teamhanko/hanko/backend/v2/context"
+	"github.com/teamhanko/hanko/backend/v2/dto"
+	"github.com/teamhanko/hanko/backend/v2/pagination"
+	"github.com/teamhanko/hanko/backend/v2/persistence"
 )
 
 type AuditLogHandler struct {
@@ -37,9 +37,9 @@ type AuditLogListRequest struct {
 }
 
 func (h AuditLogHandler) List(c echo.Context) error {
-	tenantID, err := utils.TenantIDFromContext(c)
+	tenant, err := context.GetTenant(c)
 	if err != nil {
-		return fmt.Errorf("invalid tenant identifier: %w", err)
+		return fmt.Errorf("failed to get tenant from context: %w", err)
 	}
 
 	var request AuditLogListRequest
@@ -56,12 +56,12 @@ func (h AuditLogHandler) List(c echo.Context) error {
 		request.PerPage = 20
 	}
 
-	auditLogs, err := h.persister.GetAuditLogPersister().List(request.Page, request.PerPage, request.StartTime, request.EndTime, request.Types, request.UserId, request.Email, request.IP, request.SearchString, tenantID)
+	auditLogs, err := h.persister.GetAuditLogPersister().List(request.Page, request.PerPage, request.StartTime, request.EndTime, request.Types, request.UserId, request.Email, request.IP, request.SearchString, tenant.ID)
 	if err != nil {
 		return fmt.Errorf("failed to get list of audit logs: %w", err)
 	}
 
-	logCount, err := h.persister.GetAuditLogPersister().Count(request.StartTime, request.EndTime, request.Types, request.UserId, request.Email, request.IP, request.SearchString, tenantID)
+	logCount, err := h.persister.GetAuditLogPersister().Count(request.StartTime, request.EndTime, request.Types, request.UserId, request.Email, request.IP, request.SearchString, tenant.ID)
 	if err != nil {
 		return fmt.Errorf("failed to get total count of audit logs: %w", err)
 	}

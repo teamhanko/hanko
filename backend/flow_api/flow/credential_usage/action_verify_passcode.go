@@ -53,6 +53,7 @@ func (a VerifyPasscode) Execute(c flowpilot.ExecutionContext) error {
 					models.AuditLogLoginFailure,
 					&models.User{ID: uuid.FromStringOrNil(c.Stash().Get(shared.StashPathUserID).String())},
 					err,
+					deps.TenantID,
 					auditlog.Detail("login_method", "passcode"),
 					auditlog.Detail("flow_id", c.GetFlowID()))
 
@@ -73,6 +74,7 @@ func (a VerifyPasscode) Execute(c flowpilot.ExecutionContext) error {
 					models.AuditLogLoginFailure,
 					&models.User{ID: uuid.FromStringOrNil(c.Stash().Get(shared.StashPathUserID).String())},
 					err,
+					deps.TenantID,
 					auditlog.Detail("login_method", "passcode"),
 					auditlog.Detail("flow_id", c.GetFlowID()))
 

@@ -99,11 +99,11 @@ func (a ExchangeToken) Execute(c flowpilot.ExecutionContext) error {
 
 	var onboardingStates []flowpilot.StateName
 	if isSaml {
-		samlProvider, err := deps.SamlService.GetProviderByIssuer(identity.ProviderID)
+		_, providerConfig, err := deps.SamlService.GetProviderByIssuer(deps.TenantID, deps.Cfg.TenantConfig, identity.ProviderID)
 		if err != nil {
 			return fmt.Errorf("could not fetch saml provider for identity: %w", err)
 		}
-		mustDoEmailVerification := !samlProvider.GetConfig().SkipEmailVerification && identity.Email != nil && !identity.Email.Verified
+		mustDoEmailVerification := !providerConfig.SkipEmailVerification && identity.Email != nil && !identity.Email.Verified
 		onboardingStates, err = a.determineOnboardingStates(c, identity, user, tokenModel.UserCreated, mustDoEmailVerification)
 	} else {
 		mustDoEmailVerification := deps.Cfg.Email.RequireVerification && identity.Email != nil && !identity.Email.Verified

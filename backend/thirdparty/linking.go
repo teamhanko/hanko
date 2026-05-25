@@ -138,6 +138,7 @@ func link(tx *pop.Connection, cfg *config.TenantConfig, p persistence.Persister,
 			now := time.Now().UTC()
 			samlIdentity := &models.SamlIdentity{
 				ID:         samlIdentityID,
+				TenantID:   tenantID,
 				IdentityID: identity.ID,
 				Domain:     *samlDomain,
 				CreatedAt:  now,

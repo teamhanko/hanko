@@ -25,7 +25,7 @@ func (h GetUserData) Execute(c flowpilot.HookExecutionContext) error {
 		return fmt.Errorf("failed to get user from db: %w", err)
 	}
 
-	err = c.Payload().Set("user", dto.ProfileDataFromUserModel(userModel, &deps.Cfg))
+	err = c.Payload().Set("user", dto.ProfileDataFromUserModel(userModel, &deps.Cfg.TenantConfig))
 	if err != nil {
 		return fmt.Errorf("failed to set user payload: %w", err)
 	}

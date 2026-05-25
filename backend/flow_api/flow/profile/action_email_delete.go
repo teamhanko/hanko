@@ -131,6 +131,7 @@ func (a EmailDelete) Execute(c flowpilot.ExecutionContext) error {
 		models.AuditLogEmailDeleted,
 		&models.User{ID: userModel.ID},
 		nil,
+		deps.TenantID,
 		auditlog.Detail("email", emailToBeDeletedModel.Address),
 		auditlog.Detail("flow_id", c.GetFlowID()))
 

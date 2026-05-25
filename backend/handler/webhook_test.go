@@ -413,7 +413,7 @@ func (s *webhookSuite) TestWebhookHandler_Update() {
 				events.UserDelete,
 			},
 		},
-		Enabled: true,
+		Enabled: new(true),
 	}
 	updateJson, err := json.Marshal(updateDto)
 	s.Require().NoError(err)
@@ -434,7 +434,7 @@ func (s *webhookSuite) TestWebhookHandler_Update() {
 	s.Require().NotNil(result)
 	s.Equal(testId, result.ID.String())
 	s.Equal(updateDto.Callback, result.Callback)
-	s.Equal(updateDto.Enabled, result.Enabled)
+	s.Equal(*updateDto.Enabled, result.Enabled)
 	s.Equal(0, result.Failures)
 	s.Require().True(result.ExpiresAt.After(time.Now().Add(29 * 24 * time.Hour))) // 30 Days
 	s.Require().True(result.CreatedAt.Before(result.UpdatedAt))
@@ -442,7 +442,7 @@ func (s *webhookSuite) TestWebhookHandler_Update() {
 	dbHook, err := s.Storage.GetWebhookPersister(nil).Get(testUuid, uuid.FromStringOrNil(config.DefaultTenantID))
 	s.Require().NoError(err)
 	s.Equal(updateDto.Callback, dbHook.Callback)
-	s.Equal(updateDto.Enabled, dbHook.Enabled)
+	s.Equal(*updateDto.Enabled, dbHook.Enabled)
 	s.Equal(0, dbHook.Failures)
 	s.Require().True(dbHook.ExpiresAt.After(time.Now().Add(29 * 24 * time.Hour))) // 30 Days
 	s.Require().True(dbHook.CreatedAt.Before(dbHook.UpdatedAt))
@@ -559,15 +559,6 @@ func (s *webhookSuite) TestWebhookHandler_UpdateWithParams() {
 			enabled:        true,
 			expectedStatus: http.StatusBadRequest,
 		},
-		{
-			name:     "missing enable",
-			testId:   "8b00da9a-cacf-45ea-b25d-c1ce0f0d7da4",
-			callback: "https://lorem.ipsum.et",
-			events: events.Events{
-				events.UserDelete,
-			},
-			expectedStatus: http.StatusBadRequest,
-		},
 	}
 
 	for _, currentTest := range tests {
@@ -587,7 +578,7 @@ func (s *webhookSuite) TestWebhookHandler_UpdateWithParams() {
 					Callback: currentTest.callback,
 					Events:   currentTest.events,
 				},
-				Enabled: currentTest.enabled,
+				Enabled: new(currentTest.enabled),
 			}
 			updateJson, err := json.Marshal(updateDto)
 			s.Require().NoError(err)

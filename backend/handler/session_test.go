@@ -11,11 +11,12 @@ import (
 	"github.com/gofrs/uuid"
 	"github.com/lestrrat-go/jwx/v2/jwt"
 	"github.com/stretchr/testify/suite"
-	"github.com/teamhanko/hanko/backend/v3/config"
-	"github.com/teamhanko/hanko/backend/v3/dto"
-	"github.com/teamhanko/hanko/backend/v3/persistence/models"
-	"github.com/teamhanko/hanko/backend/v3/session"
-	"github.com/teamhanko/hanko/backend/v3/test"
+	"github.com/teamhanko/hanko/backend/v2/config"
+	"github.com/teamhanko/hanko/backend/v2/crypto/jwk/local_db"
+	"github.com/teamhanko/hanko/backend/v2/dto"
+	"github.com/teamhanko/hanko/backend/v2/persistence/models"
+	"github.com/teamhanko/hanko/backend/v2/session"
+	"github.com/teamhanko/hanko/backend/v2/test"
 )
 
 func TestSessionSuite(t *testing.T) {
@@ -36,6 +37,7 @@ func (s *sessionSuite) TestSessionHandler_ValidateSession_IdleExpiresAt() {
 	s.Require().NoError(err)
 
 	testUserID := uuid.FromStringOrNil("ec4ef049-5b88-4321-a173-21b0eff06a04")
+	testTenantID := uuid.FromStringOrNil("00000000-0000-0000-0000-000000000001")
 
 	tests := []struct {
 		name                 string
@@ -67,8 +69,11 @@ func (s *sessionSuite) TestSessionHandler_ValidateSession_IdleExpiresAt() {
 		s.Run(currentTest.name, func() {
 			cfg := s.setupConfig(currentTest.idleTimeout)
 
+			err = local_db.SyncSecretKeys(cfg, s.Storage)
+			s.Require().NoError(err)
+
 			// Create sess with cookie
-			cookie, _ := s.createSessionWithCookie(testUserID, cfg, currentTest.sessionExpiresAt)
+			cookie, _ := s.createSessionWithCookie(testUserID, testTenantID, cfg, currentTest.sessionExpiresAt)
 
 			e := NewPublicRouter(cfg, s.Storage, nil, nil)
 
@@ -116,6 +121,7 @@ func (s *sessionSuite) TestSessionHandler_ValidateSessionFromBody_IdleExpiresAt(
 	s.Require().NoError(err)
 
 	testUserID := uuid.FromStringOrNil("ec4ef049-5b88-4321-a173-21b0eff06a04")
+	testTenantID := uuid.FromStringOrNil("00000000-0000-0000-0000-000000000001")
 
 	tests := []struct {
 		name                 string
@@ -147,11 +153,14 @@ func (s *sessionSuite) TestSessionHandler_ValidateSessionFromBody_IdleExpiresAt(
 		s.Run(currentTest.name, func() {
 			cfg := s.setupConfig(currentTest.idleTimeout)
 
+			err = local_db.SyncSecretKeys(cfg, s.Storage)
+			s.Require().NoError(err)
+
 			// Create session and get token
-			token, sessionID := s.createSessionWithToken(testUserID, cfg, currentTest.sessionExpiresAt)
+			token, sessionID := s.createSessionWithToken(testUserID, testTenantID, cfg, currentTest.sessionExpiresAt)
 
 			// Get the session before the request to capture original LastUsed
-			sessionBefore, err := s.Storage.GetSessionPersister().Get(sessionID)
+			sessionBefore, err := s.Storage.GetSessionPersister().Get(sessionID, testTenantID)
 			s.Require().NoError(err)
 			originalLastUsed := sessionBefore.LastUsed
 
@@ -196,7 +205,7 @@ func (s *sessionSuite) TestSessionHandler_ValidateSessionFromBody_IdleExpiresAt(
 			}
 
 			// Verify session LastUsed was updated
-			sessionAfter, err := s.Storage.GetSessionPersister().Get(sessionID)
+			sessionAfter, err := s.Storage.GetSessionPersister().Get(sessionID, testTenantID)
 			s.Require().NoError(err)
 			s.NotNil(sessionAfter)
 			s.True(sessionAfter.LastUsed.After(originalLastUsed),
@@ -208,11 +217,14 @@ func (s *sessionSuite) TestSessionHandler_ValidateSessionFromBody_IdleExpiresAt(
 
 func (s *sessionSuite) setupConfig(idleTimeout string) *config.Config {
 	cfg := test.DefaultConfig
+	err := cfg.PostProcess()
+	s.Require().NoError(err)
+
 	cfg.Session.IdleTimeout = idleTimeout
 	return &cfg
 }
 
-func (s *sessionSuite) createSessionWithCookie(userId uuid.UUID, cfg *config.Config, expiresAt *time.Time) (*http.Cookie, uuid.UUID) {
+func (s *sessionSuite) createSessionWithCookie(userId uuid.UUID, tenantID uuid.UUID, cfg *config.Config, expiresAt *time.Time) (*http.Cookie, uuid.UUID) {
 	manager := getDefaultSessionManager(s.Storage)
 
 	userJWT := dto.UserJWT{
@@ -224,9 +236,9 @@ func (s *sessionSuite) createSessionWithCookie(userId uuid.UUID, cfg *config.Con
 	var err error
 
 	if expiresAt != nil {
-		token, rawToken, err = manager.GenerateJWT(userJWT, session.WithValue(jwt.ExpirationKey, expiresAt))
+		token, rawToken, err = manager.GenerateJWT(userJWT, tenantID, session.WithValue(jwt.ExpirationKey, expiresAt))
 	} else {
-		token, rawToken, err = manager.GenerateJWT(userJWT)
+		token, rawToken, err = manager.GenerateJWT(userJWT, tenantID)
 	}
 	s.Require().NoError(err)
 
@@ -235,6 +247,7 @@ func (s *sessionSuite) createSessionWithCookie(userId uuid.UUID, cfg *config.Con
 
 	session := models.Session{
 		ID:        sessionUUID,
+		TenantID:  tenantID,
 		UserID:    userId,
 		CreatedAt: time.Now().UTC(),
 		UpdatedAt: time.Now().UTC(),
@@ -250,7 +263,7 @@ func (s *sessionSuite) createSessionWithCookie(userId uuid.UUID, cfg *config.Con
 	return cookie, sessionUUID
 }
 
-func (s *sessionSuite) createSessionWithToken(userId uuid.UUID, cfg *config.Config, expiresAt *time.Time) (string, uuid.UUID) {
+func (s *sessionSuite) createSessionWithToken(userId uuid.UUID, tenantID uuid.UUID, cfg *config.Config, expiresAt *time.Time) (string, uuid.UUID) {
 	manager := getDefaultSessionManager(s.Storage)
 
 	userJWT := dto.UserJWT{
@@ -262,9 +275,9 @@ func (s *sessionSuite) createSessionWithToken(userId uuid.UUID, cfg *config.Conf
 	var err error
 
 	if expiresAt != nil {
-		token, rawToken, err = manager.GenerateJWT(userJWT, session.WithValue(jwt.ExpirationKey, expiresAt))
+		token, rawToken, err = manager.GenerateJWT(userJWT, tenantID, session.WithValue(jwt.ExpirationKey, expiresAt))
 	} else {
-		token, rawToken, err = manager.GenerateJWT(userJWT)
+		token, rawToken, err = manager.GenerateJWT(userJWT, tenantID)
 	}
 	s.Require().NoError(err)
 
@@ -273,6 +286,7 @@ func (s *sessionSuite) createSessionWithToken(userId uuid.UUID, cfg *config.Conf
 
 	session := models.Session{
 		ID:        sessionUUID,
+		TenantID:  tenantID,
 		UserID:    userId,
 		CreatedAt: time.Now().UTC(),
 		UpdatedAt: time.Now().UTC(),

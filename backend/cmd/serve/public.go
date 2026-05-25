@@ -8,10 +8,12 @@ import (
 	"sync"
 
 	"github.com/spf13/cobra"
-	"github.com/teamhanko/hanko/backend/v3/config"
-	"github.com/teamhanko/hanko/backend/v3/mapper"
-	"github.com/teamhanko/hanko/backend/v3/persistence"
-	"github.com/teamhanko/hanko/backend/v3/server"
+	"github.com/teamhanko/hanko/backend/v2/config"
+	"github.com/teamhanko/hanko/backend/v2/crypto/jwk/local_db"
+	"github.com/teamhanko/hanko/backend/v2/mapper"
+	"github.com/teamhanko/hanko/backend/v2/persistence"
+	"github.com/teamhanko/hanko/backend/v2/saml"
+	"github.com/teamhanko/hanko/backend/v2/server"
 )
 
 func NewServePublicCommand() *cobra.Command {
@@ -37,6 +39,22 @@ func NewServePublicCommand() *cobra.Command {
 				log.Fatal(err)
 			}
 			persister := persistence.New(dbConnection)
+
+			// Sync SAML providers from config to database for backward compatibility
+			if cfg.Saml.Enabled {
+				log.Println("Syncing SAML providers from config to database...")
+				err := saml.SyncProviderConfigToDatabase(cfg, persister)
+				if err != nil {
+					log.Printf("SAML config sync failed: %v", err)
+					// Don't fail startup - just log the error
+				}
+			}
+
+			err = local_db.SyncSecretKeys(cfg, persister)
+			if err != nil {
+				log.Fatalf("Failed to sync secret keys: %v", err)
+			}
+
 			var wg sync.WaitGroup
 			wg.Add(1)
 

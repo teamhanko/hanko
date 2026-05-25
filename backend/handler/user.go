@@ -8,35 +8,29 @@ import (
 	"github.com/gofrs/uuid"
 	"github.com/labstack/echo/v4"
 	"github.com/lestrrat-go/jwx/v2/jwt"
-	auditlog "github.com/teamhanko/hanko/backend/v3/audit_log"
-	"github.com/teamhanko/hanko/backend/v3/config"
-	"github.com/teamhanko/hanko/backend/v3/dto"
-	"github.com/teamhanko/hanko/backend/v3/persistence"
-	"github.com/teamhanko/hanko/backend/v3/persistence/models"
-	"github.com/teamhanko/hanko/backend/v3/session"
-	"github.com/teamhanko/hanko/backend/v3/utils"
+	auditlog "github.com/teamhanko/hanko/backend/v2/audit_log"
+	"github.com/teamhanko/hanko/backend/v2/context"
+	"github.com/teamhanko/hanko/backend/v2/dto"
+	"github.com/teamhanko/hanko/backend/v2/persistence"
+	"github.com/teamhanko/hanko/backend/v2/persistence/models"
 )
 
 type UserHandler struct {
-	persister      persistence.Persister
-	sessionManager session.Manager
-	auditLogger    auditlog.Logger
-	cfg            *config.Config
+	persister   persistence.Persister
+	auditLogger auditlog.Logger
 }
 
-func NewUserHandler(cfg *config.Config, persister persistence.Persister, sessionManager session.Manager, auditLogger auditlog.Logger) *UserHandler {
+func NewUserHandler(persister persistence.Persister, auditLogger auditlog.Logger) *UserHandler {
 	return &UserHandler{
-		persister:      persister,
-		auditLogger:    auditLogger,
-		sessionManager: sessionManager,
-		cfg:            cfg,
+		persister:   persister,
+		auditLogger: auditLogger,
 	}
 }
 
 func (h *UserHandler) Me(c echo.Context) error {
-	tenantID, err := utils.TenantIDFromContext(c)
+	tenant, err := context.GetTenant(c)
 	if err != nil {
-		return fmt.Errorf("invalid tenant identifier: %w", err)
+		return fmt.Errorf("failed to get tenant from context: %w", err)
 	}
 
 	sessionToken, ok := c.Get("session").(jwt.Token)
@@ -44,7 +38,7 @@ func (h *UserHandler) Me(c echo.Context) error {
 		return errors.New("failed to cast session object")
 	}
 
-	user, err := h.persister.GetUserPersister().Get(uuid.FromStringOrNil(sessionToken.Subject()), tenantID)
+	user, err := h.persister.GetUserPersister().Get(uuid.FromStringOrNil(sessionToken.Subject()), tenant.ID)
 	if err != nil {
 		return fmt.Errorf("failed to get user: %w", err)
 	}
@@ -53,14 +47,19 @@ func (h *UserHandler) Me(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusNotFound).SetInternal(errors.New("user not found"))
 	}
 
-	data := dto.ProfileDataFromUserModel(user, h.cfg)
+	data := dto.ProfileDataFromUserModel(user, &tenant.Config)
 	return c.JSON(http.StatusOK, *data)
 }
 
 func (h *UserHandler) Logout(c echo.Context) error {
-	tenantID, err := utils.TenantIDFromContext(c)
+	tenant, err := context.GetTenant(c)
 	if err != nil {
-		return fmt.Errorf("invalid tenant identifier: %w", err)
+		return fmt.Errorf("failed to get tenant from context: %w", err)
+	}
+
+	sessionManager, err := context.GetSessionManager(c)
+	if err != nil {
+		return fmt.Errorf("failed to get session manager from context: %w", err)
 	}
 
 	sessionToken, ok := c.Get("session").(jwt.Token)
@@ -70,7 +69,7 @@ func (h *UserHandler) Logout(c echo.Context) error {
 
 	userId := uuid.FromStringOrNil(sessionToken.Subject())
 
-	user, err := h.persister.GetUserPersister().Get(userId, tenantID)
+	user, err := h.persister.GetUserPersister().Get(userId, tenant.ID)
 	if err != nil {
 		return fmt.Errorf("failed to get user: %w", err)
 	}
@@ -82,7 +81,7 @@ func (h *UserHandler) Logout(c echo.Context) error {
 		if err != nil {
 			return fmt.Errorf("failed to convert session id to uuid: %w", err)
 		}
-		sessionModel, err := h.persister.GetSessionPersister().Get(sessionID, tenantID)
+		sessionModel, err := h.persister.GetSessionPersister().Get(sessionID, tenant.ID)
 		if err != nil {
 			return fmt.Errorf("failed to get session from database: %w", err)
 		}
@@ -94,12 +93,12 @@ func (h *UserHandler) Logout(c echo.Context) error {
 		}
 	}
 
-	err = h.auditLogger.Create(c, models.AuditLogUserLoggedOut, user, nil)
+	err = h.auditLogger.Create(c, models.AuditLogUserLoggedOut, user, nil, tenant.ID)
 	if err != nil {
 		return fmt.Errorf("failed to write audit log: %w", err)
 	}
 
-	cookie, err := h.sessionManager.DeleteCookie()
+	cookie, err := sessionManager.DeleteCookie()
 	if err != nil {
 		return fmt.Errorf("failed to create session token: %w", err)
 	}

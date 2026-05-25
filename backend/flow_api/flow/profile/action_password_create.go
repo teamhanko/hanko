@@ -70,6 +70,7 @@ func (a PasswordCreate) Execute(c flowpilot.ExecutionContext) error {
 		models.AuditLogPasswordChanged,
 		&models.User{ID: userModel.ID},
 		nil,
+		deps.TenantID,
 		auditlog.Detail("context", "profile"),
 		auditlog.Detail("flow_id", c.GetFlowID()))
 

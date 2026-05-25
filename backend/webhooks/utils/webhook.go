@@ -6,11 +6,11 @@ import (
 	"github.com/gobuffalo/pop/v6"
 	"github.com/gofrs/uuid"
 	"github.com/labstack/echo/v4"
-	"github.com/teamhanko/hanko/backend/v3/dto/admin"
-	"github.com/teamhanko/hanko/backend/v3/persistence"
-	"github.com/teamhanko/hanko/backend/v3/utils"
-	"github.com/teamhanko/hanko/backend/v3/webhooks"
-	"github.com/teamhanko/hanko/backend/v3/webhooks/events"
+	"github.com/teamhanko/hanko/backend/v2/context"
+	"github.com/teamhanko/hanko/backend/v2/dto/admin"
+	"github.com/teamhanko/hanko/backend/v2/persistence"
+	"github.com/teamhanko/hanko/backend/v2/webhooks"
+	"github.com/teamhanko/hanko/backend/v2/webhooks/events"
 )
 
 func TriggerWebhooks(ctx echo.Context, tx *pop.Connection, tenantID uuid.UUID, evt events.Event, data interface{}) error {
@@ -26,12 +26,12 @@ func TriggerWebhooks(ctx echo.Context, tx *pop.Connection, tenantID uuid.UUID, e
 }
 
 func NotifyUserChange(ctx echo.Context, tx *pop.Connection, persister persistence.Persister, event events.Event, userId uuid.UUID) {
-	tenantID, err := utils.TenantIDFromContext(ctx)
+	tenant, err := context.GetTenant(ctx)
 	if err != nil {
 		ctx.Logger().Warn(fmt.Errorf("invalid tenant identifier: %w", err))
 	}
 
-	updatedUser, err := persister.GetUserPersisterWithConnection(tx).Get(userId, tenantID)
+	updatedUser, err := persister.GetUserPersisterWithConnection(tx).Get(userId, tenant.ID)
 	if err != nil {
 		ctx.Logger().Warn(fmt.Errorf("failed to fetch updated user: %w", err))
 		return
@@ -41,7 +41,7 @@ func NotifyUserChange(ctx echo.Context, tx *pop.Connection, persister persistenc
 	user.SetUserAgent(ctx.Request().UserAgent())
 	user.SetIPAddress(ctx.RealIP())
 
-	err = TriggerWebhooks(ctx, tx, tenantID, event, user)
+	err = TriggerWebhooks(ctx, tx, tenant.ID, event, user)
 	if err != nil {
 		ctx.Logger().Warn(err)
 	}

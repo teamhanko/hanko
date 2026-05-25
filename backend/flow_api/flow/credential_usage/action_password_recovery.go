@@ -72,6 +72,7 @@ func (a PasswordRecovery) Execute(c flowpilot.ExecutionContext) error {
 		models.AuditLogPasswordChanged,
 		&models.User{ID: uuid.FromStringOrNil(authUserID)},
 		nil,
+		deps.TenantID,
 		auditlog.Detail("context", "recovery"),
 		auditlog.Detail("flow_id", c.GetFlowID()))
 

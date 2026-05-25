@@ -35,6 +35,14 @@ func NewExportCommand() *cobra.Command {
 				log.Fatal(err)
 			}
 
+			if !cfg.ApplicationConfig.MultiTenancy.Enabled {
+				tenantID = config.DefaultTenantID
+			} else {
+				if tenantID == "" {
+					log.Fatal("tenant_id must be present if multitenancy is enabled")
+				}
+			}
+
 			var tID uuid.UUID
 			if tenantID != "" {
 				tID, err = uuid.FromString(tenantID)

@@ -1,6 +1,8 @@
 package schema
 
 import (
+	"log"
+
 	"github.com/spf13/cobra"
 	"github.com/teamhanko/hanko/backend/v3/config"
 	"log"
@@ -21,7 +23,7 @@ func NewGenerateConfigCommand() *cobra.Command {
 				output:          output,
 				extractComments: true,
 				doNotReference:  false,
-				commentPaths:    []string{"config", "ee"},
+				commentPaths:    []string{"config"},
 			})
 			if err != nil {
 				log.Fatal(err)

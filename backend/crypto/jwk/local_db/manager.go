@@ -31,24 +31,12 @@ func NewDefaultManager(keys []string, persister persistence.JwkPersister) (*Defa
 		encrypter: encrypter,
 		persister: persister,
 	}
-	// for every key we should check if a jwk with index exists and create one if not.
-	for i := range keys {
-		j, err := persister.Get(i+1, uuid.Nil)
-		if j == nil && err == nil {
-			_, err := manager.GenerateKey()
-			if err != nil {
-				return nil, err
-			}
-		} else if err != nil {
-			return nil, err
-		}
-	}
 
 	return manager, nil
 }
 
 // GenerateKey generates a new RSA key and persists it to the database
-func (m *DefaultManager) GenerateKey() (jwk.Key, error) {
+func (m *DefaultManager) GenerateKey(tenantID uuid.UUID) (jwk.Key, error) {
 	rsa := &RSAKeyGenerator{}
 	id, _ := uuid.NewV4()
 	key, err := rsa.Generate(id.String())
@@ -66,6 +54,7 @@ func (m *DefaultManager) GenerateKey() (jwk.Key, error) {
 	model := models.Jwk{
 		KeyData:   encryptedKey,
 		CreatedAt: time.Now(),
+		TenantId:  tenantID,
 	}
 	err = m.persister.Create(model)
 	if err != nil {
@@ -75,8 +64,8 @@ func (m *DefaultManager) GenerateKey() (jwk.Key, error) {
 }
 
 // GetSigningKey returns the active private key used for signing
-func (m *DefaultManager) GetSigningKey() (jwk.Key, error) {
-	sigModel, err := m.persister.GetLast(uuid.Nil)
+func (m *DefaultManager) GetSigningKey(tenantID uuid.UUID) (jwk.Key, error) {
+	sigModel, err := m.persister.GetLast(tenantID)
 	if err != nil {
 		return nil, err
 	}
@@ -96,8 +85,8 @@ func (m *DefaultManager) GetSigningKey() (jwk.Key, error) {
 }
 
 // GetPublicKeys returns all public keys that should be used for verification (active + rotating)
-func (m *DefaultManager) GetPublicKeys() (jwk.Set, error) {
-	modelList, err := m.persister.GetAll(uuid.Nil)
+func (m *DefaultManager) GetPublicKeys(tenantID uuid.UUID) (jwk.Set, error) {
+	modelList, err := m.persister.GetAll(tenantID)
 	if err != nil {
 		return nil, err
 	}
@@ -129,8 +118,8 @@ func (m *DefaultManager) GetPublicKeys() (jwk.Set, error) {
 }
 
 // Sign a JWT with the signing key and returns it
-func (m *DefaultManager) Sign(token jwt.Token) ([]byte, error) {
-	key, err := m.GetSigningKey()
+func (m *DefaultManager) Sign(token jwt.Token, tenantID uuid.UUID) ([]byte, error) {
+	key, err := m.GetSigningKey(tenantID)
 	if err != nil {
 		return nil, fmt.Errorf("failed to get signing key: %w", err)
 	}
@@ -142,8 +131,8 @@ func (m *DefaultManager) Sign(token jwt.Token) ([]byte, error) {
 }
 
 // Verify verifies a JWT, using the verificationKeys and returns the parsed JWT
-func (m *DefaultManager) Verify(signed []byte) (jwt.Token, error) {
-	keys, err := m.GetPublicKeys()
+func (m *DefaultManager) Verify(signed []byte, tenantID uuid.UUID) (jwt.Token, error) {
+	keys, err := m.GetPublicKeys(tenantID)
 	if err != nil {
 		return nil, fmt.Errorf("failed to get public keys: %w", err)
 	}

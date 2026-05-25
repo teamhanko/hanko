@@ -7,6 +7,9 @@ import (
 	"log"
 	"os/exec"
 	"path/filepath"
+
+	"github.com/spf13/cobra"
+	"github.com/teamhanko/hanko/backend/v2/config"
 )
 
 func NewMarkdownConfigCommand() *cobra.Command {
@@ -24,7 +27,7 @@ func NewMarkdownConfigCommand() *cobra.Command {
 				output:          filepath.Join(outPath, "config.schema.json"),
 				extractComments: true,
 				doNotReference:  true,
-				commentPaths:    []string{"config", "ee"},
+				commentPaths:    []string{"config"},
 			})
 
 			out, err := exec.Command("npx",

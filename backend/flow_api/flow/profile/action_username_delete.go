@@ -67,6 +67,7 @@ func (a UsernameDelete) Execute(c flowpilot.ExecutionContext) error {
 		models.AuditLogUsernameDeleted,
 		&models.User{ID: userModel.ID},
 		nil,
+		deps.TenantID,
 		auditlog.Detail("username", *deletedUsername),
 		auditlog.Detail("flow_id", c.GetFlowID()))
 

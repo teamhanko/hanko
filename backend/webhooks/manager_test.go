@@ -28,7 +28,7 @@ func (s *managerSuite) TestNewManager() {
 	cfg := config.Config{}
 	jwkManager := test.JwkManager{}
 
-	manager, err := NewManager(&cfg, s.Storage, jwkManager, nil)
+	manager, err := NewManager(cfg.TenantConfig, s.Storage, jwkManager, nil)
 	s.NoError(err)
 	s.NotEmpty(manager)
 }
@@ -37,11 +37,11 @@ func (s *managerSuite) TestManager_GenerateJWT() {
 	cfg := config.Config{}
 	jwkManager := test.JwkManager{}
 
-	manager, err := NewManager(&cfg, s.Storage, jwkManager, nil)
+	manager, err := NewManager(cfg.TenantConfig, s.Storage, jwkManager, nil)
 
 	testData := "lorem-ipsum"
 
-	dataToken, err := manager.GenerateJWT(testData, events.UserCreate)
+	dataToken, err := manager.GenerateJWT(testData, events.UserCreate, uuid.FromStringOrNil(config.DefaultTenantID))
 	s.NoError(err)
 	s.NotEmpty(dataToken)
 }
@@ -56,7 +56,7 @@ func (s *managerSuite) TestManager_TriggerWithoutHook() {
 	cfg := config.Config{}
 	jwkManager := test.JwkManager{}
 
-	manager, err := NewManager(&cfg, s.Storage, jwkManager, nil)
+	manager, err := NewManager(cfg.TenantConfig, s.Storage, jwkManager, nil)
 	s.Require().NoError(err)
 
 	manager.Trigger(s.Storage.GetConnection(), events.UserCreate, "lorem-ipsum", uuid.FromStringOrNil(config.DefaultTenantID))
@@ -90,7 +90,7 @@ func (s *managerSuite) TestManager_TriggerWithConfigHook() {
 	}
 
 	jwkManager := test.JwkManager{}
-	manager, err := NewManager(&cfg, s.Storage, jwkManager, nil)
+	manager, err := NewManager(cfg.TenantConfig, s.Storage, jwkManager, nil)
 	s.Require().NoError(err)
 
 	manager.Trigger(s.Storage.GetConnection(), events.UserCreate, "lorem-ipsum", uuid.FromStringOrNil(config.DefaultTenantID))
@@ -125,7 +125,7 @@ func (s *managerSuite) TestManager_TriggerWithDisabledConfigHook() {
 	}
 
 	jwkManager := test.JwkManager{}
-	manager, err := NewManager(&cfg, s.Storage, jwkManager, nil)
+	manager, err := NewManager(cfg.TenantConfig, s.Storage, jwkManager, nil)
 	s.Require().NoError(err)
 
 	manager.Trigger(s.Storage.GetConnection(), events.UserCreate, "lorem-ipsum", uuid.FromStringOrNil(config.DefaultTenantID))
@@ -150,7 +150,7 @@ func (s *managerSuite) TestManager_TriggerWithDbHook() {
 
 	s.createTestDatabaseWebhook(persister, true, server.URL)
 
-	manager, err := NewManager(&cfg, s.Storage, jwkManager, nil)
+	manager, err := NewManager(cfg.TenantConfig, s.Storage, jwkManager, nil)
 	s.Require().NoError(err)
 
 	manager.Trigger(s.Storage.GetConnection(), events.UserCreate, "lorem-ipsum", uuid.FromStringOrNil(config.DefaultTenantID))
@@ -174,7 +174,7 @@ func (s *managerSuite) TestManager_TriggerWithDisabledDbHook() {
 
 	s.createTestDatabaseWebhook(persister, false, server.URL)
 
-	manager, err := NewManager(&cfg, s.Storage, jwkManager, nil)
+	manager, err := NewManager(cfg.TenantConfig, s.Storage, jwkManager, nil)
 	s.Require().NoError(err)
 
 	manager.Trigger(s.Storage.GetConnection(), events.UserCreate, "lorem-ipsum", uuid.FromStringOrNil(config.DefaultTenantID))

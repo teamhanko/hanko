@@ -3,11 +3,12 @@ package handler
 import (
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
-	"github.com/teamhanko/hanko/backend/v3/dto"
-	"github.com/teamhanko/hanko/backend/v3/persistence"
+	"github.com/teamhanko/hanko/backend/v2/config"
+	"github.com/teamhanko/hanko/backend/v2/dto"
+	"github.com/teamhanko/hanko/backend/v2/persistence"
 )
 
-func NewManagementRouter(persister persistence.Persister) *echo.Echo {
+func NewManagementRouter(cfg *config.Config, persister persistence.Persister) *echo.Echo {
 
 	e := echo.New()
 	e.HideBanner = true
@@ -26,7 +27,7 @@ func NewManagementRouter(persister persistence.Persister) *echo.Echo {
 	health.GET("/alive", healthHandler.Alive)
 	health.GET("/ready", healthHandler.Ready)
 
-	tenantHandler := NewTenantHandler(persister)
+	tenantHandler := NewTenantHandler(cfg, persister)
 
 	tenants := e.Group("/tenants")
 	tenants.POST("", tenantHandler.Create)
@@ -34,6 +35,19 @@ func NewManagementRouter(persister persistence.Persister) *echo.Echo {
 	tenants.GET("/:id", tenantHandler.Get)
 	tenants.PUT("/:id", tenantHandler.Update)
 	tenants.DELETE("/:id", tenantHandler.Delete)
+
+	// SAML provider management routes (multi-tenant only)
+	if cfg.MultiTenancy.Enabled && cfg.Saml.Enabled {
+		samlProviderHandler := NewSamlProviderHandler(cfg, persister)
+
+		saml := tenants.Group("/:tenantId/saml")
+		samlProviders := saml.Group("/providers")
+		samlProviders.POST("", samlProviderHandler.Create)
+		samlProviders.GET("", samlProviderHandler.List)
+		samlProviders.GET("/:providerId", samlProviderHandler.Get)
+		samlProviders.PUT("/:providerId", samlProviderHandler.Update)
+		samlProviders.DELETE("/:providerId", samlProviderHandler.Delete)
+	}
 
 	return e
 }

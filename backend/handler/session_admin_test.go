@@ -31,7 +31,11 @@ func (s *sessionAdminSuite) TestSessionAdminHandler_List() {
 	err := s.LoadFixtures("../test/fixtures/sessions")
 	s.Require().NoError(err)
 
-	e := NewAdminRouter(&test.DefaultConfig, s.Storage, nil)
+	cfg := test.DefaultConfig
+	err = cfg.PostProcess()
+	s.Require().NoError(err)
+
+	e := NewAdminRouter(&cfg, s.Storage, nil)
 
 	tests := []struct {
 		name               string
@@ -104,7 +108,11 @@ func (s *sessionAdminSuite) TestSessionAdminHandler_Delete() {
 	err := s.LoadFixtures("../test/fixtures/sessions")
 	s.Require().NoError(err)
 
-	e := NewAdminRouter(&test.DefaultConfig, s.Storage, nil)
+	cfg := test.DefaultConfig
+	err = cfg.PostProcess()
+	s.Require().NoError(err)
+
+	e := NewAdminRouter(&cfg, s.Storage, nil)
 
 	tests := []struct {
 		name               string

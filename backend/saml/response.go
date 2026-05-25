@@ -1,13 +1,14 @@
-package utils
+package saml
 
 import (
 	"bytes"
 	"compress/flate"
 	"encoding/base64"
 	"fmt"
+	"io"
+
 	"github.com/beevik/etree"
 	rtvalidator "github.com/mattermost/xml-roundtrip-validator"
-	"io"
 )
 
 const (

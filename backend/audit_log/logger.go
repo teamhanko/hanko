@@ -1,7 +1,12 @@
 package auditlog
 
 import (
+	"os"
+	"strconv"
+	"time"
+
 	"github.com/gobuffalo/pop/v6"
+	"github.com/gofrs/uuid"
 	"github.com/labstack/echo/v4"
 	zeroLog "github.com/rs/zerolog"
 	zeroLogger "github.com/rs/zerolog/log"
@@ -15,8 +20,8 @@ import (
 )
 
 type Logger interface {
-	Create(echo.Context, models.AuditLogType, *models.User, error, ...DetailOption) error
-	CreateWithConnection(*pop.Connection, echo.Context, models.AuditLogType, *models.User, error, ...DetailOption) error
+	Create(echo.Context, models.AuditLogType, *models.User, error, uuid.UUID, ...DetailOption) error
+	CreateWithConnection(*pop.Connection, echo.Context, models.AuditLogType, *models.User, error, uuid.UUID, ...DetailOption) error
 }
 
 type logger struct {
@@ -57,17 +62,17 @@ func Detail(key string, value interface{}) DetailOption {
 	}
 }
 
-func (l *logger) Create(context echo.Context, auditLogType models.AuditLogType, user *models.User, logError error, detailOpts ...DetailOption) error {
-	return l.CreateWithConnection(l.persister.GetConnection(), context, auditLogType, user, logError, detailOpts...)
+func (l *logger) Create(context echo.Context, auditLogType models.AuditLogType, user *models.User, logError error, tenantID uuid.UUID, detailOpts ...DetailOption) error {
+	return l.CreateWithConnection(l.persister.GetConnection(), context, auditLogType, user, logError, tenantID, detailOpts...)
 }
 
-func (l *logger) CreateWithConnection(tx *pop.Connection, context echo.Context, auditLogType models.AuditLogType, user *models.User, logError error, detailOpts ...DetailOption) error {
+func (l *logger) CreateWithConnection(tx *pop.Connection, context echo.Context, auditLogType models.AuditLogType, user *models.User, logError error, tenantID uuid.UUID, detailOpts ...DetailOption) error {
 	details := make(map[string]interface{})
 	for _, detailOpt := range detailOpts {
 		detailOpt(details)
 	}
 
-	auditLog, err := models.NewAuditLog(auditLogType, l.getRequestMeta(context), details, user, logError)
+	auditLog, err := models.NewAuditLog(auditLogType, l.getRequestMeta(context), details, user, logError, tenantID)
 	if err != nil {
 		return err
 	}

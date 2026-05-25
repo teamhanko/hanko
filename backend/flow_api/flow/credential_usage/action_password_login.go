@@ -96,6 +96,7 @@ func (a PasswordLogin) Execute(c flowpilot.ExecutionContext) error {
 				models.AuditLogLoginFailure,
 				&models.User{ID: userID},
 				err,
+				deps.TenantID,
 				auditlog.Detail("login_method", "password"),
 				auditlog.Detail("flow_id", c.GetFlowID()))
 			if err != nil {

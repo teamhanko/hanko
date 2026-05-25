@@ -3,6 +3,9 @@ package test
 import "github.com/teamhanko/hanko/backend/v3/config"
 
 var DefaultConfig = config.Config{
+	ApplicationConfig: config.ApplicationConfig{
+		SecretKeys: []string{"abcdefghijklmnop"},
+	},
 	TenantConfig: config.TenantConfig{
 		Webauthn: config.WebauthnSettings{
 			RelyingParty: config.RelyingParty{

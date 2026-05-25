@@ -21,6 +21,7 @@ type Secrets struct {
 	// be valid until they expire. Removing a key from the list does not remove the corresponding
 	// database record. If you remove a key, you also have to remove the database record, otherwise
 	// application startup will fail.
+	// Deprecated: use top level "SecretKeys" instead
 	Keys []string `yaml:"keys" json:"keys,omitempty" koanf:"keys"`
 }
 
@@ -63,9 +64,9 @@ func (Secrets) JSONSchemaExtend(schema *jsonschema.Schema) {
 }
 
 func (s *Secrets) Validate() error {
-	if len(s.Keys) == 0 && s.KeyManagement.Type == "local" {
-		return errors.New("at least one key must be defined")
-	}
+	//if len(s.Keys) == 0 && s.KeyManagement.Type == "local" {
+	//	return errors.New("at least one key must be defined")
+	//}
 	return s.KeyManagement.Validate()
 }
 

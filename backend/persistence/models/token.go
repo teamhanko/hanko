@@ -57,7 +57,7 @@ func TokenWithLinkUser(linkUser bool) func(*Token) {
 	}
 }
 
-func NewToken(userID uuid.UUID, options ...func(*Token)) (*Token, error) {
+func NewToken(userID uuid.UUID, tenantID uuid.UUID, options ...func(*Token)) (*Token, error) {
 	if userID.IsNil() {
 		return nil, errors.New("userID is required")
 	}
@@ -77,6 +77,7 @@ func NewToken(userID uuid.UUID, options ...func(*Token)) (*Token, error) {
 	token := &Token{
 		ID:        id,
 		UserID:    userID,
+		TenantID:  tenantID,
 		Value:     value,
 		ExpiresAt: now.Add(time.Minute),
 		CreatedAt: now,
@@ -94,6 +95,7 @@ func (token *Token) Validate(tx *pop.Connection) (*validate.Errors, error) {
 	return validate.Validate(
 		&validators.UUIDIsPresent{Name: "ID", Field: token.ID},
 		&validators.UUIDIsPresent{Name: "UserID", Field: token.UserID},
+		&validators.UUIDIsPresent{Name: "TenantID", Field: token.TenantID},
 		&validators.StringIsPresent{Name: "Value", Field: token.Value},
 		&validators.TimeIsPresent{Name: "UpdatedAt", Field: token.UpdatedAt},
 		&validators.TimeIsPresent{Name: "CreatedAt", Field: token.CreatedAt},

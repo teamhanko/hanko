@@ -24,7 +24,7 @@ type State struct {
 	IsFlow     bool      `json:"is_flow"`
 }
 
-const statePrefixServiceProviderInitiated = "hanko_spi_"
+const StatePrefixServiceProviderInitiated = "hanko_spi_"
 
 func GenerateStateForFlowAPI(isFlow bool) func(*State) {
 	return func(state *State) {
@@ -32,13 +32,13 @@ func GenerateStateForFlowAPI(isFlow bool) func(*State) {
 	}
 }
 
-func GenerateState(config *config.Config, persister persistence.SamlStatePersister, provider string, redirectTo string, tenantID uuid.UUID, options ...func(*State)) ([]byte, error) {
+func GenerateState(config config.Config, persister persistence.SamlStatePersister, provider string, redirectTo string, tenantID uuid.UUID, options ...func(*State)) ([]byte, error) {
 	if strings.TrimSpace(provider) == "" {
 		return nil, errors.New("provider must be present")
 	}
 
 	if strings.TrimSpace(redirectTo) == "" {
-		redirectTo = config.Saml.DefaultRedirectUrl
+		redirectTo = config.TenantConfig.Saml.DefaultRedirectUrl
 	}
 
 	nonce, err := crypto.GenerateRandomStringURLSafe(32)
@@ -61,7 +61,7 @@ func GenerateState(config *config.Config, persister persistence.SamlStatePersist
 
 	stateJson, err := json.Marshal(state)
 
-	aes, err := aes_gcm.NewAESGCM(config.Secrets.Keys)
+	aes, err := aes_gcm.NewAESGCM(config.ApplicationConfig.SecretKeys)
 	if err != nil {
 		return nil, fmt.Errorf("could not instantiate aesgcm: %w", err)
 	}
@@ -82,12 +82,12 @@ func GenerateState(config *config.Config, persister persistence.SamlStatePersist
 	}
 
 	// Add prefix to distinguish between SP initiated and IDP initiated requests in callback handler.
-	result := fmt.Sprintf("%s%s", statePrefixServiceProviderInitiated, encryptedState)
+	result := fmt.Sprintf("%s%s", StatePrefixServiceProviderInitiated, encryptedState)
 	return []byte(result), nil
 }
 
-func VerifyState(config *config.Config, persister persistence.SamlStatePersister, state string, tenantID uuid.UUID) (*State, error) {
-	decodedState, err := decodeState(config, state)
+func VerifyState(tenantID uuid.UUID, keys []string, persister persistence.SamlStatePersister, state string) (*State, error) {
+	decodedState, err := decodeState(keys, state)
 	if err != nil {
 		return nil, fmt.Errorf("could not decode state: %w", err)
 	}
@@ -97,7 +97,7 @@ func VerifyState(config *config.Config, persister persistence.SamlStatePersister
 		return nil, fmt.Errorf("could not fetch expected state from db: %w", err)
 	}
 
-	decodedExpectedState, err := decodeState(config, expectedState.State)
+	decodedExpectedState, err := decodeState(keys, expectedState.State)
 	if err != nil {
 		return nil, fmt.Errorf("could not decode expectedState: %w", err)
 	}
@@ -115,8 +115,8 @@ func VerifyState(config *config.Config, persister persistence.SamlStatePersister
 	return decodedState, nil
 }
 
-func decodeState(config *config.Config, state string) (*State, error) {
-	aes, err := aes_gcm.NewAESGCM(config.Secrets.Keys)
+func decodeState(keys []string, state string) (*State, error) {
+	aes, err := aes_gcm.NewAESGCM(keys)
 	if err != nil {
 		return nil, fmt.Errorf("could not instantiate aesgcm: %w", err)
 	}

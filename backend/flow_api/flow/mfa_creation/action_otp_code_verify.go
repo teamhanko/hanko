@@ -87,6 +87,7 @@ func (a OTPCodeVerify) Execute(c flowpilot.ExecutionContext) error {
 			models.AuditLogOTPCreated,
 			&models.User{ID: userID},
 			nil,
+			deps.TenantID,
 			auditlog.Detail("otp_secret", otpSecretModel.ID),
 			auditlog.Detail("flow_id", c.GetFlowID()),
 		)

@@ -33,7 +33,7 @@ func NewShowCommand() *cobra.Command {
 				log.Fatalf("failed to validate config: %s", err)
 			}
 
-			jsonBytes, err := json.Marshal(cfg)
+			jsonBytes, err := json.Marshal(cfg.TenantConfig)
 			if err != nil {
 				log.Fatal(fmt.Errorf("failed to marshal config to JSON: %w", err))
 			}

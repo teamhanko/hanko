@@ -22,7 +22,7 @@ type Dependencies struct {
 	PasscodeService             services.Passcode
 	PasswordService             services.Password
 	WebauthnService             services.WebauthnService
-	SamlService                 saml.Service
+	SamlService                 saml.SamlProviderService
 	Persister                   persistence.Persister
 	SessionManager              session.Manager
 	OTPRateLimiter              limiter.Store

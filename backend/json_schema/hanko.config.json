@@ -166,9 +166,8 @@
           "description": "`log` configures application logging."
         },
         "multi_tenancy": {
-          "type": "boolean",
-          "description": "MultiTenancy determines if the system supports multiple tenants, enabling tenant-specific configurations and isolation.",
-          "default": false
+          "$ref": "#/$defs/MultiTenancy",
+          "description": "MultiTenancy determines if the system supports multiple tenants, enabling tenant-specific configurations and isolation."
         },
         "rate_limiter": {
           "$ref": "#/$defs/RateLimiter",
@@ -178,12 +177,19 @@
         "server": {
           "$ref": "#/$defs/Server",
           "title": "server",
-          "description": "`server` configures address and CORS settings of the public and admin API."
+          "description": "`server` configures address settings of the public and admin API."
         },
-        "email_delivery": {
+        "default_email_delivery": {
           "$ref": "#/$defs/EmailDelivery",
-          "title": "email_delivery",
-          "description": "`email_delivery` configures how outgoing mails are delivered."
+          "title": "default_email_delivery",
+          "description": "`default_email_delivery` configures how outgoing mails are delivered by default, when no `email_delivery` is configured as TenantConfig."
+        },
+        "secretkeys": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array",
+          "description": "You can use this list for key rotation: add a new key to the beginning of the list and the corresponding\nJWK will then be used for signing JWTs. All tokens signed with the previous JWK(s) will still\nbe valid until they expire. Removing a key from the list does not remove the corresponding\ndatabase record. If you remove a key, you also have to remove the database record, otherwise\napplication startup will fail."
         },
         "account": {
           "$ref": "#/$defs/Account",
@@ -204,6 +210,11 @@
           "$ref": "#/$defs/Email",
           "title": "email",
           "description": "`email` configures how email addresses of user accounts are acquired and used."
+        },
+        "email_delivery": {
+          "$ref": "#/$defs/EmailDelivery",
+          "title": "email_delivery",
+          "description": "`email_delivery` configures how outgoing mails are delivered."
         },
         "emails": {
           "$ref": "#/$defs/Emails",
@@ -233,7 +244,7 @@
         "saml": {
           "$ref": "#/$defs/Saml",
           "title": "saml",
-          "description": "// `rate_limiter` configures rate limits for rate limited API operations and storage modalities for rate limit data.\nRateLimiter RateLimiter `yaml:\"rate_limiter\" json:\"rate_limiter,omitempty\" koanf:\"rate_limiter\" split_words:\"true\" jsonschema:\"title=rate_limiter\"`\n`saml` configures modalities of SAML (Security Assertion Markup Language) SSO authentication and SAML identity\nproviders."
+          "description": "`saml` configures modalities of SAML (Security Assertion Markup Language) SSO authentication and SAML identity\nproviders."
         },
         "secrets": {
           "$ref": "#/$defs/Secrets",
@@ -247,7 +258,7 @@
         "cors": {
           "$ref": "#/$defs/Cors",
           "title": "cors",
-          "description": "`server` configures address and CORS settings of the public and admin API.\nServer Server `yaml:\"server\" json:\"server,omitempty\" koanf:\"server\" jsonschema:\"title=server\"`\n`cors` configures Cross-Origin Resource Sharing settings for this tenant."
+          "description": "`cors` configures Cross-Origin Resource Sharing settings for this tenant."
         },
         "service": {
           "$ref": "#/$defs/Service",
@@ -852,6 +863,17 @@
         "optional"
       ]
     },
+    "MultiTenancy": {
+      "properties": {
+        "enabled": {
+          "type": "boolean",
+          "description": "`enabled` determines whether multitenancy mode is enabled.",
+          "default": false
+        }
+      },
+      "additionalProperties": false,
+      "type": "object"
+    },
     "Options": {
       "properties": {
         "sign_authn_requests": {
@@ -1258,7 +1280,7 @@
             "title": "keys"
           },
           "type": "array",
-          "description": "`keys` are used to en- and decrypt the JWKs which get used to sign the JWTs issued by the API.\nFor every key a JWK is generated, encrypted with the key and persisted in the database.\n\nYou can use this list for key rotation: add a new key to the beginning of the list and the corresponding\nJWK will then be used for signing JWTs. All tokens signed with the previous JWK(s) will still\nbe valid until they expire. Removing a key from the list does not remove the corresponding\ndatabase record. If you remove a key, you also have to remove the database record, otherwise\napplication startup will fail."
+          "description": "`keys` are used to en- and decrypt the JWKs which get used to sign the JWTs issued by the API.\nFor every key a JWK is generated, encrypted with the key and persisted in the database.\n\nYou can use this list for key rotation: add a new key to the beginning of the list and the corresponding\nJWK will then be used for signing JWTs. All tokens signed with the previous JWK(s) will still\nbe valid until they expire. Removing a key from the list does not remove the corresponding\ndatabase record. If you remove a key, you also have to remove the database record, otherwise\napplication startup will fail.\nDeprecated: use top level \"SecretKeys\" instead"
         }
       },
       "additionalProperties": false,
@@ -1370,6 +1392,11 @@
           "$ref": "#/$defs/ServerSettings",
           "title": "admin",
           "description": "`admin` contains the server configuration for the admin API."
+        },
+        "management": {
+          "$ref": "#/$defs/ServerSettings",
+          "title": "management",
+          "description": "`management` contains the server configuration for the management API."
         }
       },
       "additionalProperties": false,
@@ -1380,11 +1407,6 @@
         "address": {
           "type": "string",
           "description": "`address` is the address of the server to listen on in the form of host:port.\n\nSee [net.Dial](https://pkg.go.dev/net#Dial) for details of the address format."
-        },
-        "cors": {
-          "$ref": "#/$defs/Cors",
-          "title": "cors",
-          "description": "`cors` contains configuration options regarding Cross-Origin-Resource-Sharing."
         }
       },
       "additionalProperties": false,

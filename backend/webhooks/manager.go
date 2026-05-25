@@ -16,7 +16,7 @@ import (
 
 type Manager interface {
 	Trigger(tx *pop.Connection, evt events.Event, data interface{}, tenantID uuid.UUID)
-	GenerateJWT(data interface{}, event events.Event) (string, error)
+	GenerateJWT(data interface{}, event events.Event, tenantID uuid.UUID) (string, error)
 }
 
 type manager struct {
@@ -28,7 +28,7 @@ type manager struct {
 	canExpireAtTime bool
 }
 
-func NewManager(cfg *config.Config, persister persistence.Persister, jwtGenerator jwk.Generator, logger echo.Logger) (Manager, error) {
+func NewManager(cfg config.TenantConfig, persister persistence.Persister, jwtGenerator jwk.Generator, logger echo.Logger) (Manager, error) {
 	hooks := make(Webhooks, 0)
 
 	if cfg.Webhooks.Enabled {
@@ -67,7 +67,7 @@ func (m *manager) Trigger(tx *pop.Connection, evt events.Event, data interface{}
 		hooks = append(hooks, NewDatabaseHook(dbHook, m.persister.GetWebhookPersister(nil), m.logger))
 	}
 
-	dataToken, err := m.GenerateJWT(data, evt)
+	dataToken, err := m.GenerateJWT(data, evt, tenantID)
 	if err != nil {
 		m.logger.Error(fmt.Errorf("unable to generate JWT for webhook data: %w", err))
 		return
@@ -95,7 +95,7 @@ func (m *manager) Trigger(tx *pop.Connection, evt events.Event, data interface{}
 	go worker.Run()
 }
 
-func (m *manager) GenerateJWT(data interface{}, event events.Event) (string, error) {
+func (m *manager) GenerateJWT(data interface{}, event events.Event, tenantID uuid.UUID) (string, error) {
 	issuedAt := time.Now()
 	expiration := issuedAt.Add(5 * time.Minute)
 
@@ -107,7 +107,7 @@ func (m *manager) GenerateJWT(data interface{}, event events.Event) (string, err
 	_ = token.Set("data", data)
 	_ = token.Set("evt", event)
 
-	signed, err := m.jwtGenerator.Sign(token)
+	signed, err := m.jwtGenerator.Sign(token, tenantID)
 	if err != nil {
 		return "", err
 	}

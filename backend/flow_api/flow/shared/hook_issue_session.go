@@ -52,7 +52,7 @@ func (h IssueSession) Execute(c flowpilot.HookExecutionContext) error {
 		}
 	}
 
-	signedSessionToken, rawToken, err := deps.SessionManager.GenerateJWT(userJWT, jwtOpts...)
+	signedSessionToken, rawToken, err := deps.SessionManager.GenerateJWT(userJWT, deps.TenantID, jwtOpts...)
 	if err != nil {
 		return fmt.Errorf("failed to generate JWT: %w", err)
 	}
@@ -161,6 +161,7 @@ func (h IssueSession) Execute(c flowpilot.HookExecutionContext) error {
 			models.AuditLogLoginSuccess,
 			&models.User{ID: userId},
 			err,
+			deps.TenantID,
 			auditLogDetails...)
 
 		if err != nil {

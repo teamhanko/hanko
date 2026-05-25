@@ -16,23 +16,25 @@ import (
 	"github.com/knadh/koanf/providers/rawbytes"
 	"github.com/knadh/koanf/v2"
 	"github.com/labstack/echo/v4"
-	"github.com/teamhanko/hanko/backend/v3/config"
-	"github.com/teamhanko/hanko/backend/v3/dto"
-	"github.com/teamhanko/hanko/backend/v3/pagination"
-	"github.com/teamhanko/hanko/backend/v3/persistence"
-	"github.com/teamhanko/hanko/backend/v3/persistence/models"
+	"github.com/teamhanko/hanko/backend/v2/config"
+	"github.com/teamhanko/hanko/backend/v2/crypto/jwk/local_db"
+	"github.com/teamhanko/hanko/backend/v2/dto"
+	"github.com/teamhanko/hanko/backend/v2/pagination"
+	"github.com/teamhanko/hanko/backend/v2/persistence"
+	"github.com/teamhanko/hanko/backend/v2/persistence/models"
 )
 
 type TenantHandler struct {
 	persister persistence.Persister
+	cfg       *config.Config
 }
 
-func NewTenantHandler(persister persistence.Persister) *TenantHandler {
-	return &TenantHandler{persister: persister}
+func NewTenantHandler(cfg *config.Config, persister persistence.Persister) *TenantHandler {
+	return &TenantHandler{persister: persister, cfg: cfg}
 }
 
 type CreateTenantRequest struct {
-	ID     *uuid.UUID      `json:"id"`
+	ID     string          `json:"id" validate:"required,uuid"`
 	Config json.RawMessage `json:"config" validate:"required"`
 }
 
@@ -55,51 +57,81 @@ func (h *TenantHandler) Create(c echo.Context) error {
 		return dto.ToHttpError(err)
 	}
 
+	tenantID, err := uuid.FromString(body.ID)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("invalid tenant ID: %v", err))
+	}
+
 	// Parse and validate the config using koanf
-	cfg, err := h.validateTenantConfig(body.Config)
+	tenantConfigJSON, tenantConfig, err := h.validateTenantConfig(body.Config)
 	if err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("invalid config: %v", err))
 	}
 
 	tenant := models.Tenant{
-		Config: cfg,
+		ID:     tenantID,
+		Config: tenantConfigJSON,
 	}
 
-	// Set ID if provided, otherwise generate a UUID v4
-	if body.ID != nil && !body.ID.IsNil() {
-		tenant.ID = *body.ID
-	} else {
-		// TODO: is uui.Must a good idea here?
-		tenant.ID = uuid.Must(uuid.NewV4())
-	}
-
-	err = h.persister.GetTenantPersister().Create(tenant)
-	if err != nil {
-		if pgErr, ok := errors.AsType[*pgconn.PgError](err); ok {
-			if pgErr.Code == "23505" {
-				return echo.NewHTTPError(http.StatusConflict, fmt.Sprintf("failed to create tenant with id '%v': %s", tenant.ID, "tenant already exists"))
+	return h.persister.Transaction(func(tx *pop.Connection) error {
+		err = h.persister.GetTenantPersisterWithConnection(tx).Create(tenant)
+		if err != nil {
+			if pgErr, ok := errors.AsType[*pgconn.PgError](err); ok {
+				if pgErr.Code == "23505" {
+					return echo.NewHTTPError(http.StatusConflict, fmt.Sprintf("failed to create tenant with id '%v': %s", tenant.ID, "tenant already exists"))
+				}
+			} else if mysqlErr, ok2 := errors.AsType[*mysql.MySQLError](err); ok2 {
+				if mysqlErr.Number == 1062 {
+					return echo.NewHTTPError(http.StatusConflict, fmt.Sprintf("failed to create tenant with id '%v': %s", tenant.ID, "tenant already exists"))
+				}
 			}
-		} else if mysqlErr, ok2 := errors.AsType[*mysql.MySQLError](err); ok2 {
-			if mysqlErr.Number == 1062 {
-				return echo.NewHTTPError(http.StatusConflict, fmt.Sprintf("failed to create tenant with id '%v': %s", tenant.ID, "tenant already exists"))
+			return fmt.Errorf("failed to create tenant: %w", err)
+		}
+
+		if tenantConfig.Secrets.KeyManagement.Type == "local" {
+			manager, err := local_db.NewDefaultManager(h.cfg.SecretKeys, h.persister.GetJwkPersisterWithConnection(tx))
+			if err != nil {
+				return dto.ToHttpError(err)
+			}
+
+			_, err = manager.GenerateKey(tenant.ID)
+
+			if err != nil {
+				return fmt.Errorf("failed to create JWKS for tenant: %w", err)
 			}
 		}
-		return fmt.Errorf("failed to create tenant: %w", err)
-	}
 
-	// TODO: Create JWKS for the tenant in a transaction to ensure atomicity
+		// Fetch the created tenant to return
+		createdTenant, err := h.persister.GetTenantPersisterWithConnection(tx).Get(tenant.ID)
+		if err != nil {
+			return fmt.Errorf("failed to get created tenant: %w", err)
+		}
 
-	// Fetch the created tenant to return
-	createdTenant, err := h.persister.GetTenantPersister().Get(tenant.ID)
-	if err != nil {
-		return fmt.Errorf("failed to get created tenant: %w", err)
-	}
+		if createdTenant == nil {
+			return echo.NewHTTPError(http.StatusNotFound, "tenant not found after creation")
+		}
 
-	if createdTenant == nil {
-		return echo.NewHTTPError(http.StatusNotFound, "tenant not found after creation")
-	}
+		cert, err := h.persister.GetSamlCertificatePersisterWithConnection(tx).GetFirst(tenantID)
+		if err != nil {
+			return fmt.Errorf("failed to fetch SAML certificate: %w", err)
+		}
 
-	return c.JSON(http.StatusCreated, createdTenant)
+		if cert == nil {
+			cert, err = models.NewSamlCertificate(tenantConfig.Service.Name)
+			if err != nil {
+				return fmt.Errorf("unable to create SAML certificate: %w", err)
+			}
+
+			cert.TenantID = tenantID
+
+			err = h.persister.GetSamlCertificatePersisterWithConnection(tx).Create(cert)
+			if err != nil {
+				return fmt.Errorf("unable to persist SAML certificate: %w", err)
+			}
+		}
+
+		return c.JSON(http.StatusCreated, createdTenant)
+	})
 }
 
 func (h *TenantHandler) Get(c echo.Context) error {
@@ -169,7 +201,7 @@ func (h *TenantHandler) Update(c echo.Context) error {
 	}
 
 	// Parse and validate the config using koanf
-	cfg, err := h.validateTenantConfig(body.Config)
+	cfg, _, err := h.validateTenantConfig(body.Config)
 	if err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("invalid config: %v", err))
 	}
@@ -245,27 +277,41 @@ func (h *TenantHandler) Delete(c echo.Context) error {
 }
 
 // validateTenantConfig parses and validates the tenant config JSON using koanf
-func (h *TenantHandler) validateTenantConfig(configJSON json.RawMessage) (json.RawMessage, error) {
+func (h *TenantHandler) validateTenantConfig(configJSON json.RawMessage) (json.RawMessage, *config.TenantConfig, error) {
 	if len(configJSON) == 0 {
-		return nil, fmt.Errorf("config cannot be empty")
+		return nil, nil, fmt.Errorf("config cannot be empty")
 	}
 
 	k := koanf.New(".")
 
 	// Load the JSON config into koanf
 	if err := k.Load(rawbytes.Provider(configJSON), koanfJson.Parser()); err != nil {
-		return nil, fmt.Errorf("failed to parse config JSON: %w", err)
+		return nil, nil, fmt.Errorf("failed to parse config JSON: %w", err)
 	}
 
 	// Unmarshal into TenantConfig to validate structure
 	var tenantConfig = new(config.DefaultTenantConfig())
 	if err := k.Unmarshal("", &tenantConfig); err != nil {
-		return nil, fmt.Errorf("failed to unmarshal into TenantConfig: %w", err)
+		return nil, nil, fmt.Errorf("failed to unmarshal into TenantConfig: %w", err)
 	}
 
-	b, err := k.Marshal(koanfJson.Parser())
+	err := tenantConfig.PostProcess()
 	if err != nil {
-		return nil, fmt.Errorf("failed to marshal config JSON: %w", err)
+		return nil, nil, fmt.Errorf("failed to post process tenant settings: %w", err)
 	}
-	return b, nil
+
+	cfg := config.Config{
+		ApplicationConfig: h.cfg.ApplicationConfig,
+		TenantConfig:      *tenantConfig,
+	}
+
+	if err = cfg.ValidateTenantAndCrossConfig(); err != nil {
+		return nil, nil, fmt.Errorf("failed to validate tenant settings: %w", err)
+	}
+
+	b, err := json.Marshal(tenantConfig)
+	if err != nil {
+		return nil, nil, fmt.Errorf("failed to marshal config JSON: %w", err)
+	}
+	return b, tenantConfig, nil
 }

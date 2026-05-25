@@ -43,6 +43,10 @@ type Persister interface {
 	GetSamlIdentityPersisterWithConnection(tx *pop.Connection) SamlIdentityPersister
 	GetSamlIDPInitiatedRequestPersister() SamlIDPInitiatedRequestPersister
 	GetSamlIDPInitiatedRequestPersisterWithConnection(tx *pop.Connection) SamlIDPInitiatedRequestPersister
+	GetSamlProviderPersister() SamlProviderPersister
+	GetSamlProviderPersisterWithConnection(tx *pop.Connection) SamlProviderPersister
+	GetSamlIDPMetadataPersister() SamlIDPMetadataPersister
+	GetSamlIDPMetadataPersisterWithConnection(tx *pop.Connection) SamlIDPMetadataPersister
 	GetTenantPersister() TenantPersister
 	GetTenantPersisterWithConnection(tx *pop.Connection) TenantPersister
 	GetTokenPersister() TokenPersister
@@ -305,6 +309,22 @@ func (p *persister) GetSamlIDPInitiatedRequestPersister() SamlIDPInitiatedReques
 
 func (p *persister) GetSamlIDPInitiatedRequestPersisterWithConnection(tx *pop.Connection) SamlIDPInitiatedRequestPersister {
 	return NewSamlIDPInitiatedRequestPersister(tx)
+}
+
+func (p *persister) GetSamlProviderPersister() SamlProviderPersister {
+	return NewSamlProviderPersister(p.DB)
+}
+
+func (p *persister) GetSamlProviderPersisterWithConnection(tx *pop.Connection) SamlProviderPersister {
+	return NewSamlProviderPersister(tx)
+}
+
+func (p *persister) GetSamlIDPMetadataPersister() SamlIDPMetadataPersister {
+	return NewSamlIDPMetadataPersister(p.DB)
+}
+
+func (p *persister) GetSamlIDPMetadataPersisterWithConnection(tx *pop.Connection) SamlIDPMetadataPersister {
+	return NewSamlIDPMetadataPersister(tx)
 }
 
 func (p *persister) GetWebhookPersister(tx *pop.Connection) WebhookPersister {

@@ -51,6 +51,7 @@ func (a AccountDelete) Execute(c flowpilot.ExecutionContext) error {
 		models.AuditLogUserDeleted,
 		&models.User{ID: userModel.ID},
 		nil,
+		deps.TenantID,
 		auditlog.Detail("flow_id", c.GetFlowID()))
 
 	if err != nil {

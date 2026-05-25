@@ -21,7 +21,7 @@ func (tm *testManager) Trigger(tx *pop.Connection, evt events.Event, data interf
 	tm.TestFunc()
 }
 
-func (tm *testManager) GenerateJWT(data interface{}, event events.Event) (string, error) {
+func (tm *testManager) GenerateJWT(data interface{}, event events.Event, tenantID uuid.UUID) (string, error) {
 	return "", nil
 }
 

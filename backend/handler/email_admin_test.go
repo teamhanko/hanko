@@ -26,7 +26,7 @@ type emailAdminSuite struct {
 }
 
 func (s *emailAdminSuite) TestEmailAdminHandler_New() {
-	emailHandler := NewEmailAdminHandler(&config.Config{}, s.Storage)
+	emailHandler := NewEmailAdminHandler(s.Storage)
 	s.NotEmpty(emailHandler)
 }
 
@@ -38,7 +38,11 @@ func (s *emailAdminSuite) TestEmailAdminHandler_List() {
 	err := s.LoadFixtures("../test/fixtures/email")
 	s.Require().NoError(err)
 
-	e := NewAdminRouter(&test.DefaultConfig, s.Storage, nil)
+	cfg := test.DefaultConfig
+	err = cfg.PostProcess()
+	s.Require().NoError(err)
+
+	e := NewAdminRouter(&cfg, s.Storage, nil)
 
 	tests := []struct {
 		name               string
@@ -200,6 +204,9 @@ func (s *emailAdminSuite) TestEmailAdminHandler_Create() {
 	for _, currentTest := range tests {
 		s.Run(currentTest.name, func() {
 			cfg := test.DefaultConfig
+			err = cfg.PostProcess()
+			s.Require().NoError(err)
+
 			cfg.Email.Limit = currentTest.maxNumberOfAddresses
 
 			e := NewAdminRouter(&cfg, s.Storage, nil)
@@ -299,6 +306,8 @@ func (s *emailAdminSuite) TestEmailAdminHandler_Get() {
 	for _, currentTest := range tests {
 		s.Run(currentTest.name, func() {
 			cfg := test.DefaultConfig
+			err = cfg.PostProcess()
+			s.Require().NoError(err)
 
 			e := NewAdminRouter(&cfg, s.Storage, nil)
 
@@ -390,6 +399,8 @@ func (s *emailAdminSuite) TestEmailAdminHandler_Delete() {
 	for _, currentTest := range tests {
 		s.Run(currentTest.name, func() {
 			cfg := test.DefaultConfig
+			err = cfg.PostProcess()
+			s.Require().NoError(err)
 
 			e := NewAdminRouter(&cfg, s.Storage, nil)
 
@@ -483,6 +494,8 @@ func (s *emailAdminSuite) TestEmailAdminHandler_SetPrimaryEmail() {
 	for _, currentTest := range tests {
 		s.Run(currentTest.name, func() {
 			cfg := test.DefaultConfig
+			err := cfg.PostProcess()
+			s.Require().NoError(err)
 
 			e := NewAdminRouter(&cfg, s.Storage, nil)
 
