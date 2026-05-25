@@ -2,6 +2,8 @@ package handler
 
 import (
 	"fmt"
+	"net/http"
+
 	"github.com/gobuffalo/nulls"
 	"github.com/gobuffalo/pop/v6"
 	"github.com/gofrs/uuid"
@@ -11,8 +13,6 @@ import (
 	"github.com/teamhanko/hanko/backend/v2/persistence"
 	"github.com/teamhanko/hanko/backend/v2/persistence/models"
 	webhookutils "github.com/teamhanko/hanko/backend/v2/webhooks/utils"
-	"github.com/teamhanko/hanko/backend/v2/webhooks/events"
-	"net/http"
 )
 
 func loadDto[I any](ctx echo.Context) (*I, error) {
