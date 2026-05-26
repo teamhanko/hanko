@@ -36,18 +36,15 @@ func NewManagementRouter(cfg *config.Config, persister persistence.Persister) *e
 	tenants.PUT("/:id", tenantHandler.Update)
 	tenants.DELETE("/:id", tenantHandler.Delete)
 
-	// SAML provider management routes (multi-tenant only)
-	if cfg.MultiTenancy.Enabled && cfg.Saml.Enabled {
-		samlProviderHandler := NewSamlProviderHandler(cfg, persister)
+	samlProviderHandler := NewSamlProviderHandler(cfg, persister)
 
-		saml := tenants.Group("/:tenantId/saml")
-		samlProviders := saml.Group("/providers")
-		samlProviders.POST("", samlProviderHandler.Create)
-		samlProviders.GET("", samlProviderHandler.List)
-		samlProviders.GET("/:providerId", samlProviderHandler.Get)
-		samlProviders.PUT("/:providerId", samlProviderHandler.Update)
-		samlProviders.DELETE("/:providerId", samlProviderHandler.Delete)
-	}
+	saml := tenants.Group("/:tenantId/saml")
+	samlProviders := saml.Group("/providers")
+	samlProviders.POST("", samlProviderHandler.Create)
+	samlProviders.GET("", samlProviderHandler.List)
+	samlProviders.GET("/:providerId", samlProviderHandler.Get)
+	samlProviders.PUT("/:providerId", samlProviderHandler.Update)
+	samlProviders.DELETE("/:providerId", samlProviderHandler.Delete)
 
 	return e
 }

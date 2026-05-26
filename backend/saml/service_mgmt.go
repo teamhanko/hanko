@@ -2,6 +2,7 @@ package saml
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
 	"time"
 
@@ -10,6 +11,10 @@ import (
 	samlConfig "github.com/teamhanko/hanko/backend/v3/config"
 	"github.com/teamhanko/hanko/backend/v3/persistence"
 	"github.com/teamhanko/hanko/backend/v3/persistence/models"
+)
+
+var (
+	ErrorSamlProviderAlreadyExists = errors.New("SAML provider already exists")
 )
 
 // SamlProviderManagementService handles SAML provider lifecycle operations
@@ -54,7 +59,7 @@ func (s *SamlProviderManagementService) CreateFromConfig(tenantID uuid.UUID, idp
 			existing.EntityID = parsedMetadata.EntityID
 			existing.Enabled = idpConfig.Enabled
 			existing.SkipEmailVerification = idpConfig.SkipEmailVerification
-			existing.AttributeMap = string(attributeMapJSON)
+			existing.AttributeMap = attributeMapJSON
 
 			err = providerPersister.Update(*existing)
 			if err != nil {
@@ -73,7 +78,7 @@ func (s *SamlProviderManagementService) CreateFromConfig(tenantID uuid.UUID, idp
 			Domain:                idpConfig.Domain,
 			Enabled:               idpConfig.Enabled,
 			SkipEmailVerification: idpConfig.SkipEmailVerification,
-			AttributeMap:          string(attributeMapJSON),
+			AttributeMap:          attributeMapJSON,
 		}
 
 		err = providerPersister.Create(provider)
@@ -109,7 +114,7 @@ func (s *SamlProviderManagementService) Create(tenantID uuid.UUID, name, metadat
 			return err
 		}
 		if existingByDomain != nil {
-			return fmt.Errorf("provider with domain '%s' already exists", domain)
+			return fmt.Errorf("%w: provider with domain '%s' already exists", ErrorSamlProviderAlreadyExists, domain)
 		}
 
 		existingByEntityID, err := providerPersister.GetByEntityID(tenantID, parsedMetadata.EntityID)
@@ -117,7 +122,7 @@ func (s *SamlProviderManagementService) Create(tenantID uuid.UUID, name, metadat
 			return err
 		}
 		if existingByEntityID != nil {
-			return fmt.Errorf("provider with entity_id '%s' already exists", parsedMetadata.EntityID)
+			return fmt.Errorf("%w: provider with entity_id '%s' already exists", ErrorSamlProviderAlreadyExists, parsedMetadata.EntityID)
 		}
 
 		// Create provider
@@ -130,7 +135,7 @@ func (s *SamlProviderManagementService) Create(tenantID uuid.UUID, name, metadat
 			Domain:                domain,
 			Enabled:               enabled,
 			SkipEmailVerification: skipEmailVerification,
-			AttributeMap:          string(attributeMapJSON),
+			AttributeMap:          attributeMapJSON,
 		}
 
 		err = providerPersister.Create(provider)
@@ -202,7 +207,7 @@ func (s *SamlProviderManagementService) Update(tenantID uuid.UUID, providerID uu
 		provider.Domain = domain
 		provider.Enabled = enabled
 		provider.SkipEmailVerification = skipEmailVerification
-		provider.AttributeMap = string(attributeMapJSON)
+		provider.AttributeMap = attributeMapJSON
 
 		return providerPersister.Update(*provider)
 	})

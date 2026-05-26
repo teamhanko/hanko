@@ -2,6 +2,7 @@ package handler
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
 	"net/http"
 
@@ -65,6 +66,9 @@ func (h *SamlProviderHandler) Create(c echo.Context) error {
 		attributeMap,
 	)
 	if err != nil {
+		if errors.Is(err, saml.ErrorSamlProviderAlreadyExists) {
+			return echo.NewHTTPError(http.StatusConflict, fmt.Sprintf("failed to create provider: %v", err))
+		}
 		return echo.NewHTTPError(http.StatusInternalServerError, fmt.Sprintf("failed to create provider: %v", err))
 	}
 

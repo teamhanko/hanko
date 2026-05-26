@@ -23,12 +23,16 @@ func DefaultApplicationConfig() ApplicationConfig {
 			},
 		},
 		Database: Database{
-			Database: "hanko",
-			User:     "hanko",
-			Password: "hanko",
-			Port:     "5432",
-			Dialect:  "postgres",
-			Host:     "localhost",
+			Database:        "hanko",
+			User:            "hanko",
+			Password:        "hanko",
+			Port:            "5432",
+			Dialect:         "postgres",
+			Host:            "localhost",
+			Pool:            5,
+			IdlePool:        0,
+			ConnMaxIdleTime: 5 * time.Minute,
+			ConnMaxLifetime: 1 * time.Hour,
 		},
 		AuditLog: AuditLog{
 			ConsoleOutput: AuditLogConsole{

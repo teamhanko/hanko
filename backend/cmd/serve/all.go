@@ -37,7 +37,7 @@ func NewServeAllCommand() *cobra.Command {
 			authenticatorMetadata := mapper.LoadAuthenticatorMetadata(&authenticatorMetadataFile)
 
 			dbConnection, err := persistence.NewConnection(cfg.Database)
-			pop.Debug = true
+
 			if err != nil {
 				log.Fatal(err)
 			}

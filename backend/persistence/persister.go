@@ -96,10 +96,10 @@ func New(connection *pop.Connection) Storage {
 
 func NewConnection(config config.Database) (*pop.Connection, error) {
 	connectionDetails := &pop.ConnectionDetails{
-		Pool:            5,
-		IdlePool:        0,
-		ConnMaxIdleTime: 5 * time.Minute,
-		ConnMaxLifetime: 1 * time.Hour,
+		Pool:            config.Pool,
+		IdlePool:        config.IdlePool,
+		ConnMaxIdleTime: config.ConnMaxIdleTime,
+		ConnMaxLifetime: config.ConnMaxLifetime,
 	}
 	if len(config.Url) > 0 {
 		connectionDetails.URL = config.Url
