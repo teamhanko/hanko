@@ -12,6 +12,7 @@ RUN go mod download
 COPY main.go main.go
 COPY cmd cmd/
 COPY config config/
+COPY context context/
 COPY persistence persistence/
 COPY server server/
 COPY handler handler/
