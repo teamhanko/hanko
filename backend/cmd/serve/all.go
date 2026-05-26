@@ -7,7 +7,6 @@ import (
 	"log"
 	"sync"
 
-	"github.com/gobuffalo/pop/v6"
 	"github.com/labstack/echo-contrib/echoprometheus"
 	"github.com/spf13/cobra"
 	"github.com/teamhanko/hanko/backend/v3/config"
