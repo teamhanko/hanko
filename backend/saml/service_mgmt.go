@@ -2,6 +2,7 @@ package saml
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
 	"time"
 
@@ -10,6 +11,10 @@ import (
 	samlConfig "github.com/teamhanko/hanko/backend/v2/config"
 	"github.com/teamhanko/hanko/backend/v2/persistence"
 	"github.com/teamhanko/hanko/backend/v2/persistence/models"
+)
+
+var (
+	ErrorSamlProviderAlreadyExists = errors.New("SAML provider already exists")
 )
 
 // SamlProviderManagementService handles SAML provider lifecycle operations
@@ -109,7 +114,7 @@ func (s *SamlProviderManagementService) Create(tenantID uuid.UUID, name, metadat
 			return err
 		}
 		if existingByDomain != nil {
-			return fmt.Errorf("provider with domain '%s' already exists", domain)
+			return fmt.Errorf("%w: provider with domain '%s' already exists", ErrorSamlProviderAlreadyExists, domain)
 		}
 
 		existingByEntityID, err := providerPersister.GetByEntityID(tenantID, parsedMetadata.EntityID)
@@ -117,7 +122,7 @@ func (s *SamlProviderManagementService) Create(tenantID uuid.UUID, name, metadat
 			return err
 		}
 		if existingByEntityID != nil {
-			return fmt.Errorf("provider with entity_id '%s' already exists", parsedMetadata.EntityID)
+			return fmt.Errorf("%w: provider with entity_id '%s' already exists", ErrorSamlProviderAlreadyExists, parsedMetadata.EntityID)
 		}
 
 		// Create provider
