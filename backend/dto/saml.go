@@ -1,6 +1,7 @@
 package dto
 
 import (
+	"bytes"
 	"encoding/json"
 
 	"github.com/teamhanko/hanko/backend/v2/config"
@@ -71,9 +72,9 @@ func FromSamlProvider(provider *models.SamlProvider) SamlProviderResponse {
 	}
 
 	// Parse attribute map if present
-	if provider.AttributeMap != "" {
+	if len(provider.AttributeMap) == 0 || bytes.Equal(provider.AttributeMap, []byte("null")) {
 		var attrMap config.AttributeMap
-		err := json.Unmarshal([]byte(provider.AttributeMap), &attrMap)
+		err := json.Unmarshal(provider.AttributeMap, &attrMap)
 		if err == nil {
 			resp.AttributeMap = &attrMap
 		}

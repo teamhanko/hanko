@@ -1,6 +1,7 @@
 package saml
 
 import (
+	"bytes"
 	"crypto/tls"
 	"crypto/x509"
 	"encoding/json"
@@ -97,8 +98,8 @@ func (b *ProviderManager) GetProvider(
 
 	// Parse attribute map from provider
 	var attributeMap samlConfig.AttributeMap
-	if provider.AttributeMap != "" {
-		err = json.Unmarshal([]byte(provider.AttributeMap), &attributeMap)
+	if len(provider.AttributeMap) == 0 || bytes.Equal(provider.AttributeMap, []byte("null")) {
+		err = json.Unmarshal(provider.AttributeMap, &attributeMap)
 		if err != nil {
 			return nil, nil, fmt.Errorf("failed to unmarshal attribute map: %w", err)
 		}

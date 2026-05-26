@@ -59,7 +59,7 @@ func (s *SamlProviderManagementService) CreateFromConfig(tenantID uuid.UUID, idp
 			existing.EntityID = parsedMetadata.EntityID
 			existing.Enabled = idpConfig.Enabled
 			existing.SkipEmailVerification = idpConfig.SkipEmailVerification
-			existing.AttributeMap = string(attributeMapJSON)
+			existing.AttributeMap = attributeMapJSON
 
 			err = providerPersister.Update(*existing)
 			if err != nil {
@@ -78,7 +78,7 @@ func (s *SamlProviderManagementService) CreateFromConfig(tenantID uuid.UUID, idp
 			Domain:                idpConfig.Domain,
 			Enabled:               idpConfig.Enabled,
 			SkipEmailVerification: idpConfig.SkipEmailVerification,
-			AttributeMap:          string(attributeMapJSON),
+			AttributeMap:          attributeMapJSON,
 		}
 
 		err = providerPersister.Create(provider)
@@ -135,7 +135,7 @@ func (s *SamlProviderManagementService) Create(tenantID uuid.UUID, name, metadat
 			Domain:                domain,
 			Enabled:               enabled,
 			SkipEmailVerification: skipEmailVerification,
-			AttributeMap:          string(attributeMapJSON),
+			AttributeMap:          attributeMapJSON,
 		}
 
 		err = providerPersister.Create(provider)
@@ -207,7 +207,7 @@ func (s *SamlProviderManagementService) Update(tenantID uuid.UUID, providerID uu
 		provider.Domain = domain
 		provider.Enabled = enabled
 		provider.SkipEmailVerification = skipEmailVerification
-		provider.AttributeMap = string(attributeMapJSON)
+		provider.AttributeMap = attributeMapJSON
 
 		return providerPersister.Update(*provider)
 	})
