@@ -34,7 +34,6 @@ type CreateSamlProviderRequest struct {
 
 // UpdateSamlProviderRequest represents the request body for updating a SAML provider
 type UpdateSamlProviderRequest struct {
-	ID                    string               `json:"id" validate:"required,uuid" param:"providerId"`
 	Name                  string               `json:"name" validate:"required"`
 	MetadataURL           string               `json:"metadata_url" validate:"required,url"`
 	Domain                string               `json:"domain" validate:"required"`
