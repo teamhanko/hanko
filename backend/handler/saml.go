@@ -310,7 +310,7 @@ func (handler *Handler) CallbackPost(c echo.Context) error {
 				redirectTo.String(),
 			)
 		}
-		time.Sleep(2 * time.Second)
+
 		assertionInfo, err := handler.getAssertionInfo(foundProvider, samlResponse)
 		if err != nil {
 			return handler.redirectError(
