@@ -33,10 +33,11 @@ func (s *defaultService) Persister() persistence.Persister {
 	return s.persister
 }
 
-// GetProviderByDomain retrieves a provider from DB and builds the runtime gosaml2 provider
+// GetProviderByDomain attempts to retrieve an enabled provider for the given domain from DB and builds the runtime
+// gosaml2 provider using the tenant configuration.
 func (s *defaultService) GetProviderByDomain(tenantID uuid.UUID, tenantConfig config.TenantConfig, domain string) (*saml2.SAMLServiceProvider, *ProviderConfig, error) {
 	// Query DB for provider by domain
-	providerModel, err := s.persister.GetSamlProviderPersister().GetByDomain(tenantID, domain)
+	providerModel, err := s.persister.GetSamlProviderPersister().GetEnabledByDomain(tenantID, domain)
 	if err != nil {
 		return nil, nil, fmt.Errorf("failed to get provider by domain: %w", err)
 	}
@@ -75,12 +76,10 @@ func (s *defaultService) GetProviderByIssuer(tenantID uuid.UUID, tenantConfig co
 
 // GetAuthUrl generates a SAML authentication URL for a given provider
 func (s *defaultService) GetAuthUrl(tenantID uuid.UUID, config config.Config, providerID uuid.UUID, redirectTo string, isFlow bool) (string, error) {
-	// Validate redirect URL using tenant-specific config
 	if ok := config.TenantConfig.Saml.IsAllowedRedirect(redirectTo); !ok {
 		return "", thirdparty.ErrorInvalidRequest(fmt.Sprintf("redirect to '%s' not allowed", redirectTo))
 	}
 
-	// Get provider to extract domain for state
 	providerModel, err := s.persister.GetSamlProviderPersister().Get(tenantID, providerID)
 	if err != nil {
 		return "", fmt.Errorf("failed to get provider: %w", err)
@@ -89,7 +88,6 @@ func (s *defaultService) GetAuthUrl(tenantID uuid.UUID, config config.Config, pr
 		return "", fmt.Errorf("provider not found")
 	}
 
-	// Generate state using tenant-specific SAML config and secrets
 	state, err := GenerateState(
 		config,
 		s.persister.GetSamlStatePersister(),
@@ -102,13 +100,11 @@ func (s *defaultService) GetAuthUrl(tenantID uuid.UUID, config config.Config, pr
 		return "", thirdparty.ErrorServer("could not generate state").WithCause(err)
 	}
 
-	// GetProvider runtime provider using tenant-specific config
 	samlProvider, _, err := s.runtimeBuilder.GetProvider(tenantID, providerID, config.TenantConfig.Saml, config.TenantConfig.Service.Name)
 	if err != nil {
 		return "", thirdparty.ErrorServer("could not build SAML provider").WithCause(err)
 	}
 
-	// GetProvider auth URL
 	redirectUrl, err := samlProvider.BuildAuthURL(string(state))
 	if err != nil {
 		return "", thirdparty.ErrorServer("could not generate auth url").WithCause(err)
