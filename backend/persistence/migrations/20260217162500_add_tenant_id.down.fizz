@@ -58,6 +58,7 @@ sql("ALTER TABLE identities DROP CONSTRAINT IF EXISTS identities_tenant_user_fke
 drop_foreign_key("identities", "identities_tenants_id_fk", {})
 drop_column("identities", "tenant_id")
 
+add_index("emails", "address", {})
 sql("ALTER TABLE primary_emails DROP CONSTRAINT IF EXISTS primary_emails_tenant_email_fkey;")
 sql("ALTER TABLE primary_emails DROP CONSTRAINT IF EXISTS primary_emails_tenant_user_fkey;")
 drop_foreign_key("primary_emails", "primary_emails_tenants_id_fk", {})
