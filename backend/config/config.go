@@ -35,7 +35,7 @@ type ApplicationConfig struct {
 	// be valid until they expire. Removing a key from the list does not remove the corresponding
 	// database record. If you remove a key, you also have to remove the database record, otherwise
 	// application startup will fail.
-	SecretKeys []string `yaml:"secretkeys" json:"secretkeys,omitempty" koanf:"secretkeys"`
+	SecretKeys []string `yaml:"secret_keys" json:"secret_keys,omitempty" koanf:"secret_keys" split_words:"true"`
 }
 
 type TenantConfig struct {
