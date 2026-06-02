@@ -57,6 +57,7 @@ func (a WebauthnGenerateCreationOptionsForSecurityKeys) Execute(c flowpilot.Exec
 		Email:    &email,
 		Username: &username,
 		TenantID: deps.TenantID,
+		Cfg:      deps.Cfg.TenantConfig,
 	}
 
 	sessionDataModel, creationOptions, err := deps.WebauthnService.GenerateCreationOptionsSecurityKey(params)

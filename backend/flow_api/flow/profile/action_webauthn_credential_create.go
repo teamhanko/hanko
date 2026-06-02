@@ -56,6 +56,7 @@ func (a WebauthnCredentialCreate) Execute(c flowpilot.ExecutionContext) error {
 		Email:    &primaryEmailAddress,
 		Username: userModel.GetUsername(),
 		TenantID: deps.TenantID,
+		Cfg:      deps.Cfg.TenantConfig,
 	}
 
 	sessionDataModel, creationOptions, err := deps.WebauthnService.GenerateCreationOptionsPasskey(params)

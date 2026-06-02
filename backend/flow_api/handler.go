@@ -64,7 +64,7 @@ func NewFlowAPIHandler(cfg config.Config, persister persistence.Persister, audit
 	emailService, _ := services.NewEmailService()
 	passcodeService := services.NewPasscodeService(*emailService, persister)
 	passwordService := services.NewPasswordService(persister)
-	webauthnService := services.NewWebauthnService(cfg, persister)
+	webauthnService := services.NewWebauthnService(persister)
 	securityNotificationService := services.NewSecurityNotificationService(*emailService, persister, auditLogger)
 	samlService := saml.NewSamlProviderService(persister)
 
@@ -75,7 +75,7 @@ func NewFlowAPIHandler(cfg config.Config, persister persistence.Persister, audit
 
 	return FlowPilotHandler{
 		Persister:                   persister,
-		Cfg:                         cfg,
+		Cfg:                         cfg, // Populated in executeFlow() from tenant middleware
 		SecurityNotificationService: securityNotificationService,
 		PasscodeService:             passcodeService,
 		PasswordService:             passwordService,

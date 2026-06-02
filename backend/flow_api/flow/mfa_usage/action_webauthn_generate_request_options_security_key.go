@@ -34,6 +34,7 @@ func (a WebauthnGenerateRequestOptionsSecurityKey) Execute(c flowpilot.Execution
 		Tx:       deps.Tx,
 		UserID:   uuid.FromStringOrNil(c.Stash().Get(shared.StashPathUserID).String()),
 		TenantID: deps.TenantID,
+		Cfg:      deps.Cfg.TenantConfig,
 	}
 
 	sessionDataModel, requestOptions, err := deps.WebauthnService.GenerateRequestOptionsSecurityKey(params)

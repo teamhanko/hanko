@@ -54,6 +54,7 @@ func (a WebauthnVerifyAssertionResponse) Execute(c flowpilot.ExecutionContext) e
 		AssertionResponse: assertionResponse,
 		IsMFA:             isMFA,
 		TenantID:          deps.TenantID,
+		Cfg:               deps.Cfg.TenantConfig,
 	}
 
 	userModel, err := deps.WebauthnService.VerifyAssertionResponse(params)
