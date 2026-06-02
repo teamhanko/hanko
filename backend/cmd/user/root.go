@@ -18,4 +18,5 @@ func RegisterCommands(parent *cobra.Command) {
 	command.AddCommand(NewImportCommand())
 	command.AddCommand(NewGenerateCommand())
 	command.AddCommand(NewExportCommand())
+	command.AddCommand(NewConvertCommand())
 }

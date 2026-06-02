@@ -3,10 +3,12 @@ package user
 import (
 	"errors"
 	"fmt"
+	"strings"
+	"time"
+
 	"github.com/go-playground/validator/v10"
 	"github.com/gofrs/uuid"
 	"github.com/invopop/jsonschema"
-	"time"
 )
 
 // ImportOrExportEmail The import/export format for a user's email
@@ -62,7 +64,7 @@ type ImportWebauthnCredentials []ImportWebauthnCredential
 
 type ImportPasswordCredential struct {
 	// Password hash of the password in bcrypt format.
-	Password string `json:"password" yaml:"password" validate:"required,startswith=$2a$"`
+	Password string `json:"password" yaml:"password" validate:"required"`
 	// CreatedAt optional timestamp when the password was created. Will be set to the import date if not provided.
 	CreatedAt *time.Time `json:"created_at,omitempty" yaml:"created_at" validate:"omitempty"`
 	// UpdatedAt optional timestamp of the last update to the password. Will be set to the import date if not provided.
@@ -156,6 +158,12 @@ func (entry *ImportOrExportEntry) validate(v *validator.Validate) error {
 
 	if len(entry.Emails) > 0 && primaryEmailAddresses != 1 {
 		return errors.New(fmt.Sprintf("Need exactly one primary email, got %v", primaryEmailAddresses))
+	}
+
+	if entry.Password != nil && entry.Password.Password != "" {
+		if !strings.HasPrefix(entry.Password.Password, "$2a$") && !strings.HasPrefix(entry.Password.Password, "$fbscrypt$") {
+			return errors.New("password must be in bcrypt or firebase scrypt format")
+		}
 	}
 
 	return nil
