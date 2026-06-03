@@ -48,7 +48,7 @@ type FirebaseScryptHashInput struct {
 	v             string
 	memory        uint64
 	rounds        uint64
-	threads       uint64
+	parallelism   uint64
 	saltSeparator []byte
 	signerKey     []byte
 	salt          []byte
@@ -200,11 +200,11 @@ func ParseFirebaseScryptHash(hash string) (*FirebaseScryptHashInput, error) {
 		return nil, fmt.Errorf("crypto: invalid r=0")
 	}
 
-	threads, err := strconv.ParseUint(p, 10, 8)
+	parallelism, err := strconv.ParseUint(p, 10, 8)
 	if err != nil {
 		return nil, fmt.Errorf("crypto: invalid p parameter %q: %w", p, err)
 	}
-	if threads == 0 {
+	if parallelism == 0 {
 		return nil, fmt.Errorf("crypto: invalid p=0")
 	}
 
@@ -232,7 +232,7 @@ func ParseFirebaseScryptHash(hash string) (*FirebaseScryptHashInput, error) {
 		v:             v,
 		memory:        memory,
 		rounds:        rounds,
-		threads:       threads,
+		parallelism:   parallelism,
 		salt:          salt,
 		rawHash:       rawHash,
 		saltSeparator: saltSeparator,
