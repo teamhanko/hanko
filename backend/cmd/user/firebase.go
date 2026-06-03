@@ -401,33 +401,43 @@ func writer(
 
 func convertUser(u FirebaseUser, cfg FirebaseHashConfig) (ImportOrExportEntry, error) {
 
-	createdAt, _ := parseTime(u.CreatedAt)
-	updatedAt, _ := parseTime(u.UpdatedAt)
+	if u.Email == "" && u.PasswordHash != "" {
+		// If both are missing, there is no way to authenticate the user, unless some other credential/factor
+		// is manually added after the firebase -> hanko user conversion. This feels unlikely, so we count this
+		// as a failure.
+		return ImportOrExportEntry{}, fmt.Errorf("email and passwordHash missing for Firebase user with localId '%s'", u.LocalID)
+	}
 
 	fscryptString, err := buildFbscryptString(u, cfg)
 	if err != nil {
 		return ImportOrExportEntry{}, err
 	}
 
-	convertedEntry := ImportOrExportEntry{
-		Emails: []ImportOrExportEmail{
+	convertedEntry := ImportOrExportEntry{}
+
+	if u.Email != "" {
+		convertedEntry.Emails = []ImportOrExportEmail{
 			{
 				Address:    u.Email,
-				IsPrimary:  true, // we assume imported users are new users, so we set it primary
-				IsVerified: u.EmailVerified,
+				IsPrimary:  true,            // we assume imported users are new users, so we set it primary
+				IsVerified: u.EmailVerified, // if not returned by the firebase export we accept that it zeros to false
 			},
-		},
-		Password: &ImportPasswordCredential{
-			Password: fscryptString,
-		},
-		CreatedAt: createdAt,
-		UpdatedAt: updatedAt,
+		}
 	}
 
-	if u.PasswordHash == "" {
+	if u.PasswordHash != "" {
+		convertedEntry.Password = &ImportPasswordCredential{
+			Password: fscryptString,
+		}
+	} else {
 		log.Printf("[WARN] no password given for Firebase user with localId '%s', converting anyway\n", u.LocalID)
-		convertedEntry.Password = nil
 	}
+
+	createdAt, _ := parseTime(u.CreatedAt)
+	updatedAt, _ := parseTime(u.UpdatedAt)
+
+	convertedEntry.CreatedAt = createdAt
+	convertedEntry.UpdatedAt = updatedAt
 
 	err = convertedEntry.validate(v)
 	if err != nil {
