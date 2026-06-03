@@ -409,10 +409,6 @@ func convertUser(u FirebaseUser, cfg FirebaseHashConfig) (ImportOrExportEntry, e
 		return ImportOrExportEntry{}, err
 	}
 
-	if u.PasswordHash == "" {
-		log.Printf("[WARN] no password given for Firebase user with localId '%s', converting anyway\n", u.LocalID)
-	}
-
 	convertedEntry := ImportOrExportEntry{
 		Emails: []ImportOrExportEmail{
 			{
@@ -426,6 +422,11 @@ func convertUser(u FirebaseUser, cfg FirebaseHashConfig) (ImportOrExportEntry, e
 		},
 		CreatedAt: createdAt,
 		UpdatedAt: updatedAt,
+	}
+
+	if u.PasswordHash == "" {
+		log.Printf("[WARN] no password given for Firebase user with localId '%s', converting anyway\n", u.LocalID)
+		convertedEntry.Password = nil
 	}
 
 	err = convertedEntry.validate(v)
