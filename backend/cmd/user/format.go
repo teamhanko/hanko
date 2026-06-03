@@ -91,9 +91,9 @@ type ImportOrExportEntry struct {
 	// WebauthnCredentials optional list of WebAuthn credentials of a user. Includes passkeys and MFA credentials.
 	WebauthnCredentials ImportWebauthnCredentials `json:"webauthn_credentials,omitempty" yaml:"webauthn_credentials" validate:"omitempty,unique=ID,dive"`
 	// Password optional password.
-	Password *ImportPasswordCredential `json:"password" yaml:"password" validate:"omitempty"`
+	Password *ImportPasswordCredential `json:"password,omitempty" yaml:"password" validate:"omitempty"`
 	// OTPSecret optional TOTP secret for MFA.
-	OTPSecret *ImportOTPSecret `json:"otp_secret" yaml:"otp_secret" validate:"omitempty"`
+	OTPSecret *ImportOTPSecret `json:"otp_secret,omitempty" yaml:"otp_secret" validate:"omitempty"`
 	// CreatedAt optional timestamp of the users' creation. Will be set to the import date if not provided.
 	CreatedAt *time.Time `json:"created_at,omitempty" yaml:"created_at" validate:"omitempty"`
 	// UpdatedAt optional timestamp of the last update to the user. Will be set to the import date if not provided.
