@@ -7,6 +7,7 @@ import (
 	"encoding/base64"
 	"errors"
 	"fmt"
+	"math"
 	"time"
 
 	"regexp"
@@ -123,9 +124,18 @@ func (s password) compareHashAndPasswordFirebaseScrypt(hash, password string) er
 }
 
 func firebaseScrypt(password []byte, parameters FirebaseScryptParameters) ([]byte, error) {
+	// 1. scrypt step (Firebase computes N as 2^memCost; ensure N fits in int before passing to scrypt.Key)
+	if parameters.memCost < 1 || parameters.memCost >= 63 {
+		return nil, errors.New("invalid memCost")
+	}
 
-	// 1. scrypt step (Firebase uses N = 2^memCost)
-	N := 1 << parameters.memCost
+	n64 := uint64(1) << parameters.memCost
+
+	if n64 > uint64(math.MaxInt) {
+		return nil, errors.New("N does not fit in int")
+	}
+
+	N := int(n64)
 
 	fullSalt := append(parameters.salt, parameters.saltSeparator...)
 

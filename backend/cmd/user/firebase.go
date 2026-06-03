@@ -7,6 +7,7 @@ import (
 	"errors"
 	"fmt"
 	"log"
+	"math"
 	"os"
 	"runtime"
 	"sync"
@@ -51,8 +52,15 @@ func (f *FirebaseHashConfig) Validate() error {
 		return errors.New("crypto: invalid base64_salt_separator")
 	}
 
-	if f.MemCost <= 0 {
-		return errors.New("crypto: invalid memCost (scrypt 'n') <= 0")
+	// Firebase computes N as 2^memCost; ensure N fits in int, so we can fail early
+	if f.MemCost <= 0 || f.MemCost >= 63 {
+		return errors.New("crypto: invalid memCost, must be between 1 and 62")
+	}
+
+	n64 := uint64(1) << f.MemCost
+
+	if n64 > uint64(math.MaxInt) {
+		return errors.New("crypto: memCost (N) does not fit in int")
 	}
 
 	if f.Rounds <= 0 {
