@@ -46,7 +46,7 @@ const (
 
 type FirebaseScryptHashInput struct {
 	v             string
-	memory        uint64
+	memCost       uint64
 	rounds        uint64
 	parallelism   uint64
 	saltSeparator []byte
@@ -109,7 +109,7 @@ func (s password) compareHashAndPasswordFirebaseScrypt(hash, password string) er
 		return fmt.Errorf("could not parse hash data: %w", err)
 	}
 
-	derivedKey, err := firebaseScrypt([]byte(password), input.salt, input.signerKey, input.saltSeparator, input.memory, input.rounds)
+	derivedKey, err := firebaseScrypt([]byte(password), input.salt, input.signerKey, input.saltSeparator, input.memCost, input.rounds)
 	if err != nil {
 		return fmt.Errorf("could not derive key: %w", err)
 	}
@@ -230,7 +230,7 @@ func ParseFirebaseScryptHash(hash string) (*FirebaseScryptHashInput, error) {
 
 	input := &FirebaseScryptHashInput{
 		v:             v,
-		memory:        memory,
+		memCost:       memory,
 		rounds:        rounds,
 		parallelism:   parallelism,
 		salt:          salt,
