@@ -46,9 +46,9 @@ const (
 
 type FirebaseScryptParameters struct {
 	v             string
-	memCost       uint64
-	rounds        uint64
-	parallelism   uint64
+	memCost       int
+	rounds        int
+	parallelism   int
 	saltSeparator []byte
 	signerKey     []byte
 	salt          []byte
@@ -177,7 +177,8 @@ func ParseFirebaseScryptString(fbscryptString string) (*FirebaseScryptParameters
 		return nil, fmt.Errorf("crypto: unsupported version %q", v)
 	}
 
-	memory, err := strconv.ParseUint(n, 10, 64)
+	memory64, err := strconv.ParseInt(n, 10, 0)
+	memory := int(memory64)
 	if err != nil {
 		return nil, fmt.Errorf("crypto: invalid n parameter %q: %w", n, err)
 	}
@@ -185,7 +186,8 @@ func ParseFirebaseScryptString(fbscryptString string) (*FirebaseScryptParameters
 		return nil, fmt.Errorf("crypto: invalid n=0")
 	}
 
-	rounds, err := strconv.ParseUint(r, 10, 64)
+	rounds64, err := strconv.ParseInt(r, 10, 0)
+	rounds := int(rounds64)
 	if err != nil {
 		return nil, fmt.Errorf("crypto: invalid r parameter %q: %w", r, err)
 	}
@@ -193,7 +195,8 @@ func ParseFirebaseScryptString(fbscryptString string) (*FirebaseScryptParameters
 		return nil, fmt.Errorf("crypto: invalid r=0")
 	}
 
-	parallelism, err := strconv.ParseUint(p, 10, 8)
+	parallelism64, err := strconv.ParseInt(p, 10, 0)
+	parallelism := int(parallelism64)
 	if err != nil {
 		return nil, fmt.Errorf("crypto: invalid p parameter %q: %w", p, err)
 	}
