@@ -4,6 +4,7 @@ import (
 	"bufio"
 	"context"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"log"
 	"os"
@@ -35,6 +36,30 @@ type FirebaseHashConfig struct {
 	Base64SaltSeparator string `json:"base64_salt_separator"`
 	Rounds              int    `json:"rounds"`
 	MemCost             int    `json:"mem_cost"`
+}
+
+func (f *FirebaseHashConfig) Validate() error {
+	if f.Algorithm != "SCRYPT" {
+		return errors.New("crypto: invalid algorithm")
+	}
+
+	if f.Base64SignerKey == "" {
+		return errors.New("crypto: invalid base64_signer_key")
+	}
+
+	if f.Base64SaltSeparator == "" {
+		return errors.New("crypto: invalid base64_salt_separator")
+	}
+
+	if f.MemCost <= 0 {
+		return errors.New("crypto: invalid memCost (scrypt 'n') <= 0")
+	}
+
+	if f.Rounds <= 0 {
+		return errors.New("crypto: invalid rounds (scrypt 'r') <= 0")
+	}
+
+	return nil
 }
 
 type result struct {
@@ -104,12 +129,12 @@ func run(opts *options) error {
 
 	cfg, err := loadFirebaseConfig(opts.configFile)
 	if err != nil {
-		return fmt.Errorf("config: %w", err)
+		return fmt.Errorf("firebase hash config: %w", err)
 	}
 
 	inFile, err := os.Open(opts.inputFile)
 	if err != nil {
-		return fmt.Errorf("input: %w", err)
+		return fmt.Errorf("firebase user input: %w", err)
 	}
 	defer inFile.Close()
 
@@ -481,6 +506,16 @@ func loadFirebaseConfig(path string) (FirebaseHashConfig, error) {
 
 	var cfg FirebaseHashConfig
 	err = json.Unmarshal(b, &cfg)
+
+	if err != nil {
+		return FirebaseHashConfig{}, err
+	}
+
+	// Validate and possibly fail early since the config is declared as param in multiple functions
+	if err = cfg.Validate(); err != nil {
+		return FirebaseHashConfig{}, err
+	}
+
 	return cfg, err
 }
 
