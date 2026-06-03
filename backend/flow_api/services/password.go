@@ -37,7 +37,7 @@ type password struct {
 	persister persistence.Persister
 }
 
-var fbscryptHashRegexp = regexp.MustCompile(`^\$fbscrypt\$v=(?P<v>[0-9]+),n=(?P<n>[0-9]+),r=(?P<r>[0-9]+),p=(?P<p>[0-9]+)(?:,ss=(?P<ss>[^,]+))?(?:,sk=(?P<sk>[^$]+))?\$(?P<salt>[^$]+)\$(?P<hash>.+)$`)
+var fbscryptStringRegexp = regexp.MustCompile(`^\$fbscrypt\$v=(?P<v>[0-9]+),n=(?P<n>[0-9]+),r=(?P<r>[0-9]+),p=(?P<p>[0-9]+)(?:,ss=(?P<ss>[^,]+))?(?:,sk=(?P<sk>[^$]+))?\$(?P<salt>[^$]+)\$(?P<hash>.+)$`)
 
 const (
 	FirebaseScryptPrefix = "$fbscrypt"
@@ -104,7 +104,7 @@ func (s password) CompareHashAndPassword(hash, password string) error {
 }
 
 func (s password) compareHashAndPasswordFirebaseScrypt(hash, password string) error {
-	input, err := ParseFirebaseScryptHash(hash)
+	input, err := ParseFirebaseScryptString(hash)
 	if err != nil {
 		return fmt.Errorf("could not parse hash data: %w", err)
 	}
@@ -165,20 +165,20 @@ func firebaseScrypt(
 
 // Format and parsing implementation inspired by Supabase.
 // See: https://github.com/supabase/auth/blob/v2.189.0/internal/crypto/password.go
-func ParseFirebaseScryptHash(hash string) (*FirebaseScryptParameters, error) {
-	submatch := fbscryptHashRegexp.FindStringSubmatchIndex(hash)
+func ParseFirebaseScryptString(fbscryptString string) (*FirebaseScryptParameters, error) {
+	submatch := fbscryptStringRegexp.FindStringSubmatchIndex(fbscryptString)
 	if submatch == nil {
-		return nil, errors.New("crypto: incorrect scrypt hash format")
+		return nil, errors.New("crypto: incorrect scrypt string format")
 	}
 
-	v := string(fbscryptHashRegexp.ExpandString(nil, "$v", hash, submatch))
-	n := string(fbscryptHashRegexp.ExpandString(nil, "$n", hash, submatch))
-	r := string(fbscryptHashRegexp.ExpandString(nil, "$r", hash, submatch))
-	p := string(fbscryptHashRegexp.ExpandString(nil, "$p", hash, submatch))
-	ss := string(fbscryptHashRegexp.ExpandString(nil, "$ss", hash, submatch))
-	sk := string(fbscryptHashRegexp.ExpandString(nil, "$sk", hash, submatch))
-	saltB64 := string(fbscryptHashRegexp.ExpandString(nil, "$salt", hash, submatch))
-	hashB64 := string(fbscryptHashRegexp.ExpandString(nil, "$hash", hash, submatch))
+	v := string(fbscryptStringRegexp.ExpandString(nil, "$v", fbscryptString, submatch))
+	n := string(fbscryptStringRegexp.ExpandString(nil, "$n", fbscryptString, submatch))
+	r := string(fbscryptStringRegexp.ExpandString(nil, "$r", fbscryptString, submatch))
+	p := string(fbscryptStringRegexp.ExpandString(nil, "$p", fbscryptString, submatch))
+	ss := string(fbscryptStringRegexp.ExpandString(nil, "$ss", fbscryptString, submatch))
+	sk := string(fbscryptStringRegexp.ExpandString(nil, "$sk", fbscryptString, submatch))
+	saltB64 := string(fbscryptStringRegexp.ExpandString(nil, "$salt", fbscryptString, submatch))
+	hashB64 := string(fbscryptStringRegexp.ExpandString(nil, "$hash", fbscryptString, submatch))
 
 	if v != "1" {
 		return nil, fmt.Errorf("crypto: unsupported version %q", v)
