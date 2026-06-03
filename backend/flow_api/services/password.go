@@ -104,17 +104,17 @@ func (s password) CompareHashAndPassword(hash, password string) error {
 }
 
 func (s password) compareHashAndPasswordFirebaseScrypt(hash, password string) error {
-	input, err := ParseFirebaseScryptString(hash)
+	parameters, err := ParseFirebaseScryptString(hash)
 	if err != nil {
 		return fmt.Errorf("could not parse hash data: %w", err)
 	}
 
-	derivedKey, err := firebaseScrypt([]byte(password), input.salt, input.signerKey, input.saltSeparator, input.memCost, input.rounds)
+	derivedKey, err := firebaseScrypt([]byte(password), *parameters)
 	if err != nil {
 		return fmt.Errorf("could not derive key: %w", err)
 	}
 
-	match := subtle.ConstantTimeCompare(derivedKey, input.rawHash) == 1
+	match := subtle.ConstantTimeCompare(derivedKey, parameters.rawHash) == 1
 	if !match {
 		return ErrorPasswordInvalid
 	}
@@ -122,25 +122,18 @@ func (s password) compareHashAndPasswordFirebaseScrypt(hash, password string) er
 	return nil
 }
 
-func firebaseScrypt(
-	password,
-	salt,
-	signerKey,
-	saltSeparator []byte,
-	memCost,
-	rounds uint64,
-) ([]byte, error) {
+func firebaseScrypt(password []byte, parameters FirebaseScryptParameters) ([]byte, error) {
 
 	// 1. scrypt step (Firebase uses N = 2^memCost)
-	N := 1 << memCost
+	N := 1 << parameters.memCost
 
-	fullSalt := append(salt, saltSeparator...)
+	fullSalt := append(parameters.salt, parameters.saltSeparator...)
 
 	dk, err := scrypt.Key(
 		password,
 		fullSalt,
 		N,
-		int(rounds),
+		int(parameters.rounds),
 		1,
 		FirebaseScryptKeyLen,
 	)
@@ -157,8 +150,8 @@ func firebaseScrypt(
 	stream := cipher.NewCTR(block, make([]byte, aes.BlockSize))
 
 	// 3. Encrypt signerKey directly
-	derived := make([]byte, len(signerKey))
-	stream.XORKeyStream(derived, signerKey)
+	derived := make([]byte, len(parameters.signerKey))
+	stream.XORKeyStream(derived, parameters.signerKey)
 
 	return derived, nil
 }
