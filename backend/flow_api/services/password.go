@@ -44,7 +44,7 @@ const (
 	FirebaseScryptKeyLen = 32
 )
 
-type FirebaseScryptHashInput struct {
+type FirebaseScryptParameters struct {
 	v             string
 	memCost       uint64
 	rounds        uint64
@@ -165,7 +165,7 @@ func firebaseScrypt(
 
 // Format and parsing implementation inspired by Supabase.
 // See: https://github.com/supabase/auth/blob/v2.189.0/internal/crypto/password.go
-func ParseFirebaseScryptHash(hash string) (*FirebaseScryptHashInput, error) {
+func ParseFirebaseScryptHash(hash string) (*FirebaseScryptParameters, error) {
 	submatch := fbscryptHashRegexp.FindStringSubmatchIndex(hash)
 	if submatch == nil {
 		return nil, errors.New("crypto: incorrect scrypt hash format")
@@ -228,7 +228,7 @@ func ParseFirebaseScryptHash(hash string) (*FirebaseScryptHashInput, error) {
 		return nil, fmt.Errorf("invalid salt separator: %w", err)
 	}
 
-	input := &FirebaseScryptHashInput{
+	input := &FirebaseScryptParameters{
 		v:             v,
 		memCost:       memory,
 		rounds:        rounds,
