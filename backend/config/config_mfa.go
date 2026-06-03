@@ -35,26 +35,26 @@ type MFA struct {
 	// `acquire_on_registration` configures if users are prompted creating an MFA credential on registration.
 	AcquireOnRegistration bool `yaml:"acquire_on_registration" json:"acquire_on_registration" koanf:"acquire_on_registration" jsonschema:"default=true"`
 	// `device_trust_cookie_name` is the name of the cookie used to store the token of a trusted device.
-	DeviceTrustCookieName string `yaml:"device_trust_cookie_name" json:"device_trust_cookie_name,omitempty" koanf:"device_trust_cookie_name" jsonschema:"default=hanko_device_token"`
+	DeviceTrustCookieName string `yaml:"device_trust_cookie_name" json:"device_trust_cookie_name" koanf:"device_trust_cookie_name" jsonschema:"default=hanko_device_token"`
 	// `device_trust_duration` configures the duration a device remains trusted after authentication; once expired, the
 	// user must reauthenticate with MFA.
 	DeviceTrustDuration time.Duration `yaml:"device_trust_duration" json:"device_trust_duration" koanf:"device_trust_duration" jsonschema:"default=720h,type=string"`
 	// `device_trust_max_users_per_device` limits how many users can have device trust on a single device/browser.
 	// Oldest entries are removed when the limit is exceeded. This allows multiple users to trust the same device
 	// without overwriting each other's trust tokens.
-	DeviceTrustMaxUsersPerDevice int `yaml:"device_trust_max_users_per_device,omitempty" json:"device_trust_max_users_per_device,omitempty" koanf:"device_trust_max_users_per_device" jsonschema:"default=20"`
+	DeviceTrustMaxUsersPerDevice int `yaml:"device_trust_max_users_per_device,omitempty" json:"device_trust_max_users_per_device" koanf:"device_trust_max_users_per_device" jsonschema:"default=20"`
 	// `device_trust_policy` determines the conditions under which a device or browser is considered trusted, allowing
 	// MFA to be skipped for subsequent logins.
-	DeviceTrustPolicy string `yaml:"device_trust_policy" json:"device_trust_policy,omitempty" koanf:"device_trust_policy" split_words:"true" jsonschema:"default=prompt,enum=always,enum=prompt,enum=never"`
+	DeviceTrustPolicy string `yaml:"device_trust_policy" json:"device_trust_policy" koanf:"device_trust_policy" split_words:"true" jsonschema:"default=prompt,enum=always,enum=prompt,enum=never"`
 	// `enabled` determines whether multi-factor-authentication is enabled.
 	Enabled bool `yaml:"enabled" json:"enabled" koanf:"enabled" jsonschema:"default=true"`
 	// `optional` determines whether users must create an MFA credential when prompted. The MFA credential cannot be
 	// deleted if multi-factor-authentication is required (`optional: false`).
 	Optional bool `yaml:"optional" json:"optional" koanf:"optional" jsonschema:"default=true"`
 	// `security_keys` configures security key settings for multi-factor-authentication
-	SecurityKeys SecurityKeys `yaml:"security_keys" json:"security_keys,omitempty" koanf:"security_keys" jsonschema:"title=security_keys"`
+	SecurityKeys SecurityKeys `yaml:"security_keys" json:"security_keys" koanf:"security_keys" jsonschema:"title=security_keys"`
 	// `totp` configures the TOTP (Time-Based One-Time-Password) method for multi-factor-authentication.
-	TOTP TOTP `yaml:"totp" json:"totp,omitempty" koanf:"totp" jsonschema:"title=totp"`
+	TOTP TOTP `yaml:"totp" json:"totp" koanf:"totp" jsonschema:"title=totp"`
 }
 
 func (MFA) JSONSchemaExtend(schema *jsonschema.Schema) {

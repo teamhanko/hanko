@@ -12,7 +12,7 @@ type Secrets struct {
 	// KeyManagement configures the key management system used for signing JWTs.
 	// Supports 'local' (default) which uses the keys defined in the 'keys' field to encrypt a newly generated private
 	// RSA key in the database, or 'aws_kms' which uses AWS Key Management Service for key signatures.
-	KeyManagement KeyManagement `yaml:"key_management" json:"key_management,omitempty" koanf:"key_management"`
+	KeyManagement KeyManagement `yaml:"key_management" json:"key_management" koanf:"key_management"`
 	// `keys` are used to en- and decrypt the JWKs which get used to sign the JWTs issued by the API.
 	// For every key a JWK is generated, encrypted with the key and persisted in the database.
 	//
@@ -22,7 +22,7 @@ type Secrets struct {
 	// database record. If you remove a key, you also have to remove the database record, otherwise
 	// application startup will fail.
 	// Deprecated: use top level "SecretKeys" instead
-	Keys []string `yaml:"keys" json:"keys,omitempty" koanf:"keys"`
+	Keys []string `yaml:"keys" json:"keys" koanf:"keys"`
 }
 
 func (Secrets) JSONSchemaExtend(schema *jsonschema.Schema) {

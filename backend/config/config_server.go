@@ -53,7 +53,7 @@ type Cors struct {
 	// attacks. See also https://github.com/labstack/echo/issues/2400 for discussion on the subject.
 	//
 	// Optional. Default value is `false`.
-	UnsafeWildcardOriginAllowed bool `yaml:"unsafe_wildcard_origin_allowed" json:"unsafe_wildcard_origin_allowed,omitempty" koanf:"unsafe_wildcard_origin_allowed" split_words:"true" jsonschema:"title=unsafe_wildcard_origin_allowed,default=false"`
+	UnsafeWildcardOriginAllowed bool `yaml:"unsafe_wildcard_origin_allowed" json:"unsafe_wildcard_origin_allowed" koanf:"unsafe_wildcard_origin_allowed" split_words:"true" jsonschema:"title=unsafe_wildcard_origin_allowed,default=false"`
 }
 
 func (cors *Cors) Validate() error {

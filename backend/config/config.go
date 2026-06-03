@@ -40,55 +40,55 @@ type ApplicationConfig struct {
 
 type TenantConfig struct {
 	// `account` configures settings related to user accounts.
-	Account Account `yaml:"account" json:"account,omitempty" koanf:"account" jsonschema:"title=account"`
+	Account Account `yaml:"account" json:"account" koanf:"account" jsonschema:"title=account"`
 	// `convert_legacy_config`, if set to `true`, automatically copies the set values of deprecated configuration
 	// options, to new ones. If set to `false`, these values have to be set manually if non-default values should be
 	// used.
-	ConvertLegacyConfig bool `yaml:"convert_legacy_config" json:"convert_legacy_config,omitempty" koanf:"convert_legacy_config" split_words:"true" jsonschema:"default=false"`
+	ConvertLegacyConfig bool `yaml:"convert_legacy_config" json:"convert_legacy_config" koanf:"convert_legacy_config" split_words:"true" jsonschema:"default=false"`
 	// `covert_legacy_session_config`, if set to `true`, automatically copies the set of deprecated server-side session
 	// configuration options to the new ones. If set to `false`, these values have to be set manually if non-default
 	// values should be used.
-	ConvertLegacyServerSideSessionConfig bool `yaml:"convert_legacy_server_side_session_config" json:"convert_legacy_server_side_session_config,omitempty" koanf:"convert_legacy_server_side_session_config" split_words:"true" jsonschema:"default=true"`
+	ConvertLegacyServerSideSessionConfig bool `yaml:"convert_legacy_server_side_session_config" json:"convert_legacy_server_side_session_config" koanf:"convert_legacy_server_side_session_config" split_words:"true" jsonschema:"default=true"`
 	// `email` configures how email addresses of user accounts are acquired and used.
-	Email Email `yaml:"email" json:"email,omitempty" koanf:"email" jsonschema:"title=email"`
+	Email Email `yaml:"email" json:"email" koanf:"email" jsonschema:"title=email"`
 	// `email_delivery` configures how outgoing mails are delivered.
-	EmailDelivery EmailDelivery `yaml:"email_delivery" json:"email_delivery,omitempty" koanf:"email_delivery" split_words:"true" jsonschema:"title=email_delivery"`
+	EmailDelivery EmailDelivery `yaml:"email_delivery" json:"email_delivery" koanf:"email_delivery" split_words:"true" jsonschema:"title=email_delivery"`
 	// Deprecated. See child properties for suggested replacements.
-	Emails Emails `yaml:"emails" json:"emails,omitempty" koanf:"emails" jsonschema:"title=emails"`
+	Emails Emails `yaml:"emails" json:"emails" koanf:"emails" jsonschema:"title=emails"`
 	// `mfa` configures how multi-factor-authentication behaves.
-	MFA MFA `yaml:"mfa" json:"mfa,omitempty" koanf:"mfa" jsonschema:"title=mfa"`
+	MFA MFA `yaml:"mfa" json:"mfa" koanf:"mfa" jsonschema:"title=mfa"`
 	// MultiTenancy determines if the system supports multiple tenants, enabling tenant-specific configurations and isolation.
-	Passcode Passcode `yaml:"passcode" json:"passcode,omitempty" koanf:"passcode" jsonschema:"title=passcode"`
-	// `passkey` configures how passkeys  are acquired and used.
-	Passkey Passkey `yaml:"passkey" json:"passkey,omitempty" koanf:"passkey" jsonschema:"title=passkey"`
+	Passcode Passcode `yaml:"passcode" json:"passcode" koanf:"passcode" jsonschema:"title=passcode"`
+	// `passkey` configures how passkeys are acquired and used.
+	Passkey Passkey `yaml:"passkey" json:"passkey" koanf:"passkey" jsonschema:"title=passkey"`
 	// `password` configures how passwords are acquired and used.
-	Password Password `yaml:"password" json:"password,omitempty" koanf:"password" jsonschema:"title=password"`
+	Password Password `yaml:"password" json:"password" koanf:"password" jsonschema:"title=password"`
 	// `saml` configures modalities of SAML (Security Assertion Markup Language) SSO authentication and SAML identity
 	// providers.
-	Saml Saml `yaml:"saml" json:"saml,omitempty" koanf:"saml" jsonschema:"title=saml"`
+	Saml Saml `yaml:"saml" json:"saml" koanf:"saml" jsonschema:"title=saml"`
 	// `secrets` configures the keys used for cryptographically signing tokens issued by the API.
-	Secrets Secrets `yaml:"secrets" json:"secrets,omitempty" koanf:"secrets" jsonschema:"title=secrets"`
+	Secrets Secrets `yaml:"secrets" json:"secrets" koanf:"secrets" jsonschema:"title=secrets"`
 	// `security_notifications` configures security notifications for important security-related events.
-	SecurityNotifications SecurityNotifications `yaml:"security_notifications" json:"security_notifications,omitempty" koanf:"security_notifications"`
+	SecurityNotifications SecurityNotifications `yaml:"security_notifications" json:"security_notifications" koanf:"security_notifications"`
 	// `cors` configures Cross-Origin Resource Sharing settings for this tenant.
-	Cors Cors `yaml:"cors" json:"cors,omitempty" koanf:"cors" jsonschema:"title=cors"`
+	Cors Cors `yaml:"cors" json:"cors" koanf:"cors" jsonschema:"title=cors"`
 	// `service` configures general service information.
-	Service Service `yaml:"service" json:"service,omitempty" koanf:"service" jsonschema:"title=service"`
+	Service Service `yaml:"service" json:"service" koanf:"service" jsonschema:"title=service"`
 	// `session` configures settings for session JWTs and Cookies issued by the API.
-	Session Session `yaml:"session" json:"session,omitempty" koanf:"session" jsonschema:"title=session"`
+	Session Session `yaml:"session" json:"session" koanf:"session" jsonschema:"title=session"`
 	// Deprecated. Use `email_delivery.smtp` instead.
-	Smtp SMTP `yaml:"smtp" json:"smtp,omitempty" koanf:"smtp" jsonschema:"title=smtp"`
+	Smtp SMTP `yaml:"smtp" json:"smtp" koanf:"smtp" jsonschema:"title=smtp"`
 	// `third_party` configures the modalities of third party OAuth/OIDC based authentication and available identity
 	// providers.
-	ThirdParty ThirdParty `yaml:"third_party" json:"third_party,omitempty" koanf:"third_party" split_words:"true" jsonschema:"title=third_party"`
+	ThirdParty ThirdParty `yaml:"third_party" json:"third_party" koanf:"third_party" split_words:"true" jsonschema:"title=third_party"`
 	// `username` configures how usernames of user accounts are acquired and used.
-	Username Username `yaml:"username" json:"username,omitempty" koanf:"username" jsonschema:"title=username"`
+	Username Username `yaml:"username" json:"username" koanf:"username" jsonschema:"title=username"`
 	// `webauthn` configures general settings for communication with the WebAuthentication API.
-	Webauthn WebauthnSettings `yaml:"webauthn" json:"webauthn,omitempty" koanf:"webauthn" jsonschema:"title=webauthn"`
+	Webauthn WebauthnSettings `yaml:"webauthn" json:"webauthn" koanf:"webauthn" jsonschema:"title=webauthn"`
 	// `webhooks` configures HTTP-based callbacks for specific events occurring in the system.
-	Webhooks WebhookSettings `yaml:"webhooks" json:"webhooks,omitempty" koanf:"webhooks" jsonschema:"title=webhooks"`
+	Webhooks WebhookSettings `yaml:"webhooks" json:"webhooks" koanf:"webhooks" jsonschema:"title=webhooks"`
 	// `privacy` configures privacy settings
-	Privacy Privacy `yaml:"privacy" json:"privacy,omitempty" koanf:"privacy" jsonschema:"title=privacy"`
+	Privacy Privacy `yaml:"privacy" json:"privacy" koanf:"privacy" jsonschema:"title=privacy"`
 }
 
 // Config is the central configuration type
