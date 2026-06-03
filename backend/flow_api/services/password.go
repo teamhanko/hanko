@@ -133,8 +133,8 @@ func firebaseScrypt(password []byte, parameters FirebaseScryptParameters) ([]byt
 		password,
 		fullSalt,
 		N,
-		int(parameters.rounds),
-		1,
+		parameters.rounds,
+		parameters.parallelism,
 		FirebaseScryptKeyLen,
 	)
 	if err != nil {
