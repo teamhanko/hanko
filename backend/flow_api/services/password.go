@@ -182,8 +182,8 @@ func ParseFirebaseScryptString(fbscryptString string) (*FirebaseScryptParameters
 	if err != nil {
 		return nil, fmt.Errorf("crypto: invalid n parameter %q: %w", n, err)
 	}
-	if memory == 0 {
-		return nil, fmt.Errorf("crypto: invalid n=0")
+	if memory <= 0 {
+		return nil, fmt.Errorf("crypto: invalid n<=0")
 	}
 
 	rounds64, err := strconv.ParseInt(r, 10, 0)
@@ -191,8 +191,8 @@ func ParseFirebaseScryptString(fbscryptString string) (*FirebaseScryptParameters
 	if err != nil {
 		return nil, fmt.Errorf("crypto: invalid r parameter %q: %w", r, err)
 	}
-	if rounds == 0 {
-		return nil, fmt.Errorf("crypto: invalid r=0")
+	if rounds <= 0 {
+		return nil, fmt.Errorf("crypto: invalid r<=0")
 	}
 
 	parallelism64, err := strconv.ParseInt(p, 10, 0)
@@ -200,8 +200,8 @@ func ParseFirebaseScryptString(fbscryptString string) (*FirebaseScryptParameters
 	if err != nil {
 		return nil, fmt.Errorf("crypto: invalid p parameter %q: %w", p, err)
 	}
-	if parallelism == 0 {
-		return nil, fmt.Errorf("crypto: invalid p=0")
+	if parallelism <= 0 {
+		return nil, fmt.Errorf("crypto: invalid p<=0")
 	}
 
 	rawHash, err := base64.StdEncoding.DecodeString(hashB64)
