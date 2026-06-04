@@ -80,13 +80,13 @@ type KeyManagement struct {
 	// 4. IAM role for Amazon EC2 (via instance metadata service)
 	// 5. IAM role for Amazon ECS (via container credentials)
 	// 6. IAM role for Amazon EKS (via service account token)
-	Type KeyManagementStoreType `yaml:"type" json:"type,omitempty" koanf:"type"`
+	Type KeyManagementStoreType `yaml:"type" json:"type" koanf:"type"`
 	// KeyID is the AWS KMS key identifier (ARN or alias) used for signing operations.
 	// Required when Type is 'aws_kms'.
-	KeyID string `yaml:"key_id" json:"key_id,omitempty" koanf:"key_id"`
+	KeyID string `yaml:"key_id" json:"key_id" koanf:"key_id"`
 	// Region is the AWS region where the KMS key is located.
 	// Required when Type is 'aws_kms'.
-	Region string `yaml:"region" json:"region,omitempty" koanf:"region"`
+	Region string `yaml:"region" json:"region" koanf:"region"`
 }
 
 func (KeyManagement) JSONSchemaExtend(schema *jsonschema.Schema) {
