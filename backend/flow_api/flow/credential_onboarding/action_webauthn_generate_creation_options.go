@@ -56,6 +56,7 @@ func (a WebauthnGenerateCreationOptions) Execute(c flowpilot.ExecutionContext) e
 		UserID:   userID,
 		Email:    &email,
 		Username: &username,
+		TenantID: deps.TenantID,
 		Cfg:      deps.Cfg.TenantConfig,
 	}
 
