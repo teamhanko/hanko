@@ -10,6 +10,7 @@ import (
 	"math"
 	"os"
 	"runtime"
+	"strconv"
 	"sync"
 	"time"
 
@@ -536,10 +537,10 @@ func parseTime(s string) (*time.Time, error) {
 		return nil, nil
 	}
 
-	t, err := time.Parse(time.RFC3339, s)
-	if err == nil {
-		return &t, nil
+	timestampMillis, err := strconv.ParseInt(s, 10, 64)
+	if err != nil {
+		return nil, err
 	}
 
-	return nil, nil
+	return new(time.Unix(0, timestampMillis*int64(time.Millisecond))), nil
 }
