@@ -9,19 +9,19 @@ import (
 type SecurityKeys struct {
 	// `attestation_preference` is used to specify the preference regarding attestation conveyance during
 	// credential generation.
-	AttestationPreference string `yaml:"attestation_preference" json:"attestation_preference,omitempty" koanf:"attestation_preference" split_words:"true" jsonschema:"default=direct,enum=direct,enum=indirect,enum=none"`
+	AttestationPreference string `yaml:"attestation_preference" json:"attestation_preference" koanf:"attestation_preference" split_words:"true" jsonschema:"default=direct,enum=direct,enum=indirect,enum=none"`
 	// `authenticator_attachment`  is used to specify the preference regarding authenticator attachment during credential registration.
-	AuthenticatorAttachment string `yaml:"authenticator_attachment" json:"authenticator_attachment,omitempty" koanf:"authenticator_attachment" split_words:"true" jsonschema:"default=cross-platform,enum=platform,enum=cross-platform,enum=no_preference"`
+	AuthenticatorAttachment string `yaml:"authenticator_attachment" json:"authenticator_attachment" koanf:"authenticator_attachment" split_words:"true" jsonschema:"default=cross-platform,enum=platform,enum=cross-platform,enum=no_preference"`
 	// `enabled` determines whether security keys are eligible for multi-factor-authentication.
 	Enabled bool `yaml:"enabled" json:"enabled" koanf:"enabled" jsonschema:"default=true"`
 	// 'limit' determines the maximum number of security keys a user can register.
-	Limit int `yaml:"limit" json:"limit,omitempty" koanf:"limit" jsonschema:"default=10"`
+	Limit int `yaml:"limit" json:"limit" koanf:"limit" jsonschema:"default=10"`
 	// `user_verification` specifies the requirements regarding local authorization with an authenticator through
 	//  various authorization gesture modalities; for example, through a touch plus pin code,
 	//  password entry, or biometric recognition.
 	//
 	// The setting applies to both WebAuthn registration and authentication ceremonies.
-	UserVerification string `yaml:"user_verification" json:"user_verification,omitempty" koanf:"user_verification" split_words:"true" jsonschema:"default=discouraged,enum=required,enum=preferred,enum=discouraged"`
+	UserVerification string `yaml:"user_verification" json:"user_verification" koanf:"user_verification" split_words:"true" jsonschema:"default=discouraged,enum=required,enum=preferred,enum=discouraged"`
 }
 
 type TOTP struct {
