@@ -437,7 +437,7 @@ func writer(
 
 func convertUser(u FirebaseUser, cfg FirebaseHashConfig) (ImportOrExportEntry, error) {
 
-	if u.Email == "" && u.PasswordHash != "" {
+	if u.Email == "" && u.PasswordHash == "" {
 		// If both are missing, there is no way to authenticate the user, unless some other credential/factor
 		// is manually added after the firebase -> hanko user conversion. This feels unlikely, so we count this
 		// as a failure.
