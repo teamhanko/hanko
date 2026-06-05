@@ -136,7 +136,7 @@
     "ts-jest": "^29.4.9",
     "ts-loader": "^9.5.7",
     "webpack": "^5.106.1",
-    "webpack-cli": "^7.0.2"
+    "webpack-cli": "^7.0.3"
   },
   "dependencies": {
     "@denysvuika/preact-translate": "^0.6.0",
