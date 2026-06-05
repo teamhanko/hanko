@@ -1,6 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://github.com/teamhanko/hanko/backend/cmd/user/import-or-export-list",
+  "$id": "https://github.com/teamhanko/hanko/backend/v2/cmd/user/import-or-export-list",
   "$ref": "#/$defs/ImportOrExportList",
   "$defs": {
     "Emails": {
@@ -101,9 +101,7 @@
       "additionalProperties": false,
       "type": "object",
       "required": [
-        "emails",
-        "password",
-        "otp_secret"
+        "emails"
       ],
       "title": "ImportEntry",
       "description": "ImportOrExportEntry represents a user to be imported/export to the Hanko database"
@@ -130,8 +128,6 @@
                 "is_verified": false
               }
             ],
-            "password": null,
-            "otp_secret": null,
             "created_at": "2024-08-17T12:05:15.651387237Z",
             "updated_at": "2024-08-17T12:05:15.651387237Z"
           },
@@ -149,8 +145,6 @@
                 "is_verified": false
               }
             ],
-            "password": null,
-            "otp_secret": null,
             "created_at": "2024-08-17T12:05:15.651387237Z",
             "updated_at": "2024-08-17T12:05:15.651387237Z"
           }
@@ -163,8 +157,7 @@
               "password": "$2a$12$mFbud0mLsD/q.WG7/9pNQemlAHs3H4o8zAv44gsUF1v1awsdqTh7.",
               "created_at": "2024-08-17T12:05:15.651387237Z",
               "updated_at": "2024-08-17T12:05:15.651387237Z"
-            },
-            "otp_secret": null
+            }
           }
         ]
       ]
