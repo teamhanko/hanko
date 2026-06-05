@@ -11,11 +11,13 @@ import (
 	"os"
 	"runtime"
 	"strconv"
+	"strings"
 	"sync"
 	"time"
 
 	"github.com/go-playground/validator/v10"
 	"github.com/spf13/cobra"
+	"github.com/teamhanko/hanko/backend/v2/dto"
 )
 
 // ======================================================
@@ -475,7 +477,9 @@ func convertUser(u FirebaseUser, cfg FirebaseHashConfig) (ImportOrExportEntry, e
 
 	err = convertedEntry.validate(v)
 	if err != nil {
-		return ImportOrExportEntry{}, err
+		vErrs := dto.TransformValidationErrors(err)
+		vErr := fmt.Errorf("%v", strings.Join(vErrs, " and "))
+		return ImportOrExportEntry{}, vErr
 	}
 
 	return convertedEntry, nil
