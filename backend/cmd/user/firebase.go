@@ -114,11 +114,11 @@ func NewFirebaseCommand() *cobra.Command {
 		},
 	}
 
-	cmd.Flags().StringVar(&opts.inputFile, "input", "", "input file")
-	cmd.Flags().StringVar(&opts.configFile, "config", "", "config file")
-	cmd.Flags().StringVar(&opts.outputFile, "output", opts.outputFile, "output file")
-	cmd.Flags().StringVar(&opts.dlqFile, "dlq", opts.dlqFile, "dlq file")
-	cmd.Flags().IntVar(&opts.workers, "workers", opts.workers, "workers")
+	cmd.Flags().StringVar(&opts.inputFile, "input", "", "Firebase export input file (JSON)")
+	cmd.Flags().StringVar(&opts.configFile, "config", "", "Firebase hash config file (JSON)")
+	cmd.Flags().StringVar(&opts.outputFile, "output", opts.outputFile, "Hanko import output file (JSON)")
+	cmd.Flags().StringVar(&opts.dlqFile, "dlq", opts.dlqFile, "DLQ file containing user conversion errors (NDJSON)")
+	cmd.Flags().IntVar(&opts.workers, "workers", opts.workers, "Number of workers")
 
 	_ = cmd.MarkFlagRequired("input")
 	_ = cmd.MarkFlagRequired("config")
