@@ -12,7 +12,7 @@ type Secrets struct {
 	// KeyManagement configures the key management system used for signing JWTs.
 	// Supports 'local' (default) which uses the keys defined in the 'keys' field to encrypt a newly generated private
 	// RSA key in the database, or 'aws_kms' which uses AWS Key Management Service for key signatures.
-	KeyManagement KeyManagement `yaml:"key_management" json:"key_management,omitempty" koanf:"key_management"`
+	KeyManagement KeyManagement `yaml:"key_management" json:"key_management" koanf:"key_management"`
 	// `keys` are used to en- and decrypt the JWKs which get used to sign the JWTs issued by the API.
 	// For every key a JWK is generated, encrypted with the key and persisted in the database.
 	//
@@ -22,7 +22,7 @@ type Secrets struct {
 	// database record. If you remove a key, you also have to remove the database record, otherwise
 	// application startup will fail.
 	// Deprecated: use top level "SecretKeys" instead
-	Keys []string `yaml:"keys" json:"keys,omitempty" koanf:"keys"`
+	Keys []string `yaml:"keys" json:"keys" koanf:"keys"`
 }
 
 func (Secrets) JSONSchemaExtend(schema *jsonschema.Schema) {
@@ -80,13 +80,13 @@ type KeyManagement struct {
 	// 4. IAM role for Amazon EC2 (via instance metadata service)
 	// 5. IAM role for Amazon ECS (via container credentials)
 	// 6. IAM role for Amazon EKS (via service account token)
-	Type KeyManagementStoreType `yaml:"type" json:"type,omitempty" koanf:"type"`
+	Type KeyManagementStoreType `yaml:"type" json:"type" koanf:"type"`
 	// KeyID is the AWS KMS key identifier (ARN or alias) used for signing operations.
 	// Required when Type is 'aws_kms'.
-	KeyID string `yaml:"key_id" json:"key_id,omitempty" koanf:"key_id"`
+	KeyID string `yaml:"key_id" json:"key_id" koanf:"key_id"`
 	// Region is the AWS region where the KMS key is located.
 	// Required when Type is 'aws_kms'.
-	Region string `yaml:"region" json:"region,omitempty" koanf:"region"`
+	Region string `yaml:"region" json:"region" koanf:"region"`
 }
 
 func (KeyManagement) JSONSchemaExtend(schema *jsonschema.Schema) {

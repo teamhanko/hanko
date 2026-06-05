@@ -13,15 +13,15 @@ import (
 
 type ThirdParty struct {
 	// `providers` contains the configurations for the available OAuth/OIDC identity providers.
-	Providers ThirdPartyProviders `yaml:"providers" json:"providers,omitempty" koanf:"providers" jsonschema:"title=providers,uniqueItems=true"`
+	Providers ThirdPartyProviders `yaml:"providers" json:"providers" koanf:"providers" jsonschema:"title=providers,uniqueItems=true"`
 	// `custom_providers contains the configurations for custom OAuth/OIDC identity providers.
-	CustomProviders CustomThirdPartyProviders `yaml:"custom_providers" json:"custom_providers,omitempty" koanf:"custom_providers" jsonschema:"title=custom_providers"`
+	CustomProviders CustomThirdPartyProviders `yaml:"custom_providers" json:"custom_providers" koanf:"custom_providers" jsonschema:"title=custom_providers"`
 	// `redirect_url` is the URL the third party provider redirects to with an authorization code. Must consist of the base URL
 	// of your running Hanko backend instance and the `callback` endpoint of the API,
 	// i.e. `{YOUR_BACKEND_INSTANCE}/thirdparty/callback.`
 	//
 	// Required if any of the [`providers`](#providers) are `enabled`.
-	RedirectURL string `yaml:"redirect_url" json:"redirect_url,omitempty" koanf:"redirect_url" split_words:"true" jsonschema:"example=https://yourinstance.com/thirdparty/callback"`
+	RedirectURL string `yaml:"redirect_url" json:"redirect_url" koanf:"redirect_url" split_words:"true" jsonschema:"example=https://yourinstance.com/thirdparty/callback"`
 	// `error_redirect_url` is the URL the backend redirects to if an error occurs during third party sign-in.
 	// Errors are provided as 'error' and 'error_description' query params in the redirect location URL.
 	//
@@ -32,12 +32,12 @@ type ThirdParty struct {
 	// redirect URLs.
 	//
 	// Required if any of the [`providers`](#providers) are `enabled`. Must not have trailing slash.
-	ErrorRedirectURL string `yaml:"error_redirect_url" json:"error_redirect_url,omitempty" koanf:"error_redirect_url" split_words:"true"`
+	ErrorRedirectURL string `yaml:"error_redirect_url" json:"error_redirect_url" koanf:"error_redirect_url" split_words:"true"`
 	// `default_redirect_url` is the URL the backend redirects to after it successfully verified
 	// the response from any third party provider.
 	//
 	// Must not have trailing slash.
-	DefaultRedirectURL string `yaml:"default_redirect_url" json:"default_redirect_url,omitempty" koanf:"default_redirect_url" split_words:"true"`
+	DefaultRedirectURL string `yaml:"default_redirect_url" json:"default_redirect_url" koanf:"default_redirect_url" split_words:"true"`
 	// `allowed_redirect_urls` is a list of URLs the backend is allowed to redirect to after third party sign-in was
 	// successful.
 	//
@@ -52,7 +52,7 @@ type ThirdParty struct {
 	// See [here](https://pkg.go.dev/github.com/gobwas/glob#Compile) for more on globbing.
 	//
 	// Must not be empty if any of the [`providers`](#providers) are `enabled`. URLs in the list must not have a trailing slash.
-	AllowedRedirectURLS   []string             `yaml:"allowed_redirect_urls" json:"allowed_redirect_urls,omitempty" koanf:"allowed_redirect_urls" split_words:"true" jsonschema:"minItems=1"`
+	AllowedRedirectURLS   []string             `yaml:"allowed_redirect_urls" json:"allowed_redirect_urls" koanf:"allowed_redirect_urls" split_words:"true" jsonschema:"minItems=1"`
 	AllowedRedirectURLMap map[string]glob.Glob `jsonschema:"-" yaml:"-" json:"-" koanf:"-"`
 }
 
@@ -222,12 +222,12 @@ func (p *CustomThirdPartyProviders) Validate() error {
 type CustomThirdPartyProvider struct {
 	// `acr_values` is a list of strings that specifies the Authentication Context Class Reference values that the
 	// Authorization Server is being requested to use for processing this Authentication Request.
-	AcrValues []string `yaml:"acr_values" json:"acr_values,omitempty" koanf:"acr_values"`
+	AcrValues []string `yaml:"acr_values" json:"acr_values" koanf:"acr_values"`
 	// `allow_linking` indicates whether existing accounts can be automatically linked with this provider.
 	//
 	// Linking is based on matching one of the email addresses of an existing user account with the (primary)
 	// email address of the third party provider account.
-	AllowLinking bool `yaml:"allow_linking" json:"allow_linking,omitempty" koanf:"allow_linking" jsonschema:"default=false"`
+	AllowLinking bool `yaml:"allow_linking" json:"allow_linking" koanf:"allow_linking" jsonschema:"default=false"`
 	// `attribute_mapping` defines a map that associates a set of known standard OIDC conformant end-user claims
 	// (the key of a map entry) at the Hanko backend to claims retrieved from a third party provider (the value of the
 	// map entry). This is primarily necessary if a non-OIDC provider is configured/used in which case it is probable
@@ -247,12 +247,12 @@ type CustomThirdPartyProvider struct {
 	// retained internally in a `custom_claims` claim.
 	//
 	// Mappings are one-to-one mappings, complex mappings (e.g. mapping concatenations of two claims) are not possible.
-	AttributeMapping map[string]string `yaml:"attribute_mapping" json:"attribute_mapping,omitempty" koanf:"attribute_mapping"`
+	AttributeMapping map[string]string `yaml:"attribute_mapping" json:"attribute_mapping" koanf:"attribute_mapping"`
 	// URL of the provider's authorization endpoint where the end-user is redirected to authenticate and grant consent for
 	// an application to access their resources.
 	//
 	// Required if `use_discovery` is false or omitted.
-	AuthorizationEndpoint string `yaml:"authorization_endpoint" json:"authorization_endpoint,omitempty" koanf:"authorization_endpoint"`
+	AuthorizationEndpoint string `yaml:"authorization_endpoint" json:"authorization_endpoint" koanf:"authorization_endpoint"`
 	// `ID` is a unique identifier for the provider, derived from the key in the `custom_providers` map, by
 	// concatenating the prefix "custom_". This allows distinguishing between built-in and custom providers at runtime.
 	ID string `jsonschema:"-" yaml:"-" json:"-" koanf:"-"`
@@ -260,17 +260,17 @@ type CustomThirdPartyProvider struct {
 	//	scheme and has no query or fragment components.
 	//
 	// Required if `use_discovery` is true.
-	Issuer string `yaml:"issuer" json:"issuer,omitempty" koanf:"issuer"`
+	Issuer string `yaml:"issuer" json:"issuer" koanf:"issuer"`
 	// `client_id` is the ID of the OAuth/OIDC client. Must be obtained from the provider.
 	//
 	// Required if the provider is `enabled`.
-	ClientID string `yaml:"client_id" json:"client_id,omitempty" koanf:"client_id" split_words:"true"`
+	ClientID string `yaml:"client_id" json:"client_id" koanf:"client_id" split_words:"true"`
 	// `display_name` is the name of the provider that is intended to be shown to an end-user.
 	//
 	// Required if the provider is `enabled`.
-	DisplayName string `yaml:"display_name" json:"display_name,omitempty" koanf:"display_name"`
+	DisplayName string `yaml:"display_name" json:"display_name" koanf:"display_name"`
 	// `enabled` indicates if the provider is enabled or disabled.
-	Enabled bool `yaml:"enabled" json:"enabled,omitempty" koanf:"enabled" jsonschema:"default=false"`
+	Enabled bool `yaml:"enabled" json:"enabled" koanf:"enabled" jsonschema:"default=false"`
 	// `prompt` specifies whether the Authorization Server prompts the End-User for reauthentication and consent.
 	// Possible values are:
 	// - login
@@ -278,29 +278,29 @@ type CustomThirdPartyProvider struct {
 	// - consent
 	// - select_account
 	// Please note that not all providers support all values. Check the corresponding docs of the provider for supported values.
-	Prompt string `yaml:"prompt" json:"prompt,omitempty" koanf:"prompt"`
+	Prompt string `yaml:"prompt" json:"prompt" koanf:"prompt"`
 	// `scopes` is a list of scopes requested from the provider that specify the level of access an application has to
 	// a user's resources on a server, defining what actions the app can perform on behalf of the user.
 	//
 	// Required if the provider is `enabled`.
-	Scopes []string `yaml:"scopes" json:"scopes,omitempty" koanf:"scopes,omitempty"`
+	Scopes []string `yaml:"scopes" json:"scopes" koanf:"scopes,omitempty"`
 	// `secret` is the client secret for the OAuth/OIDC client. Must be obtained from the provider.
 	//
 	// Required if the provider is `enabled`.
-	Secret string `yaml:"secret" json:"secret,omitempty" koanf:"secret"`
+	Secret string `yaml:"secret" json:"secret" koanf:"secret"`
 	// URL of the provider's token endpoint URL where an application exchanges an authorization code for an access
 	// token, which is used to authenticate API requests on behalf of the end-user.
 	//
 	// Required if `use_discovery` is false or omitted.
-	TokenEndpoint string `yaml:"token_endpoint" json:"token_endpoint,omitempty" koanf:"token_endpoint"`
+	TokenEndpoint string `yaml:"token_endpoint" json:"token_endpoint" koanf:"token_endpoint"`
 	// `use_discovery` determines if configuration information about an OpenID Connect (OIDC) provider, such as
 	// endpoint URLs and supported features,should be automatically retrieved, from a well-known
 	// URL (typically /.well-known/openid-configuration).
-	UseDiscovery bool `yaml:"use_discovery" json:"use_discovery,omitempty" koanf:"use_discovery" jsonschema:"default=true"`
+	UseDiscovery bool `yaml:"use_discovery" json:"use_discovery" koanf:"use_discovery" jsonschema:"default=true"`
 	// URL of the provider's endpoint that returns claims about an authenticated end-user.
 	//
 	// Required if `use_discovery` is false or omitted.
-	UserinfoEndpoint string `yaml:"userinfo_endpoint" json:"userinfo_endpoint,omitempty" koanf:"userinfo_endpoint"`
+	UserinfoEndpoint string `yaml:"userinfo_endpoint" json:"userinfo_endpoint" koanf:"userinfo_endpoint"`
 }
 
 func (p *CustomThirdPartyProvider) Validate() error {
@@ -376,19 +376,19 @@ func (CustomThirdPartyProvider) JSONSchemaExtend(schema *jsonschema.Schema) {
 
 type ThirdPartyProviders struct {
 	// `apple` contains the provider configuration for Apple.
-	Apple ThirdPartyProvider `yaml:"apple" json:"apple,omitempty" koanf:"apple"`
+	Apple ThirdPartyProvider `yaml:"apple" json:"apple" koanf:"apple"`
 	// `discord` contains the provider configuration for Discord.
-	Discord ThirdPartyProvider `yaml:"discord" json:"discord,omitempty" koanf:"discord"`
+	Discord ThirdPartyProvider `yaml:"discord" json:"discord" koanf:"discord"`
 	// `github` contains the provider configuration for GitHub.
-	GitHub ThirdPartyProvider `yaml:"github" json:"github,omitempty" koanf:"github"`
+	GitHub ThirdPartyProvider `yaml:"github" json:"github" koanf:"github"`
 	// `google` contains the provider configuration for Google.
-	Google ThirdPartyProvider `yaml:"google" json:"google,omitempty" koanf:"google"`
+	Google ThirdPartyProvider `yaml:"google" json:"google" koanf:"google"`
 	// `linkedin` contains the provider configuration for LinkedIn.
-	LinkedIn ThirdPartyProvider `yaml:"linkedin" json:"linkedin,omitempty" koanf:"linkedin"`
+	LinkedIn ThirdPartyProvider `yaml:"linkedin" json:"linkedin" koanf:"linkedin"`
 	// `microsoft` contains the provider configuration for Microsoft.
-	Microsoft ThirdPartyProvider `yaml:"microsoft" json:"microsoft,omitempty" koanf:"microsoft"`
+	Microsoft ThirdPartyProvider `yaml:"microsoft" json:"microsoft" koanf:"microsoft"`
 	//`facebook` contains the provider configuration for Facebook.
-	Facebook ThirdPartyProvider `yaml:"facebook" json:"facebook,omitempty" koanf:"facebook"`
+	Facebook ThirdPartyProvider `yaml:"facebook" json:"facebook" koanf:"facebook"`
 }
 
 func (p *ThirdPartyProviders) Validate() error {
@@ -445,14 +445,14 @@ type ThirdPartyProvider struct {
 	//
 	// Linking is based on matching one of the email addresses of an existing user account with the (primary)
 	// email address of the third party provider account.
-	AllowLinking bool `yaml:"allow_linking" json:"allow_linking,omitempty" koanf:"allow_linking" split_words:"true"`
+	AllowLinking bool `yaml:"allow_linking" json:"allow_linking" koanf:"allow_linking" split_words:"true"`
 	// `client_id` is the ID of the OAuth/OIDC client. Must be obtained from the provider.
 	//
 	// Required if the provider is `enabled`.
-	ClientID    string `yaml:"client_id" json:"client_id,omitempty" koanf:"client_id" split_words:"true"`
+	ClientID    string `yaml:"client_id" json:"client_id" koanf:"client_id" split_words:"true"`
 	DisplayName string `jsonschema:"-" yaml:"-" json:"-" koanf:"-"`
 	// `enabled` determines whether this provider is enabled.
-	Enabled bool `yaml:"enabled" json:"enabled,omitempty" koanf:"enabled" jsonschema:"default=false"`
+	Enabled bool `yaml:"enabled" json:"enabled" koanf:"enabled" jsonschema:"default=false"`
 	// `prompt` specifies whether the Authorization Server prompts the End-User for reauthentication and consent.
 	// Possible values are:
 	// - login
@@ -460,11 +460,11 @@ type ThirdPartyProvider struct {
 	// - consent
 	// - select_account
 	// Please note that not all providers support all values. Check the corresponding docs of the provider for supported values.
-	Prompt string `yaml:"prompt" json:"prompt,omitempty" koanf:"prompt"`
+	Prompt string `yaml:"prompt" json:"prompt" koanf:"prompt"`
 	// `secret` is the client secret for the OAuth/OIDC client. Must be obtained from the provider.
 	//
 	// Required if the provider is `enabled`.
-	Secret string `yaml:"secret" json:"secret,omitempty" koanf:"secret"`
+	Secret string `yaml:"secret" json:"secret" koanf:"secret"`
 	// `ID` is a unique name/slug/identifier for the provider. It is the lowercased key of the corresponding field
 	// in ThirdPartyProviders. See also: CustomThirdPartyProvider.ID.
 	ID string `jsonschema:"-" yaml:"-" json:"-" koanf:"-"`

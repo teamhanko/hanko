@@ -9,19 +9,19 @@ import (
 type SecurityKeys struct {
 	// `attestation_preference` is used to specify the preference regarding attestation conveyance during
 	// credential generation.
-	AttestationPreference string `yaml:"attestation_preference" json:"attestation_preference,omitempty" koanf:"attestation_preference" split_words:"true" jsonschema:"default=direct,enum=direct,enum=indirect,enum=none"`
+	AttestationPreference string `yaml:"attestation_preference" json:"attestation_preference" koanf:"attestation_preference" split_words:"true" jsonschema:"default=direct,enum=direct,enum=indirect,enum=none"`
 	// `authenticator_attachment`  is used to specify the preference regarding authenticator attachment during credential registration.
-	AuthenticatorAttachment string `yaml:"authenticator_attachment" json:"authenticator_attachment,omitempty" koanf:"authenticator_attachment" split_words:"true" jsonschema:"default=cross-platform,enum=platform,enum=cross-platform,enum=no_preference"`
+	AuthenticatorAttachment string `yaml:"authenticator_attachment" json:"authenticator_attachment" koanf:"authenticator_attachment" split_words:"true" jsonschema:"default=cross-platform,enum=platform,enum=cross-platform,enum=no_preference"`
 	// `enabled` determines whether security keys are eligible for multi-factor-authentication.
 	Enabled bool `yaml:"enabled" json:"enabled" koanf:"enabled" jsonschema:"default=true"`
 	// 'limit' determines the maximum number of security keys a user can register.
-	Limit int `yaml:"limit" json:"limit,omitempty" koanf:"limit" jsonschema:"default=10"`
+	Limit int `yaml:"limit" json:"limit" koanf:"limit" jsonschema:"default=10"`
 	// `user_verification` specifies the requirements regarding local authorization with an authenticator through
 	//  various authorization gesture modalities; for example, through a touch plus pin code,
 	//  password entry, or biometric recognition.
 	//
 	// The setting applies to both WebAuthn registration and authentication ceremonies.
-	UserVerification string `yaml:"user_verification" json:"user_verification,omitempty" koanf:"user_verification" split_words:"true" jsonschema:"default=discouraged,enum=required,enum=preferred,enum=discouraged"`
+	UserVerification string `yaml:"user_verification" json:"user_verification" koanf:"user_verification" split_words:"true" jsonschema:"default=discouraged,enum=required,enum=preferred,enum=discouraged"`
 }
 
 type TOTP struct {
@@ -35,26 +35,26 @@ type MFA struct {
 	// `acquire_on_registration` configures if users are prompted creating an MFA credential on registration.
 	AcquireOnRegistration bool `yaml:"acquire_on_registration" json:"acquire_on_registration" koanf:"acquire_on_registration" jsonschema:"default=true"`
 	// `device_trust_cookie_name` is the name of the cookie used to store the token of a trusted device.
-	DeviceTrustCookieName string `yaml:"device_trust_cookie_name" json:"device_trust_cookie_name,omitempty" koanf:"device_trust_cookie_name" jsonschema:"default=hanko_device_token"`
+	DeviceTrustCookieName string `yaml:"device_trust_cookie_name" json:"device_trust_cookie_name" koanf:"device_trust_cookie_name" jsonschema:"default=hanko_device_token"`
 	// `device_trust_duration` configures the duration a device remains trusted after authentication; once expired, the
 	// user must reauthenticate with MFA.
 	DeviceTrustDuration time.Duration `yaml:"device_trust_duration" json:"device_trust_duration" koanf:"device_trust_duration" jsonschema:"default=720h,type=string"`
 	// `device_trust_max_users_per_device` limits how many users can have device trust on a single device/browser.
 	// Oldest entries are removed when the limit is exceeded. This allows multiple users to trust the same device
 	// without overwriting each other's trust tokens.
-	DeviceTrustMaxUsersPerDevice int `yaml:"device_trust_max_users_per_device,omitempty" json:"device_trust_max_users_per_device,omitempty" koanf:"device_trust_max_users_per_device" jsonschema:"default=20"`
+	DeviceTrustMaxUsersPerDevice int `yaml:"device_trust_max_users_per_device,omitempty" json:"device_trust_max_users_per_device" koanf:"device_trust_max_users_per_device" jsonschema:"default=20"`
 	// `device_trust_policy` determines the conditions under which a device or browser is considered trusted, allowing
 	// MFA to be skipped for subsequent logins.
-	DeviceTrustPolicy string `yaml:"device_trust_policy" json:"device_trust_policy,omitempty" koanf:"device_trust_policy" split_words:"true" jsonschema:"default=prompt,enum=always,enum=prompt,enum=never"`
+	DeviceTrustPolicy string `yaml:"device_trust_policy" json:"device_trust_policy" koanf:"device_trust_policy" split_words:"true" jsonschema:"default=prompt,enum=always,enum=prompt,enum=never"`
 	// `enabled` determines whether multi-factor-authentication is enabled.
 	Enabled bool `yaml:"enabled" json:"enabled" koanf:"enabled" jsonschema:"default=true"`
 	// `optional` determines whether users must create an MFA credential when prompted. The MFA credential cannot be
 	// deleted if multi-factor-authentication is required (`optional: false`).
 	Optional bool `yaml:"optional" json:"optional" koanf:"optional" jsonschema:"default=true"`
 	// `security_keys` configures security key settings for multi-factor-authentication
-	SecurityKeys SecurityKeys `yaml:"security_keys" json:"security_keys,omitempty" koanf:"security_keys" jsonschema:"title=security_keys"`
+	SecurityKeys SecurityKeys `yaml:"security_keys" json:"security_keys" koanf:"security_keys" jsonschema:"title=security_keys"`
 	// `totp` configures the TOTP (Time-Based One-Time-Password) method for multi-factor-authentication.
-	TOTP TOTP `yaml:"totp" json:"totp,omitempty" koanf:"totp" jsonschema:"title=totp"`
+	TOTP TOTP `yaml:"totp" json:"totp" koanf:"totp" jsonschema:"title=totp"`
 }
 
 func (MFA) JSONSchemaExtend(schema *jsonschema.Schema) {
