@@ -57,7 +57,7 @@
     "eslint-plugin-promise": "^6.1.1",
     "jest": "^30.3.0",
     "jest-environment-jsdom": "^29.7.0",
-    "js-cookie": "^3.0.5",
+    "js-cookie": "^3.0.8",
     "jsdoc": "3.6.11",
     "microbundle": "^0.15.1",
     "ts-jest": "^29.4.9",
