@@ -10,11 +10,14 @@ import (
 	"math"
 	"os"
 	"runtime"
+	"strconv"
+	"strings"
 	"sync"
 	"time"
 
 	"github.com/go-playground/validator/v10"
 	"github.com/spf13/cobra"
+	"github.com/teamhanko/hanko/backend/v2/dto"
 )
 
 // ======================================================
@@ -113,11 +116,11 @@ func NewFirebaseCommand() *cobra.Command {
 		},
 	}
 
-	cmd.Flags().StringVar(&opts.inputFile, "input", "", "input file")
-	cmd.Flags().StringVar(&opts.configFile, "config", "", "config file")
-	cmd.Flags().StringVar(&opts.outputFile, "output", opts.outputFile, "output file")
-	cmd.Flags().StringVar(&opts.dlqFile, "dlq", opts.dlqFile, "dlq file")
-	cmd.Flags().IntVar(&opts.workers, "workers", opts.workers, "workers")
+	cmd.Flags().StringVar(&opts.inputFile, "input", "", "Firebase export input file (JSON)")
+	cmd.Flags().StringVar(&opts.configFile, "config", "", "Firebase hash config file (JSON)")
+	cmd.Flags().StringVar(&opts.outputFile, "output", opts.outputFile, "Hanko import output file (JSON)")
+	cmd.Flags().StringVar(&opts.dlqFile, "dlq", opts.dlqFile, "DLQ file containing user conversion errors (NDJSON)")
+	cmd.Flags().IntVar(&opts.workers, "workers", opts.workers, "Number of workers")
 
 	_ = cmd.MarkFlagRequired("input")
 	_ = cmd.MarkFlagRequired("config")
@@ -434,7 +437,7 @@ func writer(
 
 func convertUser(u FirebaseUser, cfg FirebaseHashConfig) (ImportOrExportEntry, error) {
 
-	if u.Email == "" && u.PasswordHash != "" {
+	if u.Email == "" && u.PasswordHash == "" {
 		// If both are missing, there is no way to authenticate the user, unless some other credential/factor
 		// is manually added after the firebase -> hanko user conversion. This feels unlikely, so we count this
 		// as a failure.
@@ -474,7 +477,9 @@ func convertUser(u FirebaseUser, cfg FirebaseHashConfig) (ImportOrExportEntry, e
 
 	err = convertedEntry.validate(v)
 	if err != nil {
-		return ImportOrExportEntry{}, err
+		vErrs := dto.TransformValidationErrors(err)
+		vErr := fmt.Errorf("%v", strings.Join(vErrs, " and "))
+		return ImportOrExportEntry{}, vErr
 	}
 
 	return convertedEntry, nil
@@ -536,10 +541,10 @@ func parseTime(s string) (*time.Time, error) {
 		return nil, nil
 	}
 
-	t, err := time.Parse(time.RFC3339, s)
-	if err == nil {
-		return &t, nil
+	timestampMillis, err := strconv.ParseInt(s, 10, 64)
+	if err != nil {
+		return nil, err
 	}
 
-	return nil, nil
+	return new(time.Unix(0, timestampMillis*int64(time.Millisecond))), nil
 }
