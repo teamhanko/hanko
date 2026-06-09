@@ -72,7 +72,6 @@ func (handler *Handler) Metadata(c echo.Context) error {
 		return c.JSON(http.StatusInternalServerError, thirdparty.ErrorServer("unable to provide metadata").WithCause(err))
 	}
 
-	// Marshal the metadata to XML
 	xmlMetadata, err := xml.MarshalIndent(metadata, "", "  ")
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, thirdparty.ErrorServer("unable to marshal metadata").WithCause(err))
@@ -104,8 +103,7 @@ func (handler *Handler) Auth(c echo.Context) error {
 		return handler.redirectError(c, thirdparty.ErrorInvalidRequest(err.Error()).WithCause(err), errorRedirectTo)
 	}
 
-	// Get provider by domain to obtain provider ID
-	providerModel, err := handler.samlService.Persister().GetSamlProviderPersister().GetByDomain(tenant.ID, request.Domain)
+	providerModel, err := handler.samlService.Persister().GetSamlProviderPersister().GetEnabledByDomain(tenant.ID, request.Domain)
 	if err != nil || providerModel == nil {
 		return handler.redirectError(c, thirdparty.ErrorInvalidRequest("provider not found").WithCause(err), errorRedirectTo)
 	}
@@ -312,7 +310,7 @@ func (handler *Handler) CallbackPost(c echo.Context) error {
 				redirectTo.String(),
 			)
 		}
-		time.Sleep(2 * time.Second)
+
 		assertionInfo, err := handler.getAssertionInfo(foundProvider, samlResponse)
 		if err != nil {
 			return handler.redirectError(

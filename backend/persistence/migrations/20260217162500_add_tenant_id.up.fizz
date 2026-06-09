@@ -53,6 +53,7 @@ add_index("emails", ["tenant_id", "id"], {"unique": true})
 add_index("emails", ["tenant_id", "address"], {"unique": true})
 add_foreign_key("emails", "tenant_id", {"tenants": ["id"]}, {"on_delete": "cascade", "on_update": "cascade"})
 sql("ALTER TABLE emails ADD CONSTRAINT emails_tenant_user_fkey FOREIGN KEY (tenant_id, user_id) REFERENCES users(tenant_id, id) ON DELETE CASCADE ON UPDATE CASCADE;")
+drop_index("emails", "emails_address_idx")
 
 add_column("primary_emails", "tenant_id", "uuid", {"default": "00000000-0000-0000-0000-000000000001"})
 add_index("primary_emails", "tenant_id", {})

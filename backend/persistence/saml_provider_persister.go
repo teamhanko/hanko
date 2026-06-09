@@ -14,6 +14,7 @@ type SamlProviderPersister interface {
 	Get(tenantID uuid.UUID, providerID uuid.UUID) (*models.SamlProvider, error)
 	GetByEntityID(tenantID uuid.UUID, entityID string) (*models.SamlProvider, error)
 	GetByDomain(tenantID uuid.UUID, domain string) (*models.SamlProvider, error)
+	GetEnabledByDomain(tenantID uuid.UUID, domain string) (*models.SamlProvider, error)
 	List(tenantID uuid.UUID) ([]models.SamlProvider, error)
 	Delete(provider models.SamlProvider) error
 }
@@ -29,11 +30,11 @@ func NewSamlProviderPersister(db *pop.Connection) SamlProviderPersister {
 func (p *samlProviderPersister) Create(provider models.SamlProvider) error {
 	vErr, err := p.db.ValidateAndCreate(&provider)
 	if err != nil {
-		return fmt.Errorf("failed to store saml provider: %w", err)
+		return fmt.Errorf("failed to store SAML provider: %w", err)
 	}
 
 	if vErr != nil && vErr.HasAny() {
-		return fmt.Errorf("saml provider object validation failed: %w", vErr)
+		return fmt.Errorf("SAML provider object validation failed: %w", vErr)
 	}
 
 	return nil
@@ -42,11 +43,11 @@ func (p *samlProviderPersister) Create(provider models.SamlProvider) error {
 func (p *samlProviderPersister) Update(provider models.SamlProvider) error {
 	vErr, err := p.db.ValidateAndUpdate(&provider)
 	if err != nil {
-		return fmt.Errorf("failed to update saml provider: %w", err)
+		return fmt.Errorf("failed to update SAML provider: %w", err)
 	}
 
 	if vErr != nil && vErr.HasAny() {
-		return fmt.Errorf("saml provider object validation failed: %w", vErr)
+		return fmt.Errorf("SAML provider object validation failed: %w", vErr)
 	}
 
 	return nil
@@ -59,7 +60,7 @@ func (p *samlProviderPersister) Get(tenantID uuid.UUID, providerID uuid.UUID) (*
 		if err.Error() == "sql: no rows in result set" {
 			return nil, nil
 		}
-		return nil, fmt.Errorf("failed to get saml provider: %w", err)
+		return nil, fmt.Errorf("failed to get SAML provider: %w", err)
 	}
 
 	return provider, nil
@@ -72,7 +73,7 @@ func (p *samlProviderPersister) GetByEntityID(tenantID uuid.UUID, entityID strin
 		if err.Error() == "sql: no rows in result set" {
 			return nil, nil
 		}
-		return nil, fmt.Errorf("failed to get saml provider by entity_id: %w", err)
+		return nil, fmt.Errorf("failed to get SAML provider by entity_id: %w", err)
 	}
 
 	return provider, nil
@@ -80,12 +81,25 @@ func (p *samlProviderPersister) GetByEntityID(tenantID uuid.UUID, entityID strin
 
 func (p *samlProviderPersister) GetByDomain(tenantID uuid.UUID, domain string) (*models.SamlProvider, error) {
 	provider := &models.SamlProvider{}
+	err := p.db.Where("tenant_id = ? AND domain = ?", tenantID, domain).First(provider)
+	if err != nil {
+		if err.Error() == "sql: no rows in result set" {
+			return nil, nil
+		}
+		return nil, fmt.Errorf("failed to get SAML provider by domain: %w", err)
+	}
+
+	return provider, nil
+}
+
+func (p *samlProviderPersister) GetEnabledByDomain(tenantID uuid.UUID, domain string) (*models.SamlProvider, error) {
+	provider := &models.SamlProvider{}
 	err := p.db.Where("tenant_id = ? AND domain = ? AND enabled = ?", tenantID, domain, true).First(provider)
 	if err != nil {
 		if err.Error() == "sql: no rows in result set" {
 			return nil, nil
 		}
-		return nil, fmt.Errorf("failed to get saml provider by domain: %w", err)
+		return nil, fmt.Errorf("failed to get SAML provider by domain: %w", err)
 	}
 
 	return provider, nil
@@ -95,7 +109,7 @@ func (p *samlProviderPersister) List(tenantID uuid.UUID) ([]models.SamlProvider,
 	providers := []models.SamlProvider{}
 	err := p.db.Where("tenant_id = ?", tenantID).All(&providers)
 	if err != nil {
-		return nil, fmt.Errorf("failed to list saml providers: %w", err)
+		return nil, fmt.Errorf("failed to list SAML providers: %w", err)
 	}
 
 	return providers, nil
@@ -104,7 +118,7 @@ func (p *samlProviderPersister) List(tenantID uuid.UUID) ([]models.SamlProvider,
 func (p *samlProviderPersister) Delete(provider models.SamlProvider) error {
 	err := p.db.Destroy(&provider)
 	if err != nil {
-		return fmt.Errorf("failed to delete saml provider: %w", err)
+		return fmt.Errorf("failed to delete SAML provider: %w", err)
 	}
 
 	return nil

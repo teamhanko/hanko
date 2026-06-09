@@ -14,7 +14,8 @@ import (
 )
 
 var (
-	ErrorSamlProviderAlreadyExists = errors.New("SAML provider already exists")
+	ErrorSamlProviderAlreadyExists      = errors.New("SAML provider already exists")
+	ErrorSamlProviderMetadataValidation = errors.New("SAML provider metadata validation failed")
 )
 
 // SamlProviderManagementService handles SAML provider lifecycle operations
@@ -39,7 +40,6 @@ func (s *SamlProviderManagementService) CreateFromConfig(tenantID uuid.UUID, idp
 		return fmt.Errorf("failed to fetch metadata for provider '%s': %w", idpConfig.Name, err)
 	}
 
-	// Serialize attribute map to JSON
 	attributeMapJSON, err := json.Marshal(idpConfig.AttributeMap)
 	if err != nil {
 		return fmt.Errorf("failed to marshal attribute map: %w", err)
@@ -86,7 +86,6 @@ func (s *SamlProviderManagementService) CreateFromConfig(tenantID uuid.UUID, idp
 			return fmt.Errorf("failed to create provider: %w", err)
 		}
 
-		// Store metadata cache within same transaction
 		return s.storeMetadataInTransaction(tx, tenantID, provider.ID, parsedMetadata)
 	})
 }
@@ -96,10 +95,9 @@ func (s *SamlProviderManagementService) Create(tenantID uuid.UUID, name, metadat
 	// Fetch and parse metadata (outside transaction since it's an external HTTP call)
 	parsedMetadata, err := s.metadataService.FetchAndParse(metadataURL)
 	if err != nil {
-		return nil, fmt.Errorf("failed to fetch metadata: %w", err)
+		return nil, fmt.Errorf("%w: %s", ErrorSamlProviderMetadataValidation, err.Error())
 	}
 
-	// Serialize attribute map
 	attributeMapJSON, err := json.Marshal(attributeMap)
 	if err != nil {
 		return nil, fmt.Errorf("failed to marshal attribute map: %w", err)
@@ -125,7 +123,6 @@ func (s *SamlProviderManagementService) Create(tenantID uuid.UUID, name, metadat
 			return fmt.Errorf("%w: provider with entity_id '%s' already exists", ErrorSamlProviderAlreadyExists, parsedMetadata.EntityID)
 		}
 
-		// Create provider
 		provider = models.SamlProvider{
 			ID:                    uuid.Must(uuid.NewV4()),
 			TenantID:              tenantID,
@@ -161,29 +158,41 @@ func (s *SamlProviderManagementService) Update(tenantID uuid.UUID, providerID uu
 		return err
 	}
 	if samlProvider == nil {
-		return fmt.Errorf("provider not found")
+		return fmt.Errorf("SAML provider with ID '%s' not found", providerID)
 	}
 
-	// Fetch new metadata if URL changed (outside transaction since it's an external HTTP call)
+	// Fetch metadata even if URL has not changed (outside transaction since it's an external HTTP call) -
+	// maybe certs changed.
 	var parsedMetadata *ParsedMetadata
-	if metadataURL != samlProvider.MetadataURL {
-		parsedMetadata, err = s.metadataService.FetchAndParse(metadataURL)
-		if err != nil {
-			return fmt.Errorf("failed to fetch metadata: %w", err)
-		}
+	parsedMetadata, err = s.metadataService.FetchAndParse(metadataURL)
+	if err != nil {
+		return fmt.Errorf("%w: %s", ErrorSamlProviderMetadataValidation, err.Error())
 	}
 
-	// Serialize attribute map
 	attributeMapJSON, err := json.Marshal(attributeMap)
 	if err != nil {
 		return fmt.Errorf("failed to marshal attribute map: %w", err)
 	}
 
-	// Wrap all database operations in a transaction
 	return s.persister.Transaction(func(tx *pop.Connection) error {
 		providerPersister := s.persister.GetSamlProviderPersisterWithConnection(tx)
 
-		// Re-fetch provider within transaction to ensure consistency
+		existingByDomain, err := providerPersister.GetByDomain(tenantID, domain)
+		if err != nil {
+			return err
+		}
+		if existingByDomain != nil && existingByDomain.ID.String() != samlProvider.ID.String() {
+			return fmt.Errorf("%w: provider with domain '%s' already exists", ErrorSamlProviderAlreadyExists, domain)
+		}
+
+		existingByEntityID, err := providerPersister.GetByEntityID(tenantID, parsedMetadata.EntityID)
+		if err != nil {
+			return err
+		}
+		if existingByEntityID != nil && existingByEntityID.ID.String() != samlProvider.ID.String() {
+			return fmt.Errorf("%w: provider with entity_id '%s' already exists", ErrorSamlProviderAlreadyExists, parsedMetadata.EntityID)
+		}
+
 		provider, err := providerPersister.Get(tenantID, providerID)
 		if err != nil {
 			return err
@@ -202,7 +211,6 @@ func (s *SamlProviderManagementService) Update(tenantID uuid.UUID, providerID uu
 			}
 		}
 
-		// Update provider fields
 		provider.Name = name
 		provider.Domain = domain
 		provider.Enabled = enabled

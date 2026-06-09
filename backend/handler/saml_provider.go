@@ -69,6 +69,9 @@ func (h *SamlProviderHandler) Create(c echo.Context) error {
 		if errors.Is(err, saml.ErrorSamlProviderAlreadyExists) {
 			return echo.NewHTTPError(http.StatusConflict, fmt.Sprintf("failed to create provider: %v", err))
 		}
+		if errors.Is(err, saml.ErrorSamlProviderMetadataValidation) {
+			return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("failed to create provider: %s", err.Error()))
+		}
 		return echo.NewHTTPError(http.StatusInternalServerError, fmt.Sprintf("failed to create provider: %v", err))
 	}
 
@@ -168,7 +171,13 @@ func (h *SamlProviderHandler) Update(c echo.Context) error {
 		attributeMap,
 	)
 	if err != nil {
-		return echo.NewHTTPError(http.StatusInternalServerError, fmt.Sprintf("failed to update provider: %v", err))
+		if errors.Is(err, saml.ErrorSamlProviderAlreadyExists) {
+			return echo.NewHTTPError(http.StatusConflict, fmt.Sprintf("failed to create provider: %v", err))
+		}
+		if errors.Is(err, saml.ErrorSamlProviderMetadataValidation) {
+			return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("failed to create provider: %s", err.Error()))
+		}
+		return echo.NewHTTPError(http.StatusInternalServerError, fmt.Sprintf("failed to create provider: %v", err))
 	}
 
 	// Fetch updated provider

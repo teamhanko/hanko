@@ -33,7 +33,7 @@ func (a WebauthnGenerateRequestOptions) Initialize(c flowpilot.InitializationCon
 func (a WebauthnGenerateRequestOptions) Execute(c flowpilot.ExecutionContext) error {
 	deps := a.GetDeps(c)
 
-	params := services.GenerateRequestOptionsPasskeyParams{Tx: deps.Tx, User: nil, TenantID: deps.TenantID}
+	params := services.GenerateRequestOptionsPasskeyParams{Tx: deps.Tx, User: nil, TenantID: deps.TenantID, Cfg: deps.Cfg.TenantConfig}
 
 	userIdStash := c.Stash().Get(shared.StashPathUserID)
 	if userIdStash.Exists() && deps.Cfg.Privacy.OnlyShowActualLoginMethods {

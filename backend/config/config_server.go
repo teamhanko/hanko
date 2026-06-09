@@ -44,7 +44,7 @@ type Cors struct {
 	// that may access the resource.
 	//
 	// The wildcard characters `*` and `?` are supported and are converted to regex fragments `.*` and `.` accordingly.
-	AllowOrigins []string `yaml:"allow_origins" json:"allow_origins,omitempty" koanf:"allow_origins" split_words:"true" jsonschema:"title=allow_origins,default=http://localhost:8888"`
+	AllowOrigins []string `yaml:"allow_origins" json:"allow_origins" koanf:"allow_origins" split_words:"true" jsonschema:"title=allow_origins,default=http://localhost:8888"`
 
 	// `unsafe_wildcard_origin_allowed` allows a wildcard `*` origin to be used with AllowCredentials
 	// flag. In that case we consider any origin allowed and send it back to the client in an `Access-Control-Allow-Origin` header.
@@ -53,7 +53,7 @@ type Cors struct {
 	// attacks. See also https://github.com/labstack/echo/issues/2400 for discussion on the subject.
 	//
 	// Optional. Default value is `false`.
-	UnsafeWildcardOriginAllowed bool `yaml:"unsafe_wildcard_origin_allowed" json:"unsafe_wildcard_origin_allowed,omitempty" koanf:"unsafe_wildcard_origin_allowed" split_words:"true" jsonschema:"title=unsafe_wildcard_origin_allowed,default=false"`
+	UnsafeWildcardOriginAllowed bool `yaml:"unsafe_wildcard_origin_allowed" json:"unsafe_wildcard_origin_allowed" koanf:"unsafe_wildcard_origin_allowed" split_words:"true" jsonschema:"title=unsafe_wildcard_origin_allowed,default=false"`
 }
 
 func (cors *Cors) Validate() error {

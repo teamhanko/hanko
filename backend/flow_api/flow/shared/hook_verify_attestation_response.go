@@ -42,6 +42,7 @@ func (h VerifyAttestationResponse) Execute(c flowpilot.HookExecutionContext) err
 		Email:         &email,
 		Username:      &username,
 		TenantID:      deps.TenantID,
+		Cfg:           deps.Cfg.TenantConfig,
 	}
 
 	credential, err := deps.WebauthnService.VerifyAttestationResponse(params)

@@ -3,24 +3,25 @@ package config
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/invopop/jsonschema"
-	"github.com/teamhanko/hanko/backend/v3/webhooks/events"
 	"net/url"
 	"strings"
+
+	"github.com/invopop/jsonschema"
+	"github.com/teamhanko/hanko/backend/v3/webhooks/events"
 )
 
 type WebhookSettings struct {
 	// `allow_time_expiration` determines whether webhooks are disabled when unused for 30 days
 	// (only for database webhooks).
-	AllowTimeExpiration bool `yaml:"allow_time_expiration" json:"allow_time_expiration,omitempty" koanf:"allow_time_expiration" jsonschema:"default=false"`
+	AllowTimeExpiration bool `yaml:"allow_time_expiration" json:"allow_time_expiration" koanf:"allow_time_expiration" jsonschema:"default=false"`
 	// `enabled` enables the webhook feature.
-	Enabled bool `yaml:"enabled" json:"enabled,omitempty" koanf:"enabled" jsonschema:"default=false"`
+	Enabled bool `yaml:"enabled" json:"enabled" koanf:"enabled" jsonschema:"default=false"`
 	// `hooks` is a list of Webhook configurations.
 	//
 	// When using environment variables the value for the `WEBHOOKS_HOOKS` key must be specified in the following
 	// format:
 	// `{"callback":"http://app.com/usercb","events":["user"]};{"callback":"http://app.com/emailcb","events":["email.send"]}`
-	Hooks Webhooks `yaml:"hooks" json:"hooks,omitempty" koanf:"hooks" jsonschema:"title=hooks"`
+	Hooks Webhooks `yaml:"hooks" json:"hooks" koanf:"hooks" jsonschema:"title=hooks"`
 }
 
 func (ws *WebhookSettings) Validate() error {
@@ -59,9 +60,9 @@ func (wd *Webhooks) Decode(value string) error {
 
 type Webhook struct {
 	// `callback` specifies the URL to which the change data will be sent.
-	Callback string `yaml:"callback" json:"callback,omitempty" koanf:"callback"`
+	Callback string `yaml:"callback" json:"callback" koanf:"callback"`
 	// `events` is a list of events this hook listens for.
-	Events events.Events `yaml:"events" json:"events,omitempty" koanf:"events" jsonschema:"title=events"`
+	Events events.Events `yaml:"events" json:"events" koanf:"events" jsonschema:"title=events"`
 }
 
 func (Webhook) JSONSchemaExtend(schema *jsonschema.Schema) {

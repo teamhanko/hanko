@@ -164,6 +164,7 @@ func DefaultTenantConfig() TenantConfig {
 			},
 			Limit:         5,
 			ShowOnProfile: true,
+			IdleTimeout:   "0m",
 		},
 		Emails: Emails{
 			RequireVerification: true,

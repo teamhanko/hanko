@@ -3,6 +3,7 @@ package credential_onboarding
 import (
 	"errors"
 	"fmt"
+
 	"github.com/gofrs/uuid"
 	"github.com/teamhanko/hanko/backend/v3/flow_api/flow/shared"
 	"github.com/teamhanko/hanko/backend/v3/flow_api/services"
@@ -55,6 +56,8 @@ func (a WebauthnGenerateCreationOptions) Execute(c flowpilot.ExecutionContext) e
 		UserID:   userID,
 		Email:    &email,
 		Username: &username,
+		TenantID: deps.TenantID,
+		Cfg:      deps.Cfg.TenantConfig,
 	}
 
 	sessionDataModel, creationOptions, err := deps.WebauthnService.GenerateCreationOptionsPasskey(params)

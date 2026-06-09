@@ -9,14 +9,11 @@ import (
 	"io"
 	"net/http"
 	"strings"
-	"time"
 
-	"github.com/gobuffalo/pop/v6"
 	"github.com/gofrs/uuid"
 	"github.com/russellhaering/gosaml2/types"
 	dsigTypes "github.com/russellhaering/goxmldsig/types"
 	"github.com/teamhanko/hanko/backend/v3/persistence"
-	"github.com/teamhanko/hanko/backend/v3/persistence/models"
 )
 
 // ParsedMetadata contains the extracted metadata from IdP XML
@@ -56,14 +53,12 @@ func (s *SamlMetadataService) FetchAndParse(metadataURL string) (*ParsedMetadata
 		return nil, fmt.Errorf("unable to read idp metadata response body: %w", err)
 	}
 
-	// Parse XML metadata
 	idpMetadata := &types.EntityDescriptor{}
 	err = xml.Unmarshal(metadataBody, idpMetadata)
 	if err != nil {
 		return nil, fmt.Errorf("unable to unmarshal idp metadata response body to xml: %w", err)
 	}
 
-	// Extract certificates as PEM strings
 	certificatesPEM := []string{}
 	for _, keyDescriptor := range idpMetadata.IDPSSODescriptor.KeyDescriptors {
 		for index, x509Certificate := range keyDescriptor.KeyInfo.X509Data.X509Certificates {
@@ -96,47 +91,6 @@ func (s *SamlMetadataService) FetchAndParse(metadataURL string) (*ParsedMetadata
 	}, nil
 }
 
-// Store saves metadata to the database cache
-func (s *SamlMetadataService) Store(tenantID uuid.UUID, providerID uuid.UUID, metadata *ParsedMetadata) error {
-	// Convert certificates array to JSON string for storage
-	certsJSON, err := json.Marshal(metadata.CertificatesPEM)
-	if err != nil {
-		return fmt.Errorf("failed to marshal certificates: %w", err)
-	}
-
-	metadataModel := models.SamlIDPMetadata{
-		ID:              uuid.Must(uuid.NewV4()),
-		TenantID:        tenantID,
-		ProviderID:      providerID,
-		RawMetadataXML:  metadata.RawXML,
-		Issuer:          metadata.Issuer,
-		SSOURL:          metadata.SSOURL,
-		CertificatesPEM: string(certsJSON),
-		LastFetchedAt:   time.Now(),
-	}
-
-	// Wrap check-then-act in transaction to prevent race conditions
-	return s.persister.Transaction(func(tx *pop.Connection) error {
-		metadataPersister := s.persister.GetSamlIDPMetadataPersisterWithConnection(tx)
-
-		// Check if metadata already exists
-		existing, err := metadataPersister.Get(tenantID, providerID)
-		if err != nil {
-			return fmt.Errorf("failed to check existing metadata: %w", err)
-		}
-
-		if existing != nil {
-			// Update existing
-			metadataModel.ID = existing.ID
-			metadataModel.CreatedAt = existing.CreatedAt
-			return metadataPersister.Update(metadataModel)
-		}
-
-		// Create new
-		return metadataPersister.Create(metadataModel)
-	})
-}
-
 // Get retrieves metadata from cache
 func (s *SamlMetadataService) Get(tenantID uuid.UUID, providerID uuid.UUID) (*ParsedMetadata, error) {
 	metadata, err := s.persister.GetSamlIDPMetadataPersister().Get(tenantID, providerID)
@@ -148,7 +102,6 @@ func (s *SamlMetadataService) Get(tenantID uuid.UUID, providerID uuid.UUID) (*Pa
 		return nil, nil
 	}
 
-	// Parse certificates JSON
 	var certificatesPEM []string
 	err = json.Unmarshal([]byte(metadata.CertificatesPEM), &certificatesPEM)
 	if err != nil {
@@ -177,12 +130,10 @@ func extractCertificatePEM(index int, x509Certificate dsigTypes.X509Certificate)
 		return "", fmt.Errorf("unable to decode certificate at index %d: %w", index, err)
 	}
 
-	// Verify it's a valid certificate
 	_, err = x509.ParseCertificate(certData)
 	if err != nil {
 		return "", fmt.Errorf("unable to parse certificate at index %d: %w", index, err)
 	}
 
-	// Return as PEM-formatted string
 	return fmt.Sprintf("-----BEGIN CERTIFICATE-----\n%s\n-----END CERTIFICATE-----", stringifiedData), nil
 }
