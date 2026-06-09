@@ -41,13 +41,11 @@ func NewServePublicCommand() *cobra.Command {
 			persister := persistence.New(dbConnection)
 
 			// Sync SAML providers from config to database for backward compatibility
-			if cfg.Saml.Enabled {
-				log.Println("Syncing SAML providers from config to database...")
-				err := saml.SyncProviderConfigToDatabase(cfg, persister)
-				if err != nil {
-					log.Printf("SAML config sync failed: %v", err)
-					// Don't fail startup - just log the error
-				}
+			log.Println("Syncing SAML providers from config to database...")
+			err = saml.SyncProviderConfigToDatabase(cfg, persister)
+			if err != nil {
+				log.Printf("SAML config sync failed: %v", err)
+				// Don't fail startup - just log the error
 			}
 
 			err = local_db.SyncSecretKeys(cfg, persister)
