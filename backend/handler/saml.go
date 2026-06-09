@@ -42,6 +42,10 @@ func (handler *Handler) Metadata(c echo.Context) error {
 		return fmt.Errorf("failed to get tenant from context: %w", err)
 	}
 
+	if !tenant.Config.Saml.Enabled {
+		return echo.NewHTTPError(http.StatusForbidden, "SAML is not enabled for this tenant")
+	}
+
 	var request dto.SamlMetadataRequest
 	err = c.Bind(&request)
 	if err != nil {
@@ -85,6 +89,10 @@ func (handler *Handler) Auth(c echo.Context) error {
 	tenant, err := context.GetTenant(c)
 	if err != nil {
 		return fmt.Errorf("failed to get tenant from context: %w", err)
+	}
+
+	if !tenant.Config.Saml.Enabled {
+		return echo.NewHTTPError(http.StatusForbidden, "SAML is not enabled for this tenant")
 	}
 
 	errorRedirectTo := c.Request().Header.Get("Referer")
@@ -274,6 +282,10 @@ func (handler *Handler) CallbackPost(c echo.Context) error {
 	tenant, err := context.GetTenant(c)
 	if err != nil {
 		return fmt.Errorf("failed to get tenant from context: %w", err)
+	}
+
+	if !tenant.Config.Saml.Enabled {
+		return echo.NewHTTPError(http.StatusForbidden, "SAML is not enabled for this tenant")
 	}
 
 	if handler.isIDPInitiated(relayState) {

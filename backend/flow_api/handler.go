@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"net/http"
 	"strconv"
 	"strings"
 	"time"
@@ -116,6 +117,18 @@ func (h *FlowPilotHandler) ProfileFlowHandler(c echo.Context) error {
 
 func (h *FlowPilotHandler) TokenExchangeFlowHandler(c echo.Context) error {
 	samlIdPInitiatedLoginFlow := flow.NewTokenExchangeFlow(h.Cfg.Debug)
+
+	tenant, err := context2.GetTenant(c)
+	if err != nil {
+		return fmt.Errorf("failed to fetch tenant from context: %w", err)
+	}
+
+	if !tenant.Config.Saml.Enabled {
+		flowResult := samlIdPInitiatedLoginFlow.ResultFromError(flowpilot.NewFlowError("forbidden", "SAML is not enabled for this tenant", http.StatusForbidden))
+		h.logFlowResult(c, flowResult)
+		return c.JSON(flowResult.GetStatus(), flowResult.GetResponse())
+	}
+
 	return h.executeFlow(c, samlIdPInitiatedLoginFlow)
 }
 
