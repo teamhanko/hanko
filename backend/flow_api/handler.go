@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"net/http"
 	"strconv"
 	"strings"
 	"time"
@@ -17,7 +18,7 @@ import (
 	"github.com/sethvargo/go-limiter"
 	auditlog "github.com/teamhanko/hanko/backend/v2/audit_log"
 	"github.com/teamhanko/hanko/backend/v2/config"
-	context2 "github.com/teamhanko/hanko/backend/v2/context"
+	hankoContext "github.com/teamhanko/hanko/backend/v2/context"
 	"github.com/teamhanko/hanko/backend/v2/dto"
 	"github.com/teamhanko/hanko/backend/v2/flow_api/flow"
 	"github.com/teamhanko/hanko/backend/v2/flow_api/flow/shared"
@@ -116,16 +117,28 @@ func (h *FlowPilotHandler) ProfileFlowHandler(c echo.Context) error {
 
 func (h *FlowPilotHandler) TokenExchangeFlowHandler(c echo.Context) error {
 	samlIdPInitiatedLoginFlow := flow.NewTokenExchangeFlow(h.Cfg.Debug)
-	return h.executeFlow(c, samlIdPInitiatedLoginFlow)
-}
 
-func (h *FlowPilotHandler) validateSession(c echo.Context) error {
-	tenant, err := context2.GetTenant(c)
+	tenant, err := hankoContext.GetTenant(c)
 	if err != nil {
 		return fmt.Errorf("failed to fetch tenant from context: %w", err)
 	}
 
-	sessionManager, err := context2.GetSessionManager(c)
+	if !tenant.Config.Saml.Enabled {
+		flowResult := samlIdPInitiatedLoginFlow.ResultFromError(flowpilot.NewFlowError("forbidden", "SAML is not enabled for this tenant", http.StatusForbidden))
+		h.logFlowResult(c, flowResult)
+		return c.JSON(flowResult.GetStatus(), flowResult.GetResponse())
+	}
+
+	return h.executeFlow(c, samlIdPInitiatedLoginFlow)
+}
+
+func (h *FlowPilotHandler) validateSession(c echo.Context) error {
+	tenant, err := hankoContext.GetTenant(c)
+	if err != nil {
+		return fmt.Errorf("failed to fetch tenant from context: %w", err)
+	}
+
+	sessionManager, err := hankoContext.GetSessionManager(c)
 	if err != nil {
 		return fmt.Errorf("failed to fetch session manager from context: %w", err)
 	}
@@ -245,7 +258,7 @@ func (h *FlowPilotHandler) executeFlow(c echo.Context, flow flowpilot.Flow) erro
 	}
 
 	var cfg = h.Cfg
-	tenant, err := context2.GetTenant(c)
+	tenant, err := hankoContext.GetTenant(c)
 	if err != nil {
 		return fmt.Errorf("failed to fetch tenant from context: %w", err)
 	}
@@ -255,7 +268,7 @@ func (h *FlowPilotHandler) executeFlow(c echo.Context, flow flowpilot.Flow) erro
 		TenantConfig:      tenant.Config,
 	}
 
-	sessionManager, err := context2.GetSessionManager(c)
+	sessionManager, err := hankoContext.GetSessionManager(c)
 	if err != nil {
 		return fmt.Errorf("failed to fetch session manager from context: %w", err)
 	}

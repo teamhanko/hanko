@@ -77,15 +77,13 @@ func NewPublicRouter(cfg *config.Config, persister persistence.Persister, promet
 	tenantGroup.POST("/login", flowAPIHandler.LoginFlowHandler, webhookMiddleware)
 	tenantGroup.POST("/profile", flowAPIHandler.ProfileFlowHandler, webhookMiddleware)
 
-	if cfg.Saml.Enabled {
-		samlProviderService := saml.NewSamlProviderService(persister)
-		samlHandler := NewSamlHandler(cfg.ApplicationConfig, auditLogger, samlProviderService)
-		samlGroup := tenantGroup.Group("/saml")
-		samlGroup.GET("/metadata", samlHandler.Metadata)
-		samlGroup.GET("/auth", samlHandler.Auth)
-		samlGroup.POST("/callback", samlHandler.CallbackPost)
-		tenantGroup.POST("/token_exchange", flowAPIHandler.TokenExchangeFlowHandler, webhookMiddleware)
-	}
+	samlProviderService := saml.NewSamlProviderService(persister)
+	samlHandler := NewSamlHandler(cfg.ApplicationConfig, auditLogger, samlProviderService)
+	samlGroup := tenantGroup.Group("/saml")
+	samlGroup.GET("/metadata", samlHandler.Metadata)
+	samlGroup.GET("/auth", samlHandler.Auth)
+	samlGroup.POST("/callback", samlHandler.CallbackPost)
+	tenantGroup.POST("/token_exchange", flowAPIHandler.TokenExchangeFlowHandler, webhookMiddleware)
 
 	tenantGroup.GET("/", statusHandler.Status)
 	tenantGroup.GET("/me", userHandler.Me, sessionMiddleware)
