@@ -157,8 +157,8 @@ github.com/gobuffalo/plush/v4 v4.1.22 h1:bPQr5PsiTg54UGMsfvnIAvFmUfxzD/ri+wbpu7P
 github.com/gobuffalo/plush/v4 v4.1.22/go.mod h1:WiKHJx3qBvfaDVlrv8zT7NCd3dEMaVR/fVxW4wqV17M=
 github.com/gobuffalo/plush/v5 v5.0.4 h1:GgKm+EqqV8QEn1K49b26OKCW7DMJEpw5EIHvy48FHpM=
 github.com/gobuffalo/plush/v5 v5.0.4/go.mod h1:C08u/VEqzzPBXFF/yqs40P/5Cvc/zlZsMzhCxXyWJmU=
-github.com/gobuffalo/pop/v6 v6.2.1 h1:37xMxi0XLx+VKOCds3TR033bWZeZpOaB/ySuw/sLyuI=
-github.com/gobuffalo/pop/v6 v6.2.1/go.mod h1:zscsLfgOyn4ZnFpvSqZ3EmVfnekiIqL0fdGVRY/cI8E=
+github.com/gobuffalo/pop/v6 v6.3.0 h1:2pDe4WPBtWvIZxIuKDcZHHIHD2bBdhqkPM6tNaQebIA=
+github.com/gobuffalo/pop/v6 v6.3.0/go.mod h1:FBCNE7UkvauOv0NgKxq32VOrQ8IpfVnK35zxOq28qzk=
 github.com/gobuffalo/tags/v3 v3.1.4 h1:X/ydLLPhgXV4h04Hp2xlbI2oc5MDaa7eub6zw8oHjsM=
 github.com/gobuffalo/tags/v3 v3.1.4/go.mod h1:ArRNo3ErlHO8BtdA0REaZxijuWnWzF6PUXngmMXd2I0=
 github.com/gobuffalo/validate/v3 v3.3.3 h1:o7wkIGSvZBYBd6ChQoLxkz2y1pfmhbI4jNJYh6PuNJ4=

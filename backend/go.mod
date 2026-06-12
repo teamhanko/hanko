@@ -16,7 +16,7 @@ require (
 	github.com/go-testfixtures/testfixtures/v3 v3.19.0
 	github.com/go-webauthn/webauthn v0.10.2
 	github.com/gobuffalo/nulls v0.4.2
-	github.com/gobuffalo/pop/v6 v6.2.1
+	github.com/gobuffalo/pop/v6 v6.3.0
 	github.com/gobuffalo/validate/v3 v3.3.3
 	github.com/gobwas/glob v0.2.3
 	github.com/gofrs/uuid v4.4.0+incompatible
