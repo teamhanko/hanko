@@ -41,24 +41,12 @@ type ApplicationConfig struct {
 type TenantConfig struct {
 	// `account` configures settings related to user accounts.
 	Account Account `yaml:"account" json:"account" koanf:"account" jsonschema:"title=account"`
-	// `convert_legacy_config`, if set to `true`, automatically copies the set values of deprecated configuration
-	// options, to new ones. If set to `false`, these values have to be set manually if non-default values should be
-	// used.
-	ConvertLegacyConfig bool `yaml:"convert_legacy_config" json:"convert_legacy_config" koanf:"convert_legacy_config" split_words:"true" jsonschema:"default=false"`
-	// `covert_legacy_session_config`, if set to `true`, automatically copies the set of deprecated server-side session
-	// configuration options to the new ones. If set to `false`, these values have to be set manually if non-default
-	// values should be used.
-	ConvertLegacyServerSideSessionConfig bool `yaml:"convert_legacy_server_side_session_config" json:"convert_legacy_server_side_session_config" koanf:"convert_legacy_server_side_session_config" split_words:"true" jsonschema:"default=true"`
 	// `email` configures how email addresses of user accounts are acquired and used.
 	Email Email `yaml:"email" json:"email" koanf:"email" jsonschema:"title=email"`
 	// `email_delivery` configures how outgoing mails are delivered.
 	EmailDelivery EmailDelivery `yaml:"email_delivery" json:"email_delivery" koanf:"email_delivery" split_words:"true" jsonschema:"title=email_delivery"`
-	// Deprecated. See child properties for suggested replacements.
-	Emails Emails `yaml:"emails" json:"emails" koanf:"emails" jsonschema:"title=emails"`
 	// `mfa` configures how multi-factor-authentication behaves.
 	MFA MFA `yaml:"mfa" json:"mfa" koanf:"mfa" jsonschema:"title=mfa"`
-	// MultiTenancy determines if the system supports multiple tenants, enabling tenant-specific configurations and isolation.
-	Passcode Passcode `yaml:"passcode" json:"passcode" koanf:"passcode" jsonschema:"title=passcode"`
 	// `passkey` configures how passkeys are acquired and used.
 	Passkey Passkey `yaml:"passkey" json:"passkey" koanf:"passkey" jsonschema:"title=passkey"`
 	// `password` configures how passwords are acquired and used.
@@ -76,8 +64,6 @@ type TenantConfig struct {
 	Service Service `yaml:"service" json:"service" koanf:"service" jsonschema:"title=service"`
 	// `session` configures settings for session JWTs and Cookies issued by the API.
 	Session Session `yaml:"session" json:"session" koanf:"session" jsonschema:"title=session"`
-	// Deprecated. Use `email_delivery.smtp` instead.
-	Smtp SMTP `yaml:"smtp" json:"smtp" koanf:"smtp" jsonschema:"title=smtp"`
 	// `third_party` configures the modalities of third party OAuth/OIDC based authentication and available identity
 	// providers.
 	ThirdParty ThirdParty `yaml:"third_party" json:"third_party" koanf:"third_party" split_words:"true" jsonschema:"title=third_party"`
@@ -181,7 +167,7 @@ func (c *TenantConfig) Validate(multiTenancy bool) error {
 		return fmt.Errorf("failed to validate webauthn settings: %w", err)
 	}
 	if c.EmailDelivery.Enabled {
-		err = c.Smtp.Validate()
+		err = c.EmailDelivery.SMTP.Validate()
 		if err != nil {
 			return fmt.Errorf("failed to validate smtp settings: %w", err)
 		}
@@ -260,40 +246,7 @@ func (c *Config) ValidateCrossConfig() error {
 	return nil
 }
 
-func (c *TenantConfig) convertLegacyConfig() {
-	c.Email.Limit = c.Emails.MaxNumOfAddresses
-	c.Email.RequireVerification = c.Emails.RequireVerification
-	c.Email.PasscodeTtl = c.Passcode.TTL
-
-	c.EmailDelivery.SMTP = c.Smtp
-
-	c.Password.MinLength = c.Password.MinPasswordLength
-
-	c.Passkey.UserVerification = c.Webauthn.UserVerification
-
-	c.Webauthn.Timeouts.Login = c.Webauthn.Timeout
-	c.Webauthn.Timeouts.Registration = c.Webauthn.Timeout
-}
-
-func (c *TenantConfig) convertLegacyServerSideSessionConfig() {
-	if c.Session.ServerSide != nil && c.Session.ServerSide.Enabled {
-		c.Session.AllowRevocation = true
-		c.Session.AcquireIPAddress = true
-		c.Session.AcquireUserAgent = true
-		c.Session.Limit = c.Session.ServerSide.Limit
-		c.Session.ShowOnProfile = true
-	}
-}
-
 func (c *TenantConfig) PostProcess() error {
-	if c.ConvertLegacyConfig {
-		c.convertLegacyConfig()
-	}
-
-	if c.ConvertLegacyServerSideSessionConfig {
-		c.convertLegacyServerSideSessionConfig()
-	}
-
 	err := c.ThirdParty.PostProcess()
 	if err != nil {
 		return fmt.Errorf("failed to post process third party settings: %w", err)

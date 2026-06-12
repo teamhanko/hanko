@@ -5,7 +5,6 @@ audit_log:
 account:
   allow_deletion: true
   allow_signup: true
-convert_legacy_config: false
 database:
   user: hanko
   password: hanko
