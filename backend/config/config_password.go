@@ -11,8 +11,6 @@ type Password struct {
 	Enabled bool `yaml:"enabled" json:"enabled" koanf:"enabled" jsonschema:"default=true"`
 	// `min_length` determines the minimum password length.
 	MinLength int `yaml:"min_length" json:"min_length" koanf:"min_length" split_words:"true" jsonschema:"default=8"`
-	// Deprecated. Use `min_length` instead.
-	MinPasswordLength int `yaml:"min_password_length" json:"min_password_length" koanf:"min_password_length" split_words:"true" jsonschema:"default=8"`
 	// `optional` determines whether users must set a password when prompted. The password cannot be deleted if
 	// passwords are required (`optional: false`).
 	//

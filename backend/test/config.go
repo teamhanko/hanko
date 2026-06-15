@@ -14,8 +14,10 @@ var DefaultConfig = config.Config{
 				Icon:        "",
 				Origins:     []string{"http://localhost:8080", "http://localhost:8888"},
 			},
-			Timeout:          60000,
-			UserVerification: "preferred",
+			Timeouts: config.WebauthnTimeouts{
+				Registration: 600000,
+				Login:        600000,
+			},
 		},
 		Secrets: config.Secrets{
 			Keys: []string{"abcdefghijklmnop"},
@@ -26,6 +28,7 @@ var DefaultConfig = config.Config{
 		Email: config.Email{
 			Enabled:              true,
 			UseForAuthentication: true,
+			PasscodeTtl:          300,
 		},
 		EmailDelivery: config.EmailDelivery{
 			Enabled: true,
@@ -35,9 +38,6 @@ var DefaultConfig = config.Config{
 			},
 			FromAddress: "test@hanko.io",
 			FromName:    "Hanko Test",
-		},
-		Passcode: config.Passcode{
-			TTL: 300,
 		},
 		Session: config.Session{
 			Lifespan: "1h",

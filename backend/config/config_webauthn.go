@@ -1,9 +1,6 @@
 package config
 
 import (
-	"fmt"
-	"slices"
-	"strings"
 	"time"
 
 	"github.com/go-webauthn/webauthn/protocol"
@@ -13,21 +10,13 @@ import (
 // WebauthnSettings defines the settings for the webauthn authentication mechanism
 type WebauthnSettings struct {
 	RelyingParty RelyingParty `yaml:"relying_party" json:"relying_party" koanf:"relying_party" split_words:"true" jsonschema:"title=relying_party"`
-	// Deprecated, use `timeouts` instead.
-	Timeout int `yaml:"timeout" json:"timeout" koanf:"timeout" jsonschema:"default=60000"`
 	// `timeouts` specifies the timeouts for passkey/WebAuthn registration and login.
-	Timeouts WebauthnTimeouts `yaml:"timeouts" json:"timeouts" koanf:"timeouts" split_words:"true" jsonschema:"title=timeouts"`
-	// Deprecated, use `passkey.user_verification` instead
-	UserVerification string                `yaml:"user_verification" json:"user_verification" koanf:"user_verification" split_words:"true" jsonschema:"default=preferred,enum=required,enum=preferred,enum=discouraged"`
-	Handler          *webauthnLib.WebAuthn `json:"-" jsonschema:"-"`
+	Timeouts WebauthnTimeouts      `yaml:"timeouts" json:"timeouts" koanf:"timeouts" split_words:"true" jsonschema:"title=timeouts"`
+	Handler  *webauthnLib.WebAuthn `json:"-" jsonschema:"-"`
 }
 
 // Validate does not need to validate the config, because the library does this already
 func (r *WebauthnSettings) Validate() error {
-	validUv := []string{"required", "preferred", "discouraged"}
-	if !slices.Contains(validUv, r.UserVerification) {
-		return fmt.Errorf("expected user_verification to be one of [%s], got: '%s'", strings.Join(validUv, ", "), r.UserVerification)
-	}
 	return nil
 }
 

@@ -74,8 +74,6 @@ func DefaultApplicationConfig() ApplicationConfig {
 
 func DefaultTenantConfig() TenantConfig {
 	return TenantConfig{
-		ConvertLegacyConfig:                  false,
-		ConvertLegacyServerSideSessionConfig: true,
 		Cors: Cors{
 			AllowOrigins:                []string{"http://localhost:8888"},
 			UnsafeWildcardOriginAllowed: false,
@@ -95,8 +93,6 @@ func DefaultTenantConfig() TenantConfig {
 				DisplayName: "Hanko Authentication Service",
 				Origins:     []string{"http://localhost:8888"},
 			},
-			UserVerification: "preferred",
-			Timeout:          600000,
 			Timeouts: WebauthnTimeouts{
 				Registration: 600000,
 				Login:        600000,
@@ -127,10 +123,6 @@ func DefaultTenantConfig() TenantConfig {
 				},
 			},
 		},
-		Smtp: SMTP{
-			Host: "localhost",
-			Port: "465",
-		},
 		EmailDelivery: EmailDelivery{
 			Enabled: true,
 			SMTP: SMTP{
@@ -139,9 +131,6 @@ func DefaultTenantConfig() TenantConfig {
 			},
 			FromAddress: "noreply@hanko.io",
 			FromName:    "Hanko",
-		},
-		Passcode: Passcode{
-			TTL: 300,
 		},
 		Password: Password{
 			Enabled:               true,
@@ -165,10 +154,6 @@ func DefaultTenantConfig() TenantConfig {
 			Limit:         5,
 			ShowOnProfile: true,
 			IdleTimeout:   "0m",
-		},
-		Emails: Emails{
-			RequireVerification: true,
-			MaxNumOfAddresses:   5,
 		},
 		Account: Account{
 			AllowDeletion: false,
