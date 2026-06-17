@@ -98,6 +98,9 @@ func DefaultConfig() *Config {
 			Host:     "localhost",
 		},
 		Session: Session{
+			Binding: Binding{
+				Enabled: false,
+			},
 			AllowRevocation:  true,
 			AcquireIPAddress: true,
 			AcquireUserAgent: true,

@@ -1,0 +1,2 @@
+drop_foreign_key("flows", "flows_sessions_id_fk")
+drop_column("flows", "session_id")

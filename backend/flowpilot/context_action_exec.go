@@ -60,6 +60,7 @@ func (aec *defaultActionExecutionContext) closeExecutionContext() error {
 		csrfToken: csrfToken,
 		expiresAt: aec.flowModel.ExpiresAt,
 		createdAt: aec.flowModel.CreatedAt,
+		sessionID: aec.flowModel.SessionID,
 	}
 
 	// Update the flow model in the database.
