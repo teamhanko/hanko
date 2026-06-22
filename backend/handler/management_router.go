@@ -5,6 +5,7 @@ import (
 	"github.com/labstack/echo/v4/middleware"
 	"github.com/teamhanko/hanko/backend/v2/config"
 	"github.com/teamhanko/hanko/backend/v2/dto"
+	hankoMiddleware "github.com/teamhanko/hanko/backend/v2/middleware"
 	"github.com/teamhanko/hanko/backend/v2/persistence"
 )
 
@@ -15,6 +16,7 @@ func NewManagementRouter(cfg *config.Config, persister persistence.Persister) *e
 
 	e.HTTPErrorHandler = dto.NewHTTPErrorHandler(dto.HTTPErrorHandlerConfig{Debug: false, Logger: e.Logger})
 	e.Use(middleware.RequestID())
+	e.Use(hankoMiddleware.GetLoggerMiddleware())
 
 	e.Validator = dto.NewCustomValidator()
 
