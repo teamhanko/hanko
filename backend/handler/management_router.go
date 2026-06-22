@@ -1,6 +1,7 @@
 package handler
 
 import (
+	"github.com/labstack/echo-contrib/echoprometheus"
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
 	"github.com/teamhanko/hanko/backend/v2/config"
@@ -19,6 +20,8 @@ func NewManagementRouter(cfg *config.Config, persister persistence.Persister) *e
 	e.Use(hankoMiddleware.GetLoggerMiddleware())
 
 	e.Validator = dto.NewCustomValidator()
+
+	e.GET("/metrics", echoprometheus.NewHandler())
 
 	statusHandler := NewStatusHandler(persister)
 	e.GET("/", statusHandler.Status)
