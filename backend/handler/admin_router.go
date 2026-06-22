@@ -30,7 +30,9 @@ func NewAdminRouter(cfg *config.Config, persister persistence.Persister, prometh
 
 	if prometheus != nil {
 		e.Use(prometheus)
-		e.GET("/metrics", echoprometheus.NewHandler())
+		if !cfg.MultiTenancy.Enabled {
+			e.GET("/metrics", echoprometheus.NewHandler())
+		}
 	}
 
 	statusHandler := NewStatusHandler(persister)
