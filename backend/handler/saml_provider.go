@@ -1,12 +1,14 @@
 package handler
 
 import (
-	"encoding/json"
 	"errors"
 	"fmt"
 	"net/http"
 
 	"github.com/gofrs/uuid"
+	koanfJson "github.com/knadh/koanf/parsers/json"
+	"github.com/knadh/koanf/providers/rawbytes"
+	"github.com/knadh/koanf/v2"
 	"github.com/labstack/echo/v4"
 	"github.com/teamhanko/hanko/backend/v2/config"
 	"github.com/teamhanko/hanko/backend/v2/dto"
@@ -224,9 +226,15 @@ func (h *SamlProviderHandler) ensureSamlEnabled(tenantID uuid.UUID) error {
 		return echo.NewHTTPError(http.StatusNotFound, fmt.Sprintf("tenant with ID %s not found", tenantID))
 	}
 
-	var tenantConfig config.TenantConfig
-	err = json.Unmarshal(tenant.Config, &tenantConfig)
-	if err != nil {
+	k := koanf.New(".")
+
+	if err := k.Load(rawbytes.Provider(tenant.Config), koanfJson.Parser()); err != nil {
+		return echo.NewHTTPError(http.StatusInternalServerError, fmt.Sprintf("failed to unmarshal tenant config: %v", err))
+	}
+
+	// Unmarshal into TenantConfig to validate structure
+	var tenantConfig = config.TenantConfig{}
+	if err := k.Unmarshal("", &tenantConfig); err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, fmt.Sprintf("failed to unmarshal tenant config: %v", err))
 	}
 
