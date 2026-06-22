@@ -8,9 +8,9 @@ import (
 
 	"github.com/gobuffalo/pop/v6"
 	"github.com/gofrs/uuid"
-	samlConfig "github.com/teamhanko/hanko/backend/v2/config"
-	"github.com/teamhanko/hanko/backend/v2/persistence"
-	"github.com/teamhanko/hanko/backend/v2/persistence/models"
+	samlConfig "github.com/teamhanko/hanko/backend/v3/config"
+	"github.com/teamhanko/hanko/backend/v3/persistence"
+	"github.com/teamhanko/hanko/backend/v3/persistence/models"
 )
 
 var (

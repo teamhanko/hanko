@@ -5,7 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/labstack/echo/v4"
-	"github.com/teamhanko/hanko/backend/v2/webhooks/events"
+	"github.com/teamhanko/hanko/backend/v3/webhooks/events"
 	"net/http"
 	"strings"
 	"time"

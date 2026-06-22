@@ -5,7 +5,7 @@ import (
 	"net/url"
 	"strings"
 
-	"github.com/teamhanko/hanko/backend/v2/config"
+	"github.com/teamhanko/hanko/backend/v3/config"
 )
 
 func IsAllowedRedirect(config config.ThirdParty, redirectTo string) bool {

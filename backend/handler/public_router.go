@@ -5,16 +5,16 @@ import (
 
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
-	auditlog "github.com/teamhanko/hanko/backend/v2/audit_log"
-	"github.com/teamhanko/hanko/backend/v2/config"
-	"github.com/teamhanko/hanko/backend/v2/dto"
-	"github.com/teamhanko/hanko/backend/v2/flow_api"
-	"github.com/teamhanko/hanko/backend/v2/flow_api/flow_locker"
-	"github.com/teamhanko/hanko/backend/v2/mapper"
-	hankoMiddleware "github.com/teamhanko/hanko/backend/v2/middleware"
-	"github.com/teamhanko/hanko/backend/v2/persistence"
-	"github.com/teamhanko/hanko/backend/v2/saml"
-	"github.com/teamhanko/hanko/backend/v2/template"
+	auditlog "github.com/teamhanko/hanko/backend/v3/audit_log"
+	"github.com/teamhanko/hanko/backend/v3/config"
+	"github.com/teamhanko/hanko/backend/v3/dto"
+	"github.com/teamhanko/hanko/backend/v3/flow_api"
+	"github.com/teamhanko/hanko/backend/v3/flow_api/flow_locker"
+	"github.com/teamhanko/hanko/backend/v3/mapper"
+	hankoMiddleware "github.com/teamhanko/hanko/backend/v3/middleware"
+	"github.com/teamhanko/hanko/backend/v3/persistence"
+	"github.com/teamhanko/hanko/backend/v3/saml"
+	"github.com/teamhanko/hanko/backend/v3/template"
 )
 
 func NewPublicRouter(cfg *config.Config, persister persistence.Persister, prometheus echo.MiddlewareFunc, authenticatorMetadata mapper.AuthenticatorMetadata) *echo.Echo {

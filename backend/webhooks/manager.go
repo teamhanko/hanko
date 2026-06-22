@@ -8,10 +8,10 @@ import (
 	"github.com/gofrs/uuid"
 	"github.com/labstack/echo/v4"
 	"github.com/lestrrat-go/jwx/v2/jwt"
-	"github.com/teamhanko/hanko/backend/v2/config"
-	"github.com/teamhanko/hanko/backend/v2/crypto/jwk"
-	"github.com/teamhanko/hanko/backend/v2/persistence"
-	"github.com/teamhanko/hanko/backend/v2/webhooks/events"
+	"github.com/teamhanko/hanko/backend/v3/config"
+	"github.com/teamhanko/hanko/backend/v3/crypto/jwk"
+	"github.com/teamhanko/hanko/backend/v3/persistence"
+	"github.com/teamhanko/hanko/backend/v3/webhooks/events"
 )
 
 type Manager interface {

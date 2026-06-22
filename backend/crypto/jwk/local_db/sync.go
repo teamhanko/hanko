@@ -4,8 +4,8 @@ import (
 	"fmt"
 
 	"github.com/gofrs/uuid"
-	"github.com/teamhanko/hanko/backend/v2/config"
-	"github.com/teamhanko/hanko/backend/v2/persistence"
+	"github.com/teamhanko/hanko/backend/v3/config"
+	"github.com/teamhanko/hanko/backend/v3/persistence"
 )
 
 func SyncSecretKeys(cfg *config.Config, persister persistence.Storage) error {

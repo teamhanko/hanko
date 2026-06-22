@@ -3,8 +3,8 @@ package services
 import (
 	"regexp"
 
-	"github.com/teamhanko/hanko/backend/v2/config"
-	"github.com/teamhanko/hanko/backend/v2/persistence/models"
+	"github.com/teamhanko/hanko/backend/v3/config"
+	"github.com/teamhanko/hanko/backend/v3/persistence/models"
 )
 
 func UserCanDoThirdParty(cfg config.Config, identities models.Identities) bool {

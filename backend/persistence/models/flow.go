@@ -1,7 +1,7 @@
 package models
 
 import (
-	"github.com/teamhanko/hanko/backend/v2/flowpilot"
+	"github.com/teamhanko/hanko/backend/v3/flowpilot"
 	"time"
 
 	"github.com/gobuffalo/pop/v6"

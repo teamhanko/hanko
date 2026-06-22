@@ -9,9 +9,9 @@ import (
 
 	"github.com/gofrs/uuid"
 	"github.com/stretchr/testify/suite"
-	"github.com/teamhanko/hanko/backend/v2/config"
-	"github.com/teamhanko/hanko/backend/v2/dto"
-	"github.com/teamhanko/hanko/backend/v2/test"
+	"github.com/teamhanko/hanko/backend/v3/config"
+	"github.com/teamhanko/hanko/backend/v3/dto"
+	"github.com/teamhanko/hanko/backend/v3/test"
 )
 
 func TestWebauthnCredentialAdminSuite(t *testing.T) {

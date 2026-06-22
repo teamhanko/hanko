@@ -11,12 +11,12 @@ import (
 	"github.com/gofrs/uuid"
 	"github.com/lestrrat-go/jwx/v2/jwt"
 	"github.com/stretchr/testify/suite"
-	"github.com/teamhanko/hanko/backend/v2/config"
-	"github.com/teamhanko/hanko/backend/v2/crypto/jwk/local_db"
-	"github.com/teamhanko/hanko/backend/v2/dto"
-	"github.com/teamhanko/hanko/backend/v2/persistence/models"
-	"github.com/teamhanko/hanko/backend/v2/session"
-	"github.com/teamhanko/hanko/backend/v2/test"
+	"github.com/teamhanko/hanko/backend/v3/config"
+	"github.com/teamhanko/hanko/backend/v3/crypto/jwk/local_db"
+	"github.com/teamhanko/hanko/backend/v3/dto"
+	"github.com/teamhanko/hanko/backend/v3/persistence/models"
+	"github.com/teamhanko/hanko/backend/v3/session"
+	"github.com/teamhanko/hanko/backend/v3/test"
 )
 
 func TestSessionSuite(t *testing.T) {

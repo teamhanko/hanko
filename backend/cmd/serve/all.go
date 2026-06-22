@@ -9,12 +9,12 @@ import (
 
 	"github.com/labstack/echo-contrib/echoprometheus"
 	"github.com/spf13/cobra"
-	"github.com/teamhanko/hanko/backend/v2/config"
-	"github.com/teamhanko/hanko/backend/v2/crypto/jwk/local_db"
-	"github.com/teamhanko/hanko/backend/v2/mapper"
-	"github.com/teamhanko/hanko/backend/v2/persistence"
-	"github.com/teamhanko/hanko/backend/v2/saml"
-	"github.com/teamhanko/hanko/backend/v2/server"
+	"github.com/teamhanko/hanko/backend/v3/config"
+	"github.com/teamhanko/hanko/backend/v3/crypto/jwk/local_db"
+	"github.com/teamhanko/hanko/backend/v3/mapper"
+	"github.com/teamhanko/hanko/backend/v3/persistence"
+	"github.com/teamhanko/hanko/backend/v3/saml"
+	"github.com/teamhanko/hanko/backend/v3/server"
 )
 
 func NewServeAllCommand() *cobra.Command {

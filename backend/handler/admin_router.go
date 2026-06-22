@@ -4,12 +4,12 @@ import (
 	"github.com/labstack/echo-contrib/echoprometheus"
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
-	auditlog "github.com/teamhanko/hanko/backend/v2/audit_log"
-	"github.com/teamhanko/hanko/backend/v2/config"
-	"github.com/teamhanko/hanko/backend/v2/dto"
-	hankoMiddleware "github.com/teamhanko/hanko/backend/v2/middleware"
-	"github.com/teamhanko/hanko/backend/v2/persistence"
-	"github.com/teamhanko/hanko/backend/v2/template"
+	auditlog "github.com/teamhanko/hanko/backend/v3/audit_log"
+	"github.com/teamhanko/hanko/backend/v3/config"
+	"github.com/teamhanko/hanko/backend/v3/dto"
+	hankoMiddleware "github.com/teamhanko/hanko/backend/v3/middleware"
+	"github.com/teamhanko/hanko/backend/v3/persistence"
+	"github.com/teamhanko/hanko/backend/v3/template"
 )
 
 func NewAdminRouter(cfg *config.Config, persister persistence.Persister, prometheus echo.MiddlewareFunc) *echo.Echo {

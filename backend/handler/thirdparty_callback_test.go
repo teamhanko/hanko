@@ -8,9 +8,9 @@ import (
 
 	"github.com/gofrs/uuid"
 	"github.com/h2non/gock"
-	"github.com/teamhanko/hanko/backend/v2/config"
-	"github.com/teamhanko/hanko/backend/v2/thirdparty"
-	"github.com/teamhanko/hanko/backend/v2/utils"
+	"github.com/teamhanko/hanko/backend/v3/config"
+	"github.com/teamhanko/hanko/backend/v3/thirdparty"
+	"github.com/teamhanko/hanko/backend/v3/utils"
 )
 
 func (s *thirdPartySuite) TestThirdPartyHandler_Callback_SignUp_Google() {

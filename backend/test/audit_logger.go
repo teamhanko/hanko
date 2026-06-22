@@ -4,8 +4,8 @@ import (
 	"github.com/gobuffalo/pop/v6"
 	"github.com/gofrs/uuid"
 	"github.com/labstack/echo/v4"
-	"github.com/teamhanko/hanko/backend/v2/audit_log"
-	"github.com/teamhanko/hanko/backend/v2/persistence/models"
+	"github.com/teamhanko/hanko/backend/v3/audit_log"
+	"github.com/teamhanko/hanko/backend/v3/persistence/models"
 )
 
 func NewAuditLogger() auditlog.Logger {

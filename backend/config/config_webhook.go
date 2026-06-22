@@ -7,7 +7,7 @@ import (
 	"strings"
 
 	"github.com/invopop/jsonschema"
-	"github.com/teamhanko/hanko/backend/v2/webhooks/events"
+	"github.com/teamhanko/hanko/backend/v3/webhooks/events"
 )
 
 type WebhookSettings struct {

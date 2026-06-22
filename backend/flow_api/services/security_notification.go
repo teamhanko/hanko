@@ -6,14 +6,14 @@ import (
 	"github.com/gobuffalo/pop/v6"
 	"github.com/gofrs/uuid"
 	"github.com/labstack/echo/v4"
-	auditlog "github.com/teamhanko/hanko/backend/v2/audit_log"
-	"github.com/teamhanko/hanko/backend/v2/dto/webhook"
-	"github.com/teamhanko/hanko/backend/v2/persistence"
-	"github.com/teamhanko/hanko/backend/v2/persistence/models"
-	"github.com/teamhanko/hanko/backend/v2/webhooks/events"
-	webhookUtils "github.com/teamhanko/hanko/backend/v2/webhooks/utils"
+	auditlog "github.com/teamhanko/hanko/backend/v3/audit_log"
+	"github.com/teamhanko/hanko/backend/v3/dto/webhook"
+	"github.com/teamhanko/hanko/backend/v3/persistence"
+	"github.com/teamhanko/hanko/backend/v3/persistence/models"
+	"github.com/teamhanko/hanko/backend/v3/webhooks/events"
+	webhookUtils "github.com/teamhanko/hanko/backend/v3/webhooks/utils"
 
-	"github.com/teamhanko/hanko/backend/v2/config"
+	"github.com/teamhanko/hanko/backend/v3/config"
 )
 
 type SendSecurityNotificationParams struct {

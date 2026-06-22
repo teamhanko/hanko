@@ -8,7 +8,7 @@ import (
 	"errors"
 	"net/url"
 
-	"github.com/teamhanko/hanko/backend/v2/config"
+	"github.com/teamhanko/hanko/backend/v3/config"
 	"golang.org/x/oauth2"
 )
 

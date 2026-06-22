@@ -1,6 +1,6 @@
 package events
 
-import "github.com/teamhanko/hanko/backend/v2/persistence/models"
+import "github.com/teamhanko/hanko/backend/v3/persistence/models"
 
 type Event string
 

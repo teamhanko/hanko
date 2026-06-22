@@ -9,8 +9,8 @@ import (
 	"github.com/gobuffalo/pop/v6/logging"
 	"github.com/gofrs/uuid"
 	"github.com/stretchr/testify/suite"
-	"github.com/teamhanko/hanko/backend/v2/config"
-	"github.com/teamhanko/hanko/backend/v2/persistence"
+	"github.com/teamhanko/hanko/backend/v3/config"
+	"github.com/teamhanko/hanko/backend/v3/persistence"
 )
 
 type Suite struct {

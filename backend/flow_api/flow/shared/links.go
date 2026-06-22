@@ -1,6 +1,6 @@
 package shared
 
-import "github.com/teamhanko/hanko/backend/v2/flowpilot"
+import "github.com/teamhanko/hanko/backend/v3/flowpilot"
 
 // Link categories enumeration.
 const (

@@ -12,8 +12,8 @@ import (
 	"github.com/gofrs/uuid"
 	saml2 "github.com/russellhaering/gosaml2"
 	dsig "github.com/russellhaering/goxmldsig"
-	samlConfig "github.com/teamhanko/hanko/backend/v2/config"
-	"github.com/teamhanko/hanko/backend/v2/persistence"
+	samlConfig "github.com/teamhanko/hanko/backend/v3/config"
+	"github.com/teamhanko/hanko/backend/v3/persistence"
 )
 
 // ProviderManager constructs ephemeral gosaml2.SAMLServiceProvider instances from cached metadata

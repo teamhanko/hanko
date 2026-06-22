@@ -8,9 +8,9 @@ import (
 	"github.com/knadh/koanf/providers/rawbytes"
 	"github.com/knadh/koanf/v2"
 	"github.com/labstack/echo/v4"
-	"github.com/teamhanko/hanko/backend/v2/config"
-	"github.com/teamhanko/hanko/backend/v2/context"
-	"github.com/teamhanko/hanko/backend/v2/persistence"
+	"github.com/teamhanko/hanko/backend/v3/config"
+	"github.com/teamhanko/hanko/backend/v3/context"
+	"github.com/teamhanko/hanko/backend/v3/persistence"
 )
 
 func TenantMiddlewareMultitenancy(persister persistence.Persister) echo.MiddlewareFunc {

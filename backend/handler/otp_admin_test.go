@@ -9,9 +9,9 @@ import (
 
 	"github.com/gofrs/uuid"
 	"github.com/stretchr/testify/suite"
-	"github.com/teamhanko/hanko/backend/v2/config"
-	"github.com/teamhanko/hanko/backend/v2/dto/admin"
-	"github.com/teamhanko/hanko/backend/v2/test"
+	"github.com/teamhanko/hanko/backend/v3/config"
+	"github.com/teamhanko/hanko/backend/v3/dto/admin"
+	"github.com/teamhanko/hanko/backend/v3/test"
 )
 
 func TestOtpAdminSuite(t *testing.T) {

@@ -8,13 +8,13 @@ import (
 	"github.com/gobuffalo/pop/v6"
 	"github.com/gofrs/uuid"
 	"github.com/labstack/echo/v4"
-	"github.com/teamhanko/hanko/backend/v2/config"
-	"github.com/teamhanko/hanko/backend/v2/context"
-	"github.com/teamhanko/hanko/backend/v2/dto/admin"
-	"github.com/teamhanko/hanko/backend/v2/persistence"
-	"github.com/teamhanko/hanko/backend/v2/persistence/models"
-	"github.com/teamhanko/hanko/backend/v2/webhooks"
-	"github.com/teamhanko/hanko/backend/v2/webhooks/events"
+	"github.com/teamhanko/hanko/backend/v3/config"
+	"github.com/teamhanko/hanko/backend/v3/context"
+	"github.com/teamhanko/hanko/backend/v3/dto/admin"
+	"github.com/teamhanko/hanko/backend/v3/persistence"
+	"github.com/teamhanko/hanko/backend/v3/persistence/models"
+	"github.com/teamhanko/hanko/backend/v3/webhooks"
+	"github.com/teamhanko/hanko/backend/v3/webhooks/events"
 )
 
 type WebhookHandler interface {

@@ -3,10 +3,10 @@ package jwk
 import (
 	"fmt"
 
-	"github.com/teamhanko/hanko/backend/v2/config"
-	"github.com/teamhanko/hanko/backend/v2/crypto/jwk/aws_kms"
-	"github.com/teamhanko/hanko/backend/v2/crypto/jwk/local_db"
-	"github.com/teamhanko/hanko/backend/v2/persistence"
+	"github.com/teamhanko/hanko/backend/v3/config"
+	"github.com/teamhanko/hanko/backend/v3/crypto/jwk/aws_kms"
+	"github.com/teamhanko/hanko/backend/v3/crypto/jwk/local_db"
+	"github.com/teamhanko/hanko/backend/v3/persistence"
 )
 
 func NewManager(cfg config.Config, persister persistence.Persister) (KeyProvider, error) {
