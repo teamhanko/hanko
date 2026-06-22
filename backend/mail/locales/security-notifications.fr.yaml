@@ -1,0 +1,48 @@
+password_update_text:
+  description: ""
+  other: "Le mot de passe de votre compte {{ .ServiceName }} a été mis à jour."
+subject_password_update:
+  description: ""
+  other: "Votre mot de passe a été mis à jour."
+
+primary_email_update_text:
+  description: ""
+  other: "L'adresse e-mail principale de votre compte {{ .ServiceName }} a été mise à jour de {{ .OldEmailAddress }} à {{ .NewEmailAddress }}."
+subject_primary_email_update:
+  description: ""
+  other: "Votre adresse e-mail principale a été mise à jour."
+
+email_create_text:
+  description: ""
+  other: "L'adresse e-mail {{ .NewEmailAddress }} a été ajoutée à votre compte {{ .ServiceName }}."
+subject_email_create:
+  description: ""
+  other: "Une nouvelle adresse e-mail a été ajoutée."
+
+email_delete_text:
+  description: ""
+  other: "L'adresse e-mail {{ .DeletedEmailAddress }} a été supprimée de votre compte {{ .ServiceName }}."
+subject_email_delete:
+  description: ""
+  other: "Une adresse e-mail a été supprimée."
+
+passkey_create_text:
+  description: ""
+  other: "Une nouvelle clé d'accès a été ajoutée à votre compte {{ .ServiceName }}."
+subject_passkey_create:
+  description: ""
+  other: "Une nouvelle clé d'accès a été ajoutée."
+
+mfa_create_text:
+  description: ""
+  other: "Une nouvelle méthode d'authentification multifactorielle (MFA) a été ajoutée avec succès à votre compte {{ .ServiceName }}."
+subject_mfa_create:
+  description: ""
+  other: "Une nouvelle méthode d'authentification multifacteur a été ajoutée"
+
+mfa_delete_text:
+  description: ""
+  other: "Une méthode d'authentification multifactorielle (MFA) existante a été supprimée de votre compte {{ .ServiceName }}."
+subject_mfa_delete:
+  description: ""
+  other: "Méthode MFA supprimée"

@@ -230,6 +230,10 @@
           "title": "secrets",
           "description": "`secrets` configures the keys used for cryptographically signing tokens issued by the API."
         },
+        "security_notifications": {
+          "$ref": "#/$defs/SecurityNotifications",
+          "description": "`security_notifications` configures security notifications for important security-related events."
+        },
         "server": {
           "$ref": "#/$defs/Server",
           "title": "server",
@@ -570,6 +574,15 @@
           "description": "`passcode_ttl` specifies, in seconds, how long a passcode is valid for.",
           "default": 300
         },
+        "passcode_charset": {
+          "type": "string",
+          "enum": [
+            "numeric",
+            "alphanumeric"
+          ],
+          "description": "`passcode_charset` specifies the characters that can be used in passcodes.\nE.g. `numeric` allows only numbers, `alphanumeric` allows both numbers and letters.",
+          "default": "numeric"
+        },
         "require_verification": {
           "type": "boolean",
           "description": "`require_verification` determines whether newly created emails must be verified by providing a passcode sent\nto respective address.",
@@ -707,6 +720,41 @@
       "additionalProperties": false,
       "type": "object"
     },
+    "KeyManagement": {
+      "if": {
+        "properties": {
+          "type": {
+            "const": "aws_kms"
+          }
+        }
+      },
+      "then": {
+        "required": [
+          "key_id",
+          "region"
+        ]
+      },
+      "properties": {
+        "type": {
+          "type": "string",
+          "enum": [
+            "local",
+            "aws_kms"
+          ],
+          "description": "Type specifies the key management system to use. Supported values are 'local' (default) for local key storage\nor 'aws_kms' for AWS Key Management Service.\nWhen using 'aws_kms,' the AWS credentials must be set using the standard AWS credential chain (in order of precedence).\n1. Environment variables (AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY, AWS_SESSION_TOKEN)\n2. Shared credentials file (~/.aws/credentials)\n3. Shared config file (~/.aws/config)\n4. IAM role for Amazon EC2 (via instance metadata service)\n5. IAM role for Amazon ECS (via container credentials)\n6. IAM role for Amazon EKS (via service account token)"
+        },
+        "key_id": {
+          "type": "string",
+          "description": "KeyID is the AWS KMS key identifier (ARN or alias) used for signing operations.\nRequired when Type is 'aws_kms'."
+        },
+        "region": {
+          "type": "string",
+          "description": "Region is the AWS region where the KMS key is located.\nRequired when Type is 'aws_kms'."
+        }
+      },
+      "additionalProperties": false,
+      "type": "object"
+    },
     "LoggerConfig": {
       "properties": {
         "log_health_and_metrics": {
@@ -742,6 +790,11 @@
           "type": "string",
           "description": "`device_trust_duration` configures the duration a device remains trusted after authentication; once expired, the\nuser must reauthenticate with MFA.",
           "default": "720h"
+        },
+        "device_trust_max_users_per_device": {
+          "type": "integer",
+          "description": "`device_trust_max_users_per_device` limits how many users can have device trust on a single device/browser.\nOldest entries are removed when the limit is exceeded. This allows multiple users to trust the same device\nwithout overwriting each other's trust tokens.",
+          "default": 20
         },
         "device_trust_policy": {
           "type": "string",
@@ -1165,7 +1218,29 @@
       "type": "object"
     },
     "Secrets": {
+      "if": {
+        "properties": {
+          "key_management": {
+            "properties": {
+              "type": {
+                "const": "local"
+              }
+            }
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "keys": {
+            "minItems": 1
+          }
+        }
+      },
       "properties": {
+        "key_management": {
+          "$ref": "#/$defs/KeyManagement",
+          "description": "KeyManagement configures the key management system used for signing JWTs.\nSupports 'local' (default) which uses the keys defined in the 'keys' field to encrypt a newly generated private\nRSA key in the database, or 'aws_kms' which uses AWS Key Management Service for key signatures."
+        },
         "keys": {
           "items": {
             "type": "string",
@@ -1173,7 +1248,6 @@
             "title": "keys"
           },
           "type": "array",
-          "minItems": 1,
           "description": "`keys` are used to en- and decrypt the JWKs which get used to sign the JWTs issued by the API.\nFor every key a JWK is generated, encrypted with the key and persisted in the database.\n\nYou can use this list for key rotation: add a new key to the beginning of the list and the corresponding\nJWK will then be used for signing JWTs. All tokens signed with the previous JWK(s) will still\nbe valid until they expire. Removing a key from the list does not remove the corresponding\ndatabase record. If you remove a key, you also have to remove the database record, otherwise\napplication startup will fail."
         }
       },
@@ -1228,6 +1302,52 @@
       "required": [
         "enabled"
       ]
+    },
+    "SecurityNotificationConfiguration": {
+      "properties": {
+        "enabled": {
+          "type": "boolean",
+          "default": true
+        }
+      },
+      "additionalProperties": false,
+      "type": "object"
+    },
+    "SecurityNotificationTypes": {
+      "properties": {
+        "password_update": {
+          "$ref": "#/$defs/SecurityNotificationConfiguration"
+        },
+        "primary_email_update": {
+          "$ref": "#/$defs/SecurityNotificationConfiguration"
+        },
+        "email_create": {
+          "$ref": "#/$defs/SecurityNotificationConfiguration"
+        },
+        "email_delete": {
+          "$ref": "#/$defs/SecurityNotificationConfiguration"
+        },
+        "passkey_create": {
+          "$ref": "#/$defs/SecurityNotificationConfiguration"
+        },
+        "mfa_create": {
+          "$ref": "#/$defs/SecurityNotificationConfiguration"
+        },
+        "mfa_delete": {
+          "$ref": "#/$defs/SecurityNotificationConfiguration"
+        }
+      },
+      "additionalProperties": false,
+      "type": "object"
+    },
+    "SecurityNotifications": {
+      "properties": {
+        "notifications": {
+          "$ref": "#/$defs/SecurityNotificationTypes"
+        }
+      },
+      "additionalProperties": false,
+      "type": "object"
     },
     "Server": {
       "properties": {
@@ -1345,6 +1465,11 @@
         "jwt_template": {
           "$ref": "#/$defs/JWTTemplate",
           "description": "`jwt_template` defines a template for adding custom `claims` to session JWTs.\n\nThese claims are processed at JWT generation time and can include static values,\ntemplated strings using Go's text/template syntax, or nested structures (maps and slices).\n\nThe template has access to user data via the `.User` field, which includes:\n- `.User.UserID`: The user's unique ID (string)\n- `.User.Email`: Email details (optional, with `.Address`, `.IsPrimary`, `.IsVerified`)\n- `.User.Username`: The user's username (string, optional)\n\nClaims that fail to process (e.g., due to invalid templates) are logged and skipped,\nensuring JWT generation continues without interruption.\n\nExample usage in YAML configuration:\n```yaml\nsession:\n  lifespan: 24h\n  jwt_template:\n    claims:\n      role: \"user\"                               # Static value\n      user_email: \"{{.User.Email.Address}}\"      # Templated string\n      is_verified: \"{{.User.Email.IsVerified}}\"  # Boolean from user data\n      metadata:                                  # Nested map\n        source: \"hanko\"\n        greeting: \"Hello {{.User.Username}}\"\n      scopes:                                    # Slice with templated value\n        - \"read\"\n        - \"write\"\n        - \"{{if .User.Email.IsVerified}}admin{{else}}basic{{end}}\"\n```\n\nIn this example:\n- `role` is a static string (\"user\").\n- `user_email` dynamically inserts the user's email address.\n- `is_verified` inserts a boolean indicating email verification status.\n- `metadata` is a nested map with a static `source` and a templated `greeting`.\n- `scopes` is a slice combining static values and a conditional template.\n\nNotes:\n- Claims with the following keys will be ignored because they are currently added to the JWT\n  by default:\n    - sub\n    - iat\n    - exp\n    - aud\n    - iss\n    - email\n    - username\n    - session_id\n- Templates must be valid Go `text/template` syntax. Invalid templates are logged and ignored.\n- Boolean strings (\"true\" or \"false\") from templates are automatically converted to actual booleans.\n- Use conditionals (e.g., `{{if .User.Email}}`) to handle optional fields safely.\n\nFor more details on template syntax, see: https://pkg.go.dev/text/template"
+        },
+        "idle_timeout": {
+          "type": "string",
+          "description": "IdleTimeout specifies the duration a session can remain idle before being automatically terminated.\nIt must be a (possibly signed) sequence of decimal\nnumbers, each with optional fraction and a unit suffix, such as \"300ms\", \"-1.5h\" or \"2h45m\".\nValid time units are \"ns\", \"us\" (or \"µs\"), \"ms\", \"s\", \"m\", \"h\".",
+          "default": "0"
         }
       },
       "additionalProperties": false,

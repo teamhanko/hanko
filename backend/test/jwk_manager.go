@@ -2,7 +2,11 @@ package test
 
 import (
 	"errors"
+	"fmt"
+
+	"github.com/lestrrat-go/jwx/v2/jwa"
 	"github.com/lestrrat-go/jwx/v2/jwk"
+	"github.com/lestrrat-go/jwx/v2/jwt"
 )
 
 var privateKey = `{
@@ -44,6 +48,32 @@ func (m JwkManager) GetPublicKeys() (jwk.Set, error) {
 
 func (m JwkManager) GetSigningKey() (jwk.Key, error) {
 	return getJwk()
+}
+
+// Sign a JWT with the signing key and returns it
+func (m JwkManager) Sign(token jwt.Token) ([]byte, error) {
+	key, err := m.GetSigningKey()
+	if err != nil {
+		return nil, fmt.Errorf("failed to get signing key: %w", err)
+	}
+	signed, err := jwt.Sign(token, jwt.WithKey(jwa.RS256, key))
+	if err != nil {
+		return nil, fmt.Errorf("failed to sign jwt: %w", err)
+	}
+	return signed, nil
+}
+
+// Verify verifies a JWT, using the verificationKeys and returns the parsed JWT
+func (m JwkManager) Verify(signed []byte) (jwt.Token, error) {
+	keys, err := m.GetPublicKeys()
+	if err != nil {
+		return nil, fmt.Errorf("failed to get public keys: %w", err)
+	}
+	token, err := jwt.Parse(signed, jwt.WithKeySet(keys))
+	if err != nil {
+		return nil, fmt.Errorf("failed to verify jwt: %w", err)
+	}
+	return token, nil
 }
 
 func getJwk() (jwk.Key, error) {

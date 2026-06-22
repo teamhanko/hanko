@@ -13,11 +13,11 @@ jobs:
       - name: Set up Go
         uses: actions/setup-go@v6
         with:
-          go-version: '1.24'
+          go-version: '1.26'
 
       - uses: actions/setup-node@v6
         with:
-          node-version: '20.16.0'
+          node-version: v24.11.1
           registry-url: https://registry.npmjs.org/
 
       - name: Checkout backend

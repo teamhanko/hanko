@@ -4,11 +4,11 @@ import (
 	"database/sql"
 	"errors"
 	"fmt"
+	"time"
+
 	"github.com/gobuffalo/pop/v6"
 	"github.com/gofrs/uuid"
 	"github.com/teamhanko/hanko/backend/v2/persistence/models"
-	"strings"
-	"time"
 )
 
 type AuditLogPersister interface {
@@ -89,8 +89,7 @@ func (p *auditLogPersister) addQueryParamsToSqlQuery(query *pop.Query, startTime
 	}
 
 	if len(types) > 0 {
-		joined := "'" + strings.Join(types, "','") + "'"
-		query = query.Where(fmt.Sprintf("type IN (%s)", joined))
+		query = query.Where("type IN (?)", types)
 	}
 
 	if len(userId) > 0 {

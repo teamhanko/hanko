@@ -22,8 +22,20 @@ export { Relay };
 // Utils
 
 import { WebauthnSupport } from "./lib/WebauthnSupport";
+import {
+  generateCodeVerifier,
+  setStoredCodeVerifier,
+  getStoredCodeVerifier,
+  clearStoredCodeVerifier,
+} from "./lib/Pkce";
 
-export { WebauthnSupport };
+export {
+  WebauthnSupport,
+  generateCodeVerifier,
+  setStoredCodeVerifier,
+  getStoredCodeVerifier,
+  clearStoredCodeVerifier,
+};
 
 // DTO
 

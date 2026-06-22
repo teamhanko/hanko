@@ -224,7 +224,7 @@ describe("httpClient.processResponseHeadersOnLogin()", () => {
 
         client.processHeaders(xhr);
 
-        expect(response.xhr.getResponseHeader).toBeCalledTimes(2);
+        expect(response.xhr.getResponseHeader).toHaveBeenCalledTimes(2);
 
         expect(client.cookie.setAuthCookie).toHaveBeenCalledTimes(1);
 
@@ -232,7 +232,7 @@ describe("httpClient.processResponseHeadersOnLogin()", () => {
           secure,
           expires: new Date(fakeTimerNow + expirationSeconds * 1000),
         });
-        expect(client.cookie.setAuthCookie).toBeCalledTimes(1);
+        expect(client.cookie.setAuthCookie).toHaveBeenCalledTimes(1);
       },
     );
   });

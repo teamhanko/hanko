@@ -3,14 +3,15 @@ package middleware
 import (
 	"errors"
 	"fmt"
+	"net/http"
+	"time"
+
 	"github.com/gofrs/uuid"
 	echojwt "github.com/labstack/echo-jwt/v4"
 	"github.com/labstack/echo/v4"
 	"github.com/teamhanko/hanko/backend/v2/config"
 	"github.com/teamhanko/hanko/backend/v2/persistence"
 	"github.com/teamhanko/hanko/backend/v2/session"
-	"net/http"
-	"time"
 )
 
 // Session is a convenience function to create a middleware.JWT with custom JWT verification
@@ -51,6 +52,23 @@ func parseToken(cfg config.Session, persister persistence.Persister, generator s
 		}
 		if sessionModel == nil {
 			return nil, fmt.Errorf("session id not found in database")
+		}
+
+		// Check idle timeout
+		idleTimeout, _ := time.ParseDuration(cfg.IdleTimeout)
+		if idleTimeout > 0 && time.Since(sessionModel.LastUsed) > idleTimeout {
+			sessionDeletionErr := persister.GetSessionPersister().Delete(*sessionModel)
+			if sessionDeletionErr != nil {
+				return nil, fmt.Errorf("failed to delete session: %w", sessionDeletionErr)
+			}
+
+			cookie, cookieDeletionErr := generator.DeleteCookie()
+			if cookieDeletionErr != nil {
+				return nil, fmt.Errorf("could not delete cookie: %w", cookieDeletionErr)
+			}
+			c.SetCookie(cookie)
+
+			return nil, errors.New("session expired due to idle timeout")
 		}
 
 		// Update lastUsed field

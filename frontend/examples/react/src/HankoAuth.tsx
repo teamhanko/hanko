@@ -1,4 +1,4 @@
-import React, {
+import {
   useCallback,
   useEffect,
   useState,
@@ -8,7 +8,7 @@ import { useNavigate } from "react-router-dom";
 import { Hanko, register } from "@teamhanko/hanko-elements";
 import styles from "./Todo.module.css";
 
-const api = process.env.REACT_APP_HANKO_API!;
+const api = import.meta.env.VITE_HANKO_API!;
 
 function HankoAuth() {
   const navigate = useNavigate();

@@ -258,7 +258,17 @@ func (h *UserHandler) Me(c echo.Context) error {
 		return errors.New("failed to cast session object")
 	}
 
-	return c.JSON(http.StatusOK, map[string]string{"id": sessionToken.Subject()})
+	user, err := h.persister.GetUserPersister().Get(uuid.FromStringOrNil(sessionToken.Subject()))
+	if err != nil {
+		return fmt.Errorf("failed to get user: %w", err)
+	}
+
+	if user == nil {
+		return echo.NewHTTPError(http.StatusNotFound).SetInternal(errors.New("user not found"))
+	}
+
+	data := dto.ProfileDataFromUserModel(user, h.cfg)
+	return c.JSON(http.StatusOK, *data)
 }
 
 func (h *UserHandler) Delete(c echo.Context) error {

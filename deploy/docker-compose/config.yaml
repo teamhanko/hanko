@@ -21,8 +21,38 @@ webauthn:
 session:
   cookie:
     secure: false # is needed for safari, because safari does not store secure cookies on localhost
+# MFA configuration with multi-user device trust support
+mfa:
+  enabled: true
+  optional: true
+  acquire_on_login: false
+  acquire_on_registration: true
+  device_trust_policy: "prompt"
+  device_trust_duration: "720h"
+  device_trust_cookie_name: "hanko-device-token"
+  device_trust_max_users_per_device: 20
+  totp:
+    enabled: true
+  security_keys:
+    enabled: false
 server:
   public:
     cors:
       allow_origins:
         - "http://localhost:8888"
+security_notifications:
+  notifications:
+    email_create:
+      enabled: true
+    email_delete:
+      enabled: true
+    password_update:
+      enabled: true
+    passkey_create:
+      enabled: true
+    primary_email_update:
+      enabled: true
+    mfa_create:
+      enabled: true
+    mfa_delete:
+      enabled: true

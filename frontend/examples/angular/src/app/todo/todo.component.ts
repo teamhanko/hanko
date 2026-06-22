@@ -1,13 +1,16 @@
-import { Component, OnInit, ViewChild } from '@angular/core';
+import { Component, CUSTOM_ELEMENTS_SCHEMA, OnInit, ViewChild } from "@angular/core";
 import { Router } from '@angular/router';
 import { Todos, TodoService } from '../services/todo.service';
 import { HankoService } from "../services/hanko.services";
 import { SessionExpiredModalComponent } from "../modal/session-expired-modal.component";
 
 @Component({
-  selector: 'app-todo',
-  templateUrl: './todo.component.html',
-  styleUrls: ['../app.component.css', './todo.component.css'],
+    selector: 'app-todo',
+    templateUrl: './todo.component.html',
+    styleUrls: ['../app.component.css', './todo.component.css'],
+    standalone: true,
+    imports: [SessionExpiredModalComponent],
+    schemas: [CUSTOM_ELEMENTS_SCHEMA]
 })
 export class TodoComponent implements OnInit {
   todos: Todos = [];

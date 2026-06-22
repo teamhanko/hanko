@@ -86,7 +86,7 @@ describe("Listener()", () => {
       jest.advanceTimersByTime(1100); // skip throttle
       document.dispatchEvent(mockEvent);
 
-      expect(mockCallback).toBeCalledTimes(1);
+      expect(mockCallback).toHaveBeenCalledTimes(1);
     });
 
     it("should clean up the event listener", async () => {
@@ -105,7 +105,7 @@ describe("Listener()", () => {
       cleanup();
 
       document.dispatchEvent(mockEvent);
-      expect(mockCallback).toBeCalledTimes(0);
+      expect(mockCallback).toHaveBeenCalledTimes(0);
     });
   });
 
@@ -153,7 +153,7 @@ describe("Listener()", () => {
       jest.advanceTimersByTime(1000); // skip throttle
       document.dispatchEvent(mockEvent);
 
-      expect(mockCallback).toBeCalledTimes(1);
+      expect(mockCallback).toHaveBeenCalledTimes(1);
     });
 
     it("should clean up the event listener", async () => {
@@ -164,7 +164,7 @@ describe("Listener()", () => {
       cleanup();
 
       document.dispatchEvent(mockEvent);
-      expect(mockCallback).toBeCalledTimes(0);
+      expect(mockCallback).toHaveBeenCalledTimes(0);
     });
   });
 
@@ -178,7 +178,7 @@ describe("Listener()", () => {
         { once: false },
       );
 
-      expect(mockThrottleFunc).toBeCalledTimes(0);
+      expect(mockThrottleFunc).toHaveBeenCalledTimes(0);
 
       const mockEvent = new CustomEvent(userLoggedOutType, {});
 
@@ -203,7 +203,7 @@ describe("Listener()", () => {
       document.dispatchEvent(mockEvent);
       document.dispatchEvent(mockEvent);
 
-      expect(mockCallback).toBeCalledTimes(1);
+      expect(mockCallback).toHaveBeenCalledTimes(1);
     });
 
     it("should clean up the event listener", async () => {
@@ -214,7 +214,7 @@ describe("Listener()", () => {
       cleanup();
 
       document.dispatchEvent(mockEvent);
-      expect(mockCallback).toBeCalledTimes(0);
+      expect(mockCallback).toHaveBeenCalledTimes(0);
     });
   });
 
@@ -228,7 +228,7 @@ describe("Listener()", () => {
         { once: false },
       );
 
-      expect(mockThrottleFunc).toBeCalledTimes(0);
+      expect(mockThrottleFunc).toHaveBeenCalledTimes(0);
 
       const mockEvent = new CustomEvent(userDeletedType, {});
 
@@ -253,7 +253,7 @@ describe("Listener()", () => {
       document.dispatchEvent(mockEvent);
       document.dispatchEvent(mockEvent);
 
-      expect(mockCallback).toBeCalledTimes(1);
+      expect(mockCallback).toHaveBeenCalledTimes(1);
     });
 
     it("should clean up the event listener", async () => {
@@ -264,7 +264,7 @@ describe("Listener()", () => {
       cleanup();
 
       document.dispatchEvent(mockEvent);
-      expect(mockCallback).toBeCalledTimes(0);
+      expect(mockCallback).toHaveBeenCalledTimes(0);
     });
   });
 });

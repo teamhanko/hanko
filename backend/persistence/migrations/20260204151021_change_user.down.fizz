@@ -1,0 +1,5 @@
+drop_column("users", "name")
+drop_column("users", "family_name")
+drop_column("users", "given_name")
+drop_column("users", "picture")
+

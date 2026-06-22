@@ -18,6 +18,7 @@ class UserClient extends Client {
    * @throws {UnauthorizedError}
    * @throws {RequestTimeoutError}
    * @throws {TechnicalError}
+   * @deprecated
    * @see https://docs.hanko.io/api/public#tag/User-Management/operation/IsUserAuthorized
    * @see https://docs.hanko.io/api/public#tag/User-Management/operation/listUser
    */
@@ -42,6 +43,27 @@ class UserClient extends Client {
     }
 
     return userResponse.json();
+  }
+
+  /**
+   * Fetches the current user.
+   *
+   * @return {Promise<User>}
+   * @throws {UnauthorizedError}
+   * @throws {RequestTimeoutError}
+   * @throws {TechnicalError}
+   */
+  async getCurrentUser(): Promise<User> {
+    const meResponse = await this.client.get("/me");
+
+    if (meResponse.status === 401) {
+      this.client.dispatcher.dispatchSessionExpiredEvent();
+      throw new UnauthorizedError();
+    } else if (!meResponse.ok) {
+      throw new TechnicalError();
+    }
+
+    return meResponse.json();
   }
 
   /**

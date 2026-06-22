@@ -5,7 +5,11 @@
   "workspaces": [
     "frontend-sdk",
     "elements",
-    "examples/*"
+    "examples/angular",
+    "examples/nextjs",
+    "examples/react",
+    "examples/vue",
+    "examples/express"
   ],
   "scripts": {
     "build": "turbo run build",
@@ -16,6 +20,7 @@
     "build:elements:dev": "turbo build:dev --filter=./elements"
   },
   "devDependencies": {
-    "turbo": "^1.10.7"
-  }
+    "turbo": "^2.9.16"
+  },
+  "packageManager": "npm@11.6.2"
 }

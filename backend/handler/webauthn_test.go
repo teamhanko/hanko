@@ -3,16 +3,17 @@ package handler
 import (
 	"encoding/base64"
 	"encoding/json"
+	"net/http"
+	"net/http/httptest"
+	"strings"
+	"testing"
+
 	"github.com/go-webauthn/webauthn/protocol"
 	"github.com/gofrs/uuid"
 	"github.com/labstack/echo/v4"
 	"github.com/stretchr/testify/suite"
 	"github.com/teamhanko/hanko/backend/v2/persistence/models"
 	"github.com/teamhanko/hanko/backend/v2/test"
-	"net/http"
-	"net/http/httptest"
-	"strings"
-	"testing"
 )
 
 func TestWebauthnSuite(t *testing.T) {
@@ -304,6 +305,50 @@ func (s *webauthnSuite) TestWebauthnHandler_FinalizeAuthentication_TokenInHeader
 		s.NoError(err)
 		s.Equal("Stored challenge and received challenge do not match", httpError.Message)
 	}
+}
+
+func (s *webauthnSuite) TestWebauthnHandler_FinalizeAuthentication_SignCountMismatch() {
+	if testing.Short() {
+		s.T().Skip("skipping test in short mode")
+	}
+
+	err := s.LoadFixtures("../test/fixtures/webauthn")
+	s.Require().NoError(err)
+
+	credentialID := "AaFdkcD4SuPjF-jwUoRwH8-ZHuY5RW46fsZmEvBX6RNKHaGtVzpATs06KQVheIOjYz-YneG4cmQOedzl0e0jF951ukx17Hl9jeGgWz5_DKZCO12p2-2LlzjH"
+	credential, err := s.Storage.GetWebauthnCredentialPersister().Get(credentialID)
+	s.Require().NoError(err)
+	s.Require().NotNil(credential)
+
+	// Set a higher sign count in the database to trigger a mismatch when the request arrives with a lower count (1650963259)
+	credential.SignCount = 1650963260
+	err = s.Storage.GetWebauthnCredentialPersister().Update(*credential)
+	s.Require().NoError(err)
+
+	e := NewPublicRouter(&test.DefaultConfig, s.Storage, nil, nil)
+
+	body := `{
+"id": "AaFdkcD4SuPjF-jwUoRwH8-ZHuY5RW46fsZmEvBX6RNKHaGtVzpATs06KQVheIOjYz-YneG4cmQOedzl0e0jF951ukx17Hl9jeGgWz5_DKZCO12p2-2LlzjH",
+"rawId": "AaFdkcD4SuPjF-jwUoRwH8-ZHuY5RW46fsZmEvBX6RNKHaGtVzpATs06KQVheIOjYz-YneG4cmQOedzl0e0jF951ukx17Hl9jeGgWz5_DKZCO12p2-2LlzjH",
+"type": "public-key",
+"response": {
+"authenticatorData": "SZYN5YgOjGh0NBcPZHZgW4_krrmihjLHmVzzuoMdl2MFYmezOw",
+"clientDataJSON": "eyJ0eXBlIjoid2ViYXV0aG4uZ2V0IiwiY2hhbGxlbmdlIjoiZ0tKS21oOTB2T3BZTzU1b0hwcWFIWF9vTUNxNG9UWnQtRDBiNnRlSXpyRSIsIm9yaWdpbiI6Imh0dHA6Ly9sb2NhbGhvc3Q6ODA4MCIsImNyb3NzT3JpZ2luIjpmYWxzZX0",
+"signature": "MEYCIQDi2vYVspG6pf38I4GyQCPOojGbvX4nwSPXCi0hm80twAIhAO3EWjhAnj0UpjU_l0AH5sEh3zq4LDvkvo3AUqaqfGYD",
+"userHandle": "7E7wSVuIQyGhcyGw7_BqBA"
+}
+}`
+
+	req := httptest.NewRequest(http.MethodPost, "/webauthn/login/finalize", strings.NewReader(body))
+	rec := httptest.NewRecorder()
+
+	e.ServeHTTP(rec, req)
+
+	s.Equal(http.StatusBadRequest, rec.Code)
+	httpError := echo.HTTPError{}
+	err = json.Unmarshal(rec.Body.Bytes(), &httpError)
+	s.NoError(err)
+	s.Equal("failed to validate assertion", httpError.Message)
 }
 
 var userId = "ec4ef049-5b88-4321-a173-21b0eff06a04"

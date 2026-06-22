@@ -4,6 +4,7 @@ import { de } from "./de";
 import { en } from "./en";
 import { fr } from "./fr";
 import { it } from "./it";
+import { nl } from "./nl";
 import { ptBR } from "./pt-BR";
 import { zh } from "./zh";
-export const all: Translations = { bn, de, en, fr, it, ptBR, zh };
+export const all: Translations = { bn, de, en, fr, it, nl, ptBR, zh };

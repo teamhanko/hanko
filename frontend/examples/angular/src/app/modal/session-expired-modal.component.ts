@@ -1,11 +1,13 @@
-import { Component, ElementRef, ViewChild } from "@angular/core";
+import { Component, CUSTOM_ELEMENTS_SCHEMA, ElementRef, ViewChild } from "@angular/core";
 import { Router } from '@angular/router';
 import { HankoService } from "../services/hanko.services";
 
 @Component({
-  selector: 'app-session-expired-modal',
-  templateUrl: './session-expired-modal.component.html',
-  styleUrls: ['../app.component.css'],
+    selector: 'app-session-expired-modal',
+    templateUrl: './session-expired-modal.component.html',
+    styleUrls: ['../app.component.css'],
+    standalone: true,
+    schemas: [CUSTOM_ELEMENTS_SCHEMA]
 })
 export class SessionExpiredModalComponent {
   @ViewChild('modal') modal?: ElementRef<HTMLDialogElement>;

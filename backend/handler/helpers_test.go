@@ -5,7 +5,7 @@ import (
 	"time"
 
 	"github.com/gofrs/uuid"
-	"github.com/teamhanko/hanko/backend/v2/crypto/jwk"
+	"github.com/teamhanko/hanko/backend/v2/crypto/jwk/local_db"
 	"github.com/teamhanko/hanko/backend/v2/dto"
 	"github.com/teamhanko/hanko/backend/v2/persistence"
 	"github.com/teamhanko/hanko/backend/v2/persistence/models"
@@ -14,7 +14,7 @@ import (
 )
 
 func getDefaultSessionManager(storage persistence.Persister) session.Manager {
-	jwkManager, _ := jwk.NewDefaultManager(test.DefaultConfig.Secrets.Keys, storage.GetJwkPersister())
+	jwkManager, _ := local_db.NewDefaultManager(test.DefaultConfig.Secrets.Keys, storage.GetJwkPersister())
 	sessionManager, _ := session.NewManager(jwkManager, test.DefaultConfig)
 	return sessionManager
 }

@@ -4,6 +4,7 @@ import (
 	"github.com/labstack/gommon/log"
 	"github.com/stretchr/testify/require"
 	"github.com/teamhanko/hanko/backend/v2/webhooks/events"
+	"net"
 	"net/http"
 	"net/http/httptest"
 	"testing"
@@ -144,4 +145,32 @@ func TestBaseWebhook_TriggerWithBadServer(t *testing.T) {
 
 	require.Error(t, err)
 	require.ErrorContains(t, err, "EOF")
+}
+
+func TestBaseWebhook_TriggerTimeout(t *testing.T) {
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		time.Sleep(100 * time.Millisecond)
+		w.WriteHeader(http.StatusOK)
+	}))
+	defer server.Close()
+
+	baseHook := BaseWebhook{
+		Logger:   log.New("test"),
+		Callback: server.URL,
+		Events:   events.Events{events.UserCreate},
+		Timeout:  20 * time.Millisecond,
+	}
+
+	data := JobData{
+		Token: "test-token",
+		Event: "user",
+	}
+
+	err := baseHook.Trigger(data)
+
+	var netErr net.Error
+
+	require.Error(t, err)
+	require.ErrorAs(t, err, &netErr)
+	require.True(t, netErr.Timeout())
 }

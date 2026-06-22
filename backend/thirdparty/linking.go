@@ -110,6 +110,15 @@ func link(tx *pop.Connection, cfg *config.Config, p persistence.Persister, userD
 		return nil, ErrorServer("could not create identity").WithCause(err)
 	}
 
+	profile := userData.Metadata.ProviderProfileWithLogging("thirdparty_link", providerID)
+
+	if user.SyncFromProviderProfile(profile) {
+		user.UpdatedAt = time.Now().UTC()
+		if uerr := p.GetUserPersisterWithConnection(tx).Update(*user); uerr != nil {
+			return nil, ErrorServer("could not update user").WithCause(uerr)
+		}
+	}
+
 	if isSaml && samlDomain != nil && *samlDomain != "" && email != nil {
 		if existingSamlIdentity := email.GetSamlIdentityForDomain(*samlDomain); existingSamlIdentity != nil {
 			identityToDeleteID := existingSamlIdentity.IdentityID
@@ -235,6 +244,15 @@ func signIn(tx *pop.Connection, cfg *config.Config, p persistence.Persister, use
 		return nil, ErrorServer("could not get user").WithCause(terr)
 	}
 
+	profile := userData.Metadata.ProviderProfileWithLogging("thirdparty_sign_in", identity.ProviderID)
+
+	if user.SyncFromProviderProfile(profile) {
+		user.UpdatedAt = time.Now().UTC()
+		if uerr := userPersister.Update(*user); uerr != nil {
+			return nil, ErrorServer("could not update user").WithCause(uerr)
+		}
+	}
+
 	linkingResult = &AccountLinkingResult{
 		Type:         models.AuditLogThirdPartySignInSucceeded,
 		User:         user,
@@ -263,6 +281,11 @@ func signUp(tx *pop.Connection, cfg *config.Config, p persistence.Persister, use
 	}
 
 	user := models.NewUser()
+
+	profile := userData.Metadata.ProviderProfileWithLogging("thirdparty_sign_up", providerID)
+
+	user.SyncFromProviderProfile(profile)
+
 	terr = userPersister.Create(user)
 	if terr != nil {
 		return nil, ErrorServer("could not create user").WithCause(terr)

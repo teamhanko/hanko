@@ -42,6 +42,7 @@ const Input = ({ label, ...props }: Props) => {
   return (
     <div className={styles.inputWrapper}>
       <input
+        spellcheck={false}
         part={"input text-input"}
         required={props.flowInput?.required}
         maxLength={props.flowInput?.max_length}

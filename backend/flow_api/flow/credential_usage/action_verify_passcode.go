@@ -3,6 +3,7 @@ package credential_usage
 import (
 	"errors"
 	"fmt"
+
 	"github.com/gofrs/uuid"
 	auditlog "github.com/teamhanko/hanko/backend/v2/audit_log"
 	"github.com/teamhanko/hanko/backend/v2/flow_api/flow/shared"
@@ -108,6 +109,13 @@ func (a VerifyPasscode) Execute(c flowpilot.ExecutionContext) error {
 	err = c.Stash().Set(shared.StashPathUserHasEmails, true)
 	if err != nil {
 		return err
+	}
+
+	// Registration: record that passcode was USED (not derived from login_method).
+	if c.IsFlow(shared.FlowRegistration) {
+		if err = c.Stash().Set(shared.StashPathRegistrationAMRUsedPasscode, true); err != nil {
+			return fmt.Errorf("failed to set %s to the stash: %w", shared.StashPathRegistrationAMRUsedPasscode, err)
+		}
 	}
 
 	c.PreventRevert()

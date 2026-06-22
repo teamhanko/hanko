@@ -10,6 +10,7 @@ defaults:
     working-directory: frontend/frontend-sdk
 
 permissions:
+  contents: write  # Added to allow pushing to gh-pages
   id-token: write  # Required for OIDC
 
 jobs:
@@ -29,7 +30,7 @@ jobs:
       - run: echo ${{ steps.tag-version.outputs.git_tag_version }}
       - name: Version correctly set check
         if: steps.package-version.outputs.current-version != steps.tag-version.outputs.git_tag_version
-        uses: actions/github-script@v8
+        uses: actions/github-script@v9
         with:
           script: |
             core.setFailed('version in package.json is not equal to git tag version!')

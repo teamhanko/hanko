@@ -96,10 +96,12 @@ export type Claims<
  * @property {Claims} [claims] - The claims associated with the session (optional).
  * @property {string} [expiration_time] - The expiration timestamp of the session (optional).
  * @property {string} [user_id] - The user ID linked to the session (optional).
+ * @property {string} [idle_expires_at] - Expiration timestamp indicating when the session will expire due to inactivity, assuming idle timeouts are configured and no further activity occurs before this time (optional).
  */
 export interface SessionCheckResponse {
   is_valid: boolean;
   claims?: Claims;
   expiration_time?: string;
   user_id?: string;
+  idle_expires_at?: string;
 }

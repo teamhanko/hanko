@@ -21,6 +21,10 @@ type User struct {
 	IPAddress           *string                          `json:"ip_address,omitempty"`
 	UserAgent           *string                          `json:"user_agent,omitempty"`
 	Metadata            *Metadata                        `json:"metadata,omitempty"`
+	GivenName           string                           `json:"given_name,omitempty"`
+	FamilyName          string                           `json:"family_name,omitempty"`
+	Name                string                           `json:"name,omitempty"`
+	Picture             string                           `json:"picture,omitempty"`
 }
 
 func (u *User) SetIPAddress(ip string) {
@@ -83,6 +87,10 @@ func FromUserModel(model models.User) User {
 		Identities:          identities,
 		OTP:                 otp,
 		Metadata:            metadata,
+		GivenName:           model.GivenName.String,
+		FamilyName:          model.FamilyName.String,
+		Name:                model.Name.String,
+		Picture:             model.Picture.String,
 	}
 }
 

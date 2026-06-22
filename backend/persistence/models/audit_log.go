@@ -2,9 +2,10 @@ package models
 
 import (
 	"fmt"
+	"time"
+
 	"github.com/gobuffalo/pop/v6/slices"
 	"github.com/gofrs/uuid"
-	"time"
 )
 
 type AuditLog struct {
@@ -114,14 +115,15 @@ var (
 	AuditLogUserDeleted         AuditLogType = "user_deleted"
 
 	// New/flow API types
-	AuditLogLoginSuccess       AuditLogType = "login_success"
-	AuditLogLoginFailure       AuditLogType = "login_failure"
-	AuditLogOTPCreated         AuditLogType = "otp_created"
-	AuditLogPasskeyCreated     AuditLogType = "passkey_created"
-	AuditLogPasskeyDeleted     AuditLogType = "passkey_deleted"
-	AuditLogSecurityKeyCreated AuditLogType = "security_key_created"
-	AuditLogUsernameChanged    AuditLogType = "username_changed"
-	AuditLogUsernameDeleted    AuditLogType = "username_deleted"
-	AuditLogPasswordChanged    AuditLogType = "password_changed"
-	AuditLogPasswordDeleted    AuditLogType = "password_deleted"
+	AuditLogLoginSuccess             AuditLogType = "login_success"
+	AuditLogLoginFailure             AuditLogType = "login_failure"
+	AuditLogOTPCreated               AuditLogType = "otp_created"
+	AuditLogPasskeyCreated           AuditLogType = "passkey_created"
+	AuditLogPasskeyDeleted           AuditLogType = "passkey_deleted"
+	AuditLogSecurityKeyCreated       AuditLogType = "security_key_created"
+	AuditLogSecurityNotificationSent AuditLogType = "security_notification_sent"
+	AuditLogUsernameChanged          AuditLogType = "username_changed"
+	AuditLogUsernameDeleted          AuditLogType = "username_deleted"
+	AuditLogPasswordChanged          AuditLogType = "password_changed"
+	AuditLogPasswordDeleted          AuditLogType = "password_deleted"
 )

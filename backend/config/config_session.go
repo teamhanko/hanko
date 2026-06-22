@@ -95,6 +95,11 @@ type Session struct {
 	//
 	// For more details on template syntax, see: https://pkg.go.dev/text/template
 	JWTTemplate *JWTTemplate `yaml:"jwt_template" json:"jwt_template,omitempty" koanf:"jwt_template"`
+	// IdleTimeout specifies the duration a session can remain idle before being automatically terminated.
+	// It must be a (possibly signed) sequence of decimal
+	// numbers, each with optional fraction and a unit suffix, such as "300ms", "-1.5h" or "2h45m".
+	// Valid time units are "ns", "us" (or "µs"), "ms", "s", "m", "h".
+	IdleTimeout string `yaml:"idle_timeout,omitempty" json:"idle_timeout,omitempty" koanf:"idle_timeout" jsonschema:"default=0" split_words:"true"`
 }
 
 func (s *Session) Validate() error {

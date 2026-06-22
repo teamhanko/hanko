@@ -40,6 +40,13 @@ module.exports = {
         type: "module",
       },
     },
+    nl: {
+      filename: "i18n/nl.js",
+      import: "./src/i18n/nl.ts",
+      library: {
+        type: "module",
+      },
+    },
     ptBR: {
       filename: "i18n/pt-BR.js",
       import: "./src/i18n/pt-BR.ts",
@@ -98,6 +105,7 @@ module.exports = {
               modules: {
                 localIdentName: "hanko_[local]",
                 localIdentContext: path.resolve(__dirname, "src"),
+                namedExport: false,
               },
               importLoaders: 1,
             },

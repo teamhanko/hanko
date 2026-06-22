@@ -1,0 +1,38 @@
+login_text:
+  description: "The sign in content of the text email."
+  other: "Voer de volgende code in om je identiteit te verifiëren:"
+ttl_text:
+  description: "The length how long the passcode is valid."
+  other: "De code is {{ .TTL }} minuten geldig."
+email_subject_login:
+  description: ""
+  other: "{{ .Code }} is je verificatiecode voor {{ .ServiceName }}"
+subject_email_verification:
+  description: ""
+  other: "Gebruik code {{ .Code }} om je e-mailadres te verifiëren"
+subject_login:
+  description: ""
+  other: "Gebruik code {{ .Code }} om in te loggen op je account"
+subject_recovery:
+  description: ""
+  other: "Gebruik code {{ .Code }} om je account te herstellen"
+email_verification_text:
+  description: ""
+  other: "Voer de volgende code in om je e-mailadres te verifiëren:"
+recovery_text:
+  description: "The content of the recovery text email."
+  other: "Voer de volgende code in op het inlogscherm:"
+
+subject_email_login_attempted:
+  description: "Subject for notification about a login attempt."
+  other: "Het opgegeven e-mailadres wordt niet herkend"
+email_login_attempted_text:
+  description: "Notifies the recipient that either they or someone else attempted to log in to a specific service using an unrecognized email address."
+  other: "Jij of iemand anders heeft geprobeerd in te loggen bij {{ .ServiceName }}, maar het opgegeven e-mailadres is niet bekend. Maak eerst een account aan."
+
+subject_email_registration_attempted:
+  description: "Subject for notification about a registration attempt."
+  other: "Het opgegeven e-mailadres is al in gebruik"
+email_registration_attempted_text:
+  description: "Notifies the recipient that either they or someone else attempted to register for a specific service using an email address that is already in use."
+  other: "Jij of iemand anders heeft geprobeerd een e-mailadres te registreren voor {{ .ServiceName }}, maar dit e-mailadres is al geregistreerd. Probeer in plaats daarvan in te loggen."

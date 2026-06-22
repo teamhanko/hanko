@@ -1,0 +1,48 @@
+password_update_text:
+  description: ""
+  other: "আপনার {{ .ServiceName }} অ্যাকাউন্টের পাসওয়ার্ড আপডেট করা হয়েছে।"
+subject_password_update:
+  description: ""
+  other: "আপনার পাসওয়ার্ড আপডেট করা হয়েছে।"
+
+primary_email_update_text:
+  description: ""
+  other: "আপনার {{ .ServiceName }} অ্যাকাউন্টের প্রাথমিক ইমেল ঠিকানা {{ .OldEmailAddress }} থেকে {{ .NewEmailAddress }} এ আপডেট করা হয়েছে।"
+subject_primary_email_update:
+  description: ""
+  other: "আপনার প্রাথমিক ইমেল ঠিকানা আপডেট করা হয়েছে।"
+
+email_create_text:
+  description: ""
+  other: "আপনার {{ .ServiceName }} অ্যাকাউন্টে {{ .NewEmailAddress }} ইমেল ঠিকানা যোগ করা হয়েছে।"
+subject_email_create:
+  description: ""
+  other: "একটি নতুন ইমেল ঠিকানা যোগ করা হয়েছে।"
+
+email_delete_text:
+  description: ""
+  other: "আপনার {{ .ServiceName }} অ্যাকাউন্ট থেকে {{ .DeletedEmailAddress }} ইমেল ঠিকানা মুছে ফেলা হয়েছে।"
+subject_email_delete:
+  description: ""
+  other: "একটি ইমেল ঠিকানা মুছে ফেলা হয়েছে।"
+
+passkey_create_text:
+  description: ""
+  other: "আপনার {{ .ServiceName }} অ্যাকাউন্টে একটি নতুন পাসকি যোগ করা হয়েছে।"
+subject_passkey_create:
+  description: ""
+  other: "একটি নতুন পাসকি যোগ করা হয়েছে।"
+
+mfa_create_text:
+  description: ""
+  other: "আপনার {{ .ServiceName }} অ্যাকাউন্টের জন্য একটি নতুন দুই-ফ্যাক্টর (MFA) পদ্ধতি সফলভাবে যোগ করা হয়েছে।"
+subject_mfa_create:
+  description: ""
+  other: "একটি নতুন MFA পদ্ধতি যোগ করা হয়েছে"
+
+mfa_delete_text:
+  description: ""
+  other: "আপনার {{ .ServiceName }} অ্যাকাউন্টের জন্য একটি বিদ্যমান দুই-ফ্যাক্টর (MFA) পদ্ধতি মুছে ফেলা হয়েছে।"
+subject_mfa_delete:
+  description: ""
+  other: "একটি MFA পদ্ধতি মুছে ফেলা হয়েছে।"

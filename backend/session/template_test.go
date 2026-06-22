@@ -78,8 +78,12 @@ func TestProcessJWTTemplate(t *testing.T) {
 					IsVerified: true,
 					IsPrimary:  true,
 				},
-				Username: "test_user",
-				UserID:   "48986f51-d9c8-4f22-89e9-fb7fab959399",
+				Username:   "test_user",
+				UserID:     "48986f51-d9c8-4f22-89e9-fb7fab959399",
+				Name:       "John Doe",
+				GivenName:  "John",
+				FamilyName: "Doe",
+				Picture:    "https://example.com/avatar.png",
 			},
 			expectedClaims: json.RawMessage(`{
 				"user": {
@@ -88,6 +92,10 @@ func TestProcessJWTTemplate(t *testing.T) {
 						"is_verified": true,
 						"is_primary": true
 					},
+					"family_name": "Doe",
+					"given_name": "John",
+					"name": "John Doe",
+					"picture": "https://example.com/avatar.png",
 					"user_id": "48986f51-d9c8-4f22-89e9-fb7fab959399",
 					"username": "test_user"
 				}
@@ -96,10 +104,14 @@ func TestProcessJWTTemplate(t *testing.T) {
 		{
 			name: "should process access to top level fields of user context object",
 			claims: map[string]interface{}{
-				"user_id":  "{{ .User.UserID }}",
-				"username": "{{ .User.Username }}",
-				"email":    "{{ .User.Email }}",
-				"metadata": "{{ .User.Metadata }}",
+				"user_id":    "{{ .User.UserID }}",
+				"username":   "{{ .User.Username }}",
+				"email":      "{{ .User.Email }}",
+				"metadata":   "{{ .User.Metadata }}",
+				"full_name":  "{{ .User.Name }}",
+				"first_name": "{{ .User.GivenName }}",
+				"last_name":  "{{ .User.FamilyName }}",
+				"avatar":     "{{ .User.Picture }}",
 			},
 			user: dto.UserJWT{
 				UserID:   "48986f51-d9c8-4f22-89e9-fb7fab959399",
@@ -113,6 +125,10 @@ func TestProcessJWTTemplate(t *testing.T) {
 					json.RawMessage(`{"public_key": "public_value"}`),
 					json.RawMessage(`{"unsafe_key": "unsafe_value"}`),
 				),
+				Name:       "John Doe",
+				GivenName:  "John",
+				FamilyName: "Doe",
+				Picture:    "https://example.com/avatar.png",
 			},
 			expectedClaims: json.RawMessage(`{
 				"user_id": "48986f51-d9c8-4f22-89e9-fb7fab959399",
@@ -129,7 +145,11 @@ func TestProcessJWTTemplate(t *testing.T) {
 					"unsafe_metadata": {
 						"unsafe_key": "unsafe_value"
 					}
-				}
+				},
+				"full_name": "John Doe",
+				"first_name": "John",
+				"last_name": "Doe",
+				"avatar": "https://example.com/avatar.png"
 			}`),
 		},
 		{

@@ -146,7 +146,7 @@ func (h *ThirdPartyHandler) Callback(c echo.Context) error {
 		}
 
 		opts := []oauth2.AuthCodeOption{}
-		if state.CodeVerifier != "" {
+		if state.CodeVerifier != "" && provider.ID() != "linkedin" {
 			opts = append(opts, oauth2.VerifierOption(state.CodeVerifier))
 		}
 		oAuthToken, terr := provider.GetOAuthToken(callback.AuthCode, opts...)

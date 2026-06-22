@@ -30,6 +30,7 @@ type BaseWebhook struct {
 	Logger   echo.Logger
 	Callback string
 	Events   events.Events
+	Timeout  time.Duration
 }
 
 func (bh *BaseWebhook) HasEvent(evt events.Event) bool {
@@ -57,12 +58,26 @@ func (bh *BaseWebhook) Trigger(data JobData) error {
 	}
 	request.Header.Set("Content-Type", "application/json")
 
-	client := http.Client{}
+	timeout := bh.Timeout
+	if timeout == 0 {
+		timeout = 10 * time.Second
+	}
+
+	client := http.Client{
+		Timeout: timeout,
+	}
+
 	response, err := client.Do(request)
 	if err != nil {
 		bh.Logger.Error(fmt.Errorf("unable to execute webhook request: %w", err))
 		return err
 	}
+
+	defer func() {
+		if err := response.Body.Close(); err != nil {
+			bh.Logger.Error(fmt.Errorf("failed to close webhook response body: %w", err))
+		}
+	}()
 
 	if response.StatusCode >= http.StatusBadRequest {
 		err := fmt.Errorf("request failed due to status code: %d", response.StatusCode)

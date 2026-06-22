@@ -1,0 +1,48 @@
+password_update_text:
+  description: ""
+  other: "The password for your {{ .ServiceName }} account has been updated."
+subject_password_update:
+  description: ""
+  other: "Your password has been updated"
+
+primary_email_update_text:
+  description: ""
+  other: "The primary email address for your {{ .ServiceName }} account has been updated from {{ .OldEmailAddress }} to {{ .NewEmailAddress }}."
+subject_primary_email_update:
+  description: ""
+  other: "Your primary email address has been updated"
+
+email_create_text:
+  description: ""
+  other: "The email address {{ .NewEmailAddress }} has been added to your {{ .ServiceName }} account."
+subject_email_create:
+  description: ""
+  other: "A new email address has been added"
+
+email_delete_text:
+  description: ""
+  other: "The email address {{ .DeletedEmailAddress }} has been removed from your {{ .ServiceName }} account."
+subject_email_delete:
+  description: ""
+  other: "An email address has been removed"
+
+passkey_create_text:
+  description: ""
+  other: "A new passkey has been added to your {{ .ServiceName }} account."
+subject_passkey_create:
+  description: ""
+  other: "A new passkey has been added"
+
+mfa_create_text:
+  description: ""
+  other: "A new multi-factor (MFA) method has been successfully added to your {{ .ServiceName }} account."
+subject_mfa_create:
+  description: ""
+  other: "A new MFA method has been added"
+
+mfa_delete_text:
+  description: ""
+  other: "An existing multi-factor (MFA) method has been removed from your {{ .ServiceName }} account."
+subject_mfa_delete:
+  description: ""
+  other: "MFA method removed"

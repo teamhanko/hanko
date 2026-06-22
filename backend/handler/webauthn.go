@@ -408,6 +408,33 @@ func (h *WebauthnHandler) FinishAuthentication(c echo.Context) error {
 			now := time.Now().UTC()
 			dbCred.LastUsedAt = &now
 
+			signCount := int(request.Response.AuthenticatorData.Counter)
+
+			if dbCred.SignCount > 0 && signCount > 0 && signCount <= dbCred.SignCount {
+				signCountErr := fmt.Errorf(
+					"signature counter mismatch: expected received signature count %d to be greater than current count %d",
+					signCount,
+					dbCred.SignCount,
+				)
+
+				logErr := h.auditLogger.CreateWithConnection(
+					tx,
+					c,
+					models.AuditLogWebAuthnAuthenticationFinalFailed,
+					user,
+					fmt.Errorf("assertion validation failed"),
+				)
+
+				if logErr != nil {
+					return fmt.Errorf(CreateAuditLogFailureMessage, logErr)
+				}
+
+				return echo.NewHTTPError(http.StatusBadRequest, "failed to validate assertion").
+					SetInternal(signCountErr)
+			}
+
+			dbCred.SignCount = signCount
+
 			err = h.persister.GetWebauthnCredentialPersisterWithConnection(tx).Update(*dbCred)
 			if err != nil {
 				return fmt.Errorf("failed to update webauthn credential: %w", err)

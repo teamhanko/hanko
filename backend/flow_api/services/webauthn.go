@@ -228,6 +228,18 @@ func (s *webauthnService) VerifyAssertionResponse(p VerifyAssertionResponseParam
 	credentialModel.BackupState = flags.HasBackupState()
 	credentialModel.BackupEligible = flags.HasBackupEligible()
 
+	signCount := int(credentialAssertionData.Response.AuthenticatorData.Counter)
+
+	if credentialModel.SignCount > 0 && signCount > 0 && signCount <= credentialModel.SignCount {
+		return nil, fmt.Errorf(
+			"%w: signature counter mismatch: expected received signature count (%d) to be greater than current count (%d)",
+			ErrInvalidWebauthnCredential,
+			signCount, credentialModel.SignCount,
+		)
+	}
+
+	credentialModel.SignCount = signCount
+
 	err = s.persister.GetWebauthnCredentialPersisterWithConnection(p.Tx).Update(*credentialModel)
 	if err != nil {
 		return nil, fmt.Errorf("failed to update webauthn credential: %w", err)

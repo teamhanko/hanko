@@ -2,14 +2,15 @@ package handler
 
 import (
 	"fmt"
+	"net/http"
+	"time"
+
 	echojwt "github.com/labstack/echo-jwt/v4"
 	"github.com/labstack/echo/v4"
 	"github.com/teamhanko/hanko/backend/v2/config"
 	"github.com/teamhanko/hanko/backend/v2/dto"
 	"github.com/teamhanko/hanko/backend/v2/persistence"
 	"github.com/teamhanko/hanko/backend/v2/session"
-	"net/http"
-	"time"
 )
 
 type SessionHandler struct {
@@ -58,11 +59,32 @@ func (h *SessionHandler) ValidateSession(c echo.Context) error {
 				continue
 			}
 
-			// Update lastUsed field
-			sessionModel.LastUsed = time.Now().UTC()
-			err = h.persister.GetSessionPersister().Update(*sessionModel)
-			if err != nil {
-				return dto.ToHttpError(err)
+			// Check idle timeout
+			idleTimeout, _ := time.ParseDuration(h.cfg.Session.IdleTimeout)
+			if idleTimeout > 0 && time.Since(sessionModel.LastUsed) > idleTimeout {
+				sessionDeletionErr := h.persister.GetSessionPersister().Delete(*sessionModel)
+				if sessionDeletionErr != nil {
+					return fmt.Errorf("failed to delete session: %w", sessionDeletionErr)
+				}
+
+				cookie, cookieDeletionErr := h.sessionManager.DeleteCookie()
+				if cookieDeletionErr != nil {
+					return fmt.Errorf("could not delete cookie: %w", cookieDeletionErr)
+				}
+				c.SetCookie(cookie)
+
+				// session expired due to idle timeout
+				continue
+			}
+
+			var idleExpiresAt *time.Time
+			if idleTimeout > 0 {
+				expiresAt := sessionModel.LastUsed.Add(idleTimeout)
+				// Don't exceed JWT expiration
+				if expiresAt.After(claims.Expiration) {
+					expiresAt = claims.Expiration
+				}
+				idleExpiresAt = &expiresAt
 			}
 
 			return c.JSON(http.StatusOK, dto.ValidateSessionResponse{
@@ -70,6 +92,7 @@ func (h *SessionHandler) ValidateSession(c echo.Context) error {
 				Claims:         claims,
 				ExpirationTime: &claims.Expiration,
 				UserID:         &claims.Subject,
+				IdleExpiresAt:  idleExpiresAt,
 			})
 		}
 	}
@@ -108,6 +131,24 @@ func (h *SessionHandler) ValidateSessionFromBody(c echo.Context) error {
 		return c.JSON(http.StatusOK, dto.ValidateSessionResponse{IsValid: false})
 	}
 
+	// Check idle timeout
+	idleTimeout, _ := time.ParseDuration(h.cfg.Session.IdleTimeout)
+	if idleTimeout > 0 && time.Since(sessionModel.LastUsed) > idleTimeout {
+		sessionDeletionErr := h.persister.GetSessionPersister().Delete(*sessionModel)
+		if sessionDeletionErr != nil {
+			return dto.ToHttpError(fmt.Errorf("failed to delete session: %w", sessionDeletionErr))
+		}
+
+		cookie, cookieDeletionErr := h.sessionManager.DeleteCookie()
+		if cookieDeletionErr != nil {
+			return dto.ToHttpError(fmt.Errorf("could not delete cookie: %w", cookieDeletionErr))
+		}
+		c.SetCookie(cookie)
+
+		// session expired due to idle timeout
+		return c.JSON(http.StatusOK, dto.ValidateSessionResponse{IsValid: false})
+	}
+
 	// update lastUsed field
 	sessionModel.LastUsed = time.Now().UTC()
 	err = h.persister.GetSessionPersister().Update(*sessionModel)
@@ -115,10 +156,21 @@ func (h *SessionHandler) ValidateSessionFromBody(c echo.Context) error {
 		return dto.ToHttpError(err)
 	}
 
+	var idleExpiresAt *time.Time
+	if idleTimeout > 0 {
+		expiresAt := sessionModel.LastUsed.Add(idleTimeout)
+		// Don't exceed JWT expiration
+		if expiresAt.After(claims.Expiration) {
+			expiresAt = claims.Expiration
+		}
+		idleExpiresAt = &expiresAt
+	}
+
 	return c.JSON(http.StatusOK, dto.ValidateSessionResponse{
 		IsValid:        true,
 		Claims:         claims,
 		ExpirationTime: &claims.Expiration,
 		UserID:         &claims.Subject,
+		IdleExpiresAt:  idleExpiresAt,
 	})
 }
