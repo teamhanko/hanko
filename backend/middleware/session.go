@@ -12,6 +12,7 @@ import (
 	"github.com/teamhanko/hanko/backend/v2/config"
 	"github.com/teamhanko/hanko/backend/v2/persistence"
 	"github.com/teamhanko/hanko/backend/v2/session"
+	webhookutils "github.com/teamhanko/hanko/backend/v2/webhooks/utils"
 )
 
 // Session is a convenience function to create a middleware.JWT with custom JWT verification
@@ -61,6 +62,8 @@ func parseToken(cfg config.Session, persister persistence.Persister, generator s
 			if sessionDeletionErr != nil {
 				return nil, fmt.Errorf("failed to delete session: %w", sessionDeletionErr)
 			}
+
+			webhookutils.NotifySessionDelete(c, nil, *sessionModel)
 
 			cookie, cookieDeletionErr := generator.DeleteCookie()
 			if cookieDeletionErr != nil {

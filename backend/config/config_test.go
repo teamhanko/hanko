@@ -9,6 +9,11 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
+func TestMain(m *testing.M) {
+	_ = os.Setenv("DEBUG", "false")
+	os.Exit(m.Run())
+}
+
 func TestDefaultConfigAccountParameters(t *testing.T) {
 	cfg := DefaultConfig()
 	assert.Equal(t, cfg.Account.AllowDeletion, false)

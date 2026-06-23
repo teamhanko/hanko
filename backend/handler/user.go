@@ -19,6 +19,7 @@ import (
 	"github.com/teamhanko/hanko/backend/v2/session"
 	"github.com/teamhanko/hanko/backend/v2/webhooks/events"
 	"github.com/teamhanko/hanko/backend/v2/webhooks/utils"
+	webhookutils "github.com/teamhanko/hanko/backend/v2/webhooks/utils"
 )
 
 type UserHandler struct {
@@ -347,6 +348,9 @@ func (h *UserHandler) Logout(c echo.Context) error {
 			if err != nil {
 				return fmt.Errorf("failed to delete session from database: %w", err)
 			}
+
+			// notify webhook about deleted session
+			webhookutils.NotifySessionDelete(c, nil, *sessionModel)
 		}
 	}
 

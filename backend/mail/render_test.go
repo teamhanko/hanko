@@ -1,8 +1,10 @@
 package mail
 
 import (
-	"github.com/stretchr/testify/assert"
+	"strings"
 	"testing"
+
+	"github.com/stretchr/testify/assert"
 )
 
 func TestNewRenderer(t *testing.T) {
@@ -63,6 +65,8 @@ func TestRenderer_RenderPlain(t *testing.T) {
 	for _, test := range tests {
 		t.Run(test.Name, func(t *testing.T) {
 			result, err := renderer.RenderPlain(test.Template, test.Lang, templateData)
+			// Normalize line endings for cross-platform compatibility
+			result = strings.ReplaceAll(result, "\r\n", "\n")
 
 			if test.WantErr {
 				assert.Error(t, err)

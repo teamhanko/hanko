@@ -653,6 +653,9 @@ Hanko sends webhooks for the following event types:
 | user.update.username.delete | username deletion                                                                                  |
 | user.update.username.update | change of username                                                                                 |
 | email.send                  | an email was sent or should be sent                                                                |
+| session                     | session creation, session deletion                                                                 |
+| session.create              | session creation                                                                                   |
+| session.delete              | session deletion                                                                                   |
 
 As you can see, events can have subevents. You are able to filter which events you want to receive by either selecting
 a parent event when you want to receive all subevents or selecting specific subevents.

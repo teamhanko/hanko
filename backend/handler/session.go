@@ -10,6 +10,7 @@ import (
 	"github.com/teamhanko/hanko/backend/v2/config"
 	"github.com/teamhanko/hanko/backend/v2/dto"
 	"github.com/teamhanko/hanko/backend/v2/persistence"
+	webhookutils "github.com/teamhanko/hanko/backend/v2/webhooks/utils"
 	"github.com/teamhanko/hanko/backend/v2/session"
 )
 
@@ -66,6 +67,9 @@ func (h *SessionHandler) ValidateSession(c echo.Context) error {
 				if sessionDeletionErr != nil {
 					return fmt.Errorf("failed to delete session: %w", sessionDeletionErr)
 				}
+
+				// notify webhook about deleted session
+				webhookutils.NotifySessionDelete(c, nil, *sessionModel)
 
 				cookie, cookieDeletionErr := h.sessionManager.DeleteCookie()
 				if cookieDeletionErr != nil {
@@ -133,21 +137,24 @@ func (h *SessionHandler) ValidateSessionFromBody(c echo.Context) error {
 
 	// Check idle timeout
 	idleTimeout, _ := time.ParseDuration(h.cfg.Session.IdleTimeout)
-	if idleTimeout > 0 && time.Since(sessionModel.LastUsed) > idleTimeout {
-		sessionDeletionErr := h.persister.GetSessionPersister().Delete(*sessionModel)
-		if sessionDeletionErr != nil {
-			return dto.ToHttpError(fmt.Errorf("failed to delete session: %w", sessionDeletionErr))
-		}
+		if idleTimeout > 0 && time.Since(sessionModel.LastUsed) > idleTimeout {
+				sessionDeletionErr := h.persister.GetSessionPersister().Delete(*sessionModel)
+				if sessionDeletionErr != nil {
+					return dto.ToHttpError(fmt.Errorf("failed to delete session: %w", sessionDeletionErr))
+				}
 
-		cookie, cookieDeletionErr := h.sessionManager.DeleteCookie()
-		if cookieDeletionErr != nil {
-			return dto.ToHttpError(fmt.Errorf("could not delete cookie: %w", cookieDeletionErr))
-		}
-		c.SetCookie(cookie)
+				// notify webhook about deleted session
+				webhookutils.NotifySessionDelete(c, nil, *sessionModel)
 
-		// session expired due to idle timeout
-		return c.JSON(http.StatusOK, dto.ValidateSessionResponse{IsValid: false})
-	}
+				cookie, cookieDeletionErr := h.sessionManager.DeleteCookie()
+				if cookieDeletionErr != nil {
+					return dto.ToHttpError(fmt.Errorf("could not delete cookie: %w", cookieDeletionErr))
+				}
+				c.SetCookie(cookie)
+
+				// session expired due to idle timeout
+				return c.JSON(http.StatusOK, dto.ValidateSessionResponse{IsValid: false})
+			}
 
 	// update lastUsed field
 	sessionModel.LastUsed = time.Now().UTC()
