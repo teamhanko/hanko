@@ -159,6 +159,7 @@ export const it: Translation = {
     trustDevice: "Fidarsi di questo browser",
     staySignedIn: "Rimani connesso",
     connectAccount: "Collega account",
+    restart: "Riavvia",
   },
   errors: {
     somethingWentWrong: "Si è verificato un errore tecnico. Riprova più tardi.",

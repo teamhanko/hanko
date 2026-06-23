@@ -145,6 +145,7 @@ export interface Translation {
     createSecurityKey: string;
     lastUsed: string;
     connectAccount: string;
+    restart: string;
   };
   errors: {
     somethingWentWrong: string;

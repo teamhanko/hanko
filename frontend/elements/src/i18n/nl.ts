@@ -158,6 +158,7 @@ export const nl: Translation = {
     trustDevice: "Vertrouw deze browser",
     staySignedIn: "Ingelogd blijven",
     connectAccount: "Account verbinden",
+    restart: "Opnieuw starten",
   },
   errors: {
     somethingWentWrong:

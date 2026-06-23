@@ -154,6 +154,7 @@ export const zh: Translation = {
     trustDevice: "信任此浏览器",
     staySignedIn: "保持登录状态",
     connectAccount: "连接账户",
+    restart: "重新开始",
   },
   errors: {
     somethingWentWrong: "发生技术错误。请稍后再试。",

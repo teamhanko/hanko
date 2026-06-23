@@ -1,4 +1,10 @@
-import { useContext, useEffect, useMemo, useState } from "preact/compat";
+import {
+  useCallback,
+  useContext,
+  useEffect,
+  useMemo,
+  useState,
+} from "preact/compat";
 import {
   HankoError,
   State,
@@ -55,6 +61,10 @@ const LoginInitPage = (props: Props) => {
     string | null
   >(null);
   const [rememberMe, setRememberMe] = useState<boolean>(false);
+
+  const onRestartClick = useCallback(() => {
+    init("login");
+  }, [init]);
 
   const onIdentifierInput = (event: Event) => {
     event.preventDefault();
@@ -142,6 +152,7 @@ const LoginInitPage = (props: Props) => {
   );
 
   const inputs = flowState.actions.continue_with_login_identifier.inputs;
+  const hasFlowError = !!flowState.error?.code;
 
   useEffect(() => {
     const inputs = flowState.actions.continue_with_login_identifier.inputs;
@@ -169,6 +180,8 @@ const LoginInitPage = (props: Props) => {
               flowAction={flowState.actions.continue_with_login_identifier}
               onSubmit={onEmailSubmit}
               maxWidth
+              fallbackLabel={hasFlowError ? t("labels.restart") : undefined}
+              onFallbackClick={hasFlowError ? onRestartClick : undefined}
             >
               {inputs.email ? (
                 <Input

@@ -4,6 +4,7 @@ import styles from "./styles.sass";
 import cx from "classnames";
 import { Action } from "@teamhanko/hanko-frontend-sdk";
 import { useContext, createContext } from "preact/compat";
+import Button from "./Button";
 
 type Props = {
   onSubmit?: (event: Event) => void;
@@ -11,6 +12,8 @@ type Props = {
   hidden?: boolean;
   maxWidth?: boolean;
   flowAction?: Action<any>;
+  fallbackLabel?: string;
+  onFallbackClick?: () => void;
 };
 
 type FormContextType = {
@@ -27,6 +30,8 @@ const Form = ({
   hidden = false,
   maxWidth,
   flowAction,
+  fallbackLabel,
+  onFallbackClick,
 }: Props) => {
   const defaultOnSubmit = async (event: Event) => {
     event.preventDefault();
@@ -37,9 +42,11 @@ const Form = ({
   // TODO: Find out why, we this need to be casted to any for the build to work.
   const FormContextProviderAny = FormContext.Provider as any;
 
+  const shouldRenderForm = flowAction && flowAction.enabled && !hidden;
+
   return (
     <FormContextProviderAny value={{ flowAction }}>
-      {flowAction && flowAction.enabled && !hidden ? (
+      {shouldRenderForm ? (
         <form onSubmit={onSubmit || defaultOnSubmit} className={styles.form}>
           <ul className={styles.ul}>
             {toChildArray(children).map((child, index) => (
@@ -53,6 +60,8 @@ const Form = ({
             ))}
           </ul>
         </form>
+      ) : fallbackLabel && onFallbackClick ? (
+        <Button onClick={onFallbackClick}>{fallbackLabel}</Button>
       ) : null}
     </FormContextProviderAny>
   );
