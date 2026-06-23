@@ -1,13 +1,13 @@
 package dto
 
 import (
-	"slices"
 	"strings"
 
 	"github.com/fatih/structs"
 	"github.com/gofrs/uuid"
 	"github.com/teamhanko/hanko/backend/v3/config"
 	"github.com/teamhanko/hanko/backend/v3/persistence/models"
+	"github.com/teamhanko/hanko/backend/v3/utils"
 )
 
 type ThirdPartyAuthCallback struct {
@@ -40,29 +40,13 @@ func FromIdentitiesModel(identities models.Identities, cfg *config.TenantConfig)
 
 	var result Identities
 	for _, i := range identities {
-		if isIdentityForDisabledProvider(i, enabledBuiltIn, enabledCustom) {
+		if utils.IsIdentityForDisabledProvider(i, enabledBuiltIn, enabledCustom) {
 			continue
 		}
 		identity := FromIdentityModel(&i, cfg)
 		result = append(result, *identity)
 	}
 	return result
-}
-
-func isIdentityForDisabledProvider(i models.Identity, enabledBuiltIn []config.ThirdPartyProvider, enabledCustom []config.CustomThirdPartyProvider) bool {
-	if i.SamlIdentity != nil {
-		return !i.SamlIdentity.SamlProvider.Enabled
-	}
-
-	if strings.HasPrefix(i.ProviderID, "custom_") {
-		return !slices.ContainsFunc(enabledCustom, func(p config.CustomThirdPartyProvider) bool {
-			return p.ID == i.ProviderID
-		})
-	}
-
-	return !slices.ContainsFunc(enabledBuiltIn, func(p config.ThirdPartyProvider) bool {
-		return p.ID == i.ProviderID
-	})
 }
 
 func FromIdentityModel(identity *models.Identity, cfg *config.TenantConfig) *Identity {
