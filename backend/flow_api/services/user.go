@@ -18,8 +18,10 @@ func UserCanDoThirdParty(cfg config.Config, identities models.Identities) bool {
 }
 
 func UserCanDoSaml(cfg config.Config, identities models.Identities) bool {
-	for _, identity := range identities {
-		return cfg.Saml.Enabled && identity.SamlIdentity.SamlProvider.Enabled
+	if cfg.Saml.Enabled {
+		for _, identity := range identities {
+			return identity.SamlIdentity != nil && identity.SamlIdentity.SamlProvider.Enabled
+		}
 	}
 
 	return false
