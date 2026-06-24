@@ -113,7 +113,7 @@ func TestFlowLockerConfig(t *testing.T) {
 }
 
 func TestEnvironmentVariables(t *testing.T) {
-	err := os.Setenv("SMTP_HOST", "valueFromEnvVars")
+	err := os.Setenv("EMAIL_DELIVERY_SMTP_HOST", "valueFromEnvVars")
 	require.NoError(t, err)
 
 	err = os.Setenv("WEBAUTHN_RELYING_PARTY_ORIGINS", "https://hanko.io,https://auth.hanko.io")
