@@ -54,12 +54,6 @@ func SyncProviderConfigToDatabase(cfg *config.Config, persister persistence.Pers
 	log.Printf("[SAML Migration] Syncing %d identity providers from config to database...", len(cfg.Saml.IdentityProviders))
 
 	for _, idpConfig := range cfg.Saml.IdentityProviders {
-		// Skip disabled providers
-		if !idpConfig.Enabled {
-			log.Printf("[SAML Migration] Skipping disabled provider: %s (domain: %s)", idpConfig.Name, idpConfig.Domain)
-			continue
-		}
-
 		log.Printf("[SAML Migration] Syncing provider: %s (domain: %s, metadata: %s)",
 			idpConfig.Name, idpConfig.Domain, idpConfig.MetadataUrl)
 
