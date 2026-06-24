@@ -10,6 +10,7 @@ import (
 	"github.com/gofrs/uuid"
 	_ "github.com/lib/pq"
 	"github.com/stretchr/testify/suite"
+	"github.com/teamhanko/hanko/backend/v3/config"
 	"github.com/teamhanko/hanko/backend/v3/crypto/jwk/local_db"
 	"github.com/teamhanko/hanko/backend/v3/dto"
 	"github.com/teamhanko/hanko/backend/v3/test"
@@ -35,6 +36,11 @@ func (s *userSuite) TestUserHandler_Me() {
 	tenantID := uuid.FromStringOrNil("00000000-0000-0000-0000-000000000001")
 
 	cfg := test.DefaultConfig
+	cfg.ThirdParty.Providers.Google = config.ThirdPartyProvider{
+		Enabled:     true,
+		ID:          "google",
+		DisplayName: "Google",
+	}
 	err = cfg.PostProcess()
 	s.Require().NoError(err)
 
