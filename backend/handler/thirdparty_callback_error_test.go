@@ -414,7 +414,7 @@ func (s *thirdPartySuite) TestThirdPartyHandler_Callback_Error_MicrosoftUnverifi
 		JSON(fakeJwkSet)
 
 	cfg := s.setUpConfig([]string{"microsoft"}, []string{"https://example.com"})
-	cfg.Emails.RequireVerification = true
+	cfg.Email.RequireVerification = true
 
 	state, err := thirdparty.GenerateState(cfg, "microsoft", "https://example.com")
 	s.NoError(err)
