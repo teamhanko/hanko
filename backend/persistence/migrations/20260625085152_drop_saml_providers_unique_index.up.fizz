@@ -1,0 +1,1 @@
+drop_index("saml_providers", "saml_providers_tenant_id_entity_id_idx")
