@@ -1,0 +1,29 @@
+{
+  "name": "hanko-auth-integration",
+  "version": "0.1.0",
+  "description": "Implement and verify Hanko authentication integrations.",
+  "author": {
+    "name": "Hanko contributors"
+  },
+  "skills": "./skills/",
+  "repository": "https://github.com/teamhanko/hanko",
+  "keywords": [
+    "agent-plugin",
+    "evals",
+    "hanko"
+  ],
+  "interface": {
+    "displayName": "Hanko Auth Integration",
+    "shortDescription": "Implement and verify Hanko authentication integrations.",
+    "longDescription": "Guide agents through Hanko passkey, session, redirect, and example-app integration work with repeatable plugin evals.",
+    "developerName": "Hanko contributors",
+    "category": "Developer Tools",
+    "capabilities": [
+      "passkey setup",
+      "session integration",
+      "redirect review",
+      "auth regression testing"
+    ],
+    "defaultPrompt": "Use the Hanko plugin to plan the workflow, identify verification checks, and produce plugin eval metadata."
+  }
+}
