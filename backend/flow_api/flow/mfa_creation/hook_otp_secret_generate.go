@@ -6,8 +6,8 @@ import (
 	"errors"
 	"fmt"
 	"github.com/pquerna/otp/totp"
-	"github.com/teamhanko/hanko/backend/v2/flow_api/flow/shared"
-	"github.com/teamhanko/hanko/backend/v2/flowpilot"
+	"github.com/teamhanko/hanko/backend/v3/flow_api/flow/shared"
+	"github.com/teamhanko/hanko/backend/v3/flowpilot"
 	"image/png"
 )
 

@@ -1,18 +1,28 @@
 package middleware
 
 import (
+	"net/http"
+
 	"github.com/labstack/echo/v4"
-	"github.com/teamhanko/hanko/backend/v2/config"
-	"github.com/teamhanko/hanko/backend/v2/crypto/jwk"
-	"github.com/teamhanko/hanko/backend/v2/persistence"
-	"github.com/teamhanko/hanko/backend/v2/webhooks"
+	"github.com/teamhanko/hanko/backend/v3/context"
+	"github.com/teamhanko/hanko/backend/v3/persistence"
+	"github.com/teamhanko/hanko/backend/v3/webhooks"
 )
 
-func WebhookMiddleware(cfg *config.Config, jwkManager jwk.Generator, persister persistence.Persister) echo.MiddlewareFunc {
+func WebhookMiddleware(persister persistence.Persister) echo.MiddlewareFunc {
 	return func(next echo.HandlerFunc) echo.HandlerFunc {
 		return func(ctx echo.Context) error {
+			tenant, err := context.GetTenant(ctx)
+			if err != nil {
+				return echo.NewHTTPError(http.StatusInternalServerError, "failed to get tenant from context")
+			}
 
-			manager, err := webhooks.NewManager(cfg, persister, jwkManager, ctx.Logger())
+			jwkManager, err := context.GetJwkManager(ctx)
+			if err != nil {
+				return echo.NewHTTPError(http.StatusInternalServerError, "failed to get JWK manager from context")
+			}
+
+			manager, err := webhooks.NewManager(tenant.Config, persister, jwkManager, ctx.Logger())
 			if err != nil {
 				return err
 			}

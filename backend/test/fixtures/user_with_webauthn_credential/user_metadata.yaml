@@ -1,5 +1,6 @@
 - id: 7c9e6679-7425-40de-944b-e07fc1f90ae7
   user_id: b5dd5267-b462-48be-b70d-bcd6f1bbe7a5
+  tenant_id: 00000000-0000-0000-0000-000000000001
   public_metadata: {"role":"tester","tier":"gold"}
   private_metadata: {"quota": 42}
   unsafe_metadata: {"debug": true}

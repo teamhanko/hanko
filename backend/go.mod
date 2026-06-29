@@ -1,4 +1,4 @@
-module github.com/teamhanko/hanko/backend/v2
+module github.com/teamhanko/hanko/backend/v3
 
 go 1.26.1
 
@@ -29,6 +29,7 @@ require (
 	github.com/knadh/koanf/parsers/json v1.0.0
 	github.com/knadh/koanf/parsers/yaml v1.1.0
 	github.com/knadh/koanf/providers/file v1.2.1
+	github.com/knadh/koanf/providers/rawbytes v1.0.0
 	github.com/knadh/koanf/v2 v2.3.5
 	github.com/labstack/echo-contrib v0.17.4
 	github.com/labstack/echo-jwt/v4 v4.4.0

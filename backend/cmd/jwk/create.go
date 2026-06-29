@@ -5,7 +5,7 @@ import (
 	"fmt"
 
 	"github.com/spf13/cobra"
-	"github.com/teamhanko/hanko/backend/v2/crypto/jwk/local_db"
+	"github.com/teamhanko/hanko/backend/v3/crypto/jwk/local_db"
 
 	"log"
 )

@@ -7,7 +7,7 @@ import (
 
 	"github.com/coreos/go-oidc/v3/oidc"
 	"github.com/mitchellh/mapstructure"
-	"github.com/teamhanko/hanko/backend/v2/config"
+	"github.com/teamhanko/hanko/backend/v3/config"
 	"golang.org/x/oauth2"
 )
 

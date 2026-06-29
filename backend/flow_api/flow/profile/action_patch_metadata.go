@@ -6,13 +6,13 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/teamhanko/hanko/backend/v2/persistence"
+	"github.com/teamhanko/hanko/backend/v3/persistence"
 
 	jsonpatch "github.com/evanphx/json-patch/v5"
 	"github.com/gobuffalo/nulls"
-	"github.com/teamhanko/hanko/backend/v2/flow_api/flow/shared"
-	"github.com/teamhanko/hanko/backend/v2/flowpilot"
-	"github.com/teamhanko/hanko/backend/v2/persistence/models"
+	"github.com/teamhanko/hanko/backend/v3/flow_api/flow/shared"
+	"github.com/teamhanko/hanko/backend/v3/flowpilot"
+	"github.com/teamhanko/hanko/backend/v3/persistence/models"
 )
 
 type PatchMetadata struct {
@@ -49,7 +49,7 @@ func (a PatchMetadata) Execute(c flowpilot.ExecutionContext) error {
 		return c.Error(flowpilot.ErrorOperationNotPermitted)
 	}
 
-	userMetadataModel, err := deps.Persister.GetUserMetadataPersisterWithConnection(deps.Tx).Get(userModel.ID)
+	userMetadataModel, err := deps.Persister.GetUserMetadataPersisterWithConnection(deps.Tx).Get(userModel.ID, deps.TenantID)
 	if err != nil {
 		return fmt.Errorf("could not fetch user metadata: %w", err)
 	}

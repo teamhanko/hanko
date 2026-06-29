@@ -2,9 +2,10 @@ package login
 
 import (
 	"fmt"
-	"github.com/teamhanko/hanko/backend/v2/flow_api/flow/shared"
-	"github.com/teamhanko/hanko/backend/v2/flow_api/services"
-	"github.com/teamhanko/hanko/backend/v2/flowpilot"
+
+	"github.com/teamhanko/hanko/backend/v3/flow_api/flow/shared"
+	"github.com/teamhanko/hanko/backend/v3/flow_api/services"
+	"github.com/teamhanko/hanko/backend/v3/flowpilot"
 )
 
 type WebauthnGenerateRequestOptionsForConditionalUi struct {
@@ -26,7 +27,7 @@ func (a WebauthnGenerateRequestOptionsForConditionalUi) Execute(c flowpilot.Hook
 		return nil
 	}
 
-	params := services.GenerateRequestOptionsPasskeyParams{Tx: deps.Tx}
+	params := services.GenerateRequestOptionsPasskeyParams{Tx: deps.Tx, TenantID: deps.TenantID, Cfg: deps.Cfg.TenantConfig}
 
 	sessionDataModel, requestOptions, err := deps.WebauthnService.GenerateRequestOptionsPasskey(params)
 	if err != nil {

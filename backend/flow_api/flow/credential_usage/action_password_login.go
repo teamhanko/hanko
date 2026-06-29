@@ -5,12 +5,12 @@ import (
 	"fmt"
 
 	"github.com/gofrs/uuid"
-	auditlog "github.com/teamhanko/hanko/backend/v2/audit_log"
-	"github.com/teamhanko/hanko/backend/v2/flow_api/flow/shared"
-	"github.com/teamhanko/hanko/backend/v2/flow_api/services"
-	"github.com/teamhanko/hanko/backend/v2/flowpilot"
-	"github.com/teamhanko/hanko/backend/v2/persistence/models"
-	"github.com/teamhanko/hanko/backend/v2/rate_limiter"
+	auditlog "github.com/teamhanko/hanko/backend/v3/audit_log"
+	"github.com/teamhanko/hanko/backend/v3/flow_api/flow/shared"
+	"github.com/teamhanko/hanko/backend/v3/flow_api/services"
+	"github.com/teamhanko/hanko/backend/v3/flowpilot"
+	"github.com/teamhanko/hanko/backend/v3/persistence/models"
+	"github.com/teamhanko/hanko/backend/v3/rate_limiter"
 )
 
 type PasswordLogin struct {
@@ -61,7 +61,7 @@ func (a PasswordLogin) Execute(c flowpilot.ExecutionContext) error {
 	var userID uuid.UUID
 
 	if c.Stash().Get(shared.StashPathEmail).Exists() {
-		emailModel, err := deps.Persister.GetEmailPersisterWithConnection(deps.Tx).FindByAddress(c.Stash().Get(shared.StashPathEmail).String())
+		emailModel, err := deps.Persister.GetEmailPersisterWithConnection(deps.Tx).FindByAddress(c.Stash().Get(shared.StashPathEmail).String(), deps.TenantID)
 		if err != nil {
 			return fmt.Errorf("failed to find user by email: %w", err)
 		}
@@ -73,7 +73,7 @@ func (a PasswordLogin) Execute(c flowpilot.ExecutionContext) error {
 		userID = *emailModel.UserID
 	} else if c.Stash().Get(shared.StashPathUsername).Exists() {
 		username := c.Stash().Get(shared.StashPathUsername).String()
-		userModel, err := deps.Persister.GetUserPersisterWithConnection(deps.Tx).GetByUsername(username)
+		userModel, err := deps.Persister.GetUserPersisterWithConnection(deps.Tx).GetByUsername(username, deps.TenantID)
 		if err != nil {
 			return fmt.Errorf("failed to find user via username: %w", err)
 		}
@@ -87,7 +87,7 @@ func (a PasswordLogin) Execute(c flowpilot.ExecutionContext) error {
 		return a.wrongCredentialsError(c)
 	}
 
-	err := deps.PasswordService.VerifyPassword(deps.Tx, userID, c.Input().Get("password").String())
+	err := deps.PasswordService.VerifyPassword(deps.Tx, userID, c.Input().Get("password").String(), deps.TenantID)
 	if err != nil {
 		if errors.Is(err, services.ErrorPasswordInvalid) {
 			err = deps.AuditLogger.CreateWithConnection(
@@ -96,6 +96,7 @@ func (a PasswordLogin) Execute(c flowpilot.ExecutionContext) error {
 				models.AuditLogLoginFailure,
 				&models.User{ID: userID},
 				err,
+				deps.TenantID,
 				auditlog.Detail("login_method", "password"),
 				auditlog.Detail("flow_id", c.GetFlowID()))
 			if err != nil {

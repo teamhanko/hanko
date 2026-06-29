@@ -4,8 +4,8 @@ import (
 	"time"
 
 	"github.com/gofrs/uuid"
-	"github.com/teamhanko/hanko/backend/v2/dto"
-	"github.com/teamhanko/hanko/backend/v2/persistence/models"
+	"github.com/teamhanko/hanko/backend/v3/dto"
+	"github.com/teamhanko/hanko/backend/v3/persistence/models"
 )
 
 type User struct {
@@ -58,6 +58,7 @@ func FromUserModel(model models.User) User {
 	if model.PasswordCredential != nil {
 		passwordCredential = &PasswordCredential{
 			ID:        model.PasswordCredential.ID,
+			TenantID:  model.PasswordCredential.TenantID,
 			CreatedAt: model.PasswordCredential.CreatedAt,
 			UpdatedAt: model.PasswordCredential.UpdatedAt,
 		}

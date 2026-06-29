@@ -4,15 +4,17 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
-	"github.com/tidwall/gjson"
 	"net/http"
 	"net/http/httptest"
 	"testing"
 
+	"github.com/teamhanko/hanko/backend/v3/config"
+	"github.com/tidwall/gjson"
+
 	"github.com/gofrs/uuid"
 	"github.com/stretchr/testify/suite"
-	"github.com/teamhanko/hanko/backend/v2/dto/admin"
-	"github.com/teamhanko/hanko/backend/v2/test"
+	"github.com/teamhanko/hanko/backend/v3/dto/admin"
+	"github.com/teamhanko/hanko/backend/v3/test"
 )
 
 func TestMetadataAdminSuite(t *testing.T) {
@@ -481,8 +483,9 @@ func (s *metadataAdminSuite) TestMetadataAdminHandler_Patch() {
 
 					// Also verify the metadata was actually updated in the database
 					userID, err := uuid.FromString(currentTest.userId)
+					tenantID, err := uuid.FromString(config.DefaultTenantID)
 					s.Require().NoError(err)
-					metadataModel, err := s.Storage.GetUserMetadataPersister().Get(userID)
+					metadataModel, err := s.Storage.GetUserMetadataPersister().Get(userID, tenantID)
 					s.Require().NoError(err)
 					if currentTest.expectedMetadata == nil {
 						s.False(metadataModel.Public.Valid)

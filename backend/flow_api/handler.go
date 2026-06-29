@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"net/http"
 	"strconv"
 	"strings"
 	"time"
@@ -15,18 +16,20 @@ import (
 	"github.com/rs/zerolog"
 	zeroLogger "github.com/rs/zerolog/log"
 	"github.com/sethvargo/go-limiter"
-	auditlog "github.com/teamhanko/hanko/backend/v2/audit_log"
-	"github.com/teamhanko/hanko/backend/v2/config"
-	"github.com/teamhanko/hanko/backend/v2/dto"
-	"github.com/teamhanko/hanko/backend/v2/ee/saml"
-	"github.com/teamhanko/hanko/backend/v2/flow_api/flow"
-	"github.com/teamhanko/hanko/backend/v2/flow_api/flow/shared"
-	"github.com/teamhanko/hanko/backend/v2/flow_api/flow_locker"
-	"github.com/teamhanko/hanko/backend/v2/flow_api/services"
-	"github.com/teamhanko/hanko/backend/v2/flowpilot"
-	"github.com/teamhanko/hanko/backend/v2/mapper"
-	"github.com/teamhanko/hanko/backend/v2/persistence"
-	"github.com/teamhanko/hanko/backend/v2/session"
+	auditlog "github.com/teamhanko/hanko/backend/v3/audit_log"
+	"github.com/teamhanko/hanko/backend/v3/config"
+	hankoContext "github.com/teamhanko/hanko/backend/v3/context"
+	"github.com/teamhanko/hanko/backend/v3/dto"
+	"github.com/teamhanko/hanko/backend/v3/flow_api/flow"
+	"github.com/teamhanko/hanko/backend/v3/flow_api/flow/shared"
+	"github.com/teamhanko/hanko/backend/v3/flow_api/flow_locker"
+	"github.com/teamhanko/hanko/backend/v3/flow_api/services"
+	"github.com/teamhanko/hanko/backend/v3/flowpilot"
+	"github.com/teamhanko/hanko/backend/v3/mapper"
+	"github.com/teamhanko/hanko/backend/v3/persistence"
+	"github.com/teamhanko/hanko/backend/v3/rate_limiter"
+	"github.com/teamhanko/hanko/backend/v3/saml"
+	"github.com/teamhanko/hanko/backend/v3/session"
 )
 
 type FlowPilotHandler struct {
@@ -36,7 +39,7 @@ type FlowPilotHandler struct {
 	PasscodeService             services.Passcode
 	PasswordService             services.Password
 	WebauthnService             services.WebauthnService
-	SamlService                 saml.Service
+	SamlService                 saml.SamlProviderService
 	SessionManager              session.Manager
 	OTPRateLimiter              limiter.Store
 	PasscodeRateLimiter         limiter.Store
@@ -45,6 +48,49 @@ type FlowPilotHandler struct {
 	AuthenticatorMetadata       mapper.AuthenticatorMetadata
 	AuditLogger                 auditlog.Logger
 	FlowLocker                  flow_locker.FlowLocker
+}
+
+func NewFlowAPIHandler(cfg config.Config, persister persistence.Persister, auditLogger auditlog.Logger, authenticatorMetadata mapper.AuthenticatorMetadata) FlowPilotHandler {
+	var otpRateLimiter limiter.Store
+	var passcodeRateLimiter limiter.Store
+	var passwordRateLimiter limiter.Store
+	var tokenExchangeRateLimiter limiter.Store
+	if cfg.RateLimiter.Enabled {
+		otpRateLimiter = rate_limiter.NewRateLimiter(cfg.RateLimiter, cfg.RateLimiter.OTPLimits)
+		passcodeRateLimiter = rate_limiter.NewRateLimiter(cfg.RateLimiter, cfg.RateLimiter.PasscodeLimits)
+		passwordRateLimiter = rate_limiter.NewRateLimiter(cfg.RateLimiter, cfg.RateLimiter.PasswordLimits)
+		tokenExchangeRateLimiter = rate_limiter.NewRateLimiter(cfg.RateLimiter, cfg.RateLimiter.TokenLimits)
+	}
+
+	emailService, _ := services.NewEmailService()
+	passcodeService := services.NewPasscodeService(*emailService, persister)
+	passwordService := services.NewPasswordService(persister)
+	webauthnService := services.NewWebauthnService(persister)
+	securityNotificationService := services.NewSecurityNotificationService(*emailService, persister, auditLogger)
+	samlService := saml.NewSamlProviderService(persister)
+
+	flowLocker, err := flow_locker.NewFlowLocker(cfg.FlowLocker)
+	if err != nil {
+		panic(fmt.Errorf("failed to initialize flow locker: %w", err))
+	}
+
+	return FlowPilotHandler{
+		Persister:                   persister,
+		Cfg:                         cfg, // Populated in executeFlow() from tenant middleware
+		SecurityNotificationService: securityNotificationService,
+		PasscodeService:             passcodeService,
+		PasswordService:             passwordService,
+		WebauthnService:             webauthnService,
+		SamlService:                 samlService,
+		SessionManager:              nil, // Populated in executeFlow() from session manager middleware
+		OTPRateLimiter:              otpRateLimiter,
+		PasscodeRateLimiter:         passcodeRateLimiter,
+		PasswordRateLimiter:         passwordRateLimiter,
+		TokenExchangeRateLimiter:    tokenExchangeRateLimiter,
+		AuthenticatorMetadata:       authenticatorMetadata,
+		AuditLogger:                 auditLogger,
+		FlowLocker:                  flowLocker,
+	}
 }
 
 func (h *FlowPilotHandler) RegistrationFlowHandler(c echo.Context) error {
@@ -71,11 +117,33 @@ func (h *FlowPilotHandler) ProfileFlowHandler(c echo.Context) error {
 
 func (h *FlowPilotHandler) TokenExchangeFlowHandler(c echo.Context) error {
 	samlIdPInitiatedLoginFlow := flow.NewTokenExchangeFlow(h.Cfg.Debug)
+
+	tenant, err := hankoContext.GetTenant(c)
+	if err != nil {
+		return fmt.Errorf("failed to fetch tenant from context: %w", err)
+	}
+
+	if !tenant.Config.Saml.Enabled {
+		flowResult := samlIdPInitiatedLoginFlow.ResultFromError(flowpilot.NewFlowError("forbidden", "SAML is not enabled for this tenant", http.StatusForbidden))
+		h.logFlowResult(c, flowResult)
+		return c.JSON(flowResult.GetStatus(), flowResult.GetResponse())
+	}
+
 	return h.executeFlow(c, samlIdPInitiatedLoginFlow)
 }
 
 func (h *FlowPilotHandler) validateSession(c echo.Context) error {
-	lookup := fmt.Sprintf("header:Authorization:Bearer,cookie:%s", h.Cfg.Session.Cookie.GetName())
+	tenant, err := hankoContext.GetTenant(c)
+	if err != nil {
+		return fmt.Errorf("failed to fetch tenant from context: %w", err)
+	}
+
+	sessionManager, err := hankoContext.GetSessionManager(c)
+	if err != nil {
+		return fmt.Errorf("failed to fetch session manager from context: %w", err)
+	}
+
+	lookup := fmt.Sprintf("header:Authorization:Bearer,cookie:%s", tenant.Config.Session.Cookie.GetName())
 	extractors, err := echojwt.CreateExtractors(lookup)
 
 	if err != nil {
@@ -90,7 +158,7 @@ func (h *FlowPilotHandler) validateSession(c echo.Context) error {
 			continue
 		}
 		for _, auth := range auths {
-			token, tokenErr := h.SessionManager.Verify(auth)
+			token, tokenErr := sessionManager.Verify(auth, tenant.ID)
 			if tokenErr != nil {
 				lastTokenErr = tokenErr
 				continue
@@ -108,7 +176,7 @@ func (h *FlowPilotHandler) validateSession(c echo.Context) error {
 				continue
 			}
 
-			sessionModel, err := h.Persister.GetSessionPersister().Get(sessionID)
+			sessionModel, err := h.Persister.GetSessionPersister().Get(sessionID, tenant.ID)
 			if err != nil {
 				return fmt.Errorf("failed to get session from database: %w", err)
 			}
@@ -189,24 +257,41 @@ func (h *FlowPilotHandler) executeFlow(c echo.Context, flow flowpilot.Flow) erro
 		}
 	}
 
+	var cfg = h.Cfg
+	tenant, err := hankoContext.GetTenant(c)
+	if err != nil {
+		return fmt.Errorf("failed to fetch tenant from context: %w", err)
+	}
+
+	cfg = config.Config{
+		ApplicationConfig: h.Cfg.ApplicationConfig,
+		TenantConfig:      tenant.Config,
+	}
+
+	sessionManager, err := hankoContext.GetSessionManager(c)
+	if err != nil {
+		return fmt.Errorf("failed to fetch session manager from context: %w", err)
+	}
+
 	txFunc := func(tx *pop.Connection) error {
 		deps := &shared.Dependencies{
-			Cfg:                         h.Cfg,
-			OTPRateLimiter:              h.OTPRateLimiter,
-			PasscodeRateLimiter:         h.PasscodeRateLimiter,
-			PasswordRateLimiter:         h.PasswordRateLimiter,
-			TokenExchangeRateLimiter:    h.TokenExchangeRateLimiter,
-			Tx:                          tx,
+			Cfg:                         cfg,
+			OTPRateLimiter:              h.OTPRateLimiter,           // already tenant specific
+			PasscodeRateLimiter:         h.PasscodeRateLimiter,      // already tenant specific
+			PasswordRateLimiter:         h.PasswordRateLimiter,      // already tenant specific
+			TokenExchangeRateLimiter:    h.TokenExchangeRateLimiter, // already tenant specific
+			Tx:                          tx,                         // does not need to be tenant-specific
 			Persister:                   h.Persister,
-			HttpContext:                 c,
-			SessionManager:              h.SessionManager,
+			HttpContext:                 c, // does not need to be tenant-specific, because it is request specific
+			SessionManager:              sessionManager,
 			SecurityNotificationService: h.SecurityNotificationService,
 			PasscodeService:             h.PasscodeService,
 			PasswordService:             h.PasswordService,
 			WebauthnService:             h.WebauthnService,
 			SamlService:                 h.SamlService,
-			AuthenticatorMetadata:       h.AuthenticatorMetadata,
+			AuthenticatorMetadata:       h.AuthenticatorMetadata, // does not need to be tenant-specific
 			AuditLogger:                 h.AuditLogger,
+			TenantID:                    tenant.ID,
 		}
 
 		flow.Set("deps", deps)
@@ -215,6 +300,7 @@ func (h *FlowPilotHandler) executeFlow(c echo.Context, flow flowpilot.Flow) erro
 			flowpilot.WithQueryParamKey(queryParamKey),
 			flowpilot.WithQueryParamValue(c.QueryParam(queryParamKey)),
 			flowpilot.WithInputData(inputData),
+			flowpilot.WithTenantID(tenant.ID),
 			flowpilot.UseCompression(!h.Cfg.Debug))
 
 		return err

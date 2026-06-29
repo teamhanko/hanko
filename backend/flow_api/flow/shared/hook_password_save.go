@@ -4,8 +4,8 @@ import (
 	"fmt"
 
 	"github.com/gofrs/uuid"
-	"github.com/teamhanko/hanko/backend/v2/flowpilot"
-	"github.com/teamhanko/hanko/backend/v2/persistence/models"
+	"github.com/teamhanko/hanko/backend/v3/flowpilot"
+	"github.com/teamhanko/hanko/backend/v3/persistence/models"
 )
 
 type PasswordSave struct {

@@ -2,12 +2,14 @@ package handler
 
 import (
 	"fmt"
+	"net/http"
+
 	"github.com/gofrs/uuid"
 	"github.com/labstack/echo/v4"
-	"github.com/teamhanko/hanko/backend/v2/dto"
-	"github.com/teamhanko/hanko/backend/v2/dto/admin"
-	"github.com/teamhanko/hanko/backend/v2/persistence"
-	"net/http"
+	"github.com/teamhanko/hanko/backend/v3/context"
+	"github.com/teamhanko/hanko/backend/v3/dto"
+	"github.com/teamhanko/hanko/backend/v3/dto/admin"
+	"github.com/teamhanko/hanko/backend/v3/persistence"
 )
 
 type WebauthnCredentialAdminHandler interface {
@@ -27,6 +29,11 @@ func NewWebauthnCredentialAdminHandler(persister persistence.Persister) Webauthn
 }
 
 func (h *webauthnCredentialAdminHandler) List(ctx echo.Context) error {
+	tenant, err := context.GetTenant(ctx)
+	if err != nil {
+		return fmt.Errorf("failed to get tenant from context: %w", err)
+	}
+
 	listDto, err := loadDto[admin.ListWebauthnCredentialsRequestDto](ctx)
 	if err != nil {
 		return err
@@ -37,7 +44,7 @@ func (h *webauthnCredentialAdminHandler) List(ctx echo.Context) error {
 		return fmt.Errorf(parseUserUuidFailureMessage, err)
 	}
 
-	user, err := h.persister.GetUserPersister().Get(userID)
+	user, err := h.persister.GetUserPersister().Get(userID, tenant.ID)
 	if err != nil {
 		return err
 	}
@@ -46,7 +53,7 @@ func (h *webauthnCredentialAdminHandler) List(ctx echo.Context) error {
 		return echo.NewHTTPError(http.StatusNotFound)
 	}
 
-	credentials, err := h.persister.GetWebauthnCredentialPersister().GetFromUser(userID)
+	credentials, err := h.persister.GetWebauthnCredentialPersister().GetFromUser(userID, tenant.ID)
 	if err != nil {
 		return err
 	}
@@ -60,6 +67,11 @@ func (h *webauthnCredentialAdminHandler) List(ctx echo.Context) error {
 }
 
 func (h *webauthnCredentialAdminHandler) Get(ctx echo.Context) error {
+	tenant, err := context.GetTenant(ctx)
+	if err != nil {
+		return fmt.Errorf("failed to get tenant from context: %w", err)
+	}
+
 	getDto, err := loadDto[admin.GetWebauthnCredentialRequestDto](ctx)
 	if err != nil {
 		return err
@@ -70,7 +82,7 @@ func (h *webauthnCredentialAdminHandler) Get(ctx echo.Context) error {
 		return fmt.Errorf(parseUserUuidFailureMessage, err)
 	}
 
-	user, err := h.persister.GetUserPersister().Get(userID)
+	user, err := h.persister.GetUserPersister().Get(userID, tenant.ID)
 	if err != nil {
 		return err
 	}
@@ -79,7 +91,7 @@ func (h *webauthnCredentialAdminHandler) Get(ctx echo.Context) error {
 		return echo.NewHTTPError(http.StatusNotFound)
 	}
 
-	credential, err := h.persister.GetWebauthnCredentialPersister().Get(getDto.WebauthnCredentialID)
+	credential, err := h.persister.GetWebauthnCredentialPersister().Get(getDto.WebauthnCredentialID, tenant.ID)
 	if err != nil {
 		return err
 	}
@@ -92,6 +104,11 @@ func (h *webauthnCredentialAdminHandler) Get(ctx echo.Context) error {
 }
 
 func (h *webauthnCredentialAdminHandler) Delete(ctx echo.Context) error {
+	tenant, err := context.GetTenant(ctx)
+	if err != nil {
+		return fmt.Errorf("failed to get tenant from context: %w", err)
+	}
+
 	deleteDto, err := loadDto[admin.GetWebauthnCredentialRequestDto](ctx)
 	if err != nil {
 		return err
@@ -102,7 +119,7 @@ func (h *webauthnCredentialAdminHandler) Delete(ctx echo.Context) error {
 		return fmt.Errorf(parseUserUuidFailureMessage, err)
 	}
 
-	user, err := h.persister.GetUserPersister().Get(userID)
+	user, err := h.persister.GetUserPersister().Get(userID, tenant.ID)
 	if err != nil {
 		return err
 	}
@@ -111,7 +128,7 @@ func (h *webauthnCredentialAdminHandler) Delete(ctx echo.Context) error {
 		return echo.NewHTTPError(http.StatusNotFound)
 	}
 
-	credential, err := h.persister.GetWebauthnCredentialPersister().Get(deleteDto.WebauthnCredentialID)
+	credential, err := h.persister.GetWebauthnCredentialPersister().Get(deleteDto.WebauthnCredentialID, tenant.ID)
 	if err != nil {
 		return err
 	}

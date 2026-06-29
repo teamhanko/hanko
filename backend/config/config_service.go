@@ -8,7 +8,7 @@ import (
 type Service struct {
 	// `name` determines the name of the service.
 	// This value is used, e.g. in the subject header of outgoing emails.
-	Name string `yaml:"name" json:"name,omitempty" koanf:"name"`
+	Name string `yaml:"name" json:"name" koanf:"name"`
 }
 
 func (s *Service) Validate() error {

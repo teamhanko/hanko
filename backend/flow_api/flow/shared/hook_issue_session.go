@@ -7,11 +7,11 @@ import (
 
 	"github.com/gobuffalo/nulls"
 	"github.com/gofrs/uuid"
-	auditlog "github.com/teamhanko/hanko/backend/v2/audit_log"
-	"github.com/teamhanko/hanko/backend/v2/dto"
-	"github.com/teamhanko/hanko/backend/v2/flowpilot"
-	"github.com/teamhanko/hanko/backend/v2/persistence/models"
-	"github.com/teamhanko/hanko/backend/v2/session"
+	auditlog "github.com/teamhanko/hanko/backend/v3/audit_log"
+	"github.com/teamhanko/hanko/backend/v3/dto"
+	"github.com/teamhanko/hanko/backend/v3/flowpilot"
+	"github.com/teamhanko/hanko/backend/v3/persistence/models"
+	"github.com/teamhanko/hanko/backend/v3/session"
 )
 
 type IssueSession struct {
@@ -32,7 +32,7 @@ func (h IssueSession) Execute(c flowpilot.HookExecutionContext) error {
 		return errors.New("user_id not found in stash")
 	}
 
-	userModel, err := deps.Persister.GetUserPersisterWithConnection(deps.Tx).Get(userId)
+	userModel, err := deps.Persister.GetUserPersisterWithConnection(deps.Tx).Get(userId, deps.TenantID)
 	if err != nil {
 		return fmt.Errorf("failed to fetch user from db: %w", err)
 	}
@@ -52,7 +52,7 @@ func (h IssueSession) Execute(c flowpilot.HookExecutionContext) error {
 		}
 	}
 
-	signedSessionToken, rawToken, err := deps.SessionManager.GenerateJWT(userJWT, jwtOpts...)
+	signedSessionToken, rawToken, err := deps.SessionManager.GenerateJWT(userJWT, deps.TenantID, jwtOpts...)
 	if err != nil {
 		return fmt.Errorf("failed to generate JWT: %w", err)
 	}
@@ -67,7 +67,7 @@ func (h IssueSession) Execute(c flowpilot.HookExecutionContext) error {
 		return fmt.Errorf("failed to set token claims to payload: %w", err)
 	}
 
-	activeSessions, err := deps.Persister.GetSessionPersisterWithConnection(deps.Tx).ListActive(userId)
+	activeSessions, err := deps.Persister.GetSessionPersisterWithConnection(deps.Tx).ListActive(userId, deps.TenantID)
 	if err != nil {
 		return fmt.Errorf("failed to list active sessions: %w", err)
 	}
@@ -92,6 +92,7 @@ func (h IssueSession) Execute(c flowpilot.HookExecutionContext) error {
 		UpdatedAt: rawToken.IssuedAt(),
 		ExpiresAt: &expirationTime,
 		LastUsed:  rawToken.IssuedAt(),
+		TenantID:  deps.TenantID,
 	}
 
 	if deps.Cfg.Session.AcquireIPAddress {
@@ -160,6 +161,7 @@ func (h IssueSession) Execute(c flowpilot.HookExecutionContext) error {
 			models.AuditLogLoginSuccess,
 			&models.User{ID: userId},
 			err,
+			deps.TenantID,
 			auditLogDetails...)
 
 		if err != nil {

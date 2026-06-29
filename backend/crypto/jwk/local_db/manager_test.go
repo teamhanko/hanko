@@ -1,13 +1,16 @@
 package local_db
 
 import (
+	"testing"
+
+	"github.com/gofrs/uuid"
 	"github.com/lestrrat-go/jwx/v2/jwa"
 	"github.com/lestrrat-go/jwx/v2/jwt"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"github.com/stretchr/testify/suite"
-	"github.com/teamhanko/hanko/backend/v2/test"
-	"testing"
+	"github.com/teamhanko/hanko/backend/v3/config"
+	"github.com/teamhanko/hanko/backend/v3/test"
 )
 
 func TestJWKManagerSuite(t *testing.T) {
@@ -20,22 +23,26 @@ type jwkManagerSuite struct {
 }
 
 func (s *jwkManagerSuite) TestDefaultManager() {
-	keys := []string{"asfnoadnfoaegnq3094intoaegjnoadjgnoadng", "apdisfoaiegnoaiegnbouaebgn982"}
+	cfg := config.DefaultConfig()
+	cfg.SecretKeys = []string{"asfnoadnfoaegnq3094intoaegjnoadjgnoadng", "apdisfoaiegnoaiegnbouaebgn982"}
 
 	persister := s.Storage.GetJwkPersister()
 
-	dm, err := NewDefaultManager(keys, persister)
+	err := SyncSecretKeys(cfg, s.Storage)
+	s.Require().NoError(err)
+
+	dm, err := NewDefaultManager(cfg.SecretKeys, persister)
 	require.NoError(s.T(), err)
-	all, err := persister.GetAll()
+	all, err := persister.GetAll(uuid.FromStringOrNil(config.DefaultTenantID))
 
 	require.NoError(s.T(), err)
 	assert.Equal(s.T(), 2, len(all))
 
-	js, err := dm.GetPublicKeys()
+	js, err := dm.GetPublicKeys(uuid.FromStringOrNil(config.DefaultTenantID))
 	require.NoError(s.T(), err)
 	assert.Equal(s.T(), 2, js.Len())
 
-	sk, err := dm.GetSigningKey()
+	sk, err := dm.GetSigningKey(uuid.FromStringOrNil(config.DefaultTenantID))
 	require.NoError(s.T(), err)
 
 	token := jwt.New()

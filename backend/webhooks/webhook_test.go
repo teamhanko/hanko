@@ -3,7 +3,7 @@ package webhooks
 import (
 	"github.com/labstack/gommon/log"
 	"github.com/stretchr/testify/require"
-	"github.com/teamhanko/hanko/backend/v2/webhooks/events"
+	"github.com/teamhanko/hanko/backend/v3/webhooks/events"
 	"net"
 	"net/http"
 	"net/http/httptest"

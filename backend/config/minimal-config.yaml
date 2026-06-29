@@ -3,6 +3,12 @@ smtp:
     host: smtp.example.com
     user: example
     password: example
+email_delivery:
+  smtp:
+    port: "465"
+    host: smtp.example.com
+    user: example
+    password: example
 database:
   url: postgres://postgres:123456@127.0.0.1:5432/dummy
 secrets:

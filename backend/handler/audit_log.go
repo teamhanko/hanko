@@ -2,14 +2,16 @@ package handler
 
 import (
 	"fmt"
-	"github.com/labstack/echo/v4"
-	"github.com/teamhanko/hanko/backend/v2/dto"
-	"github.com/teamhanko/hanko/backend/v2/pagination"
-	"github.com/teamhanko/hanko/backend/v2/persistence"
 	"net/http"
 	"net/url"
 	"strconv"
 	"time"
+
+	"github.com/labstack/echo/v4"
+	"github.com/teamhanko/hanko/backend/v3/context"
+	"github.com/teamhanko/hanko/backend/v3/dto"
+	"github.com/teamhanko/hanko/backend/v3/pagination"
+	"github.com/teamhanko/hanko/backend/v3/persistence"
 )
 
 type AuditLogHandler struct {
@@ -35,8 +37,13 @@ type AuditLogListRequest struct {
 }
 
 func (h AuditLogHandler) List(c echo.Context) error {
+	tenant, err := context.GetTenant(c)
+	if err != nil {
+		return fmt.Errorf("failed to get tenant from context: %w", err)
+	}
+
 	var request AuditLogListRequest
-	err := (&echo.DefaultBinder{}).BindQueryParams(c, &request)
+	err = (&echo.DefaultBinder{}).BindQueryParams(c, &request)
 	if err != nil {
 		return dto.ToHttpError(err)
 	}
@@ -49,12 +56,12 @@ func (h AuditLogHandler) List(c echo.Context) error {
 		request.PerPage = 20
 	}
 
-	auditLogs, err := h.persister.GetAuditLogPersister().List(request.Page, request.PerPage, request.StartTime, request.EndTime, request.Types, request.UserId, request.Email, request.IP, request.SearchString)
+	auditLogs, err := h.persister.GetAuditLogPersister().List(request.Page, request.PerPage, request.StartTime, request.EndTime, request.Types, request.UserId, request.Email, request.IP, request.SearchString, tenant.ID)
 	if err != nil {
 		return fmt.Errorf("failed to get list of audit logs: %w", err)
 	}
 
-	logCount, err := h.persister.GetAuditLogPersister().Count(request.StartTime, request.EndTime, request.Types, request.UserId, request.Email, request.IP, request.SearchString)
+	logCount, err := h.persister.GetAuditLogPersister().Count(request.StartTime, request.EndTime, request.Types, request.UserId, request.Email, request.IP, request.SearchString, tenant.ID)
 	if err != nil {
 		return fmt.Errorf("failed to get total count of audit logs: %w", err)
 	}

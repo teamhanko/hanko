@@ -10,9 +10,10 @@ import (
 	"github.com/gobuffalo/nulls"
 	"github.com/gofrs/uuid"
 	"github.com/labstack/echo/v4"
-	"github.com/teamhanko/hanko/backend/v2/dto/admin"
-	"github.com/teamhanko/hanko/backend/v2/persistence"
-	"github.com/teamhanko/hanko/backend/v2/persistence/models"
+	"github.com/teamhanko/hanko/backend/v3/context"
+	"github.com/teamhanko/hanko/backend/v3/dto/admin"
+	"github.com/teamhanko/hanko/backend/v3/persistence"
+	"github.com/teamhanko/hanko/backend/v3/persistence/models"
 	"github.com/tidwall/gjson"
 )
 
@@ -27,6 +28,11 @@ func NewMetadataAdminHandler(persister persistence.Persister) *MetadataAdminHand
 }
 
 func (h *MetadataAdminHandler) GetMetadata(c echo.Context) error {
+	tenant, err := context.GetTenant(c)
+	if err != nil {
+		return fmt.Errorf("failed to get tenant from context: %w", err)
+	}
+
 	userID, err := uuid.FromString(c.Param("id"))
 	if err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, "invalid user id")
@@ -41,7 +47,7 @@ func (h *MetadataAdminHandler) GetMetadata(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusNotFound, "user not found").SetInternal(err)
 	}
 
-	metadataModel, err := h.persister.GetUserMetadataPersister().Get(userID)
+	metadataModel, err := h.persister.GetUserMetadataPersister().Get(userID, tenant.ID)
 	if err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, "could not fetch metadata").SetInternal(err)
 	}
@@ -55,6 +61,11 @@ func (h *MetadataAdminHandler) GetMetadata(c echo.Context) error {
 }
 
 func (h *MetadataAdminHandler) PatchMetadata(c echo.Context) error {
+	tenant, err := context.GetTenant(c)
+	if err != nil {
+		return fmt.Errorf("failed to get tenant from context: %w", err)
+	}
+
 	userID, err := uuid.FromString(c.Param("id"))
 	if err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, "invalid user id")
@@ -74,7 +85,7 @@ func (h *MetadataAdminHandler) PatchMetadata(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusNotFound, "user not found").SetInternal(err)
 	}
 
-	currentMetadataModel, err := h.persister.GetUserMetadataPersister().Get(userID)
+	currentMetadataModel, err := h.persister.GetUserMetadataPersister().Get(userID, tenant.ID)
 	if err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, "could not fetch metadata").SetInternal(err)
 	}

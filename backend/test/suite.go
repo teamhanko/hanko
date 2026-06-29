@@ -2,14 +2,15 @@ package test
 
 import (
 	"fmt"
+	"testing"
+
 	"github.com/go-testfixtures/testfixtures/v3"
 	"github.com/gobuffalo/pop/v6"
 	"github.com/gobuffalo/pop/v6/logging"
 	"github.com/gofrs/uuid"
 	"github.com/stretchr/testify/suite"
-	"github.com/teamhanko/hanko/backend/v2/config"
-	"github.com/teamhanko/hanko/backend/v2/persistence"
-	"testing"
+	"github.com/teamhanko/hanko/backend/v3/config"
+	"github.com/teamhanko/hanko/backend/v3/persistence"
 )
 
 type Suite struct {
@@ -38,10 +39,11 @@ func (s *Suite) SetupSuite() {
 	dialect := "postgres"
 	db, err := StartDB(s.Name, dialect)
 	s.Require().NoError(err)
-	storage, err := persistence.New(config.Database{
+	dbConnection, err := persistence.NewConnection(config.Database{
 		Url: db.DatabaseUrl,
 	})
 	s.Require().NoError(err)
+	storage := persistence.New(dbConnection)
 
 	if s.WithEmailServer {
 		s.EmailServer, err = StartMailslurper()

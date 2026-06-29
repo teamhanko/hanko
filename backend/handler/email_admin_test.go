@@ -4,15 +4,16 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
-	"github.com/gofrs/uuid"
-	"github.com/stretchr/testify/suite"
-	"github.com/teamhanko/hanko/backend/v2/config"
-	"github.com/teamhanko/hanko/backend/v2/dto"
-	"github.com/teamhanko/hanko/backend/v2/dto/admin"
-	"github.com/teamhanko/hanko/backend/v2/test"
 	"net/http"
 	"net/http/httptest"
 	"testing"
+
+	"github.com/gofrs/uuid"
+	"github.com/stretchr/testify/suite"
+	"github.com/teamhanko/hanko/backend/v3/config"
+	"github.com/teamhanko/hanko/backend/v3/dto"
+	"github.com/teamhanko/hanko/backend/v3/dto/admin"
+	"github.com/teamhanko/hanko/backend/v3/test"
 )
 
 func TestEmailAdminSuite(t *testing.T) {
@@ -25,7 +26,7 @@ type emailAdminSuite struct {
 }
 
 func (s *emailAdminSuite) TestEmailAdminHandler_New() {
-	emailHandler := NewEmailAdminHandler(&config.Config{}, s.Storage)
+	emailHandler := NewEmailAdminHandler(s.Storage)
 	s.NotEmpty(emailHandler)
 }
 
@@ -37,7 +38,11 @@ func (s *emailAdminSuite) TestEmailAdminHandler_List() {
 	err := s.LoadFixtures("../test/fixtures/email")
 	s.Require().NoError(err)
 
-	e := NewAdminRouter(&test.DefaultConfig, s.Storage, nil)
+	cfg := test.DefaultConfig
+	err = cfg.PostProcess()
+	s.Require().NoError(err)
+
+	e := NewAdminRouter(&cfg, s.Storage, nil)
 
 	tests := []struct {
 		name               string
@@ -199,6 +204,9 @@ func (s *emailAdminSuite) TestEmailAdminHandler_Create() {
 	for _, currentTest := range tests {
 		s.Run(currentTest.name, func() {
 			cfg := test.DefaultConfig
+			err = cfg.PostProcess()
+			s.Require().NoError(err)
+
 			cfg.Email.Limit = currentTest.maxNumberOfAddresses
 
 			e := NewAdminRouter(&cfg, s.Storage, nil)
@@ -224,7 +232,7 @@ func (s *emailAdminSuite) TestEmailAdminHandler_Create() {
 			s.Equal(currentTest.expectedStatusCode, rec.Code)
 
 			if rec.Code == http.StatusOK {
-				email, err := s.Storage.GetEmailPersister().FindByAddress(currentTest.email)
+				email, err := s.Storage.GetEmailPersister().FindByAddress(currentTest.email, uuid.Nil)
 				s.Require().NoError(err)
 
 				if email != nil {
@@ -298,6 +306,8 @@ func (s *emailAdminSuite) TestEmailAdminHandler_Get() {
 	for _, currentTest := range tests {
 		s.Run(currentTest.name, func() {
 			cfg := test.DefaultConfig
+			err = cfg.PostProcess()
+			s.Require().NoError(err)
 
 			e := NewAdminRouter(&cfg, s.Storage, nil)
 
@@ -389,6 +399,8 @@ func (s *emailAdminSuite) TestEmailAdminHandler_Delete() {
 	for _, currentTest := range tests {
 		s.Run(currentTest.name, func() {
 			cfg := test.DefaultConfig
+			err = cfg.PostProcess()
+			s.Require().NoError(err)
 
 			e := NewAdminRouter(&cfg, s.Storage, nil)
 
@@ -482,6 +494,8 @@ func (s *emailAdminSuite) TestEmailAdminHandler_SetPrimaryEmail() {
 	for _, currentTest := range tests {
 		s.Run(currentTest.name, func() {
 			cfg := test.DefaultConfig
+			err := cfg.PostProcess()
+			s.Require().NoError(err)
 
 			e := NewAdminRouter(&cfg, s.Storage, nil)
 
@@ -498,7 +512,7 @@ func (s *emailAdminSuite) TestEmailAdminHandler_SetPrimaryEmail() {
 				userUuid, err := uuid.FromString(currentTest.userId)
 				s.Require().NoError(err)
 
-				emails, err := s.Storage.GetEmailPersister().FindByUserId(userUuid)
+				emails, err := s.Storage.GetEmailPersister().FindByUserId(userUuid, uuid.FromStringOrNil(config.DefaultTenantID))
 				s.Require().NoError(err)
 
 				s.Equal(3, len(emails))

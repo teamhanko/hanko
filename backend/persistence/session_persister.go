@@ -4,18 +4,19 @@ import (
 	"database/sql"
 	"errors"
 	"fmt"
+	"time"
+
 	"github.com/gobuffalo/pop/v6"
 	"github.com/gofrs/uuid"
-	"github.com/teamhanko/hanko/backend/v2/persistence/models"
-	"time"
+	"github.com/teamhanko/hanko/backend/v3/persistence/models"
 )
 
 type SessionPersister interface {
 	Create(session models.Session) error
-	Get(id uuid.UUID) (*models.Session, error)
+	Get(id uuid.UUID, tenantID uuid.UUID) (*models.Session, error)
 	Update(session models.Session) error
-	List(userID uuid.UUID) ([]models.Session, error)
-	ListActive(userID uuid.UUID) ([]models.Session, error)
+	List(userID uuid.UUID, tenantID uuid.UUID) ([]models.Session, error)
+	ListActive(userID uuid.UUID, tenantID uuid.UUID) ([]models.Session, error)
 	Delete(session models.Session) error
 }
 
@@ -39,9 +40,11 @@ func (p *sessionPersister) Create(session models.Session) error {
 	return nil
 }
 
-func (p *sessionPersister) Get(id uuid.UUID) (*models.Session, error) {
+func (p *sessionPersister) Get(id uuid.UUID, tenantID uuid.UUID) (*models.Session, error) {
 	session := models.Session{}
-	err := p.db.Eager().Find(&session, id)
+	query := p.db.Eager().Q()
+	query = query.Where("sessions.tenant_id = ?", tenantID)
+	err := query.Find(&session, id)
 	if err != nil && errors.Is(err, sql.ErrNoRows) {
 		return nil, nil
 	}
@@ -65,10 +68,12 @@ func (p *sessionPersister) Update(session models.Session) error {
 	return nil
 }
 
-func (p *sessionPersister) List(userID uuid.UUID) ([]models.Session, error) {
+func (p *sessionPersister) List(userID uuid.UUID, tenantID uuid.UUID) ([]models.Session, error) {
 	sessions := []models.Session{}
 
-	err := p.db.Q().Where("user_id = ?", userID).All(&sessions)
+	query := p.db.Q().Where("user_id = ?", userID)
+	query = query.Where("tenant_id = ?", tenantID)
+	err := query.All(&sessions)
 
 	if err != nil && errors.Is(err, sql.ErrNoRows) {
 		return sessions, nil
@@ -80,10 +85,12 @@ func (p *sessionPersister) List(userID uuid.UUID) ([]models.Session, error) {
 	return sessions, nil
 }
 
-func (p *sessionPersister) ListActive(userID uuid.UUID) ([]models.Session, error) {
+func (p *sessionPersister) ListActive(userID uuid.UUID, tenantID uuid.UUID) ([]models.Session, error) {
 	sessions := []models.Session{}
 
-	err := p.db.Q().Where("user_id = ?", userID).Where("expires_at > ?", time.Now()).Order("created_at desc").All(&sessions)
+	query := p.db.Q().Where("user_id = ?", userID).Where("expires_at > ?", time.Now())
+	query = query.Where("tenant_id = ?", tenantID)
+	err := query.Order("created_at desc").All(&sessions)
 
 	if err != nil && errors.Is(err, sql.ErrNoRows) {
 		return sessions, nil

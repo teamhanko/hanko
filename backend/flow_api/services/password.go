@@ -16,8 +16,8 @@ import (
 
 	"github.com/gobuffalo/pop/v6"
 	"github.com/gofrs/uuid"
-	"github.com/teamhanko/hanko/backend/v2/persistence"
-	"github.com/teamhanko/hanko/backend/v2/persistence/models"
+	"github.com/teamhanko/hanko/backend/v3/persistence"
+	"github.com/teamhanko/hanko/backend/v3/persistence/models"
 	"golang.org/x/crypto/bcrypt"
 
 	"golang.org/x/crypto/scrypt"
@@ -28,9 +28,9 @@ var (
 )
 
 type Password interface {
-	VerifyPassword(tx *pop.Connection, userId uuid.UUID, password string) error
-	RecoverPassword(tx *pop.Connection, userId uuid.UUID, newPassword string) error
-	CreatePassword(tx *pop.Connection, userId uuid.UUID, newPassword string) error
+	VerifyPassword(tx *pop.Connection, userId uuid.UUID, password string, tenantID uuid.UUID) error
+	RecoverPassword(tx *pop.Connection, userId uuid.UUID, newPassword string, tenantID uuid.UUID) error
+	CreatePassword(tx *pop.Connection, userId uuid.UUID, newPassword string, tenantID uuid.UUID) error
 	UpdatePassword(tx *pop.Connection, passwordCredentialModel *models.PasswordCredential, newPassword string) error
 }
 
@@ -62,8 +62,8 @@ func NewPasswordService(persister persistence.Persister) Password {
 	}
 }
 
-func (s password) VerifyPassword(tx *pop.Connection, userId uuid.UUID, password string) error {
-	user, err := s.persister.GetUserPersisterWithConnection(tx).Get(userId)
+func (s password) VerifyPassword(tx *pop.Connection, userId uuid.UUID, password string, tenantID uuid.UUID) error {
+	user, err := s.persister.GetUserPersisterWithConnection(tx).Get(userId, tenantID)
 	if err != nil {
 		return fmt.Errorf("failed to get user: %w", err)
 	}
@@ -72,7 +72,7 @@ func (s password) VerifyPassword(tx *pop.Connection, userId uuid.UUID, password 
 		return ErrorPasswordInvalid
 	}
 
-	pw, err := s.persister.GetPasswordCredentialPersisterWithConnection(tx).GetByUserID(userId)
+	pw, err := s.persister.GetPasswordCredentialPersisterWithConnection(tx).GetByUserID(userId, tenantID)
 	if err != nil {
 		return fmt.Errorf("error retrieving password credential: %w", err)
 	}
@@ -248,16 +248,16 @@ func ParseFirebaseScryptString(fbscryptString string) (*FirebaseScryptParameters
 	return input, nil
 }
 
-func (s password) RecoverPassword(tx *pop.Connection, userId uuid.UUID, newPassword string) error {
+func (s password) RecoverPassword(tx *pop.Connection, userId uuid.UUID, newPassword string, tenantID uuid.UUID) error {
 	passwordPersister := s.persister.GetPasswordCredentialPersisterWithConnection(tx)
 
-	passwordCredentialModel, err := passwordPersister.GetByUserID(userId)
+	passwordCredentialModel, err := passwordPersister.GetByUserID(userId, tenantID)
 	if err != nil {
 		return fmt.Errorf("failed to get password credential by user id: %w", err)
 	}
 
 	if passwordCredentialModel == nil {
-		err = s.CreatePassword(tx, userId, newPassword)
+		err = s.CreatePassword(tx, userId, newPassword, tenantID)
 	} else {
 		err = s.UpdatePassword(tx, passwordCredentialModel, newPassword)
 	}
@@ -269,13 +269,13 @@ func (s password) RecoverPassword(tx *pop.Connection, userId uuid.UUID, newPassw
 	return nil
 }
 
-func (s password) CreatePassword(tx *pop.Connection, userId uuid.UUID, newPassword string) error {
+func (s password) CreatePassword(tx *pop.Connection, userId uuid.UUID, newPassword string, tenantID uuid.UUID) error {
 	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(newPassword), 12)
 	if err != nil {
 		return ErrorPasswordInvalid
 	}
 
-	passwordCredentialModel := models.NewPasswordCredential(userId, string(hashedPassword))
+	passwordCredentialModel := models.NewPasswordCredential(userId, string(hashedPassword), tenantID)
 
 	err = s.persister.GetPasswordCredentialPersisterWithConnection(tx).Create(*passwordCredentialModel)
 	if err != nil {

@@ -141,25 +141,10 @@
     },
     "Config": {
       "properties": {
-        "account": {
-          "$ref": "#/$defs/Account",
-          "title": "account",
-          "description": "`account` configures settings related to user accounts."
-        },
         "audit_log": {
           "$ref": "#/$defs/AuditLog",
           "title": "audit_log",
           "description": "`audit_log` configures output and storage modalities of audit logs."
-        },
-        "convert_legacy_config": {
-          "type": "boolean",
-          "description": "`convert_legacy_config`, if set to `true`, automatically copies the set values of deprecated configuration\noptions, to new ones. If set to `false`, these values have to be set manually if non-default values should be\nused.",
-          "default": false
-        },
-        "convert_legacy_server_side_session_config": {
-          "type": "boolean",
-          "description": "`covert_legacy_session_config`, if set to `true`, automatically copies the set of deprecated server-side session\nconfiguration options to the new ones. If set to `false`, these values have to be set manually if non-default\nvalues should be used.",
-          "default": true
         },
         "database": {
           "$ref": "#/$defs/Database",
@@ -170,6 +155,56 @@
           "type": "boolean",
           "description": "`debug`, if set to `true`, adds additional debugging information to flow API responses.",
           "default": false
+        },
+        "flow_locker": {
+          "$ref": "#/$defs/FlowLocker",
+          "description": "`flow_locker` confgures flow locking"
+        },
+        "log": {
+          "$ref": "#/$defs/LoggerConfig",
+          "title": "log",
+          "description": "`log` configures application logging."
+        },
+        "multi_tenancy": {
+          "$ref": "#/$defs/MultiTenancy",
+          "description": "MultiTenancy determines if the system supports multiple tenants, enabling tenant-specific configurations and isolation."
+        },
+        "rate_limiter": {
+          "$ref": "#/$defs/RateLimiter",
+          "title": "rate_limiter",
+          "description": "`rate_limiter` configures rate limits for rate limited API operations and storage modalities for rate limit data."
+        },
+        "server": {
+          "$ref": "#/$defs/Server",
+          "title": "server",
+          "description": "`server` configures address settings of the public and admin API."
+        },
+        "default_email_delivery": {
+          "$ref": "#/$defs/EmailDelivery",
+          "title": "default_email_delivery",
+          "description": "`default_email_delivery` configures how outgoing mails are delivered by default, when no `email_delivery` is configured as TenantConfig."
+        },
+        "secretkeys": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array",
+          "description": "You can use this list for key rotation: add a new key to the beginning of the list and the corresponding\nJWK will then be used for signing JWTs. All tokens signed with the previous JWK(s) will still\nbe valid until they expire. Removing a key from the list does not remove the corresponding\ndatabase record. If you remove a key, you also have to remove the database record, otherwise\napplication startup will fail."
+        },
+        "account": {
+          "$ref": "#/$defs/Account",
+          "title": "account",
+          "description": "`account` configures settings related to user accounts."
+        },
+        "convert_legacy_config": {
+          "type": "boolean",
+          "description": "`convert_legacy_config`, if set to `true`, automatically copies the set values of deprecated configuration\noptions, to new ones. If set to `false`, these values have to be set manually if non-default values should be\nused.",
+          "default": false
+        },
+        "convert_legacy_server_side_session_config": {
+          "type": "boolean",
+          "description": "`covert_legacy_session_config`, if set to `true`, automatically copies the set of deprecated server-side session\nconfiguration options to the new ones. If set to `false`, these values have to be set manually if non-default\nvalues should be used.",
+          "default": true
         },
         "email": {
           "$ref": "#/$defs/Email",
@@ -186,15 +221,6 @@
           "title": "emails",
           "description": "Deprecated. See child properties for suggested replacements."
         },
-        "flow_locker": {
-          "$ref": "#/$defs/FlowLocker",
-          "description": "`flow_locker` confgures flow locking"
-        },
-        "log": {
-          "$ref": "#/$defs/LoggerConfig",
-          "title": "log",
-          "description": "`log` configures application logging."
-        },
         "mfa": {
           "$ref": "#/$defs/MFA",
           "title": "mfa",
@@ -203,7 +229,7 @@
         "passcode": {
           "$ref": "#/$defs/Passcode",
           "title": "passcode",
-          "description": "Deprecated. See child properties for suggested replacements."
+          "description": "MultiTenancy determines if the system supports multiple tenants, enabling tenant-specific configurations and isolation."
         },
         "passkey": {
           "$ref": "#/$defs/Passkey",
@@ -214,11 +240,6 @@
           "$ref": "#/$defs/Password",
           "title": "password",
           "description": "`password` configures how passwords are acquired and used."
-        },
-        "rate_limiter": {
-          "$ref": "#/$defs/RateLimiter",
-          "title": "rate_limiter",
-          "description": "`rate_limiter` configures rate limits for rate limited API operations and storage modalities for rate limit data."
         },
         "saml": {
           "$ref": "#/$defs/Saml",
@@ -234,10 +255,10 @@
           "$ref": "#/$defs/SecurityNotifications",
           "description": "`security_notifications` configures security notifications for important security-related events."
         },
-        "server": {
-          "$ref": "#/$defs/Server",
-          "title": "server",
-          "description": "`server` configures address and CORS settings of the public and admin API."
+        "cors": {
+          "$ref": "#/$defs/Cors",
+          "title": "cors",
+          "description": "`cors` configures Cross-Origin Resource Sharing settings for this tenant."
         },
         "service": {
           "$ref": "#/$defs/Service",
@@ -490,6 +511,14 @@
     },
     "Database": {
       "properties": {
+        "conn_max_lifetime": {
+          "type": "integer",
+          "description": "`conn_max_lifetime` sets the maximum amount of time a connection may be reused.\nIt must be a (possibly signed) sequence of decimal numbers, each with optional fraction and a unit suffix,\nsuch as \"300ms\", or \"2h45m\".\nValid time units are \"ns\", \"us\" (or \"µs\"), \"ms\", \"s\", \"m\", \"h\"."
+        },
+        "conn_max_idletime": {
+          "type": "integer",
+          "description": "`conn_max_idletime` sets the maximum number of connections in the idle connection pool.\nIt must be a (possibly signed) sequence of decimal numbers, each with optional fraction and a unit suffix,\nsuch as \"300ms\", or \"2h45m\".\nValid time units are \"ns\", \"us\" (or \"µs\"), \"ms\", \"s\", \"m\", \"h\"."
+        },
         "database": {
           "type": "string",
           "description": "`database` determines the name of the database schema to use.",
@@ -511,10 +540,20 @@
           "description": "`host` is the host the database system is running on.",
           "default": "localhost"
         },
+        "idle_pool": {
+          "type": "integer",
+          "description": "`idle_pool` sets the maximum number of connections in the idle connection pool.",
+          "default": 0
+        },
         "password": {
           "type": "string",
           "description": "`password` is the password for the database user to use for connecting to the database.",
           "default": "hanko"
+        },
+        "pool": {
+          "type": "integer",
+          "description": "`pool` sets the maximum number of open connections to the database.",
+          "default": 5
         },
         "port": {
           "type": "string",
@@ -841,6 +880,17 @@
         "enabled",
         "optional"
       ]
+    },
+    "MultiTenancy": {
+      "properties": {
+        "enabled": {
+          "type": "boolean",
+          "description": "`enabled` determines whether multitenancy mode is enabled.",
+          "default": false
+        }
+      },
+      "additionalProperties": false,
+      "type": "object"
     },
     "Options": {
       "properties": {
@@ -1248,7 +1298,7 @@
             "title": "keys"
           },
           "type": "array",
-          "description": "`keys` are used to en- and decrypt the JWKs which get used to sign the JWTs issued by the API.\nFor every key a JWK is generated, encrypted with the key and persisted in the database.\n\nYou can use this list for key rotation: add a new key to the beginning of the list and the corresponding\nJWK will then be used for signing JWTs. All tokens signed with the previous JWK(s) will still\nbe valid until they expire. Removing a key from the list does not remove the corresponding\ndatabase record. If you remove a key, you also have to remove the database record, otherwise\napplication startup will fail."
+          "description": "`keys` are used to en- and decrypt the JWKs which get used to sign the JWTs issued by the API.\nFor every key a JWK is generated, encrypted with the key and persisted in the database.\n\nYou can use this list for key rotation: add a new key to the beginning of the list and the corresponding\nJWK will then be used for signing JWTs. All tokens signed with the previous JWK(s) will still\nbe valid until they expire. Removing a key from the list does not remove the corresponding\ndatabase record. If you remove a key, you also have to remove the database record, otherwise\napplication startup will fail.\nDeprecated: use top level \"SecretKeys\" instead"
         }
       },
       "additionalProperties": false,
@@ -1360,6 +1410,11 @@
           "$ref": "#/$defs/ServerSettings",
           "title": "admin",
           "description": "`admin` contains the server configuration for the admin API."
+        },
+        "management": {
+          "$ref": "#/$defs/ServerSettings",
+          "title": "management",
+          "description": "`management` contains the server configuration for the management API."
         }
       },
       "additionalProperties": false,
@@ -1370,11 +1425,6 @@
         "address": {
           "type": "string",
           "description": "`address` is the address of the server to listen on in the form of host:port.\n\nSee [net.Dial](https://pkg.go.dev/net#Dial) for details of the address format."
-        },
-        "cors": {
-          "$ref": "#/$defs/Cors",
-          "title": "cors",
-          "description": "`cors` contains configuration options regarding Cross-Origin-Resource-Sharing."
         }
       },
       "additionalProperties": false,

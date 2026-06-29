@@ -2,12 +2,13 @@ package login
 
 import (
 	"fmt"
+
 	"github.com/gofrs/uuid"
-	"github.com/teamhanko/hanko/backend/v2/flow_api/flow/shared"
-	"github.com/teamhanko/hanko/backend/v2/flowpilot"
-	"github.com/teamhanko/hanko/backend/v2/persistence/models"
-	"github.com/teamhanko/hanko/backend/v2/webhooks/events"
-	"github.com/teamhanko/hanko/backend/v2/webhooks/utils"
+	"github.com/teamhanko/hanko/backend/v3/flow_api/flow/shared"
+	"github.com/teamhanko/hanko/backend/v3/flowpilot"
+	"github.com/teamhanko/hanko/backend/v3/persistence/models"
+	"github.com/teamhanko/hanko/backend/v3/webhooks/events"
+	"github.com/teamhanko/hanko/backend/v3/webhooks/utils"
 )
 
 type CreateEmail struct {
@@ -30,14 +31,14 @@ func (h CreateEmail) Execute(c flowpilot.HookExecutionContext) error {
 	}
 
 	userID := uuid.FromStringOrNil(c.Stash().Get(shared.StashPathUserID).String())
-	emailModel := models.NewEmail(&userID, c.Stash().Get(shared.StashPathEmail).String())
+	emailModel := models.NewEmail(&userID, c.Stash().Get(shared.StashPathEmail).String(), deps.TenantID)
 
 	err := deps.Persister.GetEmailPersisterWithConnection(deps.Tx).Create(*emailModel)
 	if err != nil {
 		return fmt.Errorf("failed to create a new email: %w", err)
 	}
 
-	primaryEmail := models.NewPrimaryEmail(emailModel.ID, userID)
+	primaryEmail := models.NewPrimaryEmail(emailModel.ID, userID, deps.TenantID)
 	err = deps.Persister.GetPrimaryEmailPersisterWithConnection(deps.Tx).Create(*primaryEmail)
 	if err != nil {
 		return fmt.Errorf("failed to create a new primary email: %w", err)

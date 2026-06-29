@@ -8,18 +8,18 @@ import (
 	"testing"
 	"time"
 
+	"github.com/gofrs/uuid"
 	"github.com/labstack/echo/v4"
 	"github.com/lestrrat-go/jwx/v2/jwa"
 	jwk2 "github.com/lestrrat-go/jwx/v2/jwk"
 	"github.com/lestrrat-go/jwx/v2/jwt"
 	"github.com/stretchr/testify/suite"
-	auditlog "github.com/teamhanko/hanko/backend/v2/audit_log"
-	"github.com/teamhanko/hanko/backend/v2/config"
-	"github.com/teamhanko/hanko/backend/v2/crypto/jwk/local_db"
-	"github.com/teamhanko/hanko/backend/v2/dto"
-	"github.com/teamhanko/hanko/backend/v2/session"
-	"github.com/teamhanko/hanko/backend/v2/test"
-	"github.com/teamhanko/hanko/backend/v2/utils"
+	auditlog "github.com/teamhanko/hanko/backend/v3/audit_log"
+	"github.com/teamhanko/hanko/backend/v3/config"
+	"github.com/teamhanko/hanko/backend/v3/context"
+	"github.com/teamhanko/hanko/backend/v3/dto"
+	"github.com/teamhanko/hanko/backend/v3/test"
+	"github.com/teamhanko/hanko/backend/v3/utils"
 )
 
 func TestThirdPartySuite(t *testing.T) {
@@ -31,12 +31,16 @@ type thirdPartySuite struct {
 	test.Suite
 }
 
-func (s *thirdPartySuite) setUpContext(request *http.Request) (echo.Context, *httptest.ResponseRecorder) {
+func (s *thirdPartySuite) setUpContext(request *http.Request, tenantConfig config.TenantConfig) (echo.Context, *httptest.ResponseRecorder) {
 	s.T().Helper()
 	e := echo.New()
 	e.Validator = dto.NewCustomValidator()
 	rec := httptest.NewRecorder()
 	c := e.NewContext(request, rec)
+	c.Set("tenant", context.Tenant{
+		ID:     uuid.FromStringOrNil(config.DefaultTenantID),
+		Config: tenantConfig,
+	})
 	return c, rec
 }
 
@@ -44,13 +48,7 @@ func (s *thirdPartySuite) setUpHandler(cfg *config.Config) *ThirdPartyHandler {
 	s.T().Helper()
 	auditLogger := auditlog.NewLogger(s.Storage, cfg.AuditLog)
 
-	jwkMngr, err := local_db.NewDefaultManager(cfg.Secrets.Keys, s.Storage.GetJwkPersister())
-	s.Require().NoError(err)
-
-	sessionMngr, err := session.NewManager(jwkMngr, *cfg)
-	s.Require().NoError(err)
-
-	handler := NewThirdPartyHandler(cfg, s.Storage, sessionMngr, auditLogger)
+	handler := NewThirdPartyHandler(cfg.ApplicationConfig, s.Storage, auditLogger)
 	return handler
 }
 
@@ -138,7 +136,7 @@ func (s *thirdPartySuite) setUpConfig(enabledProviders []string, allowedRedirect
 func (s *thirdPartySuite) setUpFakeJwkSet() jwk2.Set {
 	s.T().Helper()
 	generator := test.JwkManager{}
-	keySet, err := generator.GetPublicKeys()
+	keySet, err := generator.GetPublicKeys(uuid.FromStringOrNil(config.DefaultTenantID))
 	s.Require().NoError(err)
 	return keySet
 }
@@ -158,7 +156,7 @@ func (s *thirdPartySuite) setUpAppleIdToken(sub, aud, email string, emailVerifie
 	}
 
 	generator := test.JwkManager{}
-	signingKey, err := generator.GetSigningKey()
+	signingKey, err := generator.GetSigningKey(uuid.FromStringOrNil(config.DefaultTenantID))
 	s.Require().NoError(err)
 
 	signedToken, err := jwt.Sign(token, jwt.WithKey(jwa.RS256, signingKey))
@@ -178,7 +176,7 @@ func (s *thirdPartySuite) setUpMicrosoftIdToken(sub, aud, email string, edov boo
 	_ = token.Set("xms_edov", edov)
 
 	generator := test.JwkManager{}
-	signingKey, err := generator.GetSigningKey()
+	signingKey, err := generator.GetSigningKey(uuid.FromStringOrNil(config.DefaultTenantID))
 	s.Require().NoError(err)
 
 	signedToken, err := jwt.Sign(token, jwt.WithKey(jwa.RS256, signingKey))
