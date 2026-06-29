@@ -38,6 +38,7 @@ type FlowPilotHandler struct {
 	SecurityNotificationService services.SecurityNotification
 	PasscodeService             services.Passcode
 	PasswordService             services.Password
+	TOTPService                 services.TOTP
 	WebauthnService             services.WebauthnService
 	SamlService                 saml.SamlProviderService
 	SessionManager              session.Manager
@@ -65,6 +66,7 @@ func NewFlowAPIHandler(cfg config.Config, persister persistence.Persister, audit
 	emailService, _ := services.NewEmailService()
 	passcodeService := services.NewPasscodeService(*emailService, persister)
 	passwordService := services.NewPasswordService(persister)
+	totpService := services.NewTOTPService(services.DefaultTOTPOptions())
 	webauthnService := services.NewWebauthnService(persister)
 	securityNotificationService := services.NewSecurityNotificationService(*emailService, persister, auditLogger)
 	samlService := saml.NewSamlProviderService(persister)
@@ -80,6 +82,7 @@ func NewFlowAPIHandler(cfg config.Config, persister persistence.Persister, audit
 		SecurityNotificationService: securityNotificationService,
 		PasscodeService:             passcodeService,
 		PasswordService:             passwordService,
+		TOTPService:                 totpService,
 		WebauthnService:             webauthnService,
 		SamlService:                 samlService,
 		SessionManager:              nil, // Populated in executeFlow() from session manager middleware
@@ -287,6 +290,7 @@ func (h *FlowPilotHandler) executeFlow(c echo.Context, flow flowpilot.Flow) erro
 			SecurityNotificationService: h.SecurityNotificationService,
 			PasscodeService:             h.PasscodeService,
 			PasswordService:             h.PasswordService,
+			TOTPService:                 h.TOTPService,
 			WebauthnService:             h.WebauthnService,
 			SamlService:                 h.SamlService,
 			AuthenticatorMetadata:       h.AuthenticatorMetadata, // does not need to be tenant-specific

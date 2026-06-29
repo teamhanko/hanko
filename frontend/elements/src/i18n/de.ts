@@ -201,6 +201,8 @@ export const de: Translation = {
     flow_expired_error:
       "Die Sitzung ist abgelaufen, bitte klicken Sie auf die Schaltfläche, um neu zu starten.",
     value_invalid_error: "Der eingegebene Wert ist ungültig.",
+    otp_code_invalid: "Der angegebene OTP-Code war nicht korrekt.",
+    otp_code_already_used: "Der angegebene OTP-Code wurde bereits verwendet.",
     passcode_invalid: "Der angegebene Passcode war nicht korrekt.",
     passkey_invalid: "Dieser Passkey kann nicht mehr verwendet werden.",
     passcode_max_attempts_reached:

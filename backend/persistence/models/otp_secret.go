@@ -3,6 +3,7 @@ package models
 import (
 	"time"
 
+	"github.com/gobuffalo/nulls"
 	"github.com/gobuffalo/pop/v6"
 	"github.com/gobuffalo/validate/v3"
 	"github.com/gobuffalo/validate/v3/validators"
@@ -10,12 +11,13 @@ import (
 )
 
 type OTPSecret struct {
-	ID        uuid.UUID `db:"id"`
-	UserID    uuid.UUID `db:"user_id"`
-	TenantID  uuid.UUID `db:"tenant_id"`
-	Secret    string    `db:"secret"`
-	CreatedAt time.Time `db:"created_at"`
-	UpdatedAt time.Time `db:"updated_at"`
+	ID                uuid.UUID   `db:"id"`
+	UserID            uuid.UUID   `db:"user_id"`
+	TenantID          uuid.UUID   `db:"tenant_id"`
+	Secret            string      `db:"secret"`
+	LastValidatedStep nulls.Int64 `db:"last_validated_step"`
+	CreatedAt         time.Time   `db:"created_at"`
+	UpdatedAt         time.Time   `db:"updated_at"`
 }
 
 func (otpSecret OTPSecret) TableName() string {

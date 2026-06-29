@@ -197,6 +197,8 @@ export const ptBR: Translation = {
     flow_expired_error:
       "A sessão expirou, por favor, clique no botão para reiniciar.",
     value_invalid_error: "O valor inserido é inválido.",
+    otp_code_invalid: "O código OTP fornecido não estava correto.",
+    otp_code_already_used: "O código OTP já foi utilizado.",
     passcode_invalid: "O código fornecido não estava correto.",
     passkey_invalid: "Esta chave de acesso não pode mais ser utilizada.",
     passcode_max_attempts_reached:

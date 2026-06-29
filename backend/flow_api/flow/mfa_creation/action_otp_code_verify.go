@@ -1,10 +1,12 @@
 package mfa_creation
 
 import (
+	"errors"
 	"fmt"
+	"time"
 
+	"github.com/gobuffalo/nulls"
 	"github.com/gofrs/uuid"
-	"github.com/pquerna/otp/totp"
 	auditlog "github.com/teamhanko/hanko/backend/v3/audit_log"
 	"github.com/teamhanko/hanko/backend/v3/flow_api/flow/shared"
 	"github.com/teamhanko/hanko/backend/v3/flow_api/services"
@@ -40,9 +42,18 @@ func (a OTPCodeVerify) Execute(c flowpilot.ExecutionContext) error {
 	code := c.Input().Get("otp_code").String()
 	secret := c.Stash().Get(shared.StashPathOTPSecret).String()
 
-	if !totp.Validate(code, secret) {
-		c.Input().SetError("otp_code", shared.ErrorPasscodeInvalid)
-		return c.Error(flowpilot.ErrorFormDataInvalid)
+	matchedStep, err := deps.TOTPService.ValidateCode(code, &models.OTPSecret{Secret: secret}, time.Now().UTC())
+	if err != nil {
+		if errors.Is(err, services.ErrTOTPCodeInvalid) {
+			c.Input().SetError("otp_code", shared.ErrorPasscodeInvalid)
+			return c.Error(flowpilot.ErrorFormDataInvalid)
+		}
+		return fmt.Errorf("totp validation error: %w", err)
+	}
+
+	// Stash the matched step so hook_create_user can set it on the OTPSecret during registration.
+	if err := c.Stash().Set(shared.StashPathOTPLastValidatedStep, matchedStep); err != nil {
+		return fmt.Errorf("failed to stash otp last validated step: %w", err)
 	}
 
 	_ = c.Stash().Set(shared.StashPathUserHasOTPSecret, true)
@@ -62,6 +73,11 @@ func (a OTPCodeVerify) Execute(c flowpilot.ExecutionContext) error {
 		}
 
 		otpSecretModel := models.NewOTPSecret(userID, secret, deps.TenantID)
+		// Set LastValidatedStep to the step just consumed during setup verification.
+		// This prevents the setup code from being replayed as the first MFA login
+		// code (RFC 6238 §5.2): the persisted secret already has that step consumed,
+		// so the replay check in TOTPService.ValidateCode will reject it.
+		otpSecretModel.LastValidatedStep = nulls.NewInt64(matchedStep)
 
 		err := deps.Persister.GetOTPSecretPersisterWithConnection(deps.Tx).Create(*otpSecretModel)
 		if err != nil {

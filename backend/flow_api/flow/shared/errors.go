@@ -22,5 +22,7 @@ var (
 	ErrorUnknownEmail          = flowpilot.NewInputError("unknown_email_error", "The email address is unknown.")
 	ErrorInvalidUsername       = flowpilot.NewInputError("invalid_username_error", "The username is invalid.")
 	ErrorPasscodeInvalid       = flowpilot.NewInputError("passcode_invalid", "The passcode is invalid.")
+	ErrorOTPCodeInvalid        = flowpilot.NewInputError("otp_code_invalid", "The OTP code is invalid.")
+	ErrorOTPCodeAlreadyUsed    = flowpilot.NewInputError("otp_code_already_used", "The OTP code has already been used.")
 	ErrorInvalidMetadata       = flowpilot.NewInputError("invalid_metadata_error", "The metadata is invalid.")
 )

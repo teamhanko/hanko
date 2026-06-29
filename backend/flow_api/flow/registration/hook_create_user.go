@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/gobuffalo/nulls"
 	"github.com/gofrs/uuid"
 	auditlog "github.com/teamhanko/hanko/backend/v3/audit_log"
 	"github.com/teamhanko/hanko/backend/v3/flow_api/flow/shared"
@@ -44,6 +45,11 @@ func (h CreateUser) Execute(c flowpilot.HookExecutionContext) error {
 		}
 	}
 
+	otpLastValidatedStep := nulls.Int64{}
+	if stashedStep := c.Stash().Get(shared.StashPathOTPLastValidatedStep); stashedStep.Exists() {
+		otpLastValidatedStep = nulls.NewInt64(stashedStep.Int())
+	}
+
 	err = h.createUser(
 		c,
 		userId,
@@ -53,6 +59,7 @@ func (h CreateUser) Execute(c flowpilot.HookExecutionContext) error {
 		c.Stash().Get(shared.StashPathWebauthnCredentials).Array(),
 		c.Stash().Get(shared.StashPathNewPassword).String(),
 		c.Stash().Get(shared.StashPathOTPSecret).String(),
+		otpLastValidatedStep,
 		deps.TenantID,
 	)
 	if err != nil {
@@ -64,7 +71,7 @@ func (h CreateUser) Execute(c flowpilot.HookExecutionContext) error {
 	return nil
 }
 
-func (h CreateUser) createUser(c flowpilot.HookExecutionContext, id uuid.UUID, email string, emailVerified bool, username string, webauthnCredentials []gjson.Result, password, otpSecret string, tenantID uuid.UUID) error {
+func (h CreateUser) createUser(c flowpilot.HookExecutionContext, id uuid.UUID, email string, emailVerified bool, username string, webauthnCredentials []gjson.Result, password, otpSecret string, otpLastValidatedStep nulls.Int64, tenantID uuid.UUID) error {
 	deps := h.GetDeps(c)
 
 	now := time.Now().UTC()
@@ -135,6 +142,7 @@ func (h CreateUser) createUser(c flowpilot.HookExecutionContext, id uuid.UUID, e
 
 	if otpSecret != "" {
 		otpSecretModel := models.NewOTPSecret(id, otpSecret, tenantID)
+		otpSecretModel.LastValidatedStep = otpLastValidatedStep
 		err = deps.Persister.GetOTPSecretPersisterWithConnection(deps.Tx).Create(*otpSecretModel)
 		if err != nil {
 			return err

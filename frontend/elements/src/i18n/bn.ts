@@ -191,6 +191,8 @@ export const bn: Translation = {
     flow_expired_error:
       "সেশনটি মেয়াদ উত্তীর্ণ হয়েছে, দয়া করে পুনরায় শুরু করতে বাটনটি ক্লিক করুন।",
     value_invalid_error: "প্রবেশিত মান অবৈধ।",
+    otp_code_invalid: "প্রদত্ত OTP কোড সঠিক নয়।",
+    otp_code_already_used: "OTP কোডটি ইতিমধ্যে ব্যবহৃত হয়েছে।",
     passcode_invalid: "প্রদত্ত পাসকোড সঠিক নয়।",
     passkey_invalid: "এই পাসকী আর ব্যবহার করা যাবে না",
     passcode_max_attempts_reached:
