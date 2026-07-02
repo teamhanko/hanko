@@ -5,9 +5,12 @@ import (
 	"fmt"
 	"net/http"
 	"net/url"
+	"strconv"
+	"time"
 
 	"github.com/gobuffalo/pop/v6"
 	"github.com/labstack/echo/v4"
+	zeroLogger "github.com/rs/zerolog/log"
 	auditlog "github.com/teamhanko/hanko/backend/v3/audit_log"
 	"github.com/teamhanko/hanko/backend/v3/config"
 	"github.com/teamhanko/hanko/backend/v3/context"
@@ -230,6 +233,17 @@ func (h *ThirdPartyHandler) auditError(c echo.Context, logError error) error {
 	var auditLogError error
 	if ok && e.Code != thirdparty.ErrorCodeServerError {
 		auditLogError = h.auditLogger.Create(c, models.AuditLogThirdPartySignInSignUpFailed, nil, logError, tenant.ID)
+	} else {
+		zeroLogger.Error().
+			Str("time_unix", strconv.FormatInt(time.Now().Unix(), 10)).
+			Str("id", c.Response().Header().Get(echo.HeaderXRequestID)).
+			Str("remote_ip", c.RealIP()).
+			Str("host", c.Request().Host).
+			Str("method", c.Request().Method).
+			Str("uri", c.Request().RequestURI).
+			Str("user_agent", c.Request().UserAgent()).
+			Err(logError).
+			Send()
 	}
 	return auditLogError
 }
