@@ -219,8 +219,8 @@ func (h *ThirdPartyHandler) redirectError(c echo.Context, error error, to string
 	return c.Redirect(http.StatusTemporaryRedirect, redirectURL)
 }
 
-func (h *ThirdPartyHandler) auditError(c echo.Context, err error) error {
-	e, ok := err.(*thirdparty.ThirdPartyError)
+func (h *ThirdPartyHandler) auditError(c echo.Context, logError error) error {
+	e, ok := logError.(*thirdparty.ThirdPartyError)
 
 	tenant, err := context.GetTenant(c)
 	if err != nil {
@@ -229,7 +229,7 @@ func (h *ThirdPartyHandler) auditError(c echo.Context, err error) error {
 
 	var auditLogError error
 	if ok && e.Code != thirdparty.ErrorCodeServerError {
-		auditLogError = h.auditLogger.Create(c, models.AuditLogThirdPartySignInSignUpFailed, nil, err, tenant.ID)
+		auditLogError = h.auditLogger.Create(c, models.AuditLogThirdPartySignInSignUpFailed, nil, logError, tenant.ID)
 	}
 	return auditLogError
 }
