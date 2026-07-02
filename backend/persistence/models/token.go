@@ -95,7 +95,6 @@ func (token *Token) Validate(tx *pop.Connection) (*validate.Errors, error) {
 	return validate.Validate(
 		&validators.UUIDIsPresent{Name: "ID", Field: token.ID},
 		&validators.UUIDIsPresent{Name: "UserID", Field: token.UserID},
-		&validators.UUIDIsPresent{Name: "TenantID", Field: token.TenantID},
 		&validators.StringIsPresent{Name: "Value", Field: token.Value},
 		&validators.TimeIsPresent{Name: "UpdatedAt", Field: token.UpdatedAt},
 		&validators.TimeIsPresent{Name: "CreatedAt", Field: token.CreatedAt},
