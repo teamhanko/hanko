@@ -24,6 +24,7 @@ func (h PasswordSave) Execute(c flowpilot.HookExecutionContext) error {
 		ID:       passwordId,
 		UserId:   uuid.FromStringOrNil(c.Stash().Get(StashPathUserID).String()),
 		Password: c.Stash().Get(StashPathNewPassword).String(),
+		TenantID: deps.TenantID,
 	}
 
 	err := deps.Persister.GetPasswordCredentialPersisterWithConnection(deps.Tx).Create(passwordCredential)
