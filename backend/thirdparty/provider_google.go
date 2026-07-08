@@ -66,13 +66,13 @@ func (g googleProvider) AuthCodeURL(state string, opts ...oauth2.AuthCodeOption)
 	return g.oauthConfig.AuthCodeURL(state, opts...)
 }
 
-func (g googleProvider) GetOAuthToken(code string, opts ...oauth2.AuthCodeOption) (*oauth2.Token, error) {
-	return g.oauthConfig.Exchange(context.Background(), code, opts...)
+func (g googleProvider) GetOAuthToken(ctx context.Context, code string, opts ...oauth2.AuthCodeOption) (*oauth2.Token, error) {
+	return g.oauthConfig.Exchange(ctx, code, opts...)
 }
 
-func (g googleProvider) GetUserData(token *oauth2.Token) (*UserData, error) {
+func (g googleProvider) GetUserData(ctx context.Context, token *oauth2.Token) (*UserData, error) {
 	var user GoogleUser
-	if err := makeRequest(token, g.oauthConfig, GoogleUserInfoEndpoint, &user); err != nil {
+	if err := makeRequest(ctx, token, g.oauthConfig, GoogleUserInfoEndpoint, &user); err != nil {
 		return nil, err
 	}
 
