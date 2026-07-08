@@ -11,7 +11,7 @@ require (
 	github.com/evanphx/json-patch/v5 v5.9.11
 	github.com/fatih/structs v1.1.0
 	github.com/go-playground/validator/v10 v10.30.3
-	github.com/go-redsync/redsync/v4 v4.16.0
+	github.com/go-redsync/redsync/v4 v4.17.0
 	github.com/go-sql-driver/mysql v1.10.0
 	github.com/go-testfixtures/testfixtures/v3 v3.19.0
 	github.com/go-webauthn/webauthn v0.10.2
@@ -124,8 +124,6 @@ require (
 	github.com/google/shlex v0.0.0-20191202100458-e7afc7fbc510 // indirect
 	github.com/gorilla/css v1.0.1 // indirect
 	github.com/h2non/parth v0.0.0-20190131123155-b4df798d6542 // indirect
-	github.com/hashicorp/errwrap v1.1.0 // indirect
-	github.com/hashicorp/go-multierror v1.1.1 // indirect
 	github.com/inconshreveable/mousetrap v1.1.0 // indirect
 	github.com/jackc/pgpassfile v1.0.0 // indirect
 	github.com/jackc/pgservicefile v0.0.0-20240606120523-5a60cdf6a761 // indirect
