@@ -40,6 +40,13 @@ module.exports = {
         type: "module",
       },
     },
+    ko: {
+      filename: "i18n/ko.js",
+      import: "./src/i18n/ko.ts",
+      library: {
+        type: "module",
+      },
+    },
     nl: {
       filename: "i18n/nl.js",
       import: "./src/i18n/nl.ts",
