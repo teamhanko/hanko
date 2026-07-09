@@ -74,13 +74,13 @@ func (g linkedInProvider) AuthCodeURL(state string, opts ...oauth2.AuthCodeOptio
 	return g.oauthConfig.AuthCodeURL(state, opts...)
 }
 
-func (g linkedInProvider) GetOAuthToken(code string, opts ...oauth2.AuthCodeOption) (*oauth2.Token, error) {
-	return g.oauthConfig.Exchange(context.Background(), code, opts...)
+func (g linkedInProvider) GetOAuthToken(ctx context.Context, code string, opts ...oauth2.AuthCodeOption) (*oauth2.Token, error) {
+	return g.oauthConfig.Exchange(ctx, code, opts...)
 }
 
-func (g linkedInProvider) GetUserData(token *oauth2.Token) (*UserData, error) {
+func (g linkedInProvider) GetUserData(ctx context.Context, token *oauth2.Token) (*UserData, error) {
 	var user LinkedinUser
-	if err := makeRequest(token, g.oauthConfig, g.oidcProvider.UserInfoEndpoint(), &user); err != nil {
+	if err := makeRequest(ctx, token, g.oauthConfig, g.oidcProvider.UserInfoEndpoint(), &user); err != nil {
 		return nil, err
 	}
 

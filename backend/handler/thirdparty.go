@@ -116,12 +116,12 @@ func (h *ThirdPartyHandler) Callback(c echo.Context) error {
 		if state.CodeVerifier != "" && provider.ID() != "linkedin" {
 			opts = append(opts, oauth2.VerifierOption(state.CodeVerifier))
 		}
-		oAuthToken, terr := provider.GetOAuthToken(callback.AuthCode, opts...)
+		oAuthToken, terr := provider.GetOAuthToken(c.Request().Context(), callback.AuthCode, opts...)
 		if terr != nil {
 			return thirdparty.ErrorInvalidRequest("could not exchange authorization code for access token").WithCause(terr)
 		}
 
-		userData, terr := provider.GetUserData(oAuthToken)
+		userData, terr := provider.GetUserData(c.Request().Context(), oAuthToken)
 		if terr != nil {
 			return thirdparty.ErrorInvalidRequest("could not retrieve user data from provider").WithCause(terr)
 		}

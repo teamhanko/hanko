@@ -68,14 +68,14 @@ func (p customProvider) AuthCodeURL(state string, opts ...oauth2.AuthCodeOption)
 	return p.oauthConfig.AuthCodeURL(state, opts...)
 }
 
-func (p customProvider) GetOAuthToken(code string, opts ...oauth2.AuthCodeOption) (*oauth2.Token, error) {
-	return p.oauthConfig.Exchange(context.Background(), code, opts...)
+func (p customProvider) GetOAuthToken(ctx context.Context, code string, opts ...oauth2.AuthCodeOption) (*oauth2.Token, error) {
+	return p.oauthConfig.Exchange(ctx, code, opts...)
 }
 
-func (p customProvider) GetUserData(token *oauth2.Token) (*UserData, error) {
-	tokenSource := p.oauthConfig.TokenSource(context.Background(), token)
+func (p customProvider) GetUserData(ctx context.Context, token *oauth2.Token) (*UserData, error) {
+	tokenSource := p.oauthConfig.TokenSource(ctx, token)
 
-	userInfo, err := p.oidcProvider.UserInfo(context.Background(), tokenSource)
+	userInfo, err := p.oidcProvider.UserInfo(ctx, tokenSource)
 	if err != nil {
 		return nil, err
 	}

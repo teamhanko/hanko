@@ -43,8 +43,8 @@ type Email struct {
 
 type OAuthProvider interface {
 	AuthCodeURL(string, ...oauth2.AuthCodeOption) string
-	GetUserData(*oauth2.Token) (*UserData, error)
-	GetOAuthToken(string, ...oauth2.AuthCodeOption) (*oauth2.Token, error)
+	GetUserData(context.Context, *oauth2.Token) (*UserData, error)
+	GetOAuthToken(context.Context, string, ...oauth2.AuthCodeOption) (*oauth2.Token, error)
 	ID() string
 }
 
@@ -92,24 +92,29 @@ func getThirdPartyProvider(config config.ThirdParty, id string) (OAuthProvider, 
 	}
 }
 
-func makeRequest(token *oauth2.Token, config *oauth2.Config, url string, dst interface{}) error {
-	client := config.Client(context.Background(), token)
+func makeRequest(ctx context.Context, token *oauth2.Token, config *oauth2.Config, url string, dst interface{}) error {
+	client := config.Client(ctx, token)
 	client.Timeout = time.Second * 10
-	res, err := client.Get(url)
+	req, err := http.NewRequestWithContext(ctx, http.MethodGet, url, nil)
+	if err != nil {
+		return err
+	}
+	res, err := client.Do(req)
 	if err != nil {
 		return err
 	}
 	defer res.Body.Close()
 
-	bodyBytes, _ := io.ReadAll(res.Body)
-	defer res.Body.Close()
-	res.Body = io.NopCloser(bytes.NewBuffer(bodyBytes))
+	bodyBytes, err := io.ReadAll(res.Body)
+	if err != nil {
+		return fmt.Errorf("read response body: %w", err)
+	}
 
 	if res.StatusCode < http.StatusOK || res.StatusCode >= http.StatusMultipleChoices {
 		return errors.New(string(bodyBytes))
 	}
 
-	if err := json.NewDecoder(res.Body).Decode(dst); err != nil {
+	if err := json.NewDecoder(bytes.NewReader(bodyBytes)).Decode(dst); err != nil {
 		return err
 	}
 
