@@ -157,6 +157,7 @@ export const bn: Translation = {
     trustDevice: "এই ব্রাউজারটি বিশ্বাস করবেন",
     staySignedIn: "সাইন ইন থাকা চালিয়ে যান",
     connectAccount: "অ্যাকাউন্ট সংযুক্ত করুন",
+    restart: "পুনরায় শুরু করুন",
   },
   errors: {
     somethingWentWrong:
