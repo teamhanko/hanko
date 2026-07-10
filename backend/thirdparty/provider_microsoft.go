@@ -11,7 +11,7 @@ import (
 	"github.com/lestrrat-go/jwx/v2/jws"
 	"github.com/lestrrat-go/jwx/v2/jwt"
 	"github.com/mitchellh/mapstructure"
-	"github.com/teamhanko/hanko/backend/v2/config"
+	"github.com/teamhanko/hanko/backend/v3/config"
 	"golang.org/x/oauth2"
 )
 
@@ -71,17 +71,17 @@ func (p microsoftProvider) AuthCodeURL(state string, opts ...oauth2.AuthCodeOpti
 	return p.oauthConfig.AuthCodeURL(state, opts...)
 }
 
-func (p microsoftProvider) GetOAuthToken(code string, opts ...oauth2.AuthCodeOption) (*oauth2.Token, error) {
-	return p.oauthConfig.Exchange(context.Background(), code, opts...)
+func (p microsoftProvider) GetOAuthToken(ctx context.Context, code string, opts ...oauth2.AuthCodeOption) (*oauth2.Token, error) {
+	return p.oauthConfig.Exchange(ctx, code, opts...)
 }
 
-func (p microsoftProvider) GetUserData(token *oauth2.Token) (*UserData, error) {
+func (p microsoftProvider) GetUserData(ctx context.Context, token *oauth2.Token) (*UserData, error) {
 	rawIDToken, ok := token.Extra("id_token").(string)
 	if !ok {
 		return nil, errors.New("id_token missing")
 	}
 
-	jwks, err := jwk.Fetch(context.Background(), MicrosoftKeysEndpoint)
+	jwks, err := jwk.Fetch(ctx, MicrosoftKeysEndpoint)
 	if err != nil {
 		return nil, err
 	}

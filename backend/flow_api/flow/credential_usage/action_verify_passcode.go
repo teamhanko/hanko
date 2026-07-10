@@ -5,11 +5,11 @@ import (
 	"fmt"
 
 	"github.com/gofrs/uuid"
-	auditlog "github.com/teamhanko/hanko/backend/v2/audit_log"
-	"github.com/teamhanko/hanko/backend/v2/flow_api/flow/shared"
-	"github.com/teamhanko/hanko/backend/v2/flow_api/services"
-	"github.com/teamhanko/hanko/backend/v2/flowpilot"
-	"github.com/teamhanko/hanko/backend/v2/persistence/models"
+	auditlog "github.com/teamhanko/hanko/backend/v3/audit_log"
+	"github.com/teamhanko/hanko/backend/v3/flow_api/flow/shared"
+	"github.com/teamhanko/hanko/backend/v3/flow_api/services"
+	"github.com/teamhanko/hanko/backend/v3/flowpilot"
+	"github.com/teamhanko/hanko/backend/v3/persistence/models"
 )
 
 type VerifyPasscode struct {
@@ -40,7 +40,7 @@ func (a VerifyPasscode) Execute(c flowpilot.ExecutionContext) error {
 	}
 
 	passcodeID := uuid.FromStringOrNil(c.Stash().Get(shared.StashPathPasscodeID).String())
-	err := deps.PasscodeService.VerifyPasscodeCode(deps.Tx, passcodeID, c.Input().Get("code").String())
+	err := deps.PasscodeService.VerifyPasscodeCode(deps.Tx, passcodeID, c.Input().Get("code").String(), deps.TenantID)
 	if err != nil {
 		if errors.Is(err, services.ErrorPasscodeInvalid) ||
 			errors.Is(err, services.ErrorPasscodeNotFound) ||
@@ -53,6 +53,7 @@ func (a VerifyPasscode) Execute(c flowpilot.ExecutionContext) error {
 					models.AuditLogLoginFailure,
 					&models.User{ID: uuid.FromStringOrNil(c.Stash().Get(shared.StashPathUserID).String())},
 					err,
+					deps.TenantID,
 					auditlog.Detail("login_method", "passcode"),
 					auditlog.Detail("flow_id", c.GetFlowID()))
 
@@ -73,6 +74,7 @@ func (a VerifyPasscode) Execute(c flowpilot.ExecutionContext) error {
 					models.AuditLogLoginFailure,
 					&models.User{ID: uuid.FromStringOrNil(c.Stash().Get(shared.StashPathUserID).String())},
 					err,
+					deps.TenantID,
 					auditlog.Detail("login_method", "passcode"),
 					auditlog.Detail("flow_id", c.GetFlowID()))
 

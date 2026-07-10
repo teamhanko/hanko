@@ -3,10 +3,11 @@ package profile
 import (
 	"errors"
 	"fmt"
+
 	"github.com/gofrs/uuid"
 	"github.com/lestrrat-go/jwx/v2/jwt"
-	"github.com/teamhanko/hanko/backend/v2/flow_api/flow/shared"
-	"github.com/teamhanko/hanko/backend/v2/flowpilot"
+	"github.com/teamhanko/hanko/backend/v3/flow_api/flow/shared"
+	"github.com/teamhanko/hanko/backend/v3/flowpilot"
 )
 
 type RefreshSessionUser struct {
@@ -26,7 +27,7 @@ func (h RefreshSessionUser) Execute(c flowpilot.HookExecutionContext) error {
 		return fmt.Errorf("failed to parse userId from JWT subject: %w", err)
 	}
 
-	userModel, err := deps.Persister.GetUserPersisterWithConnection(deps.Tx).Get(userId)
+	userModel, err := deps.Persister.GetUserPersisterWithConnection(deps.Tx).Get(userId, deps.TenantID)
 	if err != nil {
 		return fmt.Errorf("failed to fetch user: %w", err)
 	}

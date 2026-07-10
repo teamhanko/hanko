@@ -1,6 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://github.com/teamhanko/hanko/backend/v2/config/config",
+  "$id": "https://github.com/teamhanko/hanko/backend/v3/config/config",
   "$ref": "#/$defs/Config",
   "$defs": {
     "Account": {
@@ -17,7 +17,11 @@
         }
       },
       "additionalProperties": false,
-      "type": "object"
+      "type": "object",
+      "required": [
+        "allow_deletion",
+        "allow_signup"
+      ]
     },
     "AttributeMap": {
       "properties": {
@@ -141,25 +145,10 @@
     },
     "Config": {
       "properties": {
-        "account": {
-          "$ref": "#/$defs/Account",
-          "title": "account",
-          "description": "`account` configures settings related to user accounts."
-        },
         "audit_log": {
           "$ref": "#/$defs/AuditLog",
           "title": "audit_log",
           "description": "`audit_log` configures output and storage modalities of audit logs."
-        },
-        "convert_legacy_config": {
-          "type": "boolean",
-          "description": "`convert_legacy_config`, if set to `true`, automatically copies the set values of deprecated configuration\noptions, to new ones. If set to `false`, these values have to be set manually if non-default values should be\nused.",
-          "default": false
-        },
-        "convert_legacy_server_side_session_config": {
-          "type": "boolean",
-          "description": "`covert_legacy_session_config`, if set to `true`, automatically copies the set of deprecated server-side session\nconfiguration options to the new ones. If set to `false`, these values have to be set manually if non-default\nvalues should be used.",
-          "default": true
         },
         "database": {
           "$ref": "#/$defs/Database",
@@ -171,6 +160,46 @@
           "description": "`debug`, if set to `true`, adds additional debugging information to flow API responses.",
           "default": false
         },
+        "flow_locker": {
+          "$ref": "#/$defs/FlowLocker",
+          "description": "`flow_locker` confgures flow locking"
+        },
+        "log": {
+          "$ref": "#/$defs/LoggerConfig",
+          "title": "log",
+          "description": "`log` configures application logging."
+        },
+        "multi_tenancy": {
+          "$ref": "#/$defs/MultiTenancy",
+          "description": "MultiTenancy determines if the system supports multiple tenants, enabling tenant-specific configurations and isolation."
+        },
+        "rate_limiter": {
+          "$ref": "#/$defs/RateLimiter",
+          "title": "rate_limiter",
+          "description": "`rate_limiter` configures rate limits for rate limited API operations and storage modalities for rate limit data."
+        },
+        "server": {
+          "$ref": "#/$defs/Server",
+          "title": "server",
+          "description": "`server` configures address settings of the public and admin API."
+        },
+        "default_email_delivery": {
+          "$ref": "#/$defs/EmailDelivery",
+          "title": "default_email_delivery",
+          "description": "`default_email_delivery` configures how outgoing mails are delivered by default, when no `email_delivery` is configured as TenantConfig."
+        },
+        "secret_keys": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array",
+          "description": "You can use this list for key rotation: add a new key to the beginning of the list and the corresponding\nJWK will then be used for signing JWTs. All tokens signed with the previous JWK(s) will still\nbe valid until they expire. Removing a key from the list does not remove the corresponding\ndatabase record. If you remove a key, you also have to remove the database record, otherwise\napplication startup will fail."
+        },
+        "account": {
+          "$ref": "#/$defs/Account",
+          "title": "account",
+          "description": "`account` configures settings related to user accounts."
+        },
         "email": {
           "$ref": "#/$defs/Email",
           "title": "email",
@@ -181,44 +210,20 @@
           "title": "email_delivery",
           "description": "`email_delivery` configures how outgoing mails are delivered."
         },
-        "emails": {
-          "$ref": "#/$defs/Emails",
-          "title": "emails",
-          "description": "Deprecated. See child properties for suggested replacements."
-        },
-        "flow_locker": {
-          "$ref": "#/$defs/FlowLocker",
-          "description": "`flow_locker` confgures flow locking"
-        },
-        "log": {
-          "$ref": "#/$defs/LoggerConfig",
-          "title": "log",
-          "description": "`log` configures application logging."
-        },
         "mfa": {
           "$ref": "#/$defs/MFA",
           "title": "mfa",
           "description": "`mfa` configures how multi-factor-authentication behaves."
         },
-        "passcode": {
-          "$ref": "#/$defs/Passcode",
-          "title": "passcode",
-          "description": "Deprecated. See child properties for suggested replacements."
-        },
         "passkey": {
           "$ref": "#/$defs/Passkey",
           "title": "passkey",
-          "description": "`passkey` configures how passkeys  are acquired and used."
+          "description": "`passkey` configures how passkeys are acquired and used."
         },
         "password": {
           "$ref": "#/$defs/Password",
           "title": "password",
           "description": "`password` configures how passwords are acquired and used."
-        },
-        "rate_limiter": {
-          "$ref": "#/$defs/RateLimiter",
-          "title": "rate_limiter",
-          "description": "`rate_limiter` configures rate limits for rate limited API operations and storage modalities for rate limit data."
         },
         "saml": {
           "$ref": "#/$defs/Saml",
@@ -234,10 +239,10 @@
           "$ref": "#/$defs/SecurityNotifications",
           "description": "`security_notifications` configures security notifications for important security-related events."
         },
-        "server": {
-          "$ref": "#/$defs/Server",
-          "title": "server",
-          "description": "`server` configures address and CORS settings of the public and admin API."
+        "cors": {
+          "$ref": "#/$defs/Cors",
+          "title": "cors",
+          "description": "`cors` configures Cross-Origin Resource Sharing settings for this tenant."
         },
         "service": {
           "$ref": "#/$defs/Service",
@@ -248,11 +253,6 @@
           "$ref": "#/$defs/Session",
           "title": "session",
           "description": "`session` configures settings for session JWTs and Cookies issued by the API."
-        },
-        "smtp": {
-          "$ref": "#/$defs/SMTP",
-          "title": "smtp",
-          "description": "Deprecated. Use `email_delivery.smtp` instead."
         },
         "third_party": {
           "$ref": "#/$defs/ThirdParty",
@@ -282,6 +282,25 @@
       },
       "additionalProperties": false,
       "type": "object",
+      "required": [
+        "account",
+        "email",
+        "email_delivery",
+        "mfa",
+        "passkey",
+        "password",
+        "saml",
+        "secrets",
+        "security_notifications",
+        "cors",
+        "service",
+        "session",
+        "third_party",
+        "username",
+        "webauthn",
+        "webhooks",
+        "privacy"
+      ],
       "description": "Config is the central configuration type"
     },
     "Cookie": {
@@ -333,7 +352,15 @@
         }
       },
       "additionalProperties": false,
-      "type": "object"
+      "type": "object",
+      "required": [
+        "domain",
+        "http_only",
+        "name",
+        "retention",
+        "same_site",
+        "secure"
+      ]
     },
     "Cors": {
       "properties": {
@@ -356,7 +383,11 @@
         }
       },
       "additionalProperties": false,
-      "type": "object"
+      "type": "object",
+      "required": [
+        "allow_origins",
+        "unsafe_wildcard_origin_allowed"
+      ]
     },
     "CustomThirdPartyProvider": {
       "if": {
@@ -480,6 +511,22 @@
       },
       "additionalProperties": false,
       "type": "object",
+      "required": [
+        "acr_values",
+        "allow_linking",
+        "attribute_mapping",
+        "authorization_endpoint",
+        "issuer",
+        "client_id",
+        "display_name",
+        "enabled",
+        "prompt",
+        "scopes",
+        "secret",
+        "token_endpoint",
+        "use_discovery",
+        "userinfo_endpoint"
+      ],
       "title": "custom_provider"
     },
     "CustomThirdPartyProviders": {
@@ -490,6 +537,14 @@
     },
     "Database": {
       "properties": {
+        "conn_max_lifetime": {
+          "type": "integer",
+          "description": "`conn_max_lifetime` sets the maximum amount of time a connection may be reused.\nIt must be a (possibly signed) sequence of decimal numbers, each with optional fraction and a unit suffix,\nsuch as \"300ms\", or \"2h45m\".\nValid time units are \"ns\", \"us\" (or \"µs\"), \"ms\", \"s\", \"m\", \"h\"."
+        },
+        "conn_max_idletime": {
+          "type": "integer",
+          "description": "`conn_max_idletime` sets the maximum number of connections in the idle connection pool.\nIt must be a (possibly signed) sequence of decimal numbers, each with optional fraction and a unit suffix,\nsuch as \"300ms\", or \"2h45m\".\nValid time units are \"ns\", \"us\" (or \"µs\"), \"ms\", \"s\", \"m\", \"h\"."
+        },
         "database": {
           "type": "string",
           "description": "`database` determines the name of the database schema to use.",
@@ -511,10 +566,20 @@
           "description": "`host` is the host the database system is running on.",
           "default": "localhost"
         },
+        "idle_pool": {
+          "type": "integer",
+          "description": "`idle_pool` sets the maximum number of connections in the idle connection pool.",
+          "default": 0
+        },
         "password": {
           "type": "string",
           "description": "`password` is the password for the database user to use for connecting to the database.",
           "default": "hanko"
+        },
+        "pool": {
+          "type": "integer",
+          "description": "`pool` sets the maximum number of open connections to the database.",
+          "default": 5
         },
         "port": {
           "type": "string",
@@ -600,7 +665,20 @@
         }
       },
       "additionalProperties": false,
-      "type": "object"
+      "type": "object",
+      "required": [
+        "acquire_on_login",
+        "acquire_on_registration",
+        "enabled",
+        "limit",
+        "max_length",
+        "optional",
+        "passcode_ttl",
+        "passcode_charset",
+        "require_verification",
+        "use_as_login_identifier",
+        "use_for_authentication"
+      ]
     },
     "EmailDelivery": {
       "properties": {
@@ -626,23 +704,13 @@
         }
       },
       "additionalProperties": false,
-      "type": "object"
-    },
-    "Emails": {
-      "properties": {
-        "require_verification": {
-          "type": "boolean",
-          "description": "Deprecated. Use `email.require_verification` instead.",
-          "default": true
-        },
-        "max_num_of_addresses": {
-          "type": "integer",
-          "description": "Deprecated. Use `email.limit` instead.",
-          "default": 5
-        }
-      },
-      "additionalProperties": false,
-      "type": "object"
+      "type": "object",
+      "required": [
+        "enabled",
+        "from_address",
+        "from_name",
+        "smtp"
+      ]
     },
     "Events": {
       "items": {
@@ -709,7 +777,15 @@
         }
       },
       "additionalProperties": false,
-      "type": "object"
+      "type": "object",
+      "required": [
+        "enabled",
+        "name",
+        "domain",
+        "metadata_url",
+        "skip_email_verification",
+        "attribute_map"
+      ]
     },
     "JWTTemplate": {
       "properties": {
@@ -718,7 +794,10 @@
         }
       },
       "additionalProperties": false,
-      "type": "object"
+      "type": "object",
+      "required": [
+        "claims"
+      ]
     },
     "KeyManagement": {
       "if": {
@@ -753,7 +832,12 @@
         }
       },
       "additionalProperties": false,
-      "type": "object"
+      "type": "object",
+      "required": [
+        "type",
+        "key_id",
+        "region"
+      ]
     },
     "LoggerConfig": {
       "properties": {
@@ -837,10 +921,26 @@
       "required": [
         "acquire_on_login",
         "acquire_on_registration",
+        "device_trust_cookie_name",
         "device_trust_duration",
+        "device_trust_max_users_per_device",
+        "device_trust_policy",
         "enabled",
-        "optional"
+        "optional",
+        "security_keys",
+        "totp"
       ]
+    },
+    "MultiTenancy": {
+      "properties": {
+        "enabled": {
+          "type": "boolean",
+          "description": "`enabled` determines whether multitenancy mode is enabled.",
+          "default": false
+        }
+      },
+      "additionalProperties": false,
+      "type": "object"
     },
     "Options": {
       "properties": {
@@ -871,18 +971,14 @@
         }
       },
       "additionalProperties": false,
-      "type": "object"
-    },
-    "Passcode": {
-      "properties": {
-        "ttl": {
-          "type": "integer",
-          "description": "Deprecated. Use `email.passcode_ttl` instead.",
-          "default": 300
-        }
-      },
-      "additionalProperties": false,
-      "type": "object"
+      "type": "object",
+      "required": [
+        "sign_authn_requests",
+        "force_login",
+        "validate_encryption_cert",
+        "skip_signature_validation",
+        "allow_missing_attributes"
+      ]
     },
     "Passkey": {
       "properties": {
@@ -963,7 +1059,16 @@
         }
       },
       "additionalProperties": false,
-      "type": "object"
+      "type": "object",
+      "required": [
+        "acquire_on_registration",
+        "acquire_on_login",
+        "attestation_preference",
+        "enabled",
+        "limit",
+        "optional",
+        "user_verification"
+      ]
     },
     "Password": {
       "properties": {
@@ -1007,11 +1112,6 @@
           "description": "`min_length` determines the minimum password length.",
           "default": 8
         },
-        "min_password_length": {
-          "type": "integer",
-          "description": "Deprecated. Use `min_length` instead.",
-          "default": 8
-        },
         "optional": {
           "type": "boolean",
           "description": "`optional` determines whether users must set a password when prompted. The password cannot be deleted if\npasswords are required (`optional: false`).\n\nIt also takes part in determining the order of password and passkey acquisition\non login and registration (see also `acquire_on_login` and `acquire_on_registration`): if one credential type is\nrequired (`optional: false`) then that one takes precedence, i.e. is acquired first.",
@@ -1024,7 +1124,15 @@
         }
       },
       "additionalProperties": false,
-      "type": "object"
+      "type": "object",
+      "required": [
+        "acquire_on_registration",
+        "acquire_on_login",
+        "enabled",
+        "min_length",
+        "optional",
+        "recovery"
+      ]
     },
     "Privacy": {
       "properties": {
@@ -1040,7 +1148,11 @@
         }
       },
       "additionalProperties": false,
-      "type": "object"
+      "type": "object",
+      "required": [
+        "show_account_existence_hints",
+        "only_show_actual_login_methods"
+      ]
     },
     "RateLimiter": {
       "properties": {
@@ -1152,6 +1264,11 @@
       },
       "additionalProperties": false,
       "type": "object",
+      "required": [
+        "display_name",
+        "id",
+        "origins"
+      ],
       "description": "RelyingParty webauthn settings for your application using hanko."
     },
     "SMTP": {
@@ -1173,6 +1290,12 @@
       },
       "additionalProperties": false,
       "type": "object",
+      "required": [
+        "host",
+        "port",
+        "user",
+        "password"
+      ],
       "description": "SMTP Server Settings for sending passcodes"
     },
     "Saml": {
@@ -1215,7 +1338,16 @@
         }
       },
       "additionalProperties": false,
-      "type": "object"
+      "type": "object",
+      "required": [
+        "enabled",
+        "endpoint_url",
+        "audience_uri",
+        "default_redirect_url",
+        "allowed_redirect_urls",
+        "options",
+        "identity_providers"
+      ]
     },
     "Secrets": {
       "if": {
@@ -1248,11 +1380,15 @@
             "title": "keys"
           },
           "type": "array",
-          "description": "`keys` are used to en- and decrypt the JWKs which get used to sign the JWTs issued by the API.\nFor every key a JWK is generated, encrypted with the key and persisted in the database.\n\nYou can use this list for key rotation: add a new key to the beginning of the list and the corresponding\nJWK will then be used for signing JWTs. All tokens signed with the previous JWK(s) will still\nbe valid until they expire. Removing a key from the list does not remove the corresponding\ndatabase record. If you remove a key, you also have to remove the database record, otherwise\napplication startup will fail."
+          "description": "`keys` are used to en- and decrypt the JWKs which get used to sign the JWTs issued by the API.\nFor every key a JWK is generated, encrypted with the key and persisted in the database.\n\nYou can use this list for key rotation: add a new key to the beginning of the list and the corresponding\nJWK will then be used for signing JWTs. All tokens signed with the previous JWK(s) will still\nbe valid until they expire. Removing a key from the list does not remove the corresponding\ndatabase record. If you remove a key, you also have to remove the database record, otherwise\napplication startup will fail.\nDeprecated: use top level \"SecretKeys\" instead"
         }
       },
       "additionalProperties": false,
-      "type": "object"
+      "type": "object",
+      "required": [
+        "key_management",
+        "keys"
+      ]
     },
     "SecurityKeys": {
       "properties": {
@@ -1300,7 +1436,11 @@
       "additionalProperties": false,
       "type": "object",
       "required": [
-        "enabled"
+        "attestation_preference",
+        "authenticator_attachment",
+        "enabled",
+        "limit",
+        "user_verification"
       ]
     },
     "SecurityNotificationConfiguration": {
@@ -1311,7 +1451,10 @@
         }
       },
       "additionalProperties": false,
-      "type": "object"
+      "type": "object",
+      "required": [
+        "enabled"
+      ]
     },
     "SecurityNotificationTypes": {
       "properties": {
@@ -1338,7 +1481,16 @@
         }
       },
       "additionalProperties": false,
-      "type": "object"
+      "type": "object",
+      "required": [
+        "password_update",
+        "primary_email_update",
+        "email_create",
+        "email_delete",
+        "passkey_create",
+        "mfa_create",
+        "mfa_delete"
+      ]
     },
     "SecurityNotifications": {
       "properties": {
@@ -1347,7 +1499,10 @@
         }
       },
       "additionalProperties": false,
-      "type": "object"
+      "type": "object",
+      "required": [
+        "notifications"
+      ]
     },
     "Server": {
       "properties": {
@@ -1360,6 +1515,11 @@
           "$ref": "#/$defs/ServerSettings",
           "title": "admin",
           "description": "`admin` contains the server configuration for the admin API."
+        },
+        "management": {
+          "$ref": "#/$defs/ServerSettings",
+          "title": "management",
+          "description": "`management` contains the server configuration for the management API."
         }
       },
       "additionalProperties": false,
@@ -1370,27 +1530,6 @@
         "address": {
           "type": "string",
           "description": "`address` is the address of the server to listen on in the form of host:port.\n\nSee [net.Dial](https://pkg.go.dev/net#Dial) for details of the address format."
-        },
-        "cors": {
-          "$ref": "#/$defs/Cors",
-          "title": "cors",
-          "description": "`cors` contains configuration options regarding Cross-Origin-Resource-Sharing."
-        }
-      },
-      "additionalProperties": false,
-      "type": "object"
-    },
-    "ServerSide": {
-      "properties": {
-        "enabled": {
-          "type": "boolean",
-          "description": "`enabled` determines whether server-side sessions are enabled.\n\nNOTE: When enabled the session endpoint must be used in order to check if a session is still valid.",
-          "default": false
-        },
-        "limit": {
-          "type": "integer",
-          "description": "`limit` determines the maximum number of server-side sessions a user can have. When the limit is exceeded,\nolder sessions are invalidated.",
-          "default": 100
         }
       },
       "additionalProperties": false,
@@ -1404,7 +1543,10 @@
         }
       },
       "additionalProperties": false,
-      "type": "object"
+      "type": "object",
+      "required": [
+        "name"
+      ]
     },
     "Session": {
       "properties": {
@@ -1458,10 +1600,6 @@
           "description": "`show_on_profile` indicates that the sessions should be listed on the profile.",
           "default": true
         },
-        "server_side": {
-          "$ref": "#/$defs/ServerSide",
-          "description": "Deprecated. Use settings in parent object.\n`server_side` contains configuration for server-side sessions."
-        },
         "jwt_template": {
           "$ref": "#/$defs/JWTTemplate",
           "description": "`jwt_template` defines a template for adding custom `claims` to session JWTs.\n\nThese claims are processed at JWT generation time and can include static values,\ntemplated strings using Go's text/template syntax, or nested structures (maps and slices).\n\nThe template has access to user data via the `.User` field, which includes:\n- `.User.UserID`: The user's unique ID (string)\n- `.User.Email`: Email details (optional, with `.Address`, `.IsPrimary`, `.IsVerified`)\n- `.User.Username`: The user's username (string, optional)\n\nClaims that fail to process (e.g., due to invalid templates) are logged and skipped,\nensuring JWT generation continues without interruption.\n\nExample usage in YAML configuration:\n```yaml\nsession:\n  lifespan: 24h\n  jwt_template:\n    claims:\n      role: \"user\"                               # Static value\n      user_email: \"{{.User.Email.Address}}\"      # Templated string\n      is_verified: \"{{.User.Email.IsVerified}}\"  # Boolean from user data\n      metadata:                                  # Nested map\n        source: \"hanko\"\n        greeting: \"Hello {{.User.Username}}\"\n      scopes:                                    # Slice with templated value\n        - \"read\"\n        - \"write\"\n        - \"{{if .User.Email.IsVerified}}admin{{else}}basic{{end}}\"\n```\n\nIn this example:\n- `role` is a static string (\"user\").\n- `user_email` dynamically inserts the user's email address.\n- `is_verified` inserts a boolean indicating email verification status.\n- `metadata` is a nested map with a static `source` and a templated `greeting`.\n- `scopes` is a slice combining static values and a conditional template.\n\nNotes:\n- Claims with the following keys will be ignored because they are currently added to the JWT\n  by default:\n    - sub\n    - iat\n    - exp\n    - aud\n    - iss\n    - email\n    - username\n    - session_id\n- Templates must be valid Go `text/template` syntax. Invalid templates are logged and ignored.\n- Boolean strings (\"true\" or \"false\") from templates are automatically converted to actual booleans.\n- Use conditionals (e.g., `{{if .User.Email}}`) to handle optional fields safely.\n\nFor more details on template syntax, see: https://pkg.go.dev/text/template"
@@ -1473,7 +1611,20 @@
         }
       },
       "additionalProperties": false,
-      "type": "object"
+      "type": "object",
+      "required": [
+        "allow_revocation",
+        "audience",
+        "acquire_ip_address",
+        "acquire_user_agent",
+        "cookie",
+        "enable_auth_token_header",
+        "issuer",
+        "lifespan",
+        "limit",
+        "show_on_profile",
+        "idle_timeout"
+      ]
     },
     "TOTP": {
       "properties": {
@@ -1583,7 +1734,15 @@
         }
       },
       "additionalProperties": false,
-      "type": "object"
+      "type": "object",
+      "required": [
+        "providers",
+        "custom_providers",
+        "redirect_url",
+        "error_redirect_url",
+        "default_redirect_url",
+        "allowed_redirect_urls"
+      ]
     },
     "ThirdPartyProvider": {
       "if": {
@@ -1625,6 +1784,13 @@
       },
       "additionalProperties": false,
       "type": "object",
+      "required": [
+        "allow_linking",
+        "client_id",
+        "enabled",
+        "prompt",
+        "secret"
+      ],
       "title": "provider"
     },
     "ThirdPartyProviders": {
@@ -1659,7 +1825,16 @@
         }
       },
       "additionalProperties": false,
-      "type": "object"
+      "type": "object",
+      "required": [
+        "apple",
+        "discord",
+        "github",
+        "google",
+        "linkedin",
+        "microsoft",
+        "facebook"
+      ]
     },
     "Username": {
       "properties": {
@@ -1700,7 +1875,16 @@
         }
       },
       "additionalProperties": false,
-      "type": "object"
+      "type": "object",
+      "required": [
+        "acquire_on_login",
+        "acquire_on_registration",
+        "enabled",
+        "max_length",
+        "min_length",
+        "optional",
+        "use_as_login_identifier"
+      ]
     },
     "WebauthnSettings": {
       "properties": {
@@ -1708,29 +1892,18 @@
           "$ref": "#/$defs/RelyingParty",
           "title": "relying_party"
         },
-        "timeout": {
-          "type": "integer",
-          "description": "Deprecated, use `timeouts` instead.",
-          "default": 60000
-        },
         "timeouts": {
           "$ref": "#/$defs/WebauthnTimeouts",
           "title": "timeouts",
           "description": "`timeouts` specifies the timeouts for passkey/WebAuthn registration and login."
-        },
-        "user_verification": {
-          "type": "string",
-          "enum": [
-            "required",
-            "preferred",
-            "discouraged"
-          ],
-          "description": "Deprecated, use `passkey.user_verification` instead",
-          "default": "preferred"
         }
       },
       "additionalProperties": false,
       "type": "object",
+      "required": [
+        "relying_party",
+        "timeouts"
+      ],
       "description": "WebauthnSettings defines the settings for the webauthn authentication mechanism"
     },
     "WebauthnTimeouts": {
@@ -1747,7 +1920,11 @@
         }
       },
       "additionalProperties": false,
-      "type": "object"
+      "type": "object",
+      "required": [
+        "registration",
+        "login"
+      ]
     },
     "Webhook": {
       "properties": {
@@ -1801,6 +1978,10 @@
       },
       "additionalProperties": false,
       "type": "object",
+      "required": [
+        "callback",
+        "events"
+      ],
       "title": "hooks"
     },
     "WebhookSettings": {
@@ -1822,7 +2003,12 @@
         }
       },
       "additionalProperties": false,
-      "type": "object"
+      "type": "object",
+      "required": [
+        "allow_time_expiration",
+        "enabled",
+        "hooks"
+      ]
     },
     "Webhooks": {
       "items": {

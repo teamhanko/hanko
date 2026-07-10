@@ -1,35 +1,35 @@
 package handler
 
 import (
-	"github.com/labstack/echo/v4"
-	"github.com/teamhanko/hanko/backend/v2/config"
-	hankoJwk "github.com/teamhanko/hanko/backend/v2/crypto/jwk"
-	dto "github.com/teamhanko/hanko/backend/v2/dto"
+	"fmt"
 	"net/http"
+
+	"github.com/labstack/echo/v4"
+	"github.com/teamhanko/hanko/backend/v3/context"
 )
 
-type WellKnownHandler struct {
-	jwkManager hankoJwk.Manager
-	config     dto.PublicConfig
-}
+type WellKnownHandler struct{}
 
-func NewWellKnownHandler(config config.Config, jwkManager hankoJwk.Manager) (*WellKnownHandler, error) {
-	return &WellKnownHandler{
-		config:     dto.FromConfig(config),
-		jwkManager: jwkManager,
-	}, nil
+func NewWellKnownHandler() (*WellKnownHandler, error) {
+	return &WellKnownHandler{}, nil
 }
 
 func (h *WellKnownHandler) GetPublicKeys(c echo.Context) error {
-	keys, err := h.jwkManager.GetPublicKeys()
+	tenant, err := context.GetTenant(c)
+	if err != nil {
+		return fmt.Errorf("failed to get tenant from context: %w", err)
+	}
+
+	jwkManager, err := context.GetJwkManager(c)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusInternalServerError, "failed to get JWK manager from context")
+	}
+
+	keys, err := jwkManager.GetPublicKeys(tenant.ID)
 	if err != nil {
 		return err
 	}
 
 	c.Response().Header().Add("Cache-Control", "max-age=600")
 	return c.JSON(http.StatusOK, keys)
-}
-
-func (h *WellKnownHandler) GetConfig(c echo.Context) error {
-	return c.JSON(http.StatusOK, h.config)
 }

@@ -9,15 +9,15 @@ import (
 	"github.com/lestrrat-go/jwx/v2/jwt"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
-	"github.com/teamhanko/hanko/backend/v2/config"
-	"github.com/teamhanko/hanko/backend/v2/dto"
-	"github.com/teamhanko/hanko/backend/v2/test"
+	"github.com/teamhanko/hanko/backend/v3/config"
+	"github.com/teamhanko/hanko/backend/v3/dto"
+	"github.com/teamhanko/hanko/backend/v3/test"
 )
 
 func TestNewGenerator(t *testing.T) {
 	manager := test.JwkManager{}
 	cfg := config.Config{}
-	sessionGenerator, err := NewManager(&manager, cfg)
+	sessionGenerator, err := NewManager(&manager, cfg.TenantConfig)
 	assert.NoError(t, err)
 	require.NotEmpty(t, sessionGenerator)
 }
@@ -25,7 +25,7 @@ func TestNewGenerator(t *testing.T) {
 func TestGenerator_Generate(t *testing.T) {
 	manager := test.JwkManager{}
 	cfg := config.Config{}
-	sessionGenerator, err := NewManager(&manager, cfg)
+	sessionGenerator, err := NewManager(&manager, cfg.TenantConfig)
 	assert.NoError(t, err)
 	require.NotEmpty(t, sessionGenerator)
 
@@ -34,7 +34,7 @@ func TestGenerator_Generate(t *testing.T) {
 
 	session, _, err := sessionGenerator.GenerateJWT(dto.UserJWT{
 		UserID: userId.String(),
-	})
+	}, uuid.FromStringOrNil(config.DefaultTenantID))
 	assert.NoError(t, err)
 	require.NotEmpty(t, session)
 }
@@ -43,14 +43,18 @@ func TestGenerator_Verify(t *testing.T) {
 	sessionLifespan := "5m"
 	manager := test.JwkManager{}
 	cfg := config.Config{
-		Session: config.Session{Lifespan: sessionLifespan},
+		TenantConfig: config.TenantConfig{
+			Session: config.Session{Lifespan: sessionLifespan},
+		},
 	}
-	sessionGenerator, err := NewManager(&manager, cfg)
+	sessionGenerator, err := NewManager(&manager, cfg.TenantConfig)
 	assert.NoError(t, err)
 	require.NotEmpty(t, sessionGenerator)
 
 	userId, err := uuid.NewV4()
 	assert.NoError(t, err)
+
+	tenantID := uuid.FromStringOrNil(config.DefaultTenantID)
 
 	testEmail := "lorem@ipsum.local"
 
@@ -63,11 +67,11 @@ func TestGenerator_Verify(t *testing.T) {
 	session, _, err := sessionGenerator.GenerateJWT(dto.UserJWT{
 		UserID: userId.String(),
 		Email:  emailDto,
-	})
+	}, tenantID)
 	assert.NoError(t, err)
 	require.NotEmpty(t, session)
 
-	token, err := sessionGenerator.Verify(session)
+	token, err := sessionGenerator.Verify(session, tenantID)
 	assert.NoError(t, err)
 	require.NotEmpty(t, token)
 	assert.Equal(t, token.Subject(), userId.String())
@@ -94,24 +98,26 @@ func TestGenerator_Verify(t *testing.T) {
 func TestManager_GenerateJWT_IssAndAud(t *testing.T) {
 	manager := test.JwkManager{}
 	cfg := config.Config{
-		Session: config.Session{
-			Issuer:   "hanko",
-			Lifespan: "5m",
-		},
-		Webauthn: config.WebauthnSettings{
-			RelyingParty: config.RelyingParty{
-				Id: "test.hanko.io",
+		TenantConfig: config.TenantConfig{
+			Session: config.Session{
+				Issuer:   "hanko",
+				Lifespan: "5m",
+			},
+			Webauthn: config.WebauthnSettings{
+				RelyingParty: config.RelyingParty{
+					Id: "test.hanko.io",
+				},
 			},
 		},
 	}
-	sessionGenerator, err := NewManager(&manager, cfg)
+	sessionGenerator, err := NewManager(&manager, cfg.TenantConfig)
 	assert.NoError(t, err)
 	require.NotEmpty(t, sessionGenerator)
 
 	userId, _ := uuid.NewV4()
 	j, _, err := sessionGenerator.GenerateJWT(dto.UserJWT{
 		UserID: userId.String(),
-	})
+	}, uuid.FromStringOrNil(config.DefaultTenantID))
 	assert.NoError(t, err)
 
 	token, err := jwt.ParseString(j, jwt.WithVerify(false))
@@ -123,28 +129,30 @@ func TestManager_GenerateJWT_IssAndAud(t *testing.T) {
 func TestManager_GenerateJWT_AdditionalAudiences(t *testing.T) {
 	manager := test.JwkManager{}
 	cfg := config.Config{
-		Session: config.Session{
-			Issuer:   "hanko",
-			Lifespan: "5m",
-			Audience: []string{
-				"additional.hanko.io",
-				"anotherOne",
+		TenantConfig: config.TenantConfig{
+			Session: config.Session{
+				Issuer:   "hanko",
+				Lifespan: "5m",
+				Audience: []string{
+					"additional.hanko.io",
+					"anotherOne",
+				},
 			},
-		},
-		Webauthn: config.WebauthnSettings{
-			RelyingParty: config.RelyingParty{
-				Id: "test.hanko.io",
+			Webauthn: config.WebauthnSettings{
+				RelyingParty: config.RelyingParty{
+					Id: "test.hanko.io",
+				},
 			},
 		},
 	}
-	sessionGenerator, err := NewManager(&manager, cfg)
+	sessionGenerator, err := NewManager(&manager, cfg.TenantConfig)
 	assert.NoError(t, err)
 	require.NotEmpty(t, sessionGenerator)
 
 	userId, _ := uuid.NewV4()
 	j, _, err := sessionGenerator.GenerateJWT(dto.UserJWT{
 		UserID: userId.String(),
-	})
+	}, uuid.FromStringOrNil(config.DefaultTenantID))
 	assert.NoError(t, err)
 
 	token, err := jwt.ParseString(j, jwt.WithVerify(false))
@@ -165,7 +173,9 @@ func Test_GenerateJWT_SessionID(t *testing.T) {
 		{
 			name: "token has a session id claim",
 			config: config.Config{
-				Session: config.Session{Lifespan: "5m"},
+				TenantConfig: config.TenantConfig{
+					Session: config.Session{Lifespan: "5m"},
+				},
 			},
 			tokenShouldHaveSessionID: true,
 		},
@@ -173,14 +183,14 @@ func Test_GenerateJWT_SessionID(t *testing.T) {
 	for _, testData := range tests {
 		t.Run(testData.name, func(t *testing.T) {
 			jwkManager := test.JwkManager{}
-			sessionGenerator, err := NewManager(&jwkManager, testData.config)
+			sessionGenerator, err := NewManager(&jwkManager, testData.config.TenantConfig)
 			assert.NoError(t, err)
 			require.NotEmpty(t, sessionGenerator)
 
 			userId, _ := uuid.NewV4()
 			tokenString, _, err := sessionGenerator.GenerateJWT(dto.UserJWT{
 				UserID: userId.String(),
-			})
+			}, uuid.FromStringOrNil(config.DefaultTenantID))
 			assert.NoError(t, err)
 
 			token, err := jwt.ParseString(tokenString, jwt.WithVerify(false))
@@ -202,7 +212,7 @@ func Test_GenerateJWT_SessionID(t *testing.T) {
 func TestGenerator_Verify_Error(t *testing.T) {
 	manager := test.JwkManager{}
 	cfg := config.Config{}
-	sessionGenerator, err := NewManager(&manager, cfg)
+	sessionGenerator, err := NewManager(&manager, cfg.TenantConfig)
 	assert.NoError(t, err)
 	require.NotEmpty(t, sessionGenerator)
 
@@ -223,7 +233,7 @@ func TestGenerator_Verify_Error(t *testing.T) {
 
 	for _, verifyTest := range tests {
 		t.Run(verifyTest.Name, func(t *testing.T) {
-			_, err := sessionGenerator.Verify(verifyTest.Input)
+			_, err := sessionGenerator.Verify(verifyTest.Input, uuid.FromStringOrNil(config.DefaultTenantID))
 			assert.Error(t, err)
 		})
 	}
@@ -232,7 +242,7 @@ func TestGenerator_Verify_Error(t *testing.T) {
 func TestGenerator_DeleteCookie(t *testing.T) {
 	manager := test.JwkManager{}
 	cfg := config.Config{}
-	sessionGenerator, err := NewManager(&manager, cfg)
+	sessionGenerator, err := NewManager(&manager, cfg.TenantConfig)
 	assert.NoError(t, err)
 	require.NotEmpty(t, sessionGenerator)
 

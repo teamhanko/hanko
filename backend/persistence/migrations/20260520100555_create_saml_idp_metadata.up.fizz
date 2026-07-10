@@ -1,0 +1,17 @@
+create_table("saml_idp_metadata") {
+  t.Column("id", "uuid", {primary: true})
+  t.Column("tenant_id", "uuid", {"null": false})
+  t.Column("provider_id", "uuid", {"null": false})
+  t.Column("raw_metadata_xml", "text", {"null": false})
+  t.Column("issuer", "string", {"null": false})
+  t.Column("sso_url", "string", {"null": true})
+  t.Column("certificates_pem", "text", {"null": false})
+  t.Column("last_fetched_at", "timestamp", {"null": false})
+
+  t.Timestamps()
+
+  t.ForeignKey("tenant_id", {"tenants": ["id"]}, {"on_delete": "cascade", "on_update": "cascade"})
+  t.ForeignKey("provider_id", {"saml_providers": ["id"]}, {"on_delete": "cascade", "on_update": "cascade"})
+  t.Index(["tenant_id", "provider_id"], {"unique": true})
+}
+

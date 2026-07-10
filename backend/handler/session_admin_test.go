@@ -3,13 +3,15 @@ package handler
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/gofrs/uuid"
-	"github.com/stretchr/testify/suite"
-	"github.com/teamhanko/hanko/backend/v2/dto/admin"
-	"github.com/teamhanko/hanko/backend/v2/test"
 	"net/http"
 	"net/http/httptest"
 	"testing"
+
+	"github.com/gofrs/uuid"
+	"github.com/stretchr/testify/suite"
+	"github.com/teamhanko/hanko/backend/v3/config"
+	"github.com/teamhanko/hanko/backend/v3/dto/admin"
+	"github.com/teamhanko/hanko/backend/v3/test"
 )
 
 func TestSessionAdminSuite(t *testing.T) {
@@ -29,7 +31,11 @@ func (s *sessionAdminSuite) TestSessionAdminHandler_List() {
 	err := s.LoadFixtures("../test/fixtures/sessions")
 	s.Require().NoError(err)
 
-	e := NewAdminRouter(&test.DefaultConfig, s.Storage, nil)
+	cfg := test.DefaultConfig
+	err = cfg.PostProcess()
+	s.Require().NoError(err)
+
+	e := NewAdminRouter(&cfg, s.Storage, nil)
 
 	tests := []struct {
 		name               string
@@ -102,7 +108,11 @@ func (s *sessionAdminSuite) TestSessionAdminHandler_Delete() {
 	err := s.LoadFixtures("../test/fixtures/sessions")
 	s.Require().NoError(err)
 
-	e := NewAdminRouter(&test.DefaultConfig, s.Storage, nil)
+	cfg := test.DefaultConfig
+	err = cfg.PostProcess()
+	s.Require().NoError(err)
+
+	e := NewAdminRouter(&cfg, s.Storage, nil)
 
 	tests := []struct {
 		name               string
@@ -172,7 +182,10 @@ func (s *sessionAdminSuite) TestSessionAdminHandler_Delete() {
 
 			s.Equal(currentTest.expectedStatusCode, rec.Code)
 			if http.StatusNoContent == rec.Code {
-				credentials, err := s.Storage.GetSessionPersister().ListActive(uuid.FromStringOrNil(currentTest.userID))
+				credentials, err := s.Storage.GetSessionPersister().ListActive(
+					uuid.FromStringOrNil(currentTest.userID),
+					uuid.FromStringOrNil(config.DefaultTenantID),
+				)
 				s.Require().NoError(err)
 				s.Equal(currentTest.expectedCount, len(credentials))
 			}

@@ -29,6 +29,7 @@ type WebauthnCredential struct {
 	MFAOnly         bool                          `db:"mfa_only" json:"mfa_only"`
 	UserHandleID    *uuid.UUID                    `db:"user_handle_id" json:"-"`
 	UserHandle      *WebauthnCredentialUserHandle `belongs_to:"webauthn_credential_user_handle" fk_id:"webauthn_credential_user_handle_fkey" json:"user_handle,omitempty"`
+	TenantID        uuid.UUID                     `db:"tenant_id"`
 }
 
 type WebauthnCredentials []WebauthnCredential

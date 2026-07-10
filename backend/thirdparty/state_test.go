@@ -1,23 +1,25 @@
 package thirdparty
 
 import (
-	"github.com/stretchr/testify/assert"
-	"github.com/stretchr/testify/require"
-	"github.com/teamhanko/hanko/backend/v2/config"
 	"strings"
 	"testing"
 	"time"
+
+	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
+	"github.com/teamhanko/hanko/backend/v3/config"
 )
 
 func TestThirdParty_GenerateState(t *testing.T) {
-	cfg := &config.Config{
-		Secrets: config.Secrets{Keys: []string{"thirty-two-byte-long-test-secret"}},
-		ThirdParty: config.ThirdParty{
-			ErrorRedirectURL: "https://example.com/error",
-		},
-	}
+	cfg := config.Config{
+		ApplicationConfig: config.ApplicationConfig{SecretKeys: []string{"thirty-two-byte-long-test-secret"}},
+		TenantConfig: config.TenantConfig{
+			ThirdParty: config.ThirdParty{
+				ErrorRedirectURL: "https://example.com/error",
+			},
+		}}
 
-	state, err := GenerateState(cfg, "test-provider", "https://example.com")
+	state, err := GenerateState(&cfg, "test-provider", "https://example.com")
 	assert.NoError(t, err)
 	assert.NotNil(t, state)
 }
@@ -53,11 +55,14 @@ func TestThirdParty_GenerateState_Error(t *testing.T) {
 	}
 	for _, testData := range tests {
 		t.Run(testData.name, func(t *testing.T) {
-			cfg := &config.Config{
-				Secrets:    config.Secrets{Keys: []string{testData.secret}},
-				ThirdParty: config.ThirdParty{ErrorRedirectURL: testData.errorRedirectUrl},
+			cfg := config.Config{
+				ApplicationConfig: config.ApplicationConfig{
+					SecretKeys: []string{testData.secret}},
+				TenantConfig: config.TenantConfig{
+					ThirdParty: config.ThirdParty{ErrorRedirectURL: testData.errorRedirectUrl},
+				},
 			}
-			_, err := GenerateState(cfg, testData.provider, testData.redirectTo)
+			_, err := GenerateState(&cfg, testData.provider, testData.redirectTo)
 			assert.NotNil(t, err)
 			assert.True(t, strings.Contains(err.Error(), testData.expectedError))
 		})
@@ -65,14 +70,18 @@ func TestThirdParty_GenerateState_Error(t *testing.T) {
 }
 
 func TestThirdParty_VerifyState(t *testing.T) {
-	cfg := &config.Config{
-		Secrets:    config.Secrets{Keys: []string{"thirty-two-byte-long-test-secret"}},
-		ThirdParty: config.ThirdParty{ErrorRedirectURL: "https://example.com/error"},
+	cfg := config.Config{
+		ApplicationConfig: config.ApplicationConfig{
+			SecretKeys: []string{"thirty-two-byte-long-test-secret"},
+		},
+		TenantConfig: config.TenantConfig{
+			ThirdParty: config.ThirdParty{ErrorRedirectURL: "https://example.com/error"},
+		},
 	}
 
 	state := "HmD7wlGQ7bF_4MGtmFRQuuSGTshHETDs4RQa64JAx-6EsmNsUjaQwYNOnjWUs6qIOuQMBTKapDGVXVCk00pX2vSS-x-WVqdzZ8KyeQ-9IHu2mwb-AeRbb2QPE-GFnvp2wrbCskKvWvtOfipyeTsnYY5iM90DxssaUtvKnawaB5_MNNekfKyiOeepIkKjUfSJ6-yTR7AAA4B9jwOfDRB4zdV8kKPVJlGVBJFosL11YWJaLxRGQR69nah3Jf9Z6bSAGXxWp24PoBYhij-dH4JyDCcU7D-NeT2A8qFFFjQ1m28C8fsr6zqb4w=="
 
-	validState, err := VerifyState(cfg, state, state)
+	validState, err := VerifyState(cfg.ApplicationConfig, state, state)
 	require.NoError(t, err)
 	require.NotNil(t, validState)
 	require.Equal(t, "test-provider", validState.Provider)
@@ -113,8 +122,8 @@ func TestThirdParty_VerifyState_Error(t *testing.T) {
 	}
 	for _, testData := range tests {
 		t.Run(testData.name, func(t *testing.T) {
-			cfg := &config.Config{
-				Secrets: config.Secrets{Keys: []string{"thirty-two-byte-long-test-secret"}},
+			cfg := config.ApplicationConfig{
+				SecretKeys: []string{"thirty-two-byte-long-test-secret"},
 			}
 			_, err := VerifyState(cfg, testData.state, testData.expectedState)
 			assert.NotNil(t, err)

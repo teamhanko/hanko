@@ -2,12 +2,13 @@ package profile
 
 import (
 	"fmt"
-	auditlog "github.com/teamhanko/hanko/backend/v2/audit_log"
-	"github.com/teamhanko/hanko/backend/v2/flow_api/flow/shared"
-	"github.com/teamhanko/hanko/backend/v2/flowpilot"
-	"github.com/teamhanko/hanko/backend/v2/persistence/models"
-	"github.com/teamhanko/hanko/backend/v2/webhooks/events"
-	"github.com/teamhanko/hanko/backend/v2/webhooks/utils"
+
+	auditlog "github.com/teamhanko/hanko/backend/v3/audit_log"
+	"github.com/teamhanko/hanko/backend/v3/flow_api/flow/shared"
+	"github.com/teamhanko/hanko/backend/v3/flowpilot"
+	"github.com/teamhanko/hanko/backend/v3/persistence/models"
+	"github.com/teamhanko/hanko/backend/v3/webhooks/events"
+	"github.com/teamhanko/hanko/backend/v3/webhooks/utils"
 )
 
 type UsernameDelete struct {
@@ -67,6 +68,7 @@ func (a UsernameDelete) Execute(c flowpilot.ExecutionContext) error {
 		models.AuditLogUsernameDeleted,
 		&models.User{ID: userModel.ID},
 		nil,
+		deps.TenantID,
 		auditlog.Detail("username", *deletedUsername),
 		auditlog.Detail("flow_id", c.GetFlowID()))
 

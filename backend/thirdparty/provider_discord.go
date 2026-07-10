@@ -5,7 +5,7 @@ import (
 	"errors"
 	"fmt"
 
-	"github.com/teamhanko/hanko/backend/v2/config"
+	"github.com/teamhanko/hanko/backend/v3/config"
 	"golang.org/x/oauth2"
 )
 
@@ -65,13 +65,13 @@ func (p discordProvider) AuthCodeURL(state string, opts ...oauth2.AuthCodeOption
 	return p.oauthConfig.AuthCodeURL(state, opts...)
 }
 
-func (g discordProvider) GetOAuthToken(code string, opts ...oauth2.AuthCodeOption) (*oauth2.Token, error) {
-	return g.oauthConfig.Exchange(context.Background(), code, opts...)
+func (g discordProvider) GetOAuthToken(ctx context.Context, code string, opts ...oauth2.AuthCodeOption) (*oauth2.Token, error) {
+	return g.oauthConfig.Exchange(ctx, code, opts...)
 }
 
-func (g discordProvider) GetUserData(token *oauth2.Token) (*UserData, error) {
+func (g discordProvider) GetUserData(ctx context.Context, token *oauth2.Token) (*UserData, error) {
 	var user DiscordUser
-	if err := makeRequest(token, g.oauthConfig, DiscordUserInfoEndpoint, &user); err != nil {
+	if err := makeRequest(ctx, token, g.oauthConfig, DiscordUserInfoEndpoint, &user); err != nil {
 		return nil, err
 	}
 

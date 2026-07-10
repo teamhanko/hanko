@@ -2,9 +2,9 @@ package device_trust
 
 import (
 	"github.com/gofrs/uuid"
-	"github.com/teamhanko/hanko/backend/v2/flow_api/flow/shared"
-	"github.com/teamhanko/hanko/backend/v2/flow_api/services"
-	"github.com/teamhanko/hanko/backend/v2/flowpilot"
+	"github.com/teamhanko/hanko/backend/v3/flow_api/flow/shared"
+	"github.com/teamhanko/hanko/backend/v3/flow_api/services"
+	"github.com/teamhanko/hanko/backend/v3/flowpilot"
 )
 
 type ScheduleTrustDeviceState struct {
@@ -31,6 +31,7 @@ func (h ScheduleTrustDeviceState) Execute(c flowpilot.HookExecutionContext) erro
 		Persister:   deps.Persister.GetTrustedDevicePersisterWithConnection(deps.Tx),
 		Cfg:         deps.Cfg,
 		HttpContext: deps.HttpContext,
+		TenantID:    deps.TenantID,
 	}
 
 	userID := uuid.FromStringOrNil(c.Stash().Get(shared.StashPathUserID).String())

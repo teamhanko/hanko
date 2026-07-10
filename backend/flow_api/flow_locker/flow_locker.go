@@ -5,7 +5,7 @@ import (
 	"fmt"
 
 	"github.com/gofrs/uuid"
-	"github.com/teamhanko/hanko/backend/v2/config"
+	"github.com/teamhanko/hanko/backend/v3/config"
 )
 
 // FlowLocker provides an interface for locking flow execution by flow ID

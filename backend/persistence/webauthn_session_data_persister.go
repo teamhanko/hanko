@@ -4,15 +4,16 @@ import (
 	"database/sql"
 	"errors"
 	"fmt"
+	"time"
+
 	"github.com/gobuffalo/pop/v6"
 	"github.com/gofrs/uuid"
-	"github.com/teamhanko/hanko/backend/v2/persistence/models"
-	"time"
+	"github.com/teamhanko/hanko/backend/v3/persistence/models"
 )
 
 type WebauthnSessionDataPersister interface {
-	Get(id uuid.UUID) (*models.WebauthnSessionData, error)
-	GetByChallenge(challenge string) (*models.WebauthnSessionData, error)
+	Get(id uuid.UUID, tenantID uuid.UUID) (*models.WebauthnSessionData, error)
+	GetByChallenge(challenge string, tenantID uuid.UUID) (*models.WebauthnSessionData, error)
 	Create(sessionData models.WebauthnSessionData) error
 	Update(sessionData models.WebauthnSessionData) error
 	Delete(sessionData models.WebauthnSessionData) error
@@ -27,9 +28,11 @@ func NewWebauthnSessionDataPersister(db *pop.Connection) WebauthnSessionDataPers
 	return &webauthnSessionDataPersister{db: db}
 }
 
-func (p *webauthnSessionDataPersister) Get(id uuid.UUID) (*models.WebauthnSessionData, error) {
+func (p *webauthnSessionDataPersister) Get(id uuid.UUID, tenantID uuid.UUID) (*models.WebauthnSessionData, error) {
 	sessionData := models.WebauthnSessionData{}
-	err := p.db.Eager().Find(&sessionData, id)
+	query := p.db.Eager().Q()
+	query = query.Where("webauthn_session_data.tenant_id = ?", tenantID)
+	err := query.Find(&sessionData, id)
 	if err != nil && errors.Is(err, sql.ErrNoRows) {
 		return nil, nil
 	}
@@ -40,9 +43,11 @@ func (p *webauthnSessionDataPersister) Get(id uuid.UUID) (*models.WebauthnSessio
 	return &sessionData, nil
 }
 
-func (p *webauthnSessionDataPersister) GetByChallenge(challenge string) (*models.WebauthnSessionData, error) {
+func (p *webauthnSessionDataPersister) GetByChallenge(challenge string, tenantID uuid.UUID) (*models.WebauthnSessionData, error) {
 	var sessionData []models.WebauthnSessionData
-	err := p.db.Eager().Where("challenge = ?", challenge).All(&sessionData)
+	query := p.db.Eager().Where("challenge = ?", challenge)
+	query = query.Where("webauthn_session_data.tenant_id = ?", tenantID)
+	err := query.All(&sessionData)
 	if err != nil && errors.Is(err, sql.ErrNoRows) {
 		return nil, nil
 	}
@@ -83,13 +88,12 @@ func (p *webauthnSessionDataPersister) Update(sessionData models.WebauthnSession
 	return nil
 }
 
-func (p *webauthnSessionDataPersister) FindExpired(cutoffTime time.Time, page, perPage int) ([]models.WebauthnSessionData, error) {
+func (p *webauthnSessionDataPersister) FindExpired(cutoffTime time.Time, page, perPage int, tenantID uuid.UUID) ([]models.WebauthnSessionData, error) {
 	var items []models.WebauthnSessionData
 
-	query := p.db.
-		Where("expires_at < ?", cutoffTime).
-		Select("id").
-		Paginate(page, perPage)
+	query := p.db.Where("expires_at < ?", cutoffTime)
+	query = query.Where("tenant_id = ?", tenantID)
+	query = query.Select("id").Paginate(page, perPage)
 	err := query.All(&items)
 
 	return items, err

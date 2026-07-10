@@ -3,12 +3,13 @@ package credential_usage
 import (
 	"errors"
 	"fmt"
+
 	"github.com/gofrs/uuid"
-	auditlog "github.com/teamhanko/hanko/backend/v2/audit_log"
-	"github.com/teamhanko/hanko/backend/v2/flow_api/flow/shared"
-	"github.com/teamhanko/hanko/backend/v2/flow_api/services"
-	"github.com/teamhanko/hanko/backend/v2/flowpilot"
-	"github.com/teamhanko/hanko/backend/v2/persistence/models"
+	auditlog "github.com/teamhanko/hanko/backend/v3/audit_log"
+	"github.com/teamhanko/hanko/backend/v3/flow_api/flow/shared"
+	"github.com/teamhanko/hanko/backend/v3/flow_api/services"
+	"github.com/teamhanko/hanko/backend/v3/flowpilot"
+	"github.com/teamhanko/hanko/backend/v3/persistence/models"
 )
 
 type WebauthnVerifyAssertionResponse struct {
@@ -52,6 +53,8 @@ func (a WebauthnVerifyAssertionResponse) Execute(c flowpilot.ExecutionContext) e
 		SessionDataID:     sessionDataID,
 		AssertionResponse: assertionResponse,
 		IsMFA:             isMFA,
+		TenantID:          deps.TenantID,
+		Cfg:               deps.Cfg.TenantConfig,
 	}
 
 	userModel, err := deps.WebauthnService.VerifyAssertionResponse(params)
@@ -71,6 +74,7 @@ func (a WebauthnVerifyAssertionResponse) Execute(c flowpilot.ExecutionContext) e
 				models.AuditLogLoginFailure,
 				userModel,
 				err,
+				deps.TenantID,
 				auditlog.Detail("login_method", "passkey"),
 				auditlog.Detail("flow_id", c.GetFlowID()))
 
@@ -100,6 +104,7 @@ func (a WebauthnVerifyAssertionResponse) Execute(c flowpilot.ExecutionContext) e
 			models.AuditLogLoginFailure,
 			userModel,
 			err,
+			deps.TenantID,
 			auditlog.Detail("flow_id", c.GetFlowID()))
 		if err != nil {
 			return fmt.Errorf("could not create audit log: %w", err)

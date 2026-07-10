@@ -5,7 +5,7 @@ import (
 	"errors"
 	"strconv"
 
-	"github.com/teamhanko/hanko/backend/v2/config"
+	"github.com/teamhanko/hanko/backend/v3/config"
 	"golang.org/x/oauth2"
 )
 
@@ -72,15 +72,15 @@ func (g githubProvider) AuthCodeURL(state string, opts ...oauth2.AuthCodeOption)
 	return g.oauthConfig.AuthCodeURL(state, opts...)
 }
 
-func (g githubProvider) GetOAuthToken(code string, opts ...oauth2.AuthCodeOption) (*oauth2.Token, error) {
-	return g.oauthConfig.Exchange(context.Background(), code, opts...)
+func (g githubProvider) GetOAuthToken(ctx context.Context, code string, opts ...oauth2.AuthCodeOption) (*oauth2.Token, error) {
+	return g.oauthConfig.Exchange(ctx, code, opts...)
 }
 
-func (g githubProvider) GetUserData(token *oauth2.Token) (*UserData, error) {
+func (g githubProvider) GetUserData(ctx context.Context, token *oauth2.Token) (*UserData, error) {
 	var user GithubUser
 
 	// https://docs.github.com/en/rest/users/users?apiVersion=2022-11-28#get-the-authenticated-user
-	if err := makeRequest(token, g.oauthConfig, GithubUserInfoEndpoint, &user); err != nil {
+	if err := makeRequest(ctx, token, g.oauthConfig, GithubUserInfoEndpoint, &user); err != nil {
 		return nil, err
 	}
 
@@ -98,7 +98,7 @@ func (g githubProvider) GetUserData(token *oauth2.Token) (*UserData, error) {
 	// The user data 'email' value is the user's publicly visible email address. It is possible that the user
 	// chose to not make this email public, hence the dedicated call to the 'emails' endpoint.
 	// https://docs.github.com/en/rest/users/emails?apiVersion=2022-11-28#list-email-addresses-for-the-authenticated-user
-	if err := makeRequest(token, g.oauthConfig, GitHubEmailsEndpoint, &emails); err != nil {
+	if err := makeRequest(ctx, token, g.oauthConfig, GitHubEmailsEndpoint, &emails); err != nil {
 		return nil, err
 	}
 

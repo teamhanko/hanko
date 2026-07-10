@@ -13,6 +13,7 @@ type WebauthnCredentialTransport struct {
 	Name                 string              `db:"name"`
 	WebauthnCredentialID string              `db:"webauthn_credential_id"`
 	WebauthnCredential   *WebauthnCredential `belongs_to:"webauthn_credential"`
+	TenantID             uuid.UUID           `db:"tenant_id"`
 }
 
 type Transports []WebauthnCredentialTransport

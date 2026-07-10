@@ -2,10 +2,10 @@
   "name": "example-react",
   "private": true,
   "dependencies": {
-    "@teamhanko/hanko-elements": "^2.6.0",
+    "@teamhanko/hanko-elements": "^3.0.0",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
-    "react-router-dom": "7.14.0"
+    "react-router-dom": "7.17.0"
   },
   "scripts": {
     "start": "vite --port 8888 --host",

@@ -4,12 +4,14 @@ import (
 	"database/sql"
 	"errors"
 	"fmt"
+
 	"github.com/gobuffalo/pop/v6"
-	"github.com/teamhanko/hanko/backend/v2/persistence/models"
+	"github.com/gofrs/uuid"
+	"github.com/teamhanko/hanko/backend/v3/persistence/models"
 )
 
 type WebauthnCredentialUserHandlePersister interface {
-	GetByHandle(string) (*models.WebauthnCredentialUserHandle, error)
+	GetByHandle(handle string, tenantID uuid.UUID) (*models.WebauthnCredentialUserHandle, error)
 }
 
 func NewWebauthnCredentialUserHandlePersister(db *pop.Connection) WebauthnCredentialUserHandlePersister {
@@ -20,9 +22,11 @@ type webauthnCredentialUserHandlePersister struct {
 	db *pop.Connection
 }
 
-func (p *webauthnCredentialUserHandlePersister) GetByHandle(handle string) (*models.WebauthnCredentialUserHandle, error) {
+func (p *webauthnCredentialUserHandlePersister) GetByHandle(handle string, tenantID uuid.UUID) (*models.WebauthnCredentialUserHandle, error) {
 	handleModel := models.WebauthnCredentialUserHandle{}
-	err := p.db.Where("handle = ?", handle).First(&handleModel)
+	query := p.db.Where("handle = ?", handle)
+	query = query.Where("tenant_id = ?", tenantID)
+	err := query.First(&handleModel)
 	if err != nil && errors.Is(err, sql.ErrNoRows) {
 		return nil, nil
 	}

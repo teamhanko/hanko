@@ -2,11 +2,12 @@ package login
 
 import (
 	"fmt"
+
 	"github.com/gofrs/uuid"
-	"github.com/teamhanko/hanko/backend/v2/flow_api/flow/device_trust"
-	"github.com/teamhanko/hanko/backend/v2/flow_api/flow/shared"
-	"github.com/teamhanko/hanko/backend/v2/flow_api/services"
-	"github.com/teamhanko/hanko/backend/v2/flowpilot"
+	"github.com/teamhanko/hanko/backend/v3/flow_api/flow/device_trust"
+	"github.com/teamhanko/hanko/backend/v3/flow_api/flow/shared"
+	"github.com/teamhanko/hanko/backend/v3/flow_api/services"
+	"github.com/teamhanko/hanko/backend/v3/flowpilot"
 )
 
 type ScheduleOnboardingStates struct {
@@ -61,6 +62,7 @@ func (h ScheduleOnboardingStates) determineMFAUsageStates(c flowpilot.HookExecut
 		Persister:   deps.Persister.GetTrustedDevicePersisterWithConnection(deps.Tx),
 		Cfg:         deps.Cfg,
 		HttpContext: deps.HttpContext,
+		TenantID:    deps.TenantID,
 	}
 
 	userID := uuid.FromStringOrNil(c.Stash().Get(shared.StashPathUserID).String())

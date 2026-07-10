@@ -2,13 +2,14 @@ package user_details
 
 import (
 	"fmt"
+
 	"github.com/gofrs/uuid"
-	"github.com/teamhanko/hanko/backend/v2/flow_api/flow/shared"
-	"github.com/teamhanko/hanko/backend/v2/flow_api/services"
-	"github.com/teamhanko/hanko/backend/v2/flowpilot"
-	"github.com/teamhanko/hanko/backend/v2/persistence/models"
-	"github.com/teamhanko/hanko/backend/v2/webhooks/events"
-	"github.com/teamhanko/hanko/backend/v2/webhooks/utils"
+	"github.com/teamhanko/hanko/backend/v3/flow_api/flow/shared"
+	"github.com/teamhanko/hanko/backend/v3/flow_api/services"
+	"github.com/teamhanko/hanko/backend/v3/flowpilot"
+	"github.com/teamhanko/hanko/backend/v3/persistence/models"
+	"github.com/teamhanko/hanko/backend/v3/webhooks/events"
+	"github.com/teamhanko/hanko/backend/v3/webhooks/utils"
 )
 
 type UsernameSet struct {
@@ -49,7 +50,7 @@ func (a UsernameSet) Execute(c flowpilot.ExecutionContext) error {
 		return c.Error(flowpilot.ErrorFormDataInvalid)
 	}
 
-	duplicateUsername, err := deps.Persister.GetUsernamePersisterWithConnection(deps.Tx).GetByName(username)
+	duplicateUsername, err := deps.Persister.GetUsernamePersisterWithConnection(deps.Tx).GetByName(username, deps.TenantID)
 	if err != nil {
 		return fmt.Errorf("failed to get user from db: %w", err)
 	}
@@ -59,7 +60,7 @@ func (a UsernameSet) Execute(c flowpilot.ExecutionContext) error {
 		return c.Error(flowpilot.ErrorFormDataInvalid)
 	}
 
-	usernameModel := models.NewUsername(userID, username)
+	usernameModel := models.NewUsername(userID, username, deps.TenantID)
 	err = deps.Persister.GetUsernamePersisterWithConnection(deps.Tx).Create(*usernameModel)
 	if err != nil {
 		return fmt.Errorf("failed to create username: %w", err)
