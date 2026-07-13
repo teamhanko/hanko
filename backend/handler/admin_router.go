@@ -10,11 +10,17 @@ import (
 	hankoMiddleware "github.com/teamhanko/hanko/backend/v3/middleware"
 	"github.com/teamhanko/hanko/backend/v3/persistence"
 	"github.com/teamhanko/hanko/backend/v3/template"
+	"github.com/teamhanko/hanko/backend/v3/utils"
 )
 
 func NewAdminRouter(cfg *config.Config, persister persistence.Persister, prometheus echo.MiddlewareFunc) *echo.Echo {
 	e := echo.New()
 	e.Renderer = template.NewTemplateRenderer()
+
+	if err := utils.ConfigureIPExtractor(e, cfg.Server.IP); err != nil {
+		panic(err)
+	}
+
 	e.HideBanner = true
 	g := e.Group("")
 
