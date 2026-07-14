@@ -5,6 +5,7 @@ import (
 	"net/url"
 	"strings"
 
+	"github.com/gobwas/glob"
 	"github.com/teamhanko/hanko/backend/v3/config"
 )
 
@@ -89,13 +90,14 @@ func IsAllowedRedirect(config config.ThirdParty, redirectTo string) bool {
 //
 //	http://localhost:8888**
 //
-// Instead, we extract the scheme and authority/host part textually, then apply
-// conservative host matching rules:
-//
-//   - exact host patterns require an exact destination host;
-//   - patterns starting with "*." allow real subdomains only;
-//   - partial host wildcards like "127.0.0.1**" do not allow
-//     "127.0.0.1.evil.com".
+// Instead, we extract the scheme and authority/host part textually, then
+// delegate to matchesHostPatternSafely, which applies conservative host
+// matching rules: exact literal hosts require an exact match; patterns whose
+// wildcards are all pinned down by literal text (e.g. "*.example.com",
+// "foo.*.bar.com", "192.168.*.*") are matched as a full glob; and patterns
+// with an unanchored trailing wildcard (e.g. "127.0.0.1**") fall back to an
+// exact match on the static text before the first wildcard, so that
+// "127.0.0.1**" does not allow "127.0.0.1.evil.com".
 //
 // The original glob match is still responsible for path/query matching and
 // broader legacy pattern compatibility. This helper only adds a safe boundary
@@ -240,84 +242,94 @@ func splitAuthorityPattern(authorityPattern string) (hostPattern string, portPat
 // matchesHostPatternSafely decides whether the actual parsed destination host
 // is allowed by the configured host pattern.
 //
-// The key security rule is: partial host prefix matches are not enough.
+// A host pattern is handled using one of three rules:
 //
-// For example, if the configured host pattern is:
+//  1. No wildcard characters at all: the actual host must match exactly.
 //
-//	127.0.0.1**
+//  2. The pattern's last "**" is not pinned down by literal text after it
+//     (nothing follows, or only further wildcard characters follow, e.g.
+//     "127.0.0.1**", "127.0.0.1**[a-z]", "127.0.0.1**.*"). Such a "**"
+//     conveys no fixed, unspoofable boundary, so falling back to a full glob
+//     match would let an attacker smuggle in their own apex domain:
 //
-// its static prefix is:
+//     allowed pattern: 127.0.0.1**
+//     attacker host:   127.0.0.1.evil.com
 //
-//	127.0.0.1
+//     Instead we require an exact match on the static text before the first
+//     wildcard character. (A bare trailing "**" with nothing after it, e.g.
+//     "*.example.com**", is first stripped and re-evaluated as the pattern
+//     that remains, so this fallback only actually triggers when a further
+//     wildcard character trails the "**" itself.)
 //
-// The only accepted actual host is exactly:
-//
-//	127.0.0.1
-//
-// The following is rejected:
-//
-//	127.0.0.1.evil.com
-//
-// because that is a different DNS host.
-//
-// Subdomain matching is allowed only for explicit wildcard-subdomain patterns
-// of the form:
-//
-//	*.example.com
-//
-// That allows:
-//
-//	app.example.com
-//
-// but rejects:
-//
-//	example.com
-//	example.com.evil.com
-//	badexample.com
+//  3. Otherwise every wildcard -- including any "**" -- is anchored by fixed
+//     literal text, so the pattern is compiled and matched as a full glob
+//     (with "." as the only separator). This handles subdomain wildcards
+//     ("*.example.com", "**.example.com"), bounded mid-host wildcards
+//     ("foo.*.bar.com", "foo-*.bar.com", "192.168.*.*"), and anchored
+//     mid-pattern super-globs ("foo.**.bar.com"), while still rejecting
+//     "example.com", "example.com.evil.com", and "badexample.com" against
+//     "*.example.com".
 func matchesHostPatternSafely(allowedHostPattern string, actualHost string) bool {
 	if allowedHostPattern == "" || actualHost == "" {
 		return false
 	}
 
-	// Explicit subdomain wildcard support. This preserves the intended meaning
-	// of patterns like:
-	//
-	//   https://*.example.com/**
-	//
-	// while still enforcing a domain boundary.
-	if strings.HasPrefix(allowedHostPattern, "*.") {
-		baseDomain := normalizeHost(strings.TrimPrefix(allowedHostPattern, "*."))
-		if baseDomain == "" {
-			return false
-		}
-
-		// Require a real subdomain. "*.example.com" should match
-		// "app.example.com", but not "example.com" itself.
-		return actualHost != baseDomain && strings.HasSuffix(actualHost, "."+baseDomain)
+	// Fast path: a pattern with no wildcard characters is a plain literal
+	// host and must match exactly. (This is subsumed by the glob.Compile
+	// branch below too, but is kept as a cheap allocation-free fast path for
+	// the common case of a plain configured host.)
+	if !strings.ContainsAny(allowedHostPattern, "*?[") {
+		return actualHost == allowedHostPattern
 	}
 
-	// For all other host patterns, take the static part before the first glob
-	// wildcard and require an exact parsed-host match. This is the critical
-	// protection against host-collision attacks.
-	//
-	// Example:
-	//
-	//   allowed pattern host: 127.0.0.1**
-	//   static prefix:       127.0.0.1
-	//
-	// Accepted:
-	//
-	//   actual host: 127.0.0.1
-	//
-	// Rejected:
-	//
-	//   actual host: 127.0.0.1.evil.com
-	allowedHostPrefix := normalizeHost(staticPrefixBeforeWildcard(allowedHostPattern))
-	if allowedHostPrefix == "" {
+	if lastSuperGlobIndex := strings.LastIndex(allowedHostPattern, "**"); lastSuperGlobIndex >= 0 {
+		tail := allowedHostPattern[lastSuperGlobIndex+len("**"):]
+
+		if tail == "" {
+			// A trailing "**" with nothing after it places no requirement on
+			// what may follow -- it is purely decorative legacy shorthand
+			// (e.g. "127.0.0.1**", but also "*.example.com**"). Strip it and
+			// re-evaluate the remaining pattern on its own terms, so a
+			// pattern like "*.example.com**" reduces to the well-understood
+			// "*.example.com" wildcard-subdomain pattern instead of being
+			// needlessly forced through the unbounded-super-glob fallback
+			// below (which would make it unmatchable, since its static
+			// prefix is empty).
+			return matchesHostPatternSafely(allowedHostPattern[:lastSuperGlobIndex], actualHost)
+		}
+
+		if strings.ContainsAny(tail, "*?[") {
+			// The "**" is followed by further wildcard characters, so its
+			// right-hand boundary still isn't pinned down by a fixed literal
+			// suffix (e.g. "127.0.0.1**[a-z]" only requires some trailing
+			// a-z character; "127.0.0.1**.*" only requires some final
+			// label). Fall back to the conservative rule that protects
+			// against host-collision bypasses: allowed "127.0.0.1**[a-z]"
+			// must not match "127.0.0.1.evil.com" just because it happens to
+			// end in a lowercase letter.
+			allowedHostPrefix := normalizeHost(staticPrefixBeforeWildcard(allowedHostPattern))
+			if allowedHostPrefix == "" {
+				return false
+			}
+
+			return actualHost == allowedHostPrefix
+		}
+	}
+
+	// Every wildcard in the pattern -- including any "**" -- is anchored by
+	// literal text that pins down where it must stop matching (e.g. the
+	// ".example.com" suffix in "*.example.com", or the "foo." prefix and
+	// ".bar.com" suffix in "foo.*.bar.com"). Compiling and matching the full
+	// host pattern (hosts never contain "/", so only "." is a separator)
+	// reproduces gobwas/glob's documented semantics and forces the actual
+	// host to align with the pattern's fixed structure, so it cannot be used
+	// to smuggle in an attacker-controlled apex domain.
+	hostGlob, err := glob.Compile(allowedHostPattern, '.')
+	if err != nil {
 		return false
 	}
 
-	return actualHost == allowedHostPrefix
+	return hostGlob.Match(actualHost)
 }
 
 // staticPrefixBeforeWildcard returns the part of a configured glob segment that

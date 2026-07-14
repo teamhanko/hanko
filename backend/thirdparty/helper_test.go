@@ -45,6 +45,12 @@ func TestIsValidRedirectTo(t *testing.T) {
 			want:                true,
 		},
 		{
+			name:                "Starts with super glob",
+			requestedRedirect:   "https://foo.example.com",
+			allowedRedirectURLs: []string{"https://**.example.com"},
+			want:                true,
+		},
+		{
 			name:              "Error redirect url, trailing slash ignored",
 			requestedRedirect: "https://foo.example.com/error/",
 			errorRedirectURL:  "https://foo.example.com/error",
@@ -124,6 +130,128 @@ func TestIsValidRedirectTo(t *testing.T) {
 			name:                "localhost glob does not allow localhost.evil.com",
 			requestedRedirect:   "http://localhost.evil.com",
 			allowedRedirectURLs: []string{"http://localhost**"},
+			want:                false,
+		},
+		{
+			name:                "Super glob has path suffix",
+			requestedRedirect:   "https://example.com.evil.com/test",
+			allowedRedirectURLs: []string{"https://example.com**/test"},
+			want:                false,
+		},
+
+		// --- mid-host wildcard subdomain ---
+		{
+			name:                "Mid-host wildcard subdomain match",
+			requestedRedirect:   "https://foo.mid.bar.com",
+			allowedRedirectURLs: []string{"https://foo.*.bar.com"},
+			want:                true,
+		},
+		{
+			name:                "Mid-host wildcard subdomain rejects extra nested level",
+			requestedRedirect:   "https://foo.a.b.bar.com",
+			allowedRedirectURLs: []string{"https://foo.*.bar.com"},
+			want:                false,
+		},
+
+		// --- dash-suffixed label wildcard  ---
+		{
+			name:                "Dash-suffixed label wildcard match",
+			requestedRedirect:   "https://foo-prod.bar.com",
+			allowedRedirectURLs: []string{"https://foo-*.bar.com"},
+			want:                true,
+		},
+		{
+			name:                "Dash-suffixed label wildcard rejects wrong suffix domain",
+			requestedRedirect:   "https://foo-prod.evil.com",
+			allowedRedirectURLs: []string{"https://foo-*.bar.com"},
+			want:                false,
+		},
+
+		// --- IP subnet wildcard  ---
+		{
+			name:                "IP subnet wildcard matches address in range",
+			requestedRedirect:   "http://192.168.1.55/dashboard",
+			allowedRedirectURLs: []string{"http://192.168.*.*/**"},
+			want:                true,
+		},
+		{
+			name:                "IP subnet wildcard rejects address outside range",
+			requestedRedirect:   "http://10.0.0.1/dashboard",
+			allowedRedirectURLs: []string{"http://192.168.*.*/**"},
+			want:                false,
+		},
+		{
+			name:                "IP subnet wildcard rejects host-collision with extra label",
+			requestedRedirect:   "http://192.168.1.55.evil.com/dashboard",
+			allowedRedirectURLs: []string{"http://192.168.*.*/**"},
+			want:                false,
+		},
+
+		// --- anchored mid-pattern super-glob ---
+		{
+			name:                "Anchored mid-pattern super-glob allows nested subdomains",
+			requestedRedirect:   "https://foo.a.b.bar.com",
+			allowedRedirectURLs: []string{"https://foo.**.bar.com"},
+			want:                true,
+		},
+		{
+			name:                "Anchored mid-pattern super-glob still requires literal suffix domain",
+			requestedRedirect:   "https://foo.a.b.evil.com",
+			allowedRedirectURLs: []string{"https://foo.**.bar.com"},
+			want:                false,
+		},
+
+		// --- super-wildcard subdomain depth ---
+		{
+			name:                "Super-wildcard subdomain allows nested multi-level subdomains",
+			requestedRedirect:   "https://a.b.example.com",
+			allowedRedirectURLs: []string{"https://**.example.com"},
+			want:                true,
+		},
+		{
+			name:                "Super-wildcard subdomain does not match bare base domain",
+			requestedRedirect:   "https://example.com",
+			allowedRedirectURLs: []string{"https://**.example.com"},
+			want:                false,
+		},
+
+		// --- subdomain wildcard combined with a bare trailing ** ---
+		{
+			name:                "Subdomain wildcard with trailing super glob matches subdomain",
+			requestedRedirect:   "https://app.gett.co/callback",
+			allowedRedirectURLs: []string{"https://*.gett.co**"},
+			want:                true,
+		},
+		{
+			name:                "Subdomain wildcard with trailing super glob rejects base domain",
+			requestedRedirect:   "https://gett.co",
+			allowedRedirectURLs: []string{"https://*.gett.co**"},
+			want:                false,
+		},
+		{
+			name:                "Super-wildcard subdomain with trailing super glob matches nested subdomain",
+			requestedRedirect:   "https://a.b.kyr.link/callback",
+			allowedRedirectURLs: []string{"https://**.kyr.link**"},
+			want:                true,
+		},
+		{
+			name:                "Subdomain wildcard with trailing super glob rejects host-collision",
+			requestedRedirect:   "https://app.gett.co.evil.com",
+			allowedRedirectURLs: []string{"https://*.gett.co**"},
+			want:                false,
+		},
+
+		// --- regression guards: a trailing wildcard after ** is not a safe anchor ---
+		{
+			name:                "Trailing bracket class after ** does not create a safe anchor",
+			requestedRedirect:   "http://127.0.0.1.evil.com",
+			allowedRedirectURLs: []string{"http://127.0.0.1**[a-z]"},
+			want:                false,
+		},
+		{
+			name:                "Trailing dot-star after ** does not create a safe anchor",
+			requestedRedirect:   "http://127.0.0.1.evil.com",
+			allowedRedirectURLs: []string{"http://127.0.0.1**.*"},
 			want:                false,
 		},
 
