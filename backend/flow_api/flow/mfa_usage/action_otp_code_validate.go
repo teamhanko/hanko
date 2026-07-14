@@ -3,10 +3,12 @@ package mfa_usage
 import (
 	"errors"
 	"fmt"
+	"time"
 
+	"github.com/gobuffalo/nulls"
 	"github.com/gofrs/uuid"
-	"github.com/pquerna/otp/totp"
 	"github.com/teamhanko/hanko/backend/v3/flow_api/flow/shared"
+	"github.com/teamhanko/hanko/backend/v3/flow_api/services"
 	"github.com/teamhanko/hanko/backend/v3/flowpilot"
 	"github.com/teamhanko/hanko/backend/v3/rate_limiter"
 )
@@ -63,9 +65,24 @@ func (a OTPCodeValidate) Execute(c flowpilot.ExecutionContext) error {
 
 	code := c.Input().Get("otp_code").String()
 
-	if !totp.Validate(code, userModel.OTPSecret.Secret) {
-		c.Input().SetError("otp_code", shared.ErrorPasscodeInvalid)
-		return c.Error(flowpilot.ErrorFormDataInvalid)
+	matchedStep, err := deps.TOTPService.ValidateCode(code, userModel.OTPSecret, time.Now().UTC())
+	if err != nil {
+		if errors.Is(err, services.ErrTOTPCodeAlreadyUsed) {
+			deps.HttpContext.Logger().Warn(fmt.Errorf("totp replay attempt for user %s: %w", userID, err))
+			c.Input().SetError("otp_code", shared.ErrorOTPCodeAlreadyUsed)
+			return c.Error(flowpilot.ErrorFormDataInvalid)
+		}
+		if errors.Is(err, services.ErrTOTPCodeInvalid) {
+			c.Input().SetError("otp_code", shared.ErrorOTPCodeInvalid)
+			return c.Error(flowpilot.ErrorFormDataInvalid)
+		}
+		return fmt.Errorf("totp validation error: %w", err)
+	}
+
+	// Persist the consumed step atomically within deps.Tx (same transaction as session creation).
+	userModel.OTPSecret.LastValidatedStep = nulls.NewInt64(matchedStep)
+	if err := deps.Persister.GetOTPSecretPersisterWithConnection(deps.Tx).Update(userModel.OTPSecret); err != nil {
+		return fmt.Errorf("failed to update otp secret last validated step: %w", err)
 	}
 
 	err = c.Stash().Set(shared.StashPathMFAUsageMethod, "totp")

@@ -199,6 +199,8 @@ export const fr: Translation = {
     flow_expired_error:
       "La session a expiré, veuillez cliquer sur le bouton pour redémarrer.",
     value_invalid_error: "La valeur saisie est invalide.",
+    otp_code_invalid: "Le code OTP fourni n'était pas correct.",
+    otp_code_already_used: "Le code OTP a déjà été utilisé.",
     passcode_invalid: "Le code fourni n'était pas correct.",
     passkey_invalid: "Cette clé de passe ne peut plus être utilisée.",
     passcode_max_attempts_reached:

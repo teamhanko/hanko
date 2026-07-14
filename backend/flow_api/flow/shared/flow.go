@@ -21,6 +21,7 @@ type Dependencies struct {
 	SecurityNotificationService services.SecurityNotification
 	PasscodeService             services.Passcode
 	PasswordService             services.Password
+	TOTPService                 services.TOTP
 	WebauthnService             services.WebauthnService
 	SamlService                 saml.SamlProviderService
 	Persister                   persistence.Persister

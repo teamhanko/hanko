@@ -191,6 +191,8 @@ export const ko: Translation = {
     flow_expired_error:
       "세션이 만료되었습니다. 버튼을 클릭하여 다시 시작해 주세요.",
     value_invalid_error: "입력한 값이 올바르지 않습니다.",
+    otp_code_invalid: "입력한 OTP 코드가 올바르지 않습니다.",
+    otp_code_already_used: "해당 OTP 코드는 이미 사용되었습니다.",
     passcode_invalid: "입력한 패스코드가 올바르지 않습니다.",
     passkey_invalid: "이 패스키는 더 이상 사용할 수 없습니다.",
     passcode_max_attempts_reached:

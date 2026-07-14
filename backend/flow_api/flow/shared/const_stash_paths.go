@@ -22,6 +22,7 @@ const (
 	StashPathCreateMFAOnlyCredential                = "create_mfa_only_credential"
 	StashPathNewPassword                            = "new_password"
 	StashPathOTPSecret                              = "otp_secret"
+	StashPathOTPLastValidatedStep                   = "otp_last_validated_step"
 	StashPathOTPImageSource                         = "otp_image_src"
 	StashPathPasscodeEmail                          = "sticky.passcode_email"
 	StashPathPasscodeID                             = "sticky.passcode_id"

@@ -191,6 +191,8 @@ export const nl: Translation = {
     flow_expired_error:
       "De sessie is verlopen, klik op de knop om opnieuw te starten.",
     value_invalid_error: "De ingevoerde waarde is ongeldig.",
+    otp_code_invalid: "De ingevoerde OTP-code was niet correct.",
+    otp_code_already_used: "De OTP-code is al gebruikt.",
     passcode_invalid: "De ingevoerde toegangscode was niet correct.",
     passkey_invalid: "Deze passkey kan niet meer worden gebruikt.",
     passcode_max_attempts_reached:

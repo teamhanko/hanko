@@ -169,6 +169,8 @@ export interface Translation {
     technical_error: string;
     flow_expired_error: string;
     value_invalid_error: string;
+    otp_code_invalid: string;
+    otp_code_already_used: string;
     passcode_invalid: string;
     passkey_invalid: string;
     passcode_max_attempts_reached: string;
