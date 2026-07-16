@@ -6,7 +6,7 @@
   },
   "dependencies": {
     "@teamhanko/hanko-elements": "^3.0.0",
-    "vue": "^3.5.31",
+    "vue": "^3.5.40",
     "vue-router": "^5.0.4"
   },
   "devDependencies": {
