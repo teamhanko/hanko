@@ -1,6 +1,8 @@
 package config
 
 import (
+	"encoding/json"
+	"fmt"
 	"time"
 
 	"github.com/invopop/jsonschema"
@@ -55,6 +57,60 @@ type MFA struct {
 	SecurityKeys SecurityKeys `yaml:"security_keys" json:"security_keys" koanf:"security_keys" jsonschema:"title=security_keys"`
 	// `totp` configures the TOTP (Time-Based One-Time-Password) method for multi-factor-authentication.
 	TOTP TOTP `yaml:"totp" json:"totp" koanf:"totp" jsonschema:"title=totp"`
+}
+
+// MarshalJSON renders DeviceTrustDuration as a duration string (e.g. "720h0m0s") instead of
+// time.Duration's default marshaling as a raw number of nanoseconds — matching what the schema
+// already documents (jsonschema:"type=string") and what a human would write in a YAML config file.
+// The Go field itself stays a plain time.Duration; only its JSON representation changes, so nothing
+// that reads MFA.DeviceTrustDuration as a time.Duration needs to change.
+func (m MFA) MarshalJSON() ([]byte, error) {
+	type alias MFA
+	return json.Marshal(struct {
+		DeviceTrustDuration string `json:"device_trust_duration"`
+		alias
+	}{
+		DeviceTrustDuration: m.DeviceTrustDuration.String(),
+		alias:               alias(m),
+	})
+}
+
+// UnmarshalJSON accepts DeviceTrustDuration as a duration string, matching MarshalJSON. Numeric
+// nanosecond values (as a plain time.Duration would marshal) are also still accepted, so this
+// remains compatible with anything persisted before this change.
+func (m *MFA) UnmarshalJSON(data []byte) error {
+	type alias MFA
+	aux := &struct {
+		DeviceTrustDuration json.RawMessage `json:"device_trust_duration"`
+		*alias
+	}{
+		alias: (*alias)(m),
+	}
+	if err := json.Unmarshal(data, aux); err != nil {
+		return err
+	}
+
+	if len(aux.DeviceTrustDuration) == 0 {
+		return nil
+	}
+
+	var asString string
+	if err := json.Unmarshal(aux.DeviceTrustDuration, &asString); err == nil {
+		d, err := time.ParseDuration(asString)
+		if err != nil {
+			return fmt.Errorf("invalid device_trust_duration %q: %w", asString, err)
+		}
+		m.DeviceTrustDuration = d
+		return nil
+	}
+
+	var asNanoseconds time.Duration
+	if err := json.Unmarshal(aux.DeviceTrustDuration, &asNanoseconds); err != nil {
+		return fmt.Errorf("invalid device_trust_duration: %w", err)
+	}
+	m.DeviceTrustDuration = asNanoseconds
+
+	return nil
 }
 
 func (MFA) JSONSchemaExtend(schema *jsonschema.Schema) {

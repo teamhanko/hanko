@@ -29,12 +29,11 @@ func TestDefaultTenantConfig_IsValid(t *testing.T) {
 // DefaultTenantConfig()'s actual value legitimately disagree only in *representation*, not in
 // meaning — not real drift, so excluded from the check below.
 var schemaDefaultFormatExceptions = map[string]bool{
-	// time.Duration has no custom MarshalJSON, so it always marshals as a plain number of
-	// nanoseconds; the tag documents the YAML/file-config string convention ("720h") instead. Both
-	// describe the same 720-hour duration.
-	"mfa.device_trust_duration": true,
 	// Both "0" and "0m" parse to a zero duration; just different spellings of "no idle timeout".
 	"session.idle_timeout": true,
+	// time.Duration.String() always includes all three units ("720h0m0s"), while the tag documents
+	// the shorter, equally valid "720h" — same 720-hour duration, just a different spelling.
+	"mfa.device_trust_duration": true,
 }
 
 // TestDefaultTenantConfig_MatchesSchemaDefaults guards against the schema's documented `default=`
