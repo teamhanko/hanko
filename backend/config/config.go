@@ -184,6 +184,10 @@ func (c *TenantConfig) Validate(multiTenancy bool) error {
 	if err != nil {
 		return fmt.Errorf("failed to validate session settings: %w", err)
 	}
+	err = c.MFA.Validate()
+	if err != nil {
+		return fmt.Errorf("failed to validate mfa settings: %w", err)
+	}
 	err = c.ThirdParty.Validate()
 	if err != nil {
 		return fmt.Errorf("failed to validate third_party settings: %w", err)

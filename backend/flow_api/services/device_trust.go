@@ -41,12 +41,17 @@ func (s DeviceTrustService) CreateTrustedDevice(userID uuid.UUID, deviceToken st
 		return fmt.Errorf("failed to generate device id: %w", err)
 	}
 
+	deviceTrustDuration, err := time.ParseDuration(s.Cfg.MFA.DeviceTrustDuration)
+	if err != nil {
+		return fmt.Errorf("failed to parse device_trust_duration: %w", err)
+	}
+
 	trustedDeviceModel := models.TrustedDevice{
 		ID:          deviceID,
 		UserID:      userID,
 		DeviceToken: deviceToken,
 		TenantID:    s.TenantID,
-		ExpiresAt:   time.Now().Add(s.Cfg.MFA.DeviceTrustDuration).UTC(),
+		ExpiresAt:   time.Now().Add(deviceTrustDuration).UTC(),
 		CreatedAt:   time.Now().UTC(),
 		UpdatedAt:   time.Now().UTC(),
 	}

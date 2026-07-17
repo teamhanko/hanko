@@ -237,7 +237,7 @@ func DefaultTenantConfig() TenantConfig {
 			AcquireOnLogin:               false,
 			AcquireOnRegistration:        true,
 			DeviceTrustCookieName:        "hanko-device-token",
-			DeviceTrustDuration:          30 * 24 * time.Hour, // 30 days
+			DeviceTrustDuration:          "720h", // 30 days
 			DeviceTrustMaxUsersPerDevice: 20,
 			DeviceTrustPolicy:            "prompt",
 			Enabled:                      true,

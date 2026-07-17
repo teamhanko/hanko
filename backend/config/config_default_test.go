@@ -31,9 +31,6 @@ func TestDefaultTenantConfig_IsValid(t *testing.T) {
 var schemaDefaultFormatExceptions = map[string]bool{
 	// Both "0" and "0m" parse to a zero duration; just different spellings of "no idle timeout".
 	"session.idle_timeout": true,
-	// time.Duration.String() always includes all three units ("720h0m0s"), while the tag documents
-	// the shorter, equally valid "720h" — same 720-hour duration, just a different spelling.
-	"mfa.device_trust_duration": true,
 }
 
 // TestDefaultTenantConfig_MatchesSchemaDefaults guards against the schema's documented `default=`

@@ -3,6 +3,7 @@ package device_trust
 import (
 	"fmt"
 	"net/http"
+	"time"
 
 	"github.com/gofrs/uuid"
 	"github.com/teamhanko/hanko/backend/v3/flow_api/flow/shared"
@@ -44,8 +45,13 @@ func (h IssueTrustDeviceCookie) Execute(c flowpilot.HookExecutionContext) error 
 		return fmt.Errorf("failed to generate trusted device token: %w", err)
 	}
 
+	deviceTrustDuration, err := time.ParseDuration(deps.Cfg.MFA.DeviceTrustDuration)
+	if err != nil {
+		return fmt.Errorf("failed to parse device_trust_duration: %w", err)
+	}
+
 	name := deps.Cfg.MFA.DeviceTrustCookieName
-	maxAge := int(deps.Cfg.MFA.DeviceTrustDuration.Seconds())
+	maxAge := int(deviceTrustDuration.Seconds())
 
 	if maxAge > 0 {
 		err = deviceTrustService.CreateTrustedDevice(userID, deviceToken)

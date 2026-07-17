@@ -782,7 +782,7 @@
         },
         "device_trust_duration": {
           "type": "string",
-          "description": "`device_trust_duration` configures the duration a device remains trusted after authentication; once expired, the\nuser must reauthenticate with MFA.",
+          "description": "`device_trust_duration` configures the duration a device remains trusted after authentication; once expired, the\nuser must reauthenticate with MFA. Must be a (possibly signed) sequence of decimal numbers, each with optional\nfraction and a unit suffix, such as \"300ms\", \"-1.5h\" or \"2h45m\". Valid time units are \"ns\", \"us\" (or \"µs\"),\n\"ms\", \"s\", \"m\", \"h\".",
           "default": "720h"
         },
         "device_trust_max_users_per_device": {
