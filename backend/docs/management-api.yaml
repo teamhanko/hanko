@@ -1,0 +1,2252 @@
+openapi: 3.1.0
+info:
+  title: Hanko Management API
+  description: |
+    Administrative API for managing Hanko tenants and their SAML identity providers. This API is served by the router constructed in `backend/handler/management_router.go` and is intended for internal / operator use (provisioning tenants, configuring SSO), as opposed to the public-facing Hanko API used by end users.
+  version: '1.0'
+servers:
+- url: http://localhost:8001
+  description: Default local management API listener
+tags:
+- name: Status
+  description: Service status, health and metrics endpoints.
+- name: Tenants
+  description: CRUD operations for tenants.
+- name: SAML Providers
+  description: CRUD operations for SAML identity providers scoped to a tenant.
+paths:
+  /:
+    get:
+      tags:
+      - Status
+      summary: Service status
+      description: |
+        Renders a status page and checks database connectivity by querying JWKs for the default tenant.
+      operationId: getStatus
+      responses:
+        '200':
+          description: Service is up and the database is reachable.
+          content:
+            text/html:
+              schema:
+                type: string
+        '500':
+          description: Service is up but the database could not be reached.
+          content:
+            text/html:
+              schema:
+                type: string
+  /metrics:
+    get:
+      tags:
+      - Status
+      summary: Prometheus metrics
+      operationId: getMetrics
+      responses:
+        '200':
+          description: Prometheus text-format metrics.
+          content:
+            text/plain:
+              schema:
+                type: string
+  /health/alive:
+    get:
+      tags:
+      - Status
+      summary: Liveness probe
+      operationId: getHealthAlive
+      responses:
+        '200':
+          description: Process is alive.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  alive:
+                    type: boolean
+                    example: true
+                required:
+                - alive
+  /health/ready:
+    get:
+      tags:
+      - Status
+      summary: Readiness probe
+      operationId: getHealthReady
+      responses:
+        '200':
+          description: Process is ready to serve traffic.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  ready:
+                    type: boolean
+                    example: true
+                required:
+                - ready
+  /tenants:
+    post:
+      tags:
+      - Tenants
+      summary: Create a tenant
+      description: |
+        Creates a new tenant with the given ID and configuration. If the tenant's `secrets.key_management.type` is `local`, a JWK is generated for it. A SAML signing/encryption certificate is generated for the tenant unless one already exists.
+      operationId: createTenant
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateTenantRequest'
+      responses:
+        '201':
+          description: Tenant created.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Tenant'
+        '400':
+          description: Invalid tenant ID, missing/invalid config, or config failed validation.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '409':
+          description: A tenant with this ID already exists.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+    get:
+      tags:
+      - Tenants
+      summary: List tenants
+      description: Returns a paginated list of tenants.
+      operationId: listTenants
+      parameters:
+      - $ref: '#/components/parameters/Page'
+      - $ref: '#/components/parameters/PerPage'
+      responses:
+        '200':
+          description: Paginated list of tenants.
+          headers:
+            X-Total-Count:
+              description: Total number of tenants across all pages.
+              schema:
+                type: integer
+            Link:
+              description: |
+                RFC 5988 pagination links (`first`, `last`, `next`, `prev`, as applicable).
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Tenant'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+  /tenants/{id}:
+    parameters:
+    - name: id
+      in: path
+      required: true
+      description: Tenant ID.
+      schema:
+        type: string
+        format: uuid
+    get:
+      tags:
+      - Tenants
+      summary: Get a tenant
+      operationId: getTenant
+      responses:
+        '200':
+          description: The tenant.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Tenant'
+        '400':
+          description: Tenant ID is not a valid UUID.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '404':
+          description: Tenant not found.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+    put:
+      tags:
+      - Tenants
+      summary: Update a tenant
+      description: Replaces a tenant's configuration.
+      operationId: updateTenant
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateTenantRequest'
+      responses:
+        '200':
+          description: Updated tenant.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Tenant'
+        '400':
+          description: Tenant ID is not a valid UUID, or config is missing/invalid.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '404':
+          description: Tenant not found.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+    delete:
+      tags:
+      - Tenants
+      summary: Delete a tenant
+      operationId: deleteTenant
+      responses:
+        '204':
+          description: Tenant deleted.
+        '400':
+          description: Tenant ID is not a valid UUID.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '404':
+          description: Tenant not found.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+  /tenants/{tenantId}/saml/providers:
+    parameters:
+    - $ref: '#/components/parameters/TenantId'
+    post:
+      tags:
+      - SAML Providers
+      summary: Create a SAML provider
+      description: Creates a new SAML identity provider for the tenant. Requires `saml.enabled` to be
+        true in the tenant's config.
+      operationId: createSamlProvider
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateSamlProviderRequest'
+      responses:
+        '201':
+          description: Provider created.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SamlProvider'
+        '400':
+          description: Invalid tenant ID, invalid request body/validation failure, or metadata validation
+            failure.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '403':
+          description: SAML is not enabled for this tenant.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '404':
+          description: Tenant not found.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '409':
+          description: A provider for this tenant/domain already exists.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+    get:
+      tags:
+      - SAML Providers
+      summary: List SAML providers
+      description: Lists all SAML identity providers configured for the tenant. Requires `saml.enabled`
+        to be true in the tenant's config.
+      operationId: listSamlProviders
+      responses:
+        '200':
+          description: List of providers.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/SamlProvider'
+        '400':
+          description: Invalid tenant ID.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '403':
+          description: SAML is not enabled for this tenant.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '404':
+          description: Tenant not found.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+  /tenants/{tenantId}/saml/providers/{providerId}:
+    parameters:
+    - $ref: '#/components/parameters/TenantId'
+    - name: providerId
+      in: path
+      required: true
+      description: SAML provider ID.
+      schema:
+        type: string
+        format: uuid
+    get:
+      tags:
+      - SAML Providers
+      summary: Get a SAML provider
+      operationId: getSamlProvider
+      responses:
+        '200':
+          description: The provider.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SamlProvider'
+        '400':
+          description: Invalid tenant ID or provider ID.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '403':
+          description: SAML is not enabled for this tenant.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '404':
+          description: Tenant or provider not found.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+    put:
+      tags:
+      - SAML Providers
+      summary: Update a SAML provider
+      operationId: updateSamlProvider
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateSamlProviderRequest'
+      responses:
+        '200':
+          description: Updated provider.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SamlProvider'
+        '400':
+          description: Invalid tenant/provider ID, invalid request body/validation failure, or metadata
+            validation failure.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '403':
+          description: SAML is not enabled for this tenant.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '404':
+          description: Tenant not found.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '409':
+          description: Another provider for this tenant/domain already exists.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+    delete:
+      tags:
+      - SAML Providers
+      summary: Delete a SAML provider
+      operationId: deleteSamlProvider
+      responses:
+        '204':
+          description: Provider deleted.
+        '400':
+          description: Invalid tenant ID or provider ID.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '403':
+          description: SAML is not enabled for this tenant.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '404':
+          description: Tenant not found.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+components:
+  parameters:
+    TenantId:
+      name: tenantId
+      in: path
+      required: true
+      description: Tenant ID.
+      schema:
+        type: string
+        format: uuid
+    Page:
+      name: page
+      in: query
+      required: false
+      description: 1-indexed page number. Defaults to 1.
+      schema:
+        type: integer
+        minimum: 1
+        default: 1
+    PerPage:
+      name: per_page
+      in: query
+      required: false
+      description: Number of items per page. Defaults to 20.
+      schema:
+        type: integer
+        minimum: 1
+        default: 20
+  responses:
+    InternalServerError:
+      description: Unexpected server error.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+  schemas:
+    Error:
+      type: object
+      description: |
+        Error envelope produced by the API's default HTTP error handler. `error` is only present when the server is running with debug logging enabled.
+      properties:
+        code:
+          type: integer
+          example: 404
+        message:
+          type: string
+          example: tenant not found
+        error:
+          type: string
+          description: Internal error detail (debug mode only).
+      required:
+      - code
+      - message
+    CreateTenantRequest:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          description: ID to assign to the new tenant.
+        config:
+          $ref: '#/components/schemas/TenantConfig'
+          description: Tenant configuration document.
+      required:
+      - id
+      - config
+    UpdateTenantRequest:
+      type: object
+      properties:
+        config:
+          $ref: '#/components/schemas/TenantConfig'
+          description: Replacement tenant configuration document.
+      required:
+      - config
+    Tenant:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        config:
+          $ref: '#/components/schemas/TenantConfig'
+        created_at:
+          type: string
+          format: date-time
+        updated_at:
+          type: string
+          format: date-time
+      required:
+      - id
+      - config
+      - created_at
+      - updated_at
+    TenantConfig:
+      type: object
+      description: Per-tenant configuration document (`config.TenantConfig`). Governs authentication methods,
+        SAML/OAuth SSO, email delivery, sessions, webhooks, etc. for this tenant. On create/update, any
+        section that is omitted is filled in with server-side defaults before being persisted; `GET`/`POST`/`PUT`
+        responses always return the fully resolved document.
+      properties:
+        account:
+          $ref: '#/components/schemas/Account'
+          title: account
+          description: '`account` configures settings related to user accounts.'
+        email:
+          $ref: '#/components/schemas/Email'
+          title: email
+          description: '`email` configures how email addresses of user accounts are acquired and used.'
+        email_delivery:
+          $ref: '#/components/schemas/EmailDelivery'
+          title: email_delivery
+          description: '`email_delivery` configures how outgoing mails are delivered.'
+        mfa:
+          $ref: '#/components/schemas/MFA'
+          title: mfa
+          description: '`mfa` configures how multi-factor-authentication behaves.'
+        passkey:
+          $ref: '#/components/schemas/Passkey'
+          title: passkey
+          description: '`passkey` configures how passkeys are acquired and used.'
+        password:
+          $ref: '#/components/schemas/Password'
+          title: password
+          description: '`password` configures how passwords are acquired and used.'
+        saml:
+          $ref: '#/components/schemas/Saml'
+          title: saml
+          description: |-
+            `saml` configures modalities of SAML (Security Assertion Markup Language) SSO authentication and SAML identity
+            providers.
+        secrets:
+          $ref: '#/components/schemas/Secrets'
+          title: secrets
+          description: '`secrets` configures the keys used for cryptographically signing tokens issued
+            by the API.'
+        security_notifications:
+          $ref: '#/components/schemas/SecurityNotifications'
+          description: '`security_notifications` configures security notifications for important security-related
+            events.'
+        cors:
+          $ref: '#/components/schemas/Cors'
+          title: cors
+          description: '`cors` configures Cross-Origin Resource Sharing settings for this tenant.'
+        service:
+          $ref: '#/components/schemas/Service'
+          title: service
+          description: '`service` configures general service information.'
+        session:
+          $ref: '#/components/schemas/Session'
+          title: session
+          description: '`session` configures settings for session JWTs and Cookies issued by the API.'
+        third_party:
+          $ref: '#/components/schemas/ThirdParty'
+          title: third_party
+          description: |-
+            `third_party` configures the modalities of third party OAuth/OIDC based authentication and available identity
+            providers.
+        username:
+          $ref: '#/components/schemas/Username'
+          title: username
+          description: '`username` configures how usernames of user accounts are acquired and used.'
+        webauthn:
+          $ref: '#/components/schemas/WebauthnSettings'
+          title: webauthn
+          description: '`webauthn` configures general settings for communication with the WebAuthentication
+            API.'
+        webhooks:
+          $ref: '#/components/schemas/WebhookSettings'
+          title: webhooks
+          description: '`webhooks` configures HTTP-based callbacks for specific events occurring in the
+            system.'
+        privacy:
+          $ref: '#/components/schemas/Privacy'
+          title: privacy
+          description: '`privacy` configures privacy settings'
+    Account:
+      properties:
+        allow_deletion:
+          type: boolean
+          description: '`allow_deletion` determines whether users can delete their accounts.'
+          default: false
+        allow_signup:
+          type: boolean
+          description: '`allow_signup` determines whether users are able to create new accounts.'
+          default: true
+      additionalProperties: false
+      type: object
+      required:
+      - allow_deletion
+      - allow_signup
+    AttributeMap:
+      properties:
+        name:
+          type: string
+          default: http://schemas.xmlsoap.org/ws/2005/05/identity/claims/name
+        family_name:
+          type: string
+          default: http://schemas.xmlsoap.org/ws/2005/05/identity/claims/surname
+        given_name:
+          type: string
+          default: http://schemas.xmlsoap.org/ws/2005/05/identity/claims/givenname
+        middle_name:
+          type: string
+        nickname:
+          type: string
+        preferred_username:
+          type: string
+        profile:
+          type: string
+        picture:
+          type: string
+        website:
+          type: string
+        gender:
+          type: string
+        birthdate:
+          type: string
+        zone_info:
+          type: string
+        locale:
+          type: string
+        updated_at:
+          type: string
+        email:
+          type: string
+          default: http://schemas.xmlsoap.org/ws/2005/05/identity/claims/emailaddress
+        email_verified:
+          type: string
+        phone:
+          type: string
+        phone_verified:
+          type: string
+      additionalProperties: false
+      type: object
+    Cookie:
+      properties:
+        domain:
+          type: string
+          description: |-
+            `domain` is the domain the cookie will be bound to. Works for subdomains, but not cross-domain.
+            See the `session.enable_auth_token_header` configuration instead if the API and the client application run on
+            different domains.
+          default: hanko
+        http_only:
+          type: boolean
+          description: '`http_only` determines whether cookies are HTTP only or accessible by Javascript.'
+          default: true
+        name:
+          type: string
+          description: '`name` is the name of the cookie.'
+          default: hanko
+        retention:
+          type: string
+          enum:
+          - session
+          - persistent
+          - prompt
+          description: '`retention` determines the retention behavior of authentication cookies.'
+          default: persistent
+          meta:enum:
+            persistent: Issues a cookie that remains stored on the user's device until it reaches its
+              expiration date.
+            prompt: Allows the user to choose whether to stay signed in. If the user selects 'Stay signed
+              in', a persistent cookie is issued; a session cookie otherwise.
+            session: Issues a temporary cookie that lasts for the duration of the browser session.
+        same_site:
+          type: string
+          enum:
+          - strict
+          - lax
+          - none
+          description: |-
+            `same_site` controls whether a cookie is sent with cross-site requests.
+            See [here](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Set-Cookie#samesitesamesite-value) for
+            more details.
+          default: strict
+        secure:
+          type: boolean
+          description: |-
+            `secure` indicates whether the cookie is sent to the server only when a request is made with the https: scheme
+            (except on localhost).
+
+            NOTE: `secure` must be set to `false` when working on `localhost` and with the Safari browser because it does
+            not store secure cookies on `localhost`.
+          default: true
+      additionalProperties: false
+      type: object
+      required:
+      - domain
+      - http_only
+      - name
+      - retention
+      - same_site
+      - secure
+    Cors:
+      properties:
+        allow_origins:
+          items:
+            type: string
+          type: array
+          title: allow_origins
+          description: |-
+            `allow_origins` determines the value of the Access-Control-Allow-Origin
+            response header. This header defines a list of [origins](https://developer.mozilla.org/en-US/docs/Glossary/Origin)
+            that may access the resource.
+
+            The wildcard characters `*` and `?` are supported and are converted to regex fragments `.*` and `.` accordingly.
+          default:
+          - http://localhost:8888
+        unsafe_wildcard_origin_allowed:
+          type: boolean
+          title: unsafe_wildcard_origin_allowed
+          description: |-
+            `unsafe_wildcard_origin_allowed` allows a wildcard `*` origin to be used with AllowCredentials
+            flag. In that case we consider any origin allowed and send it back to the client in an `Access-Control-Allow-Origin` header.
+
+            This is INSECURE and potentially leads to [cross-origin](https://portswigger.net/research/exploiting-cors-misconfigurations-for-bitcoins-and-bounties)
+            attacks. See also https://github.com/labstack/echo/issues/2400 for discussion on the subject.
+
+            Optional. Default value is `false`.
+          default: false
+      additionalProperties: false
+      type: object
+      required:
+      - allow_origins
+      - unsafe_wildcard_origin_allowed
+    CustomThirdPartyProvider:
+      if:
+        properties:
+          enabled:
+            anyOf:
+            - const: false
+            - type: 'null'
+      then: {}
+      else:
+        if:
+          properties:
+            use_discovery:
+              anyOf:
+              - const: false
+              - type: 'null'
+        then:
+          required:
+          - authorization_endpoint
+          - token_endpoint
+          - userinfo_endpoint
+        else:
+          required:
+          - issuer
+        required:
+        - display_name
+        - client_id
+        - secret
+        - scopes
+      properties:
+        acr_values:
+          items:
+            type: string
+          type: array
+          description: |-
+            `acr_values` is a list of strings that specifies the Authentication Context Class Reference values that the
+            Authorization Server is being requested to use for processing this Authentication Request.
+        allow_linking:
+          type: boolean
+          description: |-
+            `allow_linking` indicates whether existing accounts can be automatically linked with this provider.
+
+            Linking is based on matching one of the email addresses of an existing user account with the (primary)
+            email address of the third party provider account.
+          default: false
+        attribute_mapping:
+          additionalProperties:
+            type: string
+          type: object
+          description: |-
+            `attribute_mapping` defines a map that associates a set of known standard OIDC conformant end-user claims
+            (the key of a map entry) at the Hanko backend to claims retrieved from a third party provider (the value of the
+            map entry). This is primarily necessary if a non-OIDC provider is configured/used in which case it is probable
+            that user data returned from the userinfo endpoint does not already conform to OIDC standard claims.
+
+            Example: You configure an OAuth Provider (i.e. non-OIDC) and the provider's configured userinfo endpoint returns
+            an end-user's user ID at the provider not under a `sub` key in its JSON response but rather under a `user_id`
+            key. You would then configure an attribute mapping as follows:
+
+            ```yaml
+            attribute_mapping:
+             sub: user_id
+            ```
+
+            See https://openid.net/specs/openid-connect-core-1_0.html#StandardClaims for a list of known standard claims
+            that provider claims can be mapped into. Any other claims received from a provider are not discarded but are
+            retained internally in a `custom_claims` claim.
+
+            Mappings are one-to-one mappings, complex mappings (e.g. mapping concatenations of two claims) are not possible.
+        authorization_endpoint:
+          type: string
+          description: |-
+            URL of the provider's authorization endpoint where the end-user is redirected to authenticate and grant consent for
+            an application to access their resources.
+
+            Required if `use_discovery` is false or omitted.
+        issuer:
+          type: string
+          description: "`issuer` is the provider's issuer identifier. It should be a URL that uses the\
+            \ \"https\"\n\tscheme and has no query or fragment components.\n\nRequired if `use_discovery`\
+            \ is true."
+        client_id:
+          type: string
+          description: |-
+            `client_id` is the ID of the OAuth/OIDC client. Must be obtained from the provider.
+
+            Required if the provider is `enabled`.
+        display_name:
+          type: string
+          description: |-
+            `display_name` is the name of the provider that is intended to be shown to an end-user.
+
+            Required if the provider is `enabled`.
+        enabled:
+          type: boolean
+          description: '`enabled` indicates if the provider is enabled or disabled.'
+          default: false
+        prompt:
+          type: string
+          description: |-
+            `prompt` specifies whether the Authorization Server prompts the End-User for reauthentication and consent.
+            Possible values are:
+            - login
+            - none
+            - consent
+            - select_account
+            Please note that not all providers support all values. Check the corresponding docs of the provider for supported values.
+        scopes:
+          items:
+            type: string
+          type: array
+          description: |-
+            `scopes` is a list of scopes requested from the provider that specify the level of access an application has to
+            a user's resources on a server, defining what actions the app can perform on behalf of the user.
+
+            Required if the provider is `enabled`.
+        secret:
+          type: string
+          description: |-
+            `secret` is the client secret for the OAuth/OIDC client. Must be obtained from the provider.
+
+            Required if the provider is `enabled`.
+        token_endpoint:
+          type: string
+          description: |-
+            URL of the provider's token endpoint URL where an application exchanges an authorization code for an access
+            token, which is used to authenticate API requests on behalf of the end-user.
+
+            Required if `use_discovery` is false or omitted.
+        use_discovery:
+          type: boolean
+          description: |-
+            `use_discovery` determines if configuration information about an OpenID Connect (OIDC) provider, such as
+            endpoint URLs and supported features,should be automatically retrieved, from a well-known
+            URL (typically /.well-known/openid-configuration).
+          default: true
+        userinfo_endpoint:
+          type: string
+          description: |-
+            URL of the provider's endpoint that returns claims about an authenticated end-user.
+
+            Required if `use_discovery` is false or omitted.
+      additionalProperties: false
+      type: object
+      required:
+      - acr_values
+      - allow_linking
+      - attribute_mapping
+      - authorization_endpoint
+      - issuer
+      - client_id
+      - display_name
+      - enabled
+      - prompt
+      - scopes
+      - secret
+      - token_endpoint
+      - use_discovery
+      - userinfo_endpoint
+      title: custom_provider
+    CustomThirdPartyProviders:
+      additionalProperties:
+        $ref: '#/components/schemas/CustomThirdPartyProvider'
+      type: object
+    Email:
+      properties:
+        acquire_on_login:
+          type: boolean
+          description: "`acquire_on_login` determines whether users, provided that they do not already\
+            \ have registered an email,\n\tare prompted to provide an email on login."
+          default: false
+        acquire_on_registration:
+          type: boolean
+          description: '`acquire_on_registration` determines whether users are prompted to provide an
+            email on registration.'
+          default: true
+        enabled:
+          type: boolean
+          description: '`enabled` determines whether emails are enabled.'
+          default: true
+        limit:
+          type: integer
+          description: '''limit'' determines the maximum number of emails a user can register.'
+          default: 5
+        max_length:
+          type: integer
+          description: '`max_length` specifies the maximum allowed length of an email address.'
+          default: 100
+        optional:
+          type: boolean
+          description: |-
+            `optional` determines whether users must provide an email when prompted.
+            There must always be at least one email address associated with an account. The primary email address cannot be
+            deleted if emails are required (`optional`: false`).
+          default: false
+        passcode_ttl:
+          type: integer
+          description: '`passcode_ttl` specifies, in seconds, how long a passcode is valid for.'
+          default: 300
+        passcode_charset:
+          type: string
+          enum:
+          - numeric
+          - alphanumeric
+          description: |-
+            `passcode_charset` specifies the characters that can be used in passcodes.
+            E.g. `numeric` allows only numbers, `alphanumeric` allows both numbers and letters.
+          default: numeric
+        require_verification:
+          type: boolean
+          description: |-
+            `require_verification` determines whether newly created emails must be verified by providing a passcode sent
+            to respective address.
+          default: true
+        use_as_login_identifier:
+          type: boolean
+          description: '`use_as_login_identifier` determines whether emails can be used as an identifier
+            on login.'
+          default: true
+        use_for_authentication:
+          type: boolean
+          description: |-
+            `user_for_authentication` determines whether users can log in by providing an email address and subsequently
+            providing a passcode sent to the given email address.
+          default: true
+      additionalProperties: false
+      type: object
+      required:
+      - acquire_on_login
+      - acquire_on_registration
+      - enabled
+      - limit
+      - max_length
+      - optional
+      - passcode_ttl
+      - passcode_charset
+      - require_verification
+      - use_as_login_identifier
+      - use_for_authentication
+    EmailDelivery:
+      properties:
+        enabled:
+          type: boolean
+          description: |-
+            `enabled` determines whether the API delivers emails.
+            Disable if you want to send the emails yourself. To do so you must subscribe to the `email.create` webhook event.
+          default: true
+        from_address:
+          type: string
+          description: '`from_address` configures the sender address of emails sent to users.'
+          default: noreply@hanko.io
+        from_name:
+          type: string
+          description: '`from_name` configures the sender name of emails sent to users.'
+          default: Hanko
+        smtp:
+          $ref: '#/components/schemas/SMTP'
+          title: smtp
+          description: '`SMTP` contains the SMTP server settings for sending mails.'
+      additionalProperties: false
+      type: object
+      required:
+      - enabled
+      - from_address
+      - from_name
+      - smtp
+    Events:
+      items:
+        type: string
+      type: array
+    IdentityProvider:
+      properties:
+        enabled:
+          type: boolean
+          description: '`enabled` activates or deactivates the identity provider.'
+          default: false
+        name:
+          type: string
+          description: '`name` is the name given for the identity provider.'
+        domain:
+          type: string
+          description: |-
+            At login the domain will be extracted from the users email address and then used to identify the idp to use.
+            This tag defines for which domain the idp is used.
+        metadata_url:
+          type: string
+          description: '`metadata_url` is the URL the API can retrieve IdP metadata from.'
+        skip_email_verification:
+          type: boolean
+          description: |-
+            `skip_email_verification` determines whether the check if the `email_verified` attribute in the IdP response
+            will be skipped.
+        attribute_map:
+          $ref: '#/components/schemas/AttributeMap'
+          title: attribute_map
+          description: |-
+            `attribute_map` is a map of attributes used to map attributes in IdP response to custom attributes at
+            Hanko.
+      additionalProperties: false
+      type: object
+      required:
+      - enabled
+      - name
+      - domain
+      - metadata_url
+      - skip_email_verification
+      - attribute_map
+    JWTTemplate:
+      properties:
+        claims:
+          type: object
+      additionalProperties: false
+      type: object
+      required:
+      - claims
+    KeyManagement:
+      if:
+        properties:
+          type:
+            const: aws_kms
+      then:
+        required:
+        - key_id
+        - region
+      properties:
+        type:
+          type: string
+          enum:
+          - local
+          - aws_kms
+          description: |-
+            Type specifies the key management system to use. Supported values are 'local' (default) for local key storage
+            or 'aws_kms' for AWS Key Management Service.
+            When using 'aws_kms,' the AWS credentials must be set using the standard AWS credential chain (in order of precedence).
+            1. Environment variables (AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY, AWS_SESSION_TOKEN)
+            2. Shared credentials file (~/.aws/credentials)
+            3. Shared config file (~/.aws/config)
+            4. IAM role for Amazon EC2 (via instance metadata service)
+            5. IAM role for Amazon ECS (via container credentials)
+            6. IAM role for Amazon EKS (via service account token)
+        key_id:
+          type: string
+          description: |-
+            KeyID is the AWS KMS key identifier (ARN or alias) used for signing operations.
+            Required when Type is 'aws_kms'.
+        region:
+          type: string
+          description: |-
+            Region is the AWS region where the KMS key is located.
+            Required when Type is 'aws_kms'.
+      additionalProperties: false
+      type: object
+      required:
+      - type
+      - key_id
+      - region
+    MFA:
+      properties:
+        acquire_on_login:
+          type: boolean
+          description: '`acquire_on_login` configures if users are prompted creating an MFA credential
+            on login.'
+          default: false
+        acquire_on_registration:
+          type: boolean
+          description: '`acquire_on_registration` configures if users are prompted creating an MFA credential
+            on registration.'
+          default: true
+        device_trust_cookie_name:
+          type: string
+          description: '`device_trust_cookie_name` is the name of the cookie used to store the token of
+            a trusted device.'
+          default: hanko_device_token
+        device_trust_duration:
+          type: string
+          description: |-
+            `device_trust_duration` configures the duration a device remains trusted after authentication; once expired, the
+            user must reauthenticate with MFA.
+          default: 720h
+        device_trust_max_users_per_device:
+          type: integer
+          description: |-
+            `device_trust_max_users_per_device` limits how many users can have device trust on a single device/browser.
+            Oldest entries are removed when the limit is exceeded. This allows multiple users to trust the same device
+            without overwriting each other's trust tokens.
+          default: 20
+        device_trust_policy:
+          type: string
+          enum:
+          - always
+          - prompt
+          - never
+          description: |-
+            `device_trust_policy` determines the conditions under which a device or browser is considered trusted, allowing
+            MFA to be skipped for subsequent logins.
+          default: prompt
+          meta:enum:
+            always: Devices are trusted without user consent until the trust expires, so MFA is skipped
+              during subsequent logins.
+            never: Devices are considered untrusted, so MFA is required for each login.
+            prompt: The user can choose to trust the current device to skip MFA for subsequent logins.
+        enabled:
+          type: boolean
+          description: '`enabled` determines whether multi-factor-authentication is enabled.'
+          default: true
+        optional:
+          type: boolean
+          description: |-
+            `optional` determines whether users must create an MFA credential when prompted. The MFA credential cannot be
+            deleted if multi-factor-authentication is required (`optional: false`).
+          default: true
+        security_keys:
+          $ref: '#/components/schemas/SecurityKeys'
+          title: security_keys
+          description: '`security_keys` configures security key settings for multi-factor-authentication'
+        totp:
+          $ref: '#/components/schemas/TOTP'
+          title: totp
+          description: '`totp` configures the TOTP (Time-Based One-Time-Password) method for multi-factor-authentication.'
+      additionalProperties: false
+      type: object
+      required:
+      - acquire_on_login
+      - acquire_on_registration
+      - device_trust_cookie_name
+      - device_trust_duration
+      - device_trust_max_users_per_device
+      - device_trust_policy
+      - enabled
+      - optional
+      - security_keys
+      - totp
+    Options:
+      properties:
+        sign_authn_requests:
+          type: boolean
+          description: '`sign_authn_requests` determines whether initial requests should be signed.'
+          default: true
+        force_login:
+          type: boolean
+          description: '`force_login` forces the IdP to always show a login (even if there is an active
+            session with the IdP).'
+          default: false
+        validate_encryption_cert:
+          type: boolean
+          description: |-
+            `validate_encryption_cert` determines whether the certificate used for the encryption of the IdP responses should
+            be checked for validity.
+          default: true
+        skip_signature_validation:
+          type: boolean
+          description: |-
+            `skip_signature_validation` determines whether the validity check of an IdP response's signature
+            should be skipped.
+          default: false
+        allow_missing_attributes:
+          type: boolean
+          description: |-
+            `allow_missing_attributes` determines whether missing attributes are allowed (e.g. the IdP specifies a phone
+            attribute in the metadata but does not send it with a SAML Assertion Response).
+          default: false
+      additionalProperties: false
+      type: object
+      required:
+      - sign_authn_requests
+      - force_login
+      - validate_encryption_cert
+      - skip_signature_validation
+      - allow_missing_attributes
+    Passkey:
+      properties:
+        acquire_on_registration:
+          type: string
+          enum:
+          - always
+          - conditional
+          - never
+          description: '`acquire_on_registration` configures how users are prompted creating a passkey
+            on registration.'
+          default: always
+          meta:enum:
+            always: Indicates that users are always prompted to create a passkey on registration.
+            conditional: "Indicates that users are prompted to create a passkey on registration as long\
+              \ as the user does\n\t\t\t\t\t\tnot have a password.\n\n\t\t\t\t\t\tIf passwords are also\
+              \ conditionally acquired on registration, then users are given a choice as\n\t\t\t\t\t\t\
+              to what type of credential to create."
+            never: Indicates that users are never prompted to create a passkey on registration.
+        acquire_on_login:
+          type: string
+          enum:
+          - always
+          - conditional
+          - never
+          description: '`acquire_on_login` configures how users are prompted creating a passkey on login.'
+          default: always
+          meta:enum:
+            always: "Indicates that users are always prompted to create a passkey on login\n\t\t\t\t\t\
+              provided that they do not already have a passkey."
+            conditional: "Indicates that users are prompted to create a passkey on login provided that\n\
+              \t\t\t\t\t\tthey do not already have a passkey and do not have a password.\n\n\t\t\t\t\t\
+              \tIf passkeys are also conditionally acquired on login then users are given a choice as\
+              \ to what\n\t\t\t\t\t\ttype of credential to register."
+            never: Indicates that users are never prompted to create a passkey on login.
+        attestation_preference:
+          type: string
+          enum:
+          - direct
+          - indirect
+          - none
+          description: |-
+            `attestation_preference` is used to specify the preference regarding attestation conveyance during
+            credential generation.
+          default: direct
+          meta:enum:
+            direct: "Indicates that the Relying Party wants to receive the attestation statement as generated\
+              \ by\n\t\t\t\t\tthe authenticator."
+            indirect: "Indicates that the Relying Party prefers an attestation conveyance yielding verifiable\n\
+              \t\t\t\t\tattestation statements, but allows the client to decide how to obtain such attestation\
+              \ statements."
+            none: Indicates that the Relying Party is not interested in authenticator attestation.
+        enabled:
+          type: boolean
+          description: '`enabled` determines whether users can create or authenticate with passkeys.'
+          default: true
+        limit:
+          type: integer
+          description: '`limit` defines the maximum number of passkeys a user can have.'
+          default: 10
+        optional:
+          type: boolean
+          description: |-
+            `optional` determines whether users must create a passkey when prompted. The last remaining passkey cannot be
+            deleted if passkeys are required (`optional: false`).
+
+            It also takes part in determining the order of password and passkey acquisition
+            on login and registration (see also `acquire_on_login` and `acquire_on_registration`): if one credential type is
+            required (`optional: false`) then that one takes precedence, i.e. is acquired first.
+          default: true
+        user_verification:
+          type: string
+          enum:
+          - required
+          - preferred
+          - discouraged
+          description: |-
+            `user_verification` specifies the requirements regarding local authorization with an authenticator through
+             various authorization gesture modalities; for example, through a touch plus pin code,
+             password entry, or biometric recognition.
+
+            The setting applies to both WebAuthn registration and authentication ceremonies.
+          default: preferred
+          meta:enum:
+            discouraged: Indicates that no user verification should be performed.
+            preferred: "Indicates that user verification is preferred but will not fail the operation\
+              \ if no\n\t\t\t\t\t\tuser verification was performed."
+            required: Indicates that user verification is always required.
+      additionalProperties: false
+      type: object
+      required:
+      - acquire_on_registration
+      - acquire_on_login
+      - attestation_preference
+      - enabled
+      - limit
+      - optional
+      - user_verification
+    Password:
+      properties:
+        acquire_on_registration:
+          type: string
+          enum:
+          - always
+          - conditional
+          - never
+          description: '`acquire_on_registration` configures how users are prompted creating a password
+            on registration.'
+          default: always
+          meta:enum:
+            always: Indicates that users are always prompted to create a password on registration.
+            conditional: "Indicates that users are prompted to create a password on registration as long\
+              \ as the user does\n\t\t\t\t\t\tnot have a passkey.\n\n\t\t\t\t\t\tIf passkeys are also\
+              \ conditionally acquired on registration, then users are given a choice as\n\t\t\t\t\t\t\
+              to what type of credential to register."
+            never: Indicates that users are never prompted to create a password on registration.
+        acquire_on_login:
+          type: string
+          enum:
+          - always
+          - conditional
+          - never
+          description: '`acquire_on_login` configures how users are prompted creating a password on login.'
+          default: never
+          meta:enum:
+            always: "Indicates that users are always prompted to create a password on login\n\t\t\t\t\t\
+              provided that they do not already have a password."
+            conditional: "Indicates that users are prompted to create a password on login provided that\n\
+              \t\t\t\t\t\tthey do not already have a password and do not have a passkey.\n\n\t\t\t\t\t\
+              \tIf passkeys are also conditionally acquired on login then users are given a choice as\
+              \ to what\n\t\t\t\t\t\ttype of credential to register."
+            never: Indicates that users are never prompted to create a password on login.
+        enabled:
+          type: boolean
+          description: '`enabled` determines whether passwords are enabled or disabled.'
+          default: true
+        min_length:
+          type: integer
+          description: '`min_length` determines the minimum password length.'
+          default: 8
+        optional:
+          type: boolean
+          description: |-
+            `optional` determines whether users must set a password when prompted. The password cannot be deleted if
+            passwords are required (`optional: false`).
+
+            It also takes part in determining the order of password and passkey acquisition
+            on login and registration (see also `acquire_on_login` and `acquire_on_registration`): if one credential type is
+            required (`optional: false`) then that one takes precedence, i.e. is acquired first.
+          default: false
+        recovery:
+          type: boolean
+          description: '`recovery` determines whether users can start a recovery process, e.g. in case
+            of a forgotten password.'
+          default: true
+      additionalProperties: false
+      type: object
+      required:
+      - acquire_on_registration
+      - acquire_on_login
+      - enabled
+      - min_length
+      - optional
+      - recovery
+    Privacy:
+      properties:
+        show_account_existence_hints:
+          type: boolean
+          description: |-
+            `show_account_existence_hints` determines whether the user should get a user-friendly response rather than a privacy protecting one. E.g. on sign-up, when enabled the user will get "user already exists" response.
+            It only has an effect when emails are enabled.
+          default: false
+        only_show_actual_login_methods:
+          type: boolean
+          description: |-
+            `only_show_actual_login_methods` determines whether the user will only be prompted with his configured login methods.
+            It only has an effect when emails are enabled, can be used for authentication and passwords are enabled.
+          default: false
+      additionalProperties: false
+      type: object
+      required:
+      - show_account_existence_hints
+      - only_show_actual_login_methods
+    RelyingParty:
+      properties:
+        display_name:
+          type: string
+          description: |-
+            `display_name` is the service's name that some WebAuthn Authenticators will display to the user during registration
+            and authentication ceremonies.
+          default: Hanko Authentication Service
+        id:
+          type: string
+          description: |-
+            `id` is the [effective domain](https://html.spec.whatwg.org/multipage/browsers.html#concept-origin-effective-domain)
+            the passkey/WebAuthn credentials will be bound to.
+          default: localhost
+        origins:
+          items:
+            type: string
+          type: array
+          minItems: 1
+          description: |-
+            `origins` is a list of origins for which passkeys/WebAuthn credentials will be accepted by the server. Must
+            include the protocol and can only be the effective domain, or a registrable domain suffix of the effective
+            domain, as specified in the [`id`](#id). Except for `localhost`, the protocol **must** always be `https` for
+            passkeys/WebAuthn to work. IP Addresses will not work.
+
+            For an Android application the origin must be the base64 url encoded SHA256 fingerprint of the signing
+            certificate.
+          default:
+          - http://localhost:8888
+      additionalProperties: false
+      type: object
+      required:
+      - display_name
+      - id
+      - origins
+      description: RelyingParty webauthn settings for your application using hanko.
+    SMTP:
+      properties:
+        host:
+          type: string
+          default: localhost
+        port:
+          type: string
+          default: '465'
+        user:
+          type: string
+        password:
+          type: string
+      additionalProperties: false
+      type: object
+      required:
+      - host
+      - port
+      - user
+      - password
+      description: SMTP Server Settings for sending passcodes
+    Saml:
+      properties:
+        enabled:
+          type: boolean
+          description: '`enabled` determines whether the SAML API endpoints are available.'
+          default: false
+        endpoint_url:
+          type: string
+          description: |-
+            `endpoint` is URL at which the SAML endpoints like metadata, callback, etc. are available
+            (e.g. `{YOUR_BACKEND_INSTANCE}/api`).
+
+            Will be provided as metadata for IdP.
+        audience_uri:
+          type: string
+          description: '`audience_uri` determines the intended recipient or audience for the SAML Assertion.'
+        default_redirect_url:
+          type: string
+          description: '`default_redirect_url` is the URL to redirect to in case of errors or when no
+            `allowed_redirect_url` is provided.'
+        allowed_redirect_urls:
+          items:
+            type: string
+          type: array
+          description: |-
+            `allowed_redirect_urls` is a list of URLs the backend is allowed to redirect to after third party sign-in was
+            successful.
+
+            Supports wildcard matching through globbing. e.g. `https://*.example.com` will allow `https://foo.example.com`
+            and `https://bar.example.com` to be accepted.
+
+            Globbing is also supported for paths, e.g. `https://foo.example.com/*` will match `https://foo.example.com/page1`
+            and `https://foo.example.com/page2`.
+
+            A double asterisk (`**`) acts as a "super"-wildcard/match-all.
+
+            See [here](https://pkg.go.dev/github.com/gobwas/glob#Compile) for more on globbinh.
+        options:
+          $ref: '#/components/schemas/Options'
+          title: options
+          description: '`options` allows setting optional features for service provider operations.'
+        identity_providers:
+          items:
+            $ref: '#/components/schemas/IdentityProvider'
+          type: array
+          description: '`identity_providers` is a list of SAML identity providers.'
+      additionalProperties: false
+      type: object
+      required:
+      - enabled
+      - endpoint_url
+      - audience_uri
+      - default_redirect_url
+      - allowed_redirect_urls
+      - options
+      - identity_providers
+    Secrets:
+      if:
+        properties:
+          key_management:
+            properties:
+              type:
+                const: local
+      then:
+        properties:
+          keys:
+            minItems: 1
+      properties:
+        key_management:
+          $ref: '#/components/schemas/KeyManagement'
+          description: |-
+            KeyManagement configures the key management system used for signing JWTs.
+            Supports 'local' (default) which uses the keys defined in the 'keys' field to encrypt a newly generated private
+            RSA key in the database, or 'aws_kms' which uses AWS Key Management Service for key signatures.
+        keys:
+          items:
+            type: string
+            minLength: 16
+            title: keys
+          type: array
+          description: |-
+            `keys` are used to en- and decrypt the JWKs which get used to sign the JWTs issued by the API.
+            For every key a JWK is generated, encrypted with the key and persisted in the database.
+
+            You can use this list for key rotation: add a new key to the beginning of the list and the corresponding
+            JWK will then be used for signing JWTs. All tokens signed with the previous JWK(s) will still
+            be valid until they expire. Removing a key from the list does not remove the corresponding
+            database record. If you remove a key, you also have to remove the database record, otherwise
+            application startup will fail.
+            Deprecated: use top level "SecretKeys" instead
+      additionalProperties: false
+      type: object
+      required:
+      - key_management
+      - keys
+    SecurityKeys:
+      properties:
+        attestation_preference:
+          type: string
+          enum:
+          - direct
+          - indirect
+          - none
+          description: |-
+            `attestation_preference` is used to specify the preference regarding attestation conveyance during
+            credential generation.
+          default: direct
+        authenticator_attachment:
+          type: string
+          enum:
+          - platform
+          - cross-platform
+          - no_preference
+          description: '`authenticator_attachment`  is used to specify the preference regarding authenticator
+            attachment during credential registration.'
+          default: cross-platform
+        enabled:
+          type: boolean
+          description: '`enabled` determines whether security keys are eligible for multi-factor-authentication.'
+          default: true
+        limit:
+          type: integer
+          description: '''limit'' determines the maximum number of security keys a user can register.'
+          default: 10
+        user_verification:
+          type: string
+          enum:
+          - required
+          - preferred
+          - discouraged
+          description: |-
+            `user_verification` specifies the requirements regarding local authorization with an authenticator through
+             various authorization gesture modalities; for example, through a touch plus pin code,
+             password entry, or biometric recognition.
+
+            The setting applies to both WebAuthn registration and authentication ceremonies.
+          default: discouraged
+      additionalProperties: false
+      type: object
+      required:
+      - attestation_preference
+      - authenticator_attachment
+      - enabled
+      - limit
+      - user_verification
+    SecurityNotificationConfiguration:
+      properties:
+        enabled:
+          type: boolean
+          default: true
+      additionalProperties: false
+      type: object
+      required:
+      - enabled
+    SecurityNotificationTypes:
+      properties:
+        password_update:
+          $ref: '#/components/schemas/SecurityNotificationConfiguration'
+        primary_email_update:
+          $ref: '#/components/schemas/SecurityNotificationConfiguration'
+        email_create:
+          $ref: '#/components/schemas/SecurityNotificationConfiguration'
+        email_delete:
+          $ref: '#/components/schemas/SecurityNotificationConfiguration'
+        passkey_create:
+          $ref: '#/components/schemas/SecurityNotificationConfiguration'
+        mfa_create:
+          $ref: '#/components/schemas/SecurityNotificationConfiguration'
+        mfa_delete:
+          $ref: '#/components/schemas/SecurityNotificationConfiguration'
+      additionalProperties: false
+      type: object
+      required:
+      - password_update
+      - primary_email_update
+      - email_create
+      - email_delete
+      - passkey_create
+      - mfa_create
+      - mfa_delete
+    SecurityNotifications:
+      properties:
+        notifications:
+          $ref: '#/components/schemas/SecurityNotificationTypes'
+      additionalProperties: false
+      type: object
+      required:
+      - notifications
+    Service:
+      properties:
+        name:
+          type: string
+          description: |-
+            `name` determines the name of the service.
+            This value is used, e.g. in the subject header of outgoing emails.
+      additionalProperties: false
+      type: object
+      required:
+      - name
+    Session:
+      properties:
+        allow_revocation:
+          type: boolean
+          description: '`allow_revocation` allows users to revoke their own sessions.'
+          default: true
+        audience:
+          items:
+            type: string
+          type: array
+          description: |-
+            `audience` is a list of strings that identifies the recipients that the JWT is intended for.
+            The audiences are placed in the `aud` claim of the JWT.
+            If not set, it defaults to the value of the`webauthn.relying_party.id` configuration parameter.
+        acquire_ip_address:
+          type: boolean
+          description: '`acquire_ip_address` stores the user''s IP address in the database.'
+          default: true
+        acquire_user_agent:
+          type: boolean
+          description: '`acquire_user_agent` stores the user''s user agent in the database.'
+          default: true
+        cookie:
+          $ref: '#/components/schemas/Cookie'
+          description: '`cookie` contains configuration for the session cookie issued on successful registration
+            or login.'
+        enable_auth_token_header:
+          type: boolean
+          description: |-
+            `enable_auth_token_header` determines whether a session token (JWT) is returned in an `X-Auth-Token`
+            header after a successful authentication. This option should be set to `true` if API and client applications
+            run on different domains.
+          default: false
+        issuer:
+          type: string
+          description: |-
+            `issuer` is a string that identifies the principal (human user, an organization, or a service)
+            that issued the JWT. Its value is set in the `iss` claim of a JWT.
+        lifespan:
+          type: string
+          description: |-
+            `lifespan` determines the maximum duration for which a session token (JWT) is valid. It must be a (possibly signed) sequence of decimal
+            numbers, each with optional fraction and a unit suffix, such as "300ms", "-1.5h" or "2h45m".
+            Valid time units are "ns", "us" (or "µs"), "ms", "s", "m", "h".
+          default: 12h
+        limit:
+          type: integer
+          description: |-
+            `limit` determines the maximum number of server-side sessions a user can have. When the limit is exceeded,
+            older sessions are invalidated.
+          default: 5
+        show_on_profile:
+          type: boolean
+          description: '`show_on_profile` indicates that the sessions should be listed on the profile.'
+          default: true
+        jwt_template:
+          $ref: '#/components/schemas/JWTTemplate'
+          description: |-
+            `jwt_template` defines a template for adding custom `claims` to session JWTs.
+
+            These claims are processed at JWT generation time and can include static values,
+            templated strings using Go's text/template syntax, or nested structures (maps and slices).
+
+            The template has access to user data via the `.User` field, which includes:
+            - `.User.UserID`: The user's unique ID (string)
+            - `.User.Email`: Email details (optional, with `.Address`, `.IsPrimary`, `.IsVerified`)
+            - `.User.Username`: The user's username (string, optional)
+
+            Claims that fail to process (e.g., due to invalid templates) are logged and skipped,
+            ensuring JWT generation continues without interruption.
+
+            Example usage in YAML configuration:
+            ```yaml
+            session:
+              lifespan: 24h
+              jwt_template:
+                claims:
+                  role: "user"                               # Static value
+                  user_email: "{{.User.Email.Address}}"      # Templated string
+                  is_verified: "{{.User.Email.IsVerified}}"  # Boolean from user data
+                  metadata:                                  # Nested map
+                    source: "hanko"
+                    greeting: "Hello {{.User.Username}}"
+                  scopes:                                    # Slice with templated value
+                    - "read"
+                    - "write"
+                    - "{{if .User.Email.IsVerified}}admin{{else}}basic{{end}}"
+            ```
+
+            In this example:
+            - `role` is a static string ("user").
+            - `user_email` dynamically inserts the user's email address.
+            - `is_verified` inserts a boolean indicating email verification status.
+            - `metadata` is a nested map with a static `source` and a templated `greeting`.
+            - `scopes` is a slice combining static values and a conditional template.
+
+            Notes:
+            - Claims with the following keys will be ignored because they are currently added to the JWT
+              by default:
+                - sub
+                - iat
+                - exp
+                - aud
+                - iss
+                - email
+                - username
+                - session_id
+            - Templates must be valid Go `text/template` syntax. Invalid templates are logged and ignored.
+            - Boolean strings ("true" or "false") from templates are automatically converted to actual booleans.
+            - Use conditionals (e.g., `{{if .User.Email}}`) to handle optional fields safely.
+
+            For more details on template syntax, see: https://pkg.go.dev/text/template
+        idle_timeout:
+          type: string
+          description: |-
+            IdleTimeout specifies the duration a session can remain idle before being automatically terminated.
+            It must be a (possibly signed) sequence of decimal
+            numbers, each with optional fraction and a unit suffix, such as "300ms", "-1.5h" or "2h45m".
+            Valid time units are "ns", "us" (or "µs"), "ms", "s", "m", "h".
+          default: '0'
+      additionalProperties: false
+      type: object
+      required:
+      - allow_revocation
+      - audience
+      - acquire_ip_address
+      - acquire_user_agent
+      - cookie
+      - enable_auth_token_header
+      - issuer
+      - lifespan
+      - limit
+      - show_on_profile
+      - idle_timeout
+    TOTP:
+      properties:
+        enabled:
+          type: boolean
+          description: '`enabled` determines whether TOTP is eligible for multi-factor-authentication.'
+          default: true
+      additionalProperties: false
+      type: object
+      required:
+      - enabled
+    ThirdParty:
+      if:
+        allOf:
+        - properties:
+            providers:
+              patternProperties:
+                ^.*:
+                  $ref: '#/components/schemas/ThirdPartyProvider'
+                  properties:
+                    enabled:
+                      anyOf:
+                      - const: false
+                      - const: 'null'
+              type: object
+        - properties:
+            custom_providers:
+              additionalProperties:
+                $ref: '#/components/schemas/CustomThirdPartyProvider'
+                properties:
+                  enabled:
+                    anyOf:
+                    - const: false
+                    - type: 'null'
+      then: {}
+      else:
+        required:
+        - redirect_url
+        - error_redirect_url
+        - allowed_redirect_urls
+      properties:
+        providers:
+          $ref: '#/components/schemas/ThirdPartyProviders'
+          title: providers
+          description: '`providers` contains the configurations for the available OAuth/OIDC identity
+            providers.'
+        custom_providers:
+          $ref: '#/components/schemas/CustomThirdPartyProviders'
+          title: custom_providers
+          description: '`custom_providers contains the configurations for custom OAuth/OIDC identity providers.'
+        redirect_url:
+          type: string
+          description: |-
+            `redirect_url` is the URL the third party provider redirects to with an authorization code. Must consist of the base URL
+            of your running Hanko backend instance and the `callback` endpoint of the API,
+            i.e. `{YOUR_BACKEND_INSTANCE}/thirdparty/callback.`
+
+            Required if any of the [`providers`](#providers) are `enabled`.
+          examples:
+          - https://yourinstance.com/thirdparty/callback
+        error_redirect_url:
+          type: string
+          description: |-
+            `error_redirect_url` is the URL the backend redirects to if an error occurs during third party sign-in.
+            Errors are provided as 'error' and 'error_description' query params in the redirect location URL.
+
+            When using the Hanko web components it should be the URL of the page that embeds the web component such that
+            errors can be processed properly by the web component.
+
+            You do not have to add this URL to the 'allowed_redirect_urls', it is automatically included when validating
+            redirect URLs.
+
+            Required if any of the [`providers`](#providers) are `enabled`. Must not have trailing slash.
+        default_redirect_url:
+          type: string
+          description: |-
+            `default_redirect_url` is the URL the backend redirects to after it successfully verified
+            the response from any third party provider.
+
+            Must not have trailing slash.
+        allowed_redirect_urls:
+          items:
+            type: string
+          type: array
+          minItems: 1
+          description: |-
+            `allowed_redirect_urls` is a list of URLs the backend is allowed to redirect to after third party sign-in was
+            successful.
+
+            Supports wildcard matching through globbing. e.g. `https://*.example.com` will allow `https://foo.example.com`
+            and `https://bar.example.com` to be accepted.
+
+            Globbing is also supported for paths, e.g. `https://foo.example.com/*` will match `https://foo.example.com/page1`
+            and `https://foo.example.com/page2`.
+
+            A double asterisk (`**`) acts as a "super"-wildcard/match-all.
+
+            See [here](https://pkg.go.dev/github.com/gobwas/glob#Compile) for more on globbing.
+
+            Must not be empty if any of the [`providers`](#providers) are `enabled`. URLs in the list must not have a trailing slash.
+      additionalProperties: false
+      type: object
+      required:
+      - providers
+      - custom_providers
+      - redirect_url
+      - error_redirect_url
+      - default_redirect_url
+      - allowed_redirect_urls
+    ThirdPartyProvider:
+      if:
+        properties:
+          enabled:
+            const: true
+      then:
+        required:
+        - client_id
+        - secret
+      else: {}
+      properties:
+        allow_linking:
+          type: boolean
+          description: |-
+            `allow_linking` indicates whether existing accounts can be automatically linked with this provider.
+
+            Linking is based on matching one of the email addresses of an existing user account with the (primary)
+            email address of the third party provider account.
+        client_id:
+          type: string
+          description: |-
+            `client_id` is the ID of the OAuth/OIDC client. Must be obtained from the provider.
+
+            Required if the provider is `enabled`.
+        enabled:
+          type: boolean
+          description: '`enabled` determines whether this provider is enabled.'
+          default: false
+        prompt:
+          type: string
+          description: |-
+            `prompt` specifies whether the Authorization Server prompts the End-User for reauthentication and consent.
+            Possible values are:
+            - login
+            - none
+            - consent
+            - select_account
+            Please note that not all providers support all values. Check the corresponding docs of the provider for supported values.
+        secret:
+          type: string
+          description: |-
+            `secret` is the client secret for the OAuth/OIDC client. Must be obtained from the provider.
+
+            Required if the provider is `enabled`.
+      additionalProperties: false
+      type: object
+      required:
+      - allow_linking
+      - client_id
+      - enabled
+      - prompt
+      - secret
+      title: provider
+    ThirdPartyProviders:
+      properties:
+        apple:
+          $ref: '#/components/schemas/ThirdPartyProvider'
+          description: '`apple` contains the provider configuration for Apple.'
+        discord:
+          $ref: '#/components/schemas/ThirdPartyProvider'
+          description: '`discord` contains the provider configuration for Discord.'
+        github:
+          $ref: '#/components/schemas/ThirdPartyProvider'
+          description: '`github` contains the provider configuration for GitHub.'
+        google:
+          $ref: '#/components/schemas/ThirdPartyProvider'
+          description: '`google` contains the provider configuration for Google.'
+        linkedin:
+          $ref: '#/components/schemas/ThirdPartyProvider'
+          description: '`linkedin` contains the provider configuration for LinkedIn.'
+        microsoft:
+          $ref: '#/components/schemas/ThirdPartyProvider'
+          description: '`microsoft` contains the provider configuration for Microsoft.'
+        facebook:
+          $ref: '#/components/schemas/ThirdPartyProvider'
+          description: '`facebook` contains the provider configuration for Facebook.'
+      additionalProperties: false
+      type: object
+      required:
+      - apple
+      - discord
+      - github
+      - google
+      - linkedin
+      - microsoft
+      - facebook
+    Username:
+      properties:
+        acquire_on_login:
+          type: boolean
+          description: "`acquire_on_login` determines whether users, provided that they do not already\
+            \ have set a username,\n\tare prompted to provide a username on login."
+          default: true
+        acquire_on_registration:
+          type: boolean
+          description: '`acquire_on_registration` determines whether users are prompted to provide a username
+            on registration.'
+          default: true
+        enabled:
+          type: boolean
+          description: |-
+            `enabled` determines whether users can set a unique username.
+
+            Usernames can contain letters (a-z,A-Z), numbers (0-9), and underscores.
+          default: false
+        max_length:
+          type: integer
+          description: '`max_length` specifies the maximum allowed length of a username.'
+          default: 32
+        min_length:
+          type: integer
+          description: '`min_length` specifies the minimum length of a username.'
+          default: 3
+        optional:
+          type: boolean
+          description: |-
+            `optional` determines whether users must provide a username when prompted. The username can only be changed but
+            not deleted if usernames are required (`optional: false`).
+          default: true
+        use_as_login_identifier:
+          type: boolean
+          description: '`use_as_login_identifier` determines whether usernames, if enabled, can be used
+            for logging in.'
+          default: true
+      additionalProperties: false
+      type: object
+      required:
+      - acquire_on_login
+      - acquire_on_registration
+      - enabled
+      - max_length
+      - min_length
+      - optional
+      - use_as_login_identifier
+    WebauthnSettings:
+      properties:
+        relying_party:
+          $ref: '#/components/schemas/RelyingParty'
+          title: relying_party
+        timeouts:
+          $ref: '#/components/schemas/WebauthnTimeouts'
+          title: timeouts
+          description: '`timeouts` specifies the timeouts for passkey/WebAuthn registration and login.'
+      additionalProperties: false
+      type: object
+      required:
+      - relying_party
+      - timeouts
+      description: WebauthnSettings defines the settings for the webauthn authentication mechanism
+    WebauthnTimeouts:
+      properties:
+        registration:
+          type: integer
+          description: |-
+            `registration` determines the time, in milliseconds, that the client is willing to wait for the credential
+            creation request to the WebAuthn API to complete.
+          default: 600000
+        login:
+          type: integer
+          description: |-
+            `login` determines the time, in milliseconds, that the client is willing to wait for the credential
+             request to the WebAuthn API to complete.
+          default: 600000
+      additionalProperties: false
+      type: object
+      required:
+      - registration
+      - login
+    Webhook:
+      properties:
+        callback:
+          type: string
+          description: '`callback` specifies the URL to which the change data will be sent.'
+        events:
+          $ref: '#/components/schemas/Events'
+          items:
+            type: string
+            enum:
+            - user
+            - user.create
+            - user.delete
+            - user.login
+            - user.update
+            - user.update.email
+            - user.update.email.create
+            - user.update.email.delete
+            - user.update.email.primary
+            - user.update.password.update
+            - user.update.username
+            - user.update.username.create
+            - user.update.username.delete
+            - user.update.username.update
+            - email.send
+            title: events
+            meta:enum:
+              email.send: 'Triggers on: an email was sent or should be sent'
+              user: 'Triggers on: user creation, user deletion, user update, email creation, email deletion,
+                change of primary email'
+              user.create: 'Triggers on: user creation'
+              user.delete: 'Triggers on: user deletion'
+              user.login: 'Triggers on: user login'
+              user.update: 'Triggers on: user update, email creation, email deletion, change of primary
+                email'
+              user.update.email: 'Triggers on: email creation, email deletion, change of primary email'
+              user.update.email.create: 'Triggers on: email creation'
+              user.update.email.delete: 'Triggers on: email deletion'
+              user.update.email.primary: 'Triggers on: change of primary email'
+              user.update.password.update: 'Triggers on: change of password'
+              user.update.username: 'Triggers on: username creation, username deletion, change of username'
+              user.update.username.create: 'Triggers on: username creation'
+              user.update.username.delete: 'Triggers on: username deletion'
+              user.update.username.update: 'Triggers on: change of username'
+          title: events
+          description: '`events` is a list of events this hook listens for.'
+      additionalProperties: false
+      type: object
+      required:
+      - callback
+      - events
+      title: hooks
+    WebhookSettings:
+      properties:
+        allow_time_expiration:
+          type: boolean
+          description: |-
+            `allow_time_expiration` determines whether webhooks are disabled when unused for 30 days
+            (only for database webhooks).
+          default: false
+        enabled:
+          type: boolean
+          description: '`enabled` enables the webhook feature.'
+          default: false
+        hooks:
+          $ref: '#/components/schemas/Webhooks'
+          title: hooks
+          description: |-
+            `hooks` is a list of Webhook configurations.
+
+            When using environment variables the value for the `WEBHOOKS_HOOKS` key must be specified in the following
+            format:
+            `{"callback":"http://app.com/usercb","events":["user"]};{"callback":"http://app.com/emailcb","events":["email.send"]}`
+      additionalProperties: false
+      type: object
+      required:
+      - allow_time_expiration
+      - enabled
+      - hooks
+    Webhooks:
+      items:
+        $ref: '#/components/schemas/Webhook'
+      type: array
+    CreateSamlProviderRequest:
+      type: object
+      properties:
+        name:
+          type: string
+        metadata_url:
+          type: string
+          format: uri
+        domain:
+          type: string
+          description: Email domain used to select this IdP at login.
+        enabled:
+          type: boolean
+          default: false
+        skip_email_verification:
+          type: boolean
+          default: false
+        attribute_map:
+          $ref: '#/components/schemas/AttributeMap'
+      required:
+      - name
+      - metadata_url
+      - domain
+    UpdateSamlProviderRequest:
+      type: object
+      properties:
+        name:
+          type: string
+        metadata_url:
+          type: string
+          format: uri
+        domain:
+          type: string
+        enabled:
+          type: boolean
+        skip_email_verification:
+          type: boolean
+        attribute_map:
+          $ref: '#/components/schemas/AttributeMap'
+      required:
+      - name
+      - metadata_url
+      - domain
+    SamlProvider:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        tenant_id:
+          type: string
+          format: uuid
+        name:
+          type: string
+        entity_id:
+          type: string
+          description: Entity ID generated for this provider.
+        metadata_url:
+          type: string
+          format: uri
+        domain:
+          type: string
+        enabled:
+          type: boolean
+        skip_email_verification:
+          type: boolean
+        attribute_map:
+          $ref: '#/components/schemas/AttributeMap'
+        created_at:
+          type: string
+        updated_at:
+          type: string
+      required:
+      - id
+      - tenant_id
+      - name
+      - entity_id
+      - metadata_url
+      - domain
+      - enabled
+      - skip_email_verification
+      - created_at
+      - updated_at
