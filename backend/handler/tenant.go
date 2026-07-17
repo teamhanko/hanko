@@ -62,8 +62,8 @@ func (h *TenantHandler) Create(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("invalid tenant ID: %v", err))
 	}
 
-	// Parse and validate the config using koanf
-	tenantConfigJSON, tenantConfig, err := h.validateTenantConfig(body.Config)
+	// Create allows a partial config: anything not given is filled in from config.DefaultTenantConfig().
+	tenantConfigJSON, tenantConfig, err := h.validateTenantConfigForCreate(body.Config)
 	if err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("invalid config: %v", err))
 	}
@@ -200,12 +200,6 @@ func (h *TenantHandler) Update(c echo.Context) error {
 		return dto.ToHttpError(err)
 	}
 
-	// Parse and validate the config using koanf
-	cfg, _, err := h.validateTenantConfig(body.Config)
-	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("invalid config: %v", err))
-	}
-
 	err = h.persister.Transaction(func(tx *pop.Connection) error {
 		p := h.persister.GetTenantPersisterWithConnection(tx)
 
@@ -216,6 +210,14 @@ func (h *TenantHandler) Update(c echo.Context) error {
 
 		if tenant == nil {
 			return echo.NewHTTPError(http.StatusNotFound, "tenant not found")
+		}
+
+		// PUT merges the given config onto the tenant's current one: a field the request omits
+		// keeps its existing value. To clear a field, send its zero value explicitly (e.g. "",
+		// false, [], {}) — omission always means "leave as is", never "reset".
+		cfg, _, err := h.validateTenantConfigForUpdate(tenant.Config, body.Config)
+		if err != nil {
+			return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("invalid config: %v", err))
 		}
 
 		tenant.Config = cfg
@@ -276,28 +278,70 @@ func (h *TenantHandler) Delete(c echo.Context) error {
 	return c.NoContent(http.StatusNoContent)
 }
 
-// validateTenantConfig parses and validates the tenant config JSON using koanf
-func (h *TenantHandler) validateTenantConfig(configJSON json.RawMessage) (json.RawMessage, *config.TenantConfig, error) {
+// validateTenantConfigForCreate parses the tenant config JSON using koanf, filling in anything not
+// given from config.DefaultTenantConfig(). Creation allows a partial document because every section
+// has a usable default.
+func (h *TenantHandler) validateTenantConfigForCreate(configJSON json.RawMessage) (json.RawMessage, *config.TenantConfig, error) {
 	if len(configJSON) == 0 {
 		return nil, nil, fmt.Errorf("config cannot be empty")
 	}
 
 	k := koanf.New(".")
 
-	// Load the JSON config into koanf
 	if err := k.Load(rawbytes.Provider(configJSON), koanfJson.Parser()); err != nil {
 		return nil, nil, fmt.Errorf("failed to parse config JSON: %w", err)
 	}
 
-	// Unmarshal into TenantConfig to validate structure
-	var tenantConfig = new(config.DefaultTenantConfig())
-	if err := k.Unmarshal("", &tenantConfig); err != nil {
+	tenantConfig := new(config.DefaultTenantConfig())
+	if err := k.Unmarshal("", tenantConfig); err != nil {
 		return nil, nil, fmt.Errorf("failed to unmarshal into TenantConfig: %w", err)
 	}
 
-	err := tenantConfig.PostProcess()
+	b, err := h.finalizeTenantConfig(tenantConfig)
 	if err != nil {
-		return nil, nil, fmt.Errorf("failed to post process tenant settings: %w", err)
+		return nil, nil, err
+	}
+
+	return b, tenantConfig, nil
+}
+
+// validateTenantConfigForUpdate parses the tenant config JSON for a PUT, merging it onto the
+// tenant's existing config: a field the given JSON omits keeps its current value rather than
+// resetting to anything. Both sources are loaded into the same koanf instance, so later (given)
+// values override earlier (existing) ones only where the given JSON actually specifies a key.
+func (h *TenantHandler) validateTenantConfigForUpdate(existingConfigJSON, configJSON json.RawMessage) (json.RawMessage, *config.TenantConfig, error) {
+	if len(configJSON) == 0 {
+		return nil, nil, fmt.Errorf("config cannot be empty")
+	}
+
+	k := koanf.New(".")
+
+	if err := k.Load(rawbytes.Provider(existingConfigJSON), koanfJson.Parser()); err != nil {
+		return nil, nil, fmt.Errorf("failed to parse existing config JSON: %w", err)
+	}
+
+	if err := k.Load(rawbytes.Provider(configJSON), koanfJson.Parser()); err != nil {
+		return nil, nil, fmt.Errorf("failed to parse config JSON: %w", err)
+	}
+
+	tenantConfig := new(config.TenantConfig)
+	if err := k.Unmarshal("", tenantConfig); err != nil {
+		return nil, nil, fmt.Errorf("failed to unmarshal into TenantConfig: %w", err)
+	}
+
+	b, err := h.finalizeTenantConfig(tenantConfig)
+	if err != nil {
+		return nil, nil, err
+	}
+
+	return b, tenantConfig, nil
+}
+
+// finalizeTenantConfig runs the post-processing and semantic/cross-field validation shared by
+// creation and replacement, then marshals the result.
+func (h *TenantHandler) finalizeTenantConfig(tenantConfig *config.TenantConfig) (json.RawMessage, error) {
+	if err := tenantConfig.PostProcess(); err != nil {
+		return nil, fmt.Errorf("failed to post process tenant settings: %w", err)
 	}
 
 	cfg := config.Config{
@@ -305,13 +349,14 @@ func (h *TenantHandler) validateTenantConfig(configJSON json.RawMessage) (json.R
 		TenantConfig:      *tenantConfig,
 	}
 
-	if err = cfg.ValidateTenantAndCrossConfig(); err != nil {
-		return nil, nil, fmt.Errorf("failed to validate tenant settings: %w", err)
+	if err := cfg.ValidateTenantAndCrossConfig(); err != nil {
+		return nil, fmt.Errorf("failed to validate tenant settings: %w", err)
 	}
 
 	b, err := json.Marshal(tenantConfig)
 	if err != nil {
-		return nil, nil, fmt.Errorf("failed to marshal config JSON: %w", err)
+		return nil, fmt.Errorf("failed to marshal config JSON: %w", err)
 	}
-	return b, tenantConfig, nil
+
+	return b, nil
 }

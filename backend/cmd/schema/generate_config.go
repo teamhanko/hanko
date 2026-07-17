@@ -17,12 +17,13 @@ func NewGenerateConfigCommand() *cobra.Command {
 		Short: "Generate JSON schema for the backend config",
 		Run: func(cmd *cobra.Command, args []string) {
 			err := generateSchema(generateSchemaParams{
-				structure:       &config.Config{},
-				rootSchemaTitle: "Config",
-				output:          output,
-				extractComments: true,
-				doNotReference:  false,
-				commentPaths:    []string{"config"},
+				structure:                  &config.Config{},
+				rootSchemaTitle:            "Config",
+				output:                     output,
+				extractComments:            true,
+				doNotReference:             false,
+				commentPaths:               []string{"config"},
+				requiredFromJSONSchemaTags: true,
 			})
 			if err != nil {
 				log.Fatal(err)

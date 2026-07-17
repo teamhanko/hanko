@@ -5,7 +5,7 @@ import "fmt"
 type Email struct {
 	// `acquire_on_login` determines whether users, provided that they do not already have registered an email,
 	//	are prompted to provide an email on login.
-	AcquireOnLogin bool `yaml:"acquire_on_login" json:"acquire_on_login" koanf:"acquire_on_login" split_words:"true" jsonschema:"default=false"`
+	AcquireOnLogin bool `yaml:"acquire_on_login" json:"acquire_on_login" koanf:"acquire_on_login" split_words:"true" jsonschema:"default=true"`
 	// `acquire_on_registration` determines whether users are prompted to provide an email on registration.
 	AcquireOnRegistration bool `yaml:"acquire_on_registration" json:"acquire_on_registration" koanf:"acquire_on_registration" split_words:"true" jsonschema:"default=true"`
 	// `enabled` determines whether emails are enabled.
@@ -13,7 +13,7 @@ type Email struct {
 	// 'limit' determines the maximum number of emails a user can register.
 	Limit int `yaml:"limit" json:"limit" koanf:"limit" jsonschema:"default=5"`
 	// `max_length` specifies the maximum allowed length of an email address.
-	MaxLength int `yaml:"max_length" json:"max_length" koanf:"max_length" jsonschema:"default=100"`
+	MaxLength int `yaml:"max_length" json:"max_length" koanf:"max_length" jsonschema:"default=120"`
 	// `optional` determines whether users must provide an email when prompted.
 	// There must always be at least one email address associated with an account. The primary email address cannot be
 	// deleted if emails are required (`optional`: false`).

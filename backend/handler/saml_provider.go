@@ -1,6 +1,7 @@
 package handler
 
 import (
+	"encoding/json"
 	"errors"
 	"fmt"
 	"net/http"
@@ -155,21 +156,59 @@ func (h *SamlProviderHandler) Update(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("validation failed: %v", err))
 	}
 
-	// Use empty attribute map if not provided
+	// PUT merges the given fields onto the provider's current ones: a field the request omits
+	// keeps its existing value.
+	existing, err := h.providerManagementService.Get(tenantID, providerID)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusInternalServerError, fmt.Sprintf("failed to get provider: %v", err))
+	}
+	if existing == nil {
+		return echo.NewHTTPError(http.StatusNotFound, "provider not found")
+	}
+
+	name := existing.Name
+	if req.Name != nil {
+		name = *req.Name
+	}
+
+	metadataURL := existing.MetadataURL
+	if req.MetadataURL != nil {
+		metadataURL = *req.MetadataURL
+	}
+
+	domain := existing.Domain
+	if req.Domain != nil {
+		domain = *req.Domain
+	}
+
+	enabled := existing.Enabled
+	if req.Enabled != nil {
+		enabled = *req.Enabled
+	}
+
+	skipEmailVerification := existing.SkipEmailVerification
+	if req.SkipEmailVerification != nil {
+		skipEmailVerification = *req.SkipEmailVerification
+	}
+
 	attributeMap := config.AttributeMap{}
 	if req.AttributeMap != nil {
 		attributeMap = *req.AttributeMap
+	} else if len(existing.AttributeMap) > 0 {
+		if err := json.Unmarshal(existing.AttributeMap, &attributeMap); err != nil {
+			return echo.NewHTTPError(http.StatusInternalServerError, fmt.Sprintf("failed to parse existing attribute map: %v", err))
+		}
 	}
 
 	// Update provider
 	err = h.providerManagementService.Update(
 		tenantID,
 		providerID,
-		req.Name,
-		req.MetadataURL,
-		req.Domain,
-		req.Enabled,
-		req.SkipEmailVerification,
+		name,
+		metadataURL,
+		domain,
+		enabled,
+		skipEmailVerification,
 		attributeMap,
 	)
 	if err != nil {

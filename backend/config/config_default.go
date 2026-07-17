@@ -82,7 +82,7 @@ func DefaultTenantConfig() TenantConfig {
 			Name: "Hanko Authentication Service",
 		},
 		Secrets: Secrets{
-			// Keys: []string{"abcedfghijklmnopqrstuvwxyz"},
+			Keys: []string{},
 			KeyManagement: KeyManagement{
 				Type: "local",
 			},
@@ -147,6 +147,7 @@ func DefaultTenantConfig() TenantConfig {
 			Lifespan:         "12h",
 			Cookie: Cookie{
 				HttpOnly:  true,
+				Name:      "hanko",
 				Retention: "persistent",
 				SameSite:  "strict",
 				Secure:    true,
@@ -154,12 +155,15 @@ func DefaultTenantConfig() TenantConfig {
 			Limit:         5,
 			ShowOnProfile: true,
 			IdleTimeout:   "0m",
+			Audience:      []string{},
 		},
 		Account: Account{
 			AllowDeletion: false,
 			AllowSignup:   true,
 		},
 		ThirdParty: ThirdParty{
+			AllowedRedirectURLS: []string{},
+			CustomProviders:     CustomThirdPartyProviders{},
 			Providers: ThirdPartyProviders{
 				Apple: ThirdPartyProvider{
 					DisplayName:  "Apple",
@@ -252,6 +256,17 @@ func DefaultTenantConfig() TenantConfig {
 		Privacy: Privacy{
 			ShowAccountExistenceHints:  false,
 			OnlyShowActualLoginMethods: false,
+		},
+		Saml: Saml{
+			AllowedRedirectURLS: []string{},
+			IdentityProviders:   []IdentityProvider{},
+			Options: Options{
+				SignAuthnRequests:             true,
+				ValidateEncryptionCertificate: true,
+			},
+		},
+		Webhooks: WebhookSettings{
+			Hooks: Webhooks{},
 		},
 	}
 }

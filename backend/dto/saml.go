@@ -32,13 +32,16 @@ type CreateSamlProviderRequest struct {
 	AttributeMap          *config.AttributeMap `json:"attribute_map,omitempty"`
 }
 
-// UpdateSamlProviderRequest represents the request body for updating a SAML provider
+// UpdateSamlProviderRequest represents the request body for updating a SAML provider. PUT merges
+// onto the provider's current values: a field left nil (omitted from the request) keeps its
+// existing value rather than resetting. Unlike CreateSamlProviderRequest, fields aren't required —
+// there's always an existing value to fall back to.
 type UpdateSamlProviderRequest struct {
-	Name                  string               `json:"name" validate:"required"`
-	MetadataURL           string               `json:"metadata_url" validate:"required,url"`
-	Domain                string               `json:"domain" validate:"required"`
-	Enabled               bool                 `json:"enabled"`
-	SkipEmailVerification bool                 `json:"skip_email_verification"`
+	Name                  *string              `json:"name" validate:"omitempty,min=1"`
+	MetadataURL           *string              `json:"metadata_url" validate:"omitempty,url"`
+	Domain                *string              `json:"domain" validate:"omitempty,min=1"`
+	Enabled               *bool                `json:"enabled"`
+	SkipEmailVerification *bool                `json:"skip_email_verification"`
 	AttributeMap          *config.AttributeMap `json:"attribute_map,omitempty"`
 }
 

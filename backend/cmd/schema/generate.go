@@ -32,10 +32,22 @@ type generateSchemaParams struct {
 	doNotReference  bool
 	extractComments bool
 	commentPaths    []string
+	// requiredFromJSONSchemaTags, if true, makes required-ness come only from an explicit
+	// `jsonschema:"required"` tag, ignoring the presence/absence of `omitempty`/`omitzero` on the
+	// `json` tag. Config/TenantConfig fields intentionally lack omitempty (see #2649) so that
+	// explicit zero values (e.g. `false`) always survive marshaling; without this, invopop's default
+	// inference would mark all of them required, which is wrong for this schema's actual purpose —
+	// documenting the config file, where every section is genuinely optional because
+	// config.DefaultConfig()/DefaultTenantConfig() fill in whatever is omitted. Other schemas (e.g.
+	// user import/export) still rely on the default omitempty-based inference, so this must stay
+	// opt-in per call rather than a global reflector default.
+	requiredFromJSONSchemaTags bool
 }
 
 func generateSchema(params generateSchemaParams) error {
 	r := new(jsonschema.Reflector)
+
+	r.RequiredFromJSONSchemaTags = params.requiredFromJSONSchemaTags
 
 	if params.doNotReference {
 		r.DoNotReference = true

@@ -17,11 +17,7 @@
         }
       },
       "additionalProperties": false,
-      "type": "object",
-      "required": [
-        "allow_deletion",
-        "allow_signup"
-      ]
+      "type": "object"
     },
     "AttributeMap": {
       "properties": {
@@ -282,33 +278,13 @@
       },
       "additionalProperties": false,
       "type": "object",
-      "required": [
-        "account",
-        "email",
-        "email_delivery",
-        "mfa",
-        "passkey",
-        "password",
-        "saml",
-        "secrets",
-        "security_notifications",
-        "cors",
-        "service",
-        "session",
-        "third_party",
-        "username",
-        "webauthn",
-        "webhooks",
-        "privacy"
-      ],
       "description": "Config is the central configuration type"
     },
     "Cookie": {
       "properties": {
         "domain": {
           "type": "string",
-          "description": "`domain` is the domain the cookie will be bound to. Works for subdomains, but not cross-domain.\nSee the `session.enable_auth_token_header` configuration instead if the API and the client application run on\ndifferent domains.",
-          "default": "hanko"
+          "description": "`domain` is the domain the cookie will be bound to. Works for subdomains, but not cross-domain.\nSee the `session.enable_auth_token_header` configuration instead if the API and the client application run on\ndifferent domains.\n\nLeft empty, no `Domain` attribute is set on the cookie, so the browser scopes it to the exact\nhost that issued it (host-only cookie) — the right behavior for a service deployed under a\ndifferent domain per installation."
         },
         "http_only": {
           "type": "boolean",
@@ -352,15 +328,7 @@
         }
       },
       "additionalProperties": false,
-      "type": "object",
-      "required": [
-        "domain",
-        "http_only",
-        "name",
-        "retention",
-        "same_site",
-        "secure"
-      ]
+      "type": "object"
     },
     "Cors": {
       "properties": {
@@ -383,11 +351,7 @@
         }
       },
       "additionalProperties": false,
-      "type": "object",
-      "required": [
-        "allow_origins",
-        "unsafe_wildcard_origin_allowed"
-      ]
+      "type": "object"
     },
     "CustomThirdPartyProvider": {
       "if": {
@@ -511,22 +475,6 @@
       },
       "additionalProperties": false,
       "type": "object",
-      "required": [
-        "acr_values",
-        "allow_linking",
-        "attribute_mapping",
-        "authorization_endpoint",
-        "issuer",
-        "client_id",
-        "display_name",
-        "enabled",
-        "prompt",
-        "scopes",
-        "secret",
-        "token_endpoint",
-        "use_discovery",
-        "userinfo_endpoint"
-      ],
       "title": "custom_provider"
     },
     "CustomThirdPartyProviders": {
@@ -607,7 +555,7 @@
         "acquire_on_login": {
           "type": "boolean",
           "description": "`acquire_on_login` determines whether users, provided that they do not already have registered an email,\n\tare prompted to provide an email on login.",
-          "default": false
+          "default": true
         },
         "acquire_on_registration": {
           "type": "boolean",
@@ -627,7 +575,7 @@
         "max_length": {
           "type": "integer",
           "description": "`max_length` specifies the maximum allowed length of an email address.",
-          "default": 100
+          "default": 120
         },
         "optional": {
           "type": "boolean",
@@ -665,20 +613,7 @@
         }
       },
       "additionalProperties": false,
-      "type": "object",
-      "required": [
-        "acquire_on_login",
-        "acquire_on_registration",
-        "enabled",
-        "limit",
-        "max_length",
-        "optional",
-        "passcode_ttl",
-        "passcode_charset",
-        "require_verification",
-        "use_as_login_identifier",
-        "use_for_authentication"
-      ]
+      "type": "object"
     },
     "EmailDelivery": {
       "properties": {
@@ -704,13 +639,7 @@
         }
       },
       "additionalProperties": false,
-      "type": "object",
-      "required": [
-        "enabled",
-        "from_address",
-        "from_name",
-        "smtp"
-      ]
+      "type": "object"
     },
     "Events": {
       "items": {
@@ -777,15 +706,7 @@
         }
       },
       "additionalProperties": false,
-      "type": "object",
-      "required": [
-        "enabled",
-        "name",
-        "domain",
-        "metadata_url",
-        "skip_email_verification",
-        "attribute_map"
-      ]
+      "type": "object"
     },
     "JWTTemplate": {
       "properties": {
@@ -794,10 +715,7 @@
         }
       },
       "additionalProperties": false,
-      "type": "object",
-      "required": [
-        "claims"
-      ]
+      "type": "object"
     },
     "KeyManagement": {
       "if": {
@@ -832,12 +750,7 @@
         }
       },
       "additionalProperties": false,
-      "type": "object",
-      "required": [
-        "type",
-        "key_id",
-        "region"
-      ]
+      "type": "object"
     },
     "LoggerConfig": {
       "properties": {
@@ -848,10 +761,7 @@
         }
       },
       "additionalProperties": false,
-      "type": "object",
-      "required": [
-        "log_health_and_metrics"
-      ]
+      "type": "object"
     },
     "MFA": {
       "properties": {
@@ -868,7 +778,7 @@
         "device_trust_cookie_name": {
           "type": "string",
           "description": "`device_trust_cookie_name` is the name of the cookie used to store the token of a trusted device.",
-          "default": "hanko_device_token"
+          "default": "hanko-device-token"
         },
         "device_trust_duration": {
           "type": "string",
@@ -917,19 +827,7 @@
         }
       },
       "additionalProperties": false,
-      "type": "object",
-      "required": [
-        "acquire_on_login",
-        "acquire_on_registration",
-        "device_trust_cookie_name",
-        "device_trust_duration",
-        "device_trust_max_users_per_device",
-        "device_trust_policy",
-        "enabled",
-        "optional",
-        "security_keys",
-        "totp"
-      ]
+      "type": "object"
     },
     "MultiTenancy": {
       "properties": {
@@ -971,14 +869,7 @@
         }
       },
       "additionalProperties": false,
-      "type": "object",
-      "required": [
-        "sign_authn_requests",
-        "force_login",
-        "validate_encryption_cert",
-        "skip_signature_validation",
-        "allow_missing_attributes"
-      ]
+      "type": "object"
     },
     "Passkey": {
       "properties": {
@@ -1059,16 +950,7 @@
         }
       },
       "additionalProperties": false,
-      "type": "object",
-      "required": [
-        "acquire_on_registration",
-        "acquire_on_login",
-        "attestation_preference",
-        "enabled",
-        "limit",
-        "optional",
-        "user_verification"
-      ]
+      "type": "object"
     },
     "Password": {
       "properties": {
@@ -1124,15 +1006,7 @@
         }
       },
       "additionalProperties": false,
-      "type": "object",
-      "required": [
-        "acquire_on_registration",
-        "acquire_on_login",
-        "enabled",
-        "min_length",
-        "optional",
-        "recovery"
-      ]
+      "type": "object"
     },
     "Privacy": {
       "properties": {
@@ -1148,11 +1022,7 @@
         }
       },
       "additionalProperties": false,
-      "type": "object",
-      "required": [
-        "show_account_existence_hints",
-        "only_show_actual_login_methods"
-      ]
+      "type": "object"
     },
     "RateLimiter": {
       "properties": {
@@ -1208,11 +1078,7 @@
         }
       },
       "additionalProperties": false,
-      "type": "object",
-      "required": [
-        "tokens",
-        "interval"
-      ]
+      "type": "object"
     },
     "RedisConfig": {
       "properties": {
@@ -1233,10 +1099,7 @@
         }
       },
       "additionalProperties": false,
-      "type": "object",
-      "required": [
-        "address"
-      ]
+      "type": "object"
     },
     "RelyingParty": {
       "properties": {
@@ -1264,11 +1127,6 @@
       },
       "additionalProperties": false,
       "type": "object",
-      "required": [
-        "display_name",
-        "id",
-        "origins"
-      ],
       "description": "RelyingParty webauthn settings for your application using hanko."
     },
     "SMTP": {
@@ -1290,12 +1148,6 @@
       },
       "additionalProperties": false,
       "type": "object",
-      "required": [
-        "host",
-        "port",
-        "user",
-        "password"
-      ],
       "description": "SMTP Server Settings for sending passcodes"
     },
     "Saml": {
@@ -1338,36 +1190,9 @@
         }
       },
       "additionalProperties": false,
-      "type": "object",
-      "required": [
-        "enabled",
-        "endpoint_url",
-        "audience_uri",
-        "default_redirect_url",
-        "allowed_redirect_urls",
-        "options",
-        "identity_providers"
-      ]
+      "type": "object"
     },
     "Secrets": {
-      "if": {
-        "properties": {
-          "key_management": {
-            "properties": {
-              "type": {
-                "const": "local"
-              }
-            }
-          }
-        }
-      },
-      "then": {
-        "properties": {
-          "keys": {
-            "minItems": 1
-          }
-        }
-      },
       "properties": {
         "key_management": {
           "$ref": "#/$defs/KeyManagement",
@@ -1384,11 +1209,7 @@
         }
       },
       "additionalProperties": false,
-      "type": "object",
-      "required": [
-        "key_management",
-        "keys"
-      ]
+      "type": "object"
     },
     "SecurityKeys": {
       "properties": {
@@ -1434,14 +1255,7 @@
         }
       },
       "additionalProperties": false,
-      "type": "object",
-      "required": [
-        "attestation_preference",
-        "authenticator_attachment",
-        "enabled",
-        "limit",
-        "user_verification"
-      ]
+      "type": "object"
     },
     "SecurityNotificationConfiguration": {
       "properties": {
@@ -1451,10 +1265,7 @@
         }
       },
       "additionalProperties": false,
-      "type": "object",
-      "required": [
-        "enabled"
-      ]
+      "type": "object"
     },
     "SecurityNotificationTypes": {
       "properties": {
@@ -1481,16 +1292,7 @@
         }
       },
       "additionalProperties": false,
-      "type": "object",
-      "required": [
-        "password_update",
-        "primary_email_update",
-        "email_create",
-        "email_delete",
-        "passkey_create",
-        "mfa_create",
-        "mfa_delete"
-      ]
+      "type": "object"
     },
     "SecurityNotifications": {
       "properties": {
@@ -1499,10 +1301,7 @@
         }
       },
       "additionalProperties": false,
-      "type": "object",
-      "required": [
-        "notifications"
-      ]
+      "type": "object"
     },
     "Server": {
       "properties": {
@@ -1543,10 +1342,7 @@
         }
       },
       "additionalProperties": false,
-      "type": "object",
-      "required": [
-        "name"
-      ]
+      "type": "object"
     },
     "Session": {
       "properties": {
@@ -1611,20 +1407,7 @@
         }
       },
       "additionalProperties": false,
-      "type": "object",
-      "required": [
-        "allow_revocation",
-        "audience",
-        "acquire_ip_address",
-        "acquire_user_agent",
-        "cookie",
-        "enable_auth_token_header",
-        "issuer",
-        "lifespan",
-        "limit",
-        "show_on_profile",
-        "idle_timeout"
-      ]
+      "type": "object"
     },
     "TOTP": {
       "properties": {
@@ -1635,10 +1418,7 @@
         }
       },
       "additionalProperties": false,
-      "type": "object",
-      "required": [
-        "enabled"
-      ]
+      "type": "object"
     },
     "ThirdParty": {
       "if": {
@@ -1734,15 +1514,7 @@
         }
       },
       "additionalProperties": false,
-      "type": "object",
-      "required": [
-        "providers",
-        "custom_providers",
-        "redirect_url",
-        "error_redirect_url",
-        "default_redirect_url",
-        "allowed_redirect_urls"
-      ]
+      "type": "object"
     },
     "ThirdPartyProvider": {
       "if": {
@@ -1784,13 +1556,6 @@
       },
       "additionalProperties": false,
       "type": "object",
-      "required": [
-        "allow_linking",
-        "client_id",
-        "enabled",
-        "prompt",
-        "secret"
-      ],
       "title": "provider"
     },
     "ThirdPartyProviders": {
@@ -1825,16 +1590,7 @@
         }
       },
       "additionalProperties": false,
-      "type": "object",
-      "required": [
-        "apple",
-        "discord",
-        "github",
-        "google",
-        "linkedin",
-        "microsoft",
-        "facebook"
-      ]
+      "type": "object"
     },
     "Username": {
       "properties": {
@@ -1875,16 +1631,7 @@
         }
       },
       "additionalProperties": false,
-      "type": "object",
-      "required": [
-        "acquire_on_login",
-        "acquire_on_registration",
-        "enabled",
-        "max_length",
-        "min_length",
-        "optional",
-        "use_as_login_identifier"
-      ]
+      "type": "object"
     },
     "WebauthnSettings": {
       "properties": {
@@ -1900,10 +1647,6 @@
       },
       "additionalProperties": false,
       "type": "object",
-      "required": [
-        "relying_party",
-        "timeouts"
-      ],
       "description": "WebauthnSettings defines the settings for the webauthn authentication mechanism"
     },
     "WebauthnTimeouts": {
@@ -1920,11 +1663,7 @@
         }
       },
       "additionalProperties": false,
-      "type": "object",
-      "required": [
-        "registration",
-        "login"
-      ]
+      "type": "object"
     },
     "Webhook": {
       "properties": {
@@ -1978,10 +1717,6 @@
       },
       "additionalProperties": false,
       "type": "object",
-      "required": [
-        "callback",
-        "events"
-      ],
       "title": "hooks"
     },
     "WebhookSettings": {
@@ -2003,12 +1738,7 @@
         }
       },
       "additionalProperties": false,
-      "type": "object",
-      "required": [
-        "allow_time_expiration",
-        "enabled",
-        "hooks"
-      ]
+      "type": "object"
     },
     "Webhooks": {
       "items": {

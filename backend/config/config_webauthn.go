@@ -61,7 +61,7 @@ type RelyingParty struct {
 	// `display_name` is the service's name that some WebAuthn Authenticators will display to the user during registration
 	// and authentication ceremonies.
 	DisplayName string `yaml:"display_name" json:"display_name" koanf:"display_name" split_words:"true" jsonschema:"default=Hanko Authentication Service"`
-	Icon        string `yaml:"icon" json:"icon" koanf:"icon" jsonschema:"-"`
+	Icon        string `yaml:"icon" json:"-" koanf:"icon" jsonschema:"-"`
 	// `id` is the [effective domain](https://html.spec.whatwg.org/multipage/browsers.html#concept-origin-effective-domain)
 	// the passkey/WebAuthn credentials will be bound to.
 	Id string `yaml:"id" json:"id" koanf:"id" jsonschema:"default=localhost,examples=localhost,example.com,subdomain.example.com"`

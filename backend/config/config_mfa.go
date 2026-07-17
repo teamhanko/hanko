@@ -35,7 +35,7 @@ type MFA struct {
 	// `acquire_on_registration` configures if users are prompted creating an MFA credential on registration.
 	AcquireOnRegistration bool `yaml:"acquire_on_registration" json:"acquire_on_registration" koanf:"acquire_on_registration" jsonschema:"default=true"`
 	// `device_trust_cookie_name` is the name of the cookie used to store the token of a trusted device.
-	DeviceTrustCookieName string `yaml:"device_trust_cookie_name" json:"device_trust_cookie_name" koanf:"device_trust_cookie_name" jsonschema:"default=hanko_device_token"`
+	DeviceTrustCookieName string `yaml:"device_trust_cookie_name" json:"device_trust_cookie_name" koanf:"device_trust_cookie_name" jsonschema:"default=hanko-device-token"`
 	// `device_trust_duration` configures the duration a device remains trusted after authentication; once expired, the
 	// user must reauthenticate with MFA.
 	DeviceTrustDuration time.Duration `yaml:"device_trust_duration" json:"device_trust_duration" koanf:"device_trust_duration" jsonschema:"default=720h,type=string"`

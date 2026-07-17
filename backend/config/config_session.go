@@ -112,7 +112,11 @@ type Cookie struct {
 	// `domain` is the domain the cookie will be bound to. Works for subdomains, but not cross-domain.
 	// See the `session.enable_auth_token_header` configuration instead if the API and the client application run on
 	// different domains.
-	Domain string `yaml:"domain" json:"domain" koanf:"domain" jsonschema:"default=hanko"`
+	//
+	// Left empty, no `Domain` attribute is set on the cookie, so the browser scopes it to the exact
+	// host that issued it (host-only cookie) — the right behavior for a service deployed under a
+	// different domain per installation.
+	Domain string `yaml:"domain" json:"domain" koanf:"domain"`
 	// `http_only` determines whether cookies are HTTP only or accessible by Javascript.
 	HttpOnly bool `yaml:"http_only" json:"http_only" koanf:"http_only" split_words:"true" jsonschema:"default=true"`
 	// `name` is the name of the cookie.

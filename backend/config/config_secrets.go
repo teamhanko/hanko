@@ -33,34 +33,6 @@ func (Secrets) JSONSchemaExtend(schema *jsonschema.Schema) {
 		Title:     "keys",
 		MinLength: &keysItemsMinLength,
 	}
-
-	// Require at least one key when key_management.type is "local"
-	schema.If = &jsonschema.Schema{
-		Properties: func() *orderedmap.OrderedMap[string, *jsonschema.Schema] {
-			props := orderedmap.New[string, *jsonschema.Schema]()
-			props.Set("key_management", &jsonschema.Schema{
-				Properties: func() *orderedmap.OrderedMap[string, *jsonschema.Schema] {
-					kmProps := orderedmap.New[string, *jsonschema.Schema]()
-					kmProps.Set("type", &jsonschema.Schema{
-						Const: "local",
-					})
-					return kmProps
-				}(),
-			})
-			return props
-		}(),
-	}
-	var minItems uint64 = 1
-	schema.Then = &jsonschema.Schema{
-		Properties: func() *orderedmap.OrderedMap[string, *jsonschema.Schema] {
-			props := orderedmap.New[string, *jsonschema.Schema]()
-			props.Set("keys", &jsonschema.Schema{
-				MinItems: &minItems,
-			})
-			return props
-		}(),
-	}
-
 }
 
 func (s *Secrets) Validate() error {
