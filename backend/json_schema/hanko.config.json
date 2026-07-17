@@ -1403,7 +1403,7 @@
         "idle_timeout": {
           "type": "string",
           "description": "IdleTimeout specifies the duration a session can remain idle before being automatically terminated.\nIt must be a (possibly signed) sequence of decimal\nnumbers, each with optional fraction and a unit suffix, such as \"300ms\", \"-1.5h\" or \"2h45m\".\nValid time units are \"ns\", \"us\" (or \"µs\"), \"ms\", \"s\", \"m\", \"h\".",
-          "default": "0"
+          "default": "0m"
         }
       },
       "additionalProperties": false,

@@ -25,14 +25,6 @@ func TestDefaultTenantConfig_IsValid(t *testing.T) {
 	assert.NoError(t, err)
 }
 
-// schemaDefaultFormatExceptions lists paths where the schema's `default=` tag and
-// DefaultTenantConfig()'s actual value legitimately disagree only in *representation*, not in
-// meaning — not real drift, so excluded from the check below.
-var schemaDefaultFormatExceptions = map[string]bool{
-	// Both "0" and "0m" parse to a zero duration; just different spellings of "no idle timeout".
-	"session.idle_timeout": true,
-}
-
 // TestDefaultTenantConfig_MatchesSchemaDefaults guards against the schema's documented `default=`
 // annotations silently drifting from what config.DefaultTenantConfig() actually produces — the two
 // are maintained independently (a struct tag vs. a Go literal) and nothing else keeps them in sync.
@@ -66,7 +58,7 @@ func checkSchemaDefaults(schema *jsonschema.Schema, defs jsonschema.Definitions,
 		return
 	}
 
-	if schema.Default != nil && !schemaDefaultFormatExceptions[path] {
+	if schema.Default != nil {
 		wantJSON, err := json.Marshal(schema.Default)
 		if err == nil {
 			gotJSON, _ := json.Marshal(actual)
