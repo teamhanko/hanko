@@ -21,6 +21,7 @@ func NewGenerateCommand() *cobra.Command {
 
 	cmd.AddCommand(NewGenerateImportCommand())
 	cmd.AddCommand(NewGenerateConfigCommand())
+	cmd.AddCommand(NewGenerateManagementAPICommand())
 
 	return cmd
 }
