@@ -7,7 +7,7 @@ create_table("saml_providers") {
 	t.Column("domain", "string", {"null": false})
 	t.Column("enabled", "bool", {"null": false, "default": true})
 	t.Column("skip_email_verification", "bool", {"null": false, "default": false})
-	t.Column("attribute_map", "jsonb", {"null": true})
+	t.Column("attribute_map", "json", {"null": true})
 	t.Timestamps()
 
 	t.ForeignKey("tenant_id", {"tenants": ["id"]}, {"on_delete": "cascade", "on_update": "cascade"})
