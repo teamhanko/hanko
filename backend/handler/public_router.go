@@ -15,12 +15,18 @@ import (
 	"github.com/teamhanko/hanko/backend/v3/persistence"
 	"github.com/teamhanko/hanko/backend/v3/saml"
 	"github.com/teamhanko/hanko/backend/v3/template"
+	"github.com/teamhanko/hanko/backend/v3/utils"
 )
 
 func NewPublicRouter(cfg *config.Config, persister persistence.Persister, prometheus echo.MiddlewareFunc, authenticatorMetadata mapper.AuthenticatorMetadata) *echo.Echo {
 	e := echo.New()
 	e.HideBanner = true
 	e.Renderer = template.NewTemplateRenderer()
+
+	if err := utils.ConfigureIPExtractor(e, cfg.Server.IP); err != nil {
+		panic(err)
+	}
+
 	e.Validator = dto.NewCustomValidator()
 	e.HTTPErrorHandler = dto.NewHTTPErrorHandler(dto.HTTPErrorHandlerConfig{Debug: cfg.Debug, Logger: e.Logger})
 
