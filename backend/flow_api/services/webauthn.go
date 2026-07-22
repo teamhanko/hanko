@@ -220,7 +220,11 @@ func (s *webauthnService) VerifyAssertionResponse(p VerifyAssertionResponseParam
 		return webAuthnUser, nil
 	}
 
-	sessionData := sessionDataModel.ToSessionData()
+	sessionData, err := sessionDataModel.ToSessionData()
+	if err != nil {
+		return nil, fmt.Errorf("failed to convert session data model to session data: %w", err)
+	}
+
 	if p.IsMFA || len(sessionData.AllowedCredentialIDs) > 0 {
 		_, err = p.Cfg.Webauthn.Handler.ValidateLogin(webAuthnUser, *sessionData, credentialAssertionData)
 	} else {
@@ -352,7 +356,10 @@ func (s *webauthnService) VerifyAttestationResponse(p VerifyAttestationResponseP
 
 	user := webauthnUser{id: p.UserID, email: p.Email, username: p.Username}
 
-	sessionData := sessionDataModel.ToSessionData()
+	sessionData, err := sessionDataModel.ToSessionData()
+	if err != nil {
+		return nil, fmt.Errorf("failed to convert session data model to session data: %w", err)
+	}
 
 	credential, err := p.Cfg.Webauthn.Handler.CreateCredential(
 		user,
