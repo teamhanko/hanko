@@ -159,7 +159,7 @@ Fetches the current user's profile information.
 
 ```typescript
 try {
-    const user = await hanko.getUser();
+    const user = await hanko.getCurrentUser();
     console.log("User profile:", user);
     // Example output:
     // {
