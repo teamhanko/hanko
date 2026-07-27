@@ -133,7 +133,7 @@
     "sass-loader": "^16.0.7",
     "source-map-loader": "^4.0.1",
     "style-loader": "^3.3.2",
-    "ts-jest": "^29.4.9",
+    "ts-jest": "^29.4.11",
     "ts-loader": "^9.6.2",
     "webpack": "^5.106.1",
     "webpack-cli": "^7.0.3"
