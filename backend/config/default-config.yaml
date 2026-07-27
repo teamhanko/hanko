@@ -1,0 +1,255 @@
+audit_log:
+  console_output:
+    enabled: true
+    output: stdout
+  mask: true
+  storage:
+    enabled: false
+  retention: 720h
+database:
+  database: hanko
+  user: hanko
+  password: hanko
+  host: localhost
+  port: "5432"
+  dialect: postgres
+  pool: 5
+  idle_pool: 0
+  conn_max_idletime: 5m
+  conn_max_lifetime: 1h
+  url: ""
+debug: false
+flow_locker:
+  enabled: true
+  store: in_memory
+  redis_config: null
+  ttl: 0s
+log:
+  log_health_and_metrics: false
+multi_tenancy:
+  enabled: false
+rate_limiter:
+  enabled: true
+  store: in_memory
+  redis_config: null
+  otp_limits:
+    tokens: 3
+    interval: 1m
+  passcode_limits:
+    tokens: 3
+    interval: 1m
+  password_limits:
+    tokens: 5
+    interval: 1m
+  token_limits:
+    tokens: 3
+    interval: 1m
+server:
+  public:
+    address: ":8000"
+  admin:
+    address: ":8001"
+  management:
+    address: ":8002"
+default_email_delivery:
+  enabled: false
+  from_address: ""
+  from_name: ""
+  smtp:
+    host: ""
+    port: ""
+    user: ""
+    password: ""
+secret_keys:
+  - abcedfghijklmnopqrstuvwxyz
+
+account:
+  allow_deletion: false
+  allow_signup: true
+email:
+  enabled: true
+  optional: false
+  acquire_on_registration: true
+  acquire_on_login: true
+  require_verification: true
+  limit: 5
+  max_length: 120
+  use_as_login_identifier: true
+  use_for_authentication: true
+  passcode_ttl: 300
+  passcode_charset: numeric
+email_delivery:
+  enabled: true
+  from_address: noreply@hanko.io
+  from_name: Hanko
+  smtp:
+    host: localhost
+    port: "465"
+    user: ""
+    password: ""
+mfa:
+  acquire_on_login: false
+  acquire_on_registration: true
+  device_trust_cookie_name: hanko-device-token
+  device_trust_duration: 720h
+  device_trust_max_users_per_device: 20
+  device_trust_policy: prompt
+  enabled: true
+  optional: true
+  security_keys:
+    attestation_preference: direct
+    authenticator_attachment: cross-platform
+    enabled: true
+    limit: 10
+    user_verification: discouraged
+  totp:
+    enabled: true
+passkey:
+  acquire_on_registration: always
+  acquire_on_login: always
+  attestation_preference: direct
+  enabled: true
+  limit: 10
+  optional: true
+  user_verification: preferred
+password:
+  acquire_on_registration: always
+  acquire_on_login: never
+  enabled: true
+  min_length: 8
+  optional: false
+  recovery: true
+saml:
+  enabled: false
+  endpoint_url: ""
+  audience_uri: ""
+  default_redirect_url: ""
+  allowed_redirect_urls: []
+  options:
+    sign_authn_requests: false
+    force_login: false
+    validate_encryption_cert: false
+    skip_signature_validation: false
+    allow_missing_attributes: false
+  identity_providers: []
+secrets:
+  key_management:
+    type: local
+    key_id: ""
+    region: ""
+  keys: []
+security_notifications:
+  notifications:
+    password_update:
+      enabled: true
+    primary_email_update:
+      enabled: true
+    email_create:
+      enabled: true
+    email_delete:
+      enabled: true
+    passkey_create:
+      enabled: true
+    mfa_create:
+      enabled: true
+    mfa_delete:
+      enabled: true
+cors:
+  allow_origins:
+    - http://localhost:8888
+  unsafe_wildcard_origin_allowed: false
+service:
+  name: Hanko Authentication Service
+session:
+  allow_revocation: true
+  audience: []
+  acquire_ip_address: true
+  acquire_user_agent: true
+  cookie:
+    domain: ""
+    http_only: true
+    name: ""
+    retention: persistent
+    same_site: strict
+    secure: true
+  enable_auth_token_header: false
+  issuer: ""
+  lifespan: 12h
+  limit: 5
+  show_on_profile: true
+  jwt_template: null
+  idle_timeout: "0m"
+third_party:
+  providers:
+    apple:
+      allow_linking: true
+      client_id: ""
+      enabled: false
+      prompt: ""
+      secret: ""
+    discord:
+      allow_linking: true
+      client_id: ""
+      enabled: false
+      prompt: ""
+      secret: ""
+    github:
+      allow_linking: true
+      client_id: ""
+      enabled: false
+      prompt: ""
+      secret: ""
+    google:
+      allow_linking: true
+      client_id: ""
+      enabled: false
+      prompt: ""
+      secret: ""
+    linkedin:
+      allow_linking: true
+      client_id: ""
+      enabled: false
+      prompt: ""
+      secret: ""
+    microsoft:
+      allow_linking: true
+      client_id: ""
+      enabled: false
+      prompt: ""
+      secret: ""
+    facebook:
+      allow_linking: true
+      client_id: ""
+      enabled: false
+      prompt: ""
+      secret: ""
+  custom_providers: {}
+  redirect_url: ""
+  error_redirect_url: ""
+  default_redirect_url: ""
+  allowed_redirect_urls: []
+username:
+  acquire_on_login: true
+  acquire_on_registration: true
+  enabled: false
+  max_length: 32
+  min_length: 3
+  optional: true
+  use_as_login_identifier: true
+webauthn:
+  relying_party:
+    display_name: Hanko Authentication Service
+    icon: ""
+    id: localhost
+    origins:
+      - http://localhost:8888
+  timeouts:
+    registration: 600000
+    login: 600000
+webhooks:
+  allow_time_expiration: false
+  enabled: false
+  hooks: []
+privacy:
+  show_account_existence_hints: false
+  only_show_actual_login_methods: false
