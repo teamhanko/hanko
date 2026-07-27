@@ -1,6 +1,7 @@
 package jwk
 
 import (
+	"github.com/gofrs/uuid"
 	"github.com/lestrrat-go/jwx/v2/jwk"
 	"github.com/lestrrat-go/jwx/v2/jwt"
 )
@@ -13,14 +14,14 @@ type KeyProvider interface {
 
 type Manager interface {
 	// GenerateKey is used to generate a jwk Key
-	GenerateKey() (jwk.Key, error)
+	GenerateKey(tenantID uuid.UUID) (jwk.Key, error)
 	// GetPublicKeys returns all Public keys that are persisted
-	GetPublicKeys() (jwk.Set, error)
+	GetPublicKeys(tenantID uuid.UUID) (jwk.Set, error)
 	// GetSigningKey returns the last added private key that is used for signing
-	GetSigningKey() (jwk.Key, error)
+	GetSigningKey(tenantID uuid.UUID) (jwk.Key, error)
 }
 
 type Generator interface {
-	Sign(jwt.Token) ([]byte, error)
-	Verify([]byte) (jwt.Token, error)
+	Sign(token jwt.Token, tenantID uuid.UUID) ([]byte, error)
+	Verify(tokenString []byte, tenantID uuid.UUID) (jwt.Token, error)
 }

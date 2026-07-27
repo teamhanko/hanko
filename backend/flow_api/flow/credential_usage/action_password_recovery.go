@@ -3,14 +3,15 @@ package credential_usage
 import (
 	"errors"
 	"fmt"
+
 	"github.com/gofrs/uuid"
-	auditlog "github.com/teamhanko/hanko/backend/v2/audit_log"
-	"github.com/teamhanko/hanko/backend/v2/flow_api/flow/shared"
-	"github.com/teamhanko/hanko/backend/v2/flow_api/services"
-	"github.com/teamhanko/hanko/backend/v2/flowpilot"
-	"github.com/teamhanko/hanko/backend/v2/persistence/models"
-	"github.com/teamhanko/hanko/backend/v2/webhooks/events"
-	"github.com/teamhanko/hanko/backend/v2/webhooks/utils"
+	auditlog "github.com/teamhanko/hanko/backend/v3/audit_log"
+	"github.com/teamhanko/hanko/backend/v3/flow_api/flow/shared"
+	"github.com/teamhanko/hanko/backend/v3/flow_api/services"
+	"github.com/teamhanko/hanko/backend/v3/flowpilot"
+	"github.com/teamhanko/hanko/backend/v3/persistence/models"
+	"github.com/teamhanko/hanko/backend/v3/webhooks/events"
+	"github.com/teamhanko/hanko/backend/v3/webhooks/utils"
 )
 
 type PasswordRecovery struct {
@@ -54,7 +55,7 @@ func (a PasswordRecovery) Execute(c flowpilot.ExecutionContext) error {
 
 	authUserID := c.Stash().Get(shared.StashPathUserID).String()
 
-	err := deps.PasswordService.RecoverPassword(deps.Tx, uuid.FromStringOrNil(authUserID), newPassword)
+	err := deps.PasswordService.RecoverPassword(deps.Tx, uuid.FromStringOrNil(authUserID), newPassword, deps.TenantID)
 
 	if err != nil {
 		if errors.Is(err, services.ErrorPasswordInvalid) {
@@ -71,6 +72,7 @@ func (a PasswordRecovery) Execute(c flowpilot.ExecutionContext) error {
 		models.AuditLogPasswordChanged,
 		&models.User{ID: uuid.FromStringOrNil(authUserID)},
 		nil,
+		deps.TenantID,
 		auditlog.Detail("context", "recovery"),
 		auditlog.Detail("flow_id", c.GetFlowID()))
 

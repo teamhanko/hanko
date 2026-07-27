@@ -8,7 +8,7 @@ import (
 	"github.com/gofrs/uuid"
 
 	"github.com/gobuffalo/pop/v6"
-	"github.com/teamhanko/hanko/backend/v2/persistence/models"
+	"github.com/teamhanko/hanko/backend/v3/persistence/models"
 )
 
 type WebhookPersister interface {
@@ -17,8 +17,8 @@ type WebhookPersister interface {
 	Delete(webhook models.Webhook) error
 	AddEvent(event models.WebhookEvent) error
 	RemoveEvent(event models.WebhookEvent) error
-	List(includeDisabled bool) (models.Webhooks, error)
-	Get(webhookId uuid.UUID) (*models.Webhook, error)
+	List(includeDisabled bool, tenantID uuid.UUID) (models.Webhooks, error)
+	Get(webhookId uuid.UUID, tenantID uuid.UUID) (*models.Webhook, error)
 }
 
 type webhookPersister struct {
@@ -117,12 +117,13 @@ func (w *webhookPersister) RemoveEvent(event models.WebhookEvent) error {
 	return nil
 }
 
-func (w *webhookPersister) List(includeDisabled bool) (models.Webhooks, error) {
+func (w *webhookPersister) List(includeDisabled bool, tenantID uuid.UUID) (models.Webhooks, error) {
 	webhooks := make(models.Webhooks, 0)
 	query := w.db.Eager().Q()
 	if !includeDisabled {
 		query = query.Where("enabled = true")
 	}
+	query = query.Where("tenant_id = ?", tenantID)
 	err := query.All(&webhooks)
 
 	if err != nil && errors.Is(err, sql.ErrNoRows) {
@@ -136,9 +137,11 @@ func (w *webhookPersister) List(includeDisabled bool) (models.Webhooks, error) {
 	return webhooks, nil
 }
 
-func (w *webhookPersister) Get(webhookId uuid.UUID) (*models.Webhook, error) {
+func (w *webhookPersister) Get(webhookId uuid.UUID, tenantID uuid.UUID) (*models.Webhook, error) {
 	webhook := models.Webhook{}
-	err := w.db.Eager().Find(&webhook, webhookId)
+	query := w.db.Eager().Q()
+	query = query.Where("webhooks.tenant_id = ?", tenantID)
+	err := query.Find(&webhook, webhookId)
 	if err != nil && errors.Is(err, sql.ErrNoRows) {
 		return nil, nil
 	}

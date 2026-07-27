@@ -1,6 +1,6 @@
 package shared
 
-import "github.com/teamhanko/hanko/backend/v2/flowpilot"
+import "github.com/teamhanko/hanko/backend/v3/flowpilot"
 
 const (
 	StateCredentialOnboardingChooser           flowpilot.StateName = "credential_onboarding_chooser"

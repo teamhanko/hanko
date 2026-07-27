@@ -3,10 +3,10 @@ package profile
 import (
 	"fmt"
 
-	"github.com/teamhanko/hanko/backend/v2/flow_api/flow/shared"
-	"github.com/teamhanko/hanko/backend/v2/flow_api/services"
-	"github.com/teamhanko/hanko/backend/v2/flowpilot"
-	"github.com/teamhanko/hanko/backend/v2/persistence/models"
+	"github.com/teamhanko/hanko/backend/v3/flow_api/flow/shared"
+	"github.com/teamhanko/hanko/backend/v3/flow_api/services"
+	"github.com/teamhanko/hanko/backend/v3/flowpilot"
+	"github.com/teamhanko/hanko/backend/v3/persistence/models"
 )
 
 type SecurityKeyDelete struct {
@@ -76,6 +76,7 @@ func (a SecurityKeyDelete) Execute(c flowpilot.ExecutionContext) error {
 	// Inform user that an MFA method has been deleted
 	if deps.Cfg.SecurityNotifications.Notifications.MFADelete.Enabled {
 		deps.SecurityNotificationService.SendNotification(deps.Tx, services.SendSecurityNotificationParams{
+			TenantID:     deps.TenantID,
 			EmailAddress: userModel.Emails.GetPrimary().Address,
 			Template:     "mfa_delete",
 			HttpContext:  deps.HttpContext,

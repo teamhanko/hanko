@@ -17,7 +17,7 @@ func TestDefaultConfigAccountParameters(t *testing.T) {
 
 func TestDefaultConfigSmtpParameters(t *testing.T) {
 	cfg := DefaultConfig()
-	assert.Equal(t, cfg.Smtp.Port, "465")
+	assert.Equal(t, cfg.EmailDelivery.SMTP.Port, "465")
 }
 
 func TestParseValidConfig(t *testing.T) {
@@ -113,7 +113,7 @@ func TestFlowLockerConfig(t *testing.T) {
 }
 
 func TestEnvironmentVariables(t *testing.T) {
-	err := os.Setenv("SMTP_HOST", "valueFromEnvVars")
+	err := os.Setenv("EMAIL_DELIVERY_SMTP_HOST", "valueFromEnvVars")
 	require.NoError(t, err)
 
 	err = os.Setenv("WEBAUTHN_RELYING_PARTY_ORIGINS", "https://hanko.io,https://auth.hanko.io")
@@ -123,7 +123,7 @@ func TestEnvironmentVariables(t *testing.T) {
 	cfg, err := Load(&configPath)
 	require.NoError(t, err)
 
-	assert.Equal(t, "valueFromEnvVars", cfg.Smtp.Host)
+	assert.Equal(t, "valueFromEnvVars", cfg.EmailDelivery.SMTP.Host)
 	assert.True(t, reflect.DeepEqual([]string{"https://hanko.io", "https://auth.hanko.io"}, cfg.Webauthn.RelyingParty.Origins))
 }
 

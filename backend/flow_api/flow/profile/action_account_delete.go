@@ -2,13 +2,14 @@ package profile
 
 import (
 	"fmt"
-	auditlog "github.com/teamhanko/hanko/backend/v2/audit_log"
-	"github.com/teamhanko/hanko/backend/v2/dto/admin"
-	"github.com/teamhanko/hanko/backend/v2/flow_api/flow/shared"
-	"github.com/teamhanko/hanko/backend/v2/flowpilot"
-	"github.com/teamhanko/hanko/backend/v2/persistence/models"
-	"github.com/teamhanko/hanko/backend/v2/webhooks/events"
-	"github.com/teamhanko/hanko/backend/v2/webhooks/utils"
+
+	auditlog "github.com/teamhanko/hanko/backend/v3/audit_log"
+	"github.com/teamhanko/hanko/backend/v3/dto/admin"
+	"github.com/teamhanko/hanko/backend/v3/flow_api/flow/shared"
+	"github.com/teamhanko/hanko/backend/v3/flowpilot"
+	"github.com/teamhanko/hanko/backend/v3/persistence/models"
+	"github.com/teamhanko/hanko/backend/v3/webhooks/events"
+	"github.com/teamhanko/hanko/backend/v3/webhooks/utils"
 )
 
 type AccountDelete struct {
@@ -50,6 +51,7 @@ func (a AccountDelete) Execute(c flowpilot.ExecutionContext) error {
 		models.AuditLogUserDeleted,
 		&models.User{ID: userModel.ID},
 		nil,
+		deps.TenantID,
 		auditlog.Detail("flow_id", c.GetFlowID()))
 
 	if err != nil {
@@ -63,7 +65,7 @@ func (a AccountDelete) Execute(c flowpilot.ExecutionContext) error {
 
 	deps.HttpContext.SetCookie(cookie)
 
-	err = utils.TriggerWebhooks(deps.HttpContext, deps.Tx, events.UserDelete, admin.FromUserModel(*userModel))
+	err = utils.TriggerWebhooks(deps.HttpContext, deps.Tx, deps.TenantID, events.UserDelete, admin.FromUserModel(*userModel))
 	if err != nil {
 		return fmt.Errorf("failed to trrigger webhook: %w", err)
 	}

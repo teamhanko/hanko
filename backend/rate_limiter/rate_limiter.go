@@ -3,6 +3,12 @@ package rate_limiter
 import (
 	"context"
 	"fmt"
+	"log"
+	"math"
+	"net/http"
+	"strconv"
+	"time"
+
 	"github.com/gofrs/uuid"
 	"github.com/gomodule/redigo/redis"
 	"github.com/labstack/echo/v4"
@@ -10,12 +16,7 @@ import (
 	"github.com/sethvargo/go-limiter/httplimit"
 	"github.com/sethvargo/go-limiter/memorystore"
 	"github.com/sethvargo/go-redisstore"
-	"github.com/teamhanko/hanko/backend/v2/config"
-	"log"
-	"math"
-	"net/http"
-	"strconv"
-	"time"
+	"github.com/teamhanko/hanko/backend/v3/config"
 )
 
 func NewRateLimiter(cfg config.RateLimiter, limits config.RateLimits) limiter.Store {

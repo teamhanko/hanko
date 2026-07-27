@@ -6,13 +6,13 @@ import (
 	"slices"
 	"time"
 
-	"github.com/teamhanko/hanko/backend/v2/dto/webhook"
-	"github.com/teamhanko/hanko/backend/v2/flow_api/flow/shared"
-	"github.com/teamhanko/hanko/backend/v2/flow_api/services"
-	"github.com/teamhanko/hanko/backend/v2/flowpilot"
-	"github.com/teamhanko/hanko/backend/v2/rate_limiter"
-	"github.com/teamhanko/hanko/backend/v2/webhooks/events"
-	"github.com/teamhanko/hanko/backend/v2/webhooks/utils"
+	"github.com/teamhanko/hanko/backend/v3/dto/webhook"
+	"github.com/teamhanko/hanko/backend/v3/flow_api/flow/shared"
+	"github.com/teamhanko/hanko/backend/v3/flow_api/services"
+	"github.com/teamhanko/hanko/backend/v3/flowpilot"
+	"github.com/teamhanko/hanko/backend/v3/rate_limiter"
+	"github.com/teamhanko/hanko/backend/v3/webhooks/events"
+	webhookUtils "github.com/teamhanko/hanko/backend/v3/webhooks/utils"
 )
 
 type ReSendPasscode struct {
@@ -62,6 +62,8 @@ func (a ReSendPasscode) Execute(c flowpilot.ExecutionContext) error {
 		Template:     passcodeTemplate,
 		EmailAddress: c.Stash().Get(shared.StashPathEmail).String(),
 		Language:     deps.HttpContext.Request().Header.Get("X-Language"),
+		Cfg:          deps.Cfg.TenantConfig,
+		TenantID:     deps.TenantID,
 	}
 	passcodeResult, err := deps.PasscodeService.SendPasscode(deps.Tx, sendParams)
 	if err != nil {
@@ -96,7 +98,7 @@ func (a ReSendPasscode) Execute(c flowpilot.ExecutionContext) error {
 		}
 	}
 
-	err = utils.TriggerWebhooks(deps.HttpContext, deps.Tx, events.EmailSend, webhookData)
+	err = webhookUtils.TriggerWebhooks(deps.HttpContext, deps.Tx, deps.TenantID, events.EmailSend, webhookData)
 	if err != nil {
 		return fmt.Errorf("failed to trigger webhook: %w", err)
 	}

@@ -6,9 +6,9 @@ import (
 	"strings"
 
 	"github.com/gofrs/uuid"
-	"github.com/teamhanko/hanko/backend/v2/flow_api/flow/shared"
-	"github.com/teamhanko/hanko/backend/v2/flow_api/services"
-	"github.com/teamhanko/hanko/backend/v2/flowpilot"
+	"github.com/teamhanko/hanko/backend/v3/flow_api/flow/shared"
+	"github.com/teamhanko/hanko/backend/v3/flow_api/services"
+	"github.com/teamhanko/hanko/backend/v3/flowpilot"
 )
 
 // RegisterLoginIdentifier takes the identifier which the user entered and checks if they are valid and available according to the configuration
@@ -86,7 +86,7 @@ func (a RegisterLoginIdentifier) Execute(c flowpilot.ExecutionContext) error {
 
 		// Check that username is not already taken
 		// this check is non-exhaustive as the username is not blocked here and might be created after the check here and the user creation
-		userModel, err := deps.Persister.GetUserPersisterWithConnection(deps.Tx).GetByUsername(username)
+		userModel, err := deps.Persister.GetUserPersisterWithConnection(deps.Tx).GetByUsername(username, deps.TenantID)
 		if err != nil {
 			return err
 		}
@@ -104,9 +104,11 @@ func (a RegisterLoginIdentifier) Execute(c flowpilot.ExecutionContext) error {
 	if email != "" {
 		if deps.Cfg.Saml.Enabled {
 			domain := strings.Split(email, "@")[1]
-			if provider, err := deps.SamlService.GetProviderByDomain(domain); err == nil && provider != nil {
+			// Try to get SAML provider by domain
+			providerModel, err := deps.Persister.GetSamlProviderPersister().GetEnabledByDomain(deps.TenantID, domain)
+			if err == nil && providerModel != nil {
 				var authUrl string
-				authUrl, err = deps.SamlService.GetAuthUrl(provider, deps.Cfg.Saml.DefaultRedirectUrl, true)
+				authUrl, err = deps.SamlService.GetAuthUrl(deps.TenantID, deps.Cfg, providerModel.ID, deps.Cfg.Saml.DefaultRedirectUrl, true)
 
 				if err != nil {
 					return fmt.Errorf("failed to get auth url: %w", err)
@@ -121,7 +123,7 @@ func (a RegisterLoginIdentifier) Execute(c flowpilot.ExecutionContext) error {
 		if deps.Cfg.Email.Enabled && deps.Cfg.Email.AcquireOnRegistration {
 			// Check that email is not already taken
 			// this check is non-exhaustive as the email is not blocked here and might be created after the check here and the user creation
-			emailModel, err := deps.Persister.GetEmailPersisterWithConnection(deps.Tx).FindByAddress(email)
+			emailModel, err := deps.Persister.GetEmailPersisterWithConnection(deps.Tx).FindByAddress(email, deps.TenantID)
 			if err != nil {
 				return err
 			}

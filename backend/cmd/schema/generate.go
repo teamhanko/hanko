@@ -4,11 +4,12 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"github.com/invopop/jsonschema"
-	"github.com/spf13/cobra"
 	"log"
 	"os"
 	"path/filepath"
+
+	"github.com/invopop/jsonschema"
+	"github.com/spf13/cobra"
 )
 
 func NewGenerateCommand() *cobra.Command {
@@ -42,7 +43,7 @@ func generateSchema(params generateSchemaParams) error {
 
 	if params.extractComments {
 		for _, path := range params.commentPaths {
-			if err := r.AddGoComments("github.com/teamhanko/hanko/backend/v2", path); err != nil {
+			if err := r.AddGoComments("github.com/teamhanko/hanko/backend/v3", path); err != nil {
 				return err
 			}
 		}

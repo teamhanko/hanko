@@ -3,8 +3,8 @@ package user_details
 import (
 	"fmt"
 
-	"github.com/teamhanko/hanko/backend/v2/flow_api/flow/shared"
-	"github.com/teamhanko/hanko/backend/v2/flowpilot"
+	"github.com/teamhanko/hanko/backend/v3/flow_api/flow/shared"
+	"github.com/teamhanko/hanko/backend/v3/flowpilot"
 )
 
 type EmailAddressSet struct {
@@ -44,7 +44,7 @@ func (a EmailAddressSet) Execute(c flowpilot.ExecutionContext) error {
 		return fmt.Errorf("failed to stash email address: %w", err)
 	}
 
-	existingEmail, err := deps.Persister.GetEmailPersisterWithConnection(deps.Tx).FindByAddress(email)
+	existingEmail, err := deps.Persister.GetEmailPersisterWithConnection(deps.Tx).FindByAddress(email, deps.TenantID)
 	if err != nil {
 		return fmt.Errorf("failed to get email from db: %w", err)
 	}

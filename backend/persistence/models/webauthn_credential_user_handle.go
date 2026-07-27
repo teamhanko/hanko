@@ -11,6 +11,7 @@ import (
 type WebauthnCredentialUserHandle struct {
 	ID        uuid.UUID `db:"id" json:"id"`
 	UserID    uuid.UUID `db:"user_id" json:"user_id"`
+	TenantID  uuid.UUID `db:"tenant_id"`
 	Handle    string    `db:"handle" json:"handle"`
 	CreatedAt time.Time `db:"created_at" json:"created_at"`
 	UpdatedAt time.Time `db:"updated_at" json:"updated_at"`

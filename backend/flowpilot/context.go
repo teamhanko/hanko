@@ -4,8 +4,9 @@ import (
 	"database/sql"
 	"errors"
 	"fmt"
-	"github.com/gofrs/uuid"
 	"time"
+
+	"github.com/gofrs/uuid"
 )
 
 type context interface {
@@ -138,6 +139,7 @@ func createAndInitializeFlow(db FlowDB, flow defaultFlow) (FlowResult, error) {
 		data:      s.String(),
 		csrfToken: csrfToken,
 		expiresAt: expiresAt,
+		tenantID:  flow.tenantID,
 	}
 	flowModel, err := dbw.createFlowWithParam(flowCreation)
 	if err != nil {
@@ -175,7 +177,7 @@ func executeFlowAction(db FlowDB, flow defaultFlow) (FlowResult, error) {
 	actionName := flow.queryParam.getActionName()
 
 	// Retrieve the flow model from the database using the flow ID.
-	flowModel, err := db.GetFlow(flow.queryParam.getFlowID())
+	flowModel, err := db.GetFlow(flow.queryParam.getFlowID(), flow.tenantID)
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
 			return newFlowResultFromError(flow.errorStateName, ErrorOperationNotPermitted.Wrap(err), flow.debug), nil

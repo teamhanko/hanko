@@ -5,78 +5,46 @@ import (
 
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
-	"github.com/sethvargo/go-limiter"
-	"github.com/sethvargo/go-limiter/httplimit"
-	auditlog "github.com/teamhanko/hanko/backend/v2/audit_log"
-	"github.com/teamhanko/hanko/backend/v2/config"
-	"github.com/teamhanko/hanko/backend/v2/crypto/jwk"
-	"github.com/teamhanko/hanko/backend/v2/dto"
-	"github.com/teamhanko/hanko/backend/v2/ee/saml"
-	"github.com/teamhanko/hanko/backend/v2/flow_api"
-	"github.com/teamhanko/hanko/backend/v2/flow_api/flow_locker"
-	"github.com/teamhanko/hanko/backend/v2/flow_api/services"
-	"github.com/teamhanko/hanko/backend/v2/mail"
-	"github.com/teamhanko/hanko/backend/v2/mapper"
-	hankoMiddleware "github.com/teamhanko/hanko/backend/v2/middleware"
-	"github.com/teamhanko/hanko/backend/v2/persistence"
-	"github.com/teamhanko/hanko/backend/v2/rate_limiter"
-	"github.com/teamhanko/hanko/backend/v2/session"
-	"github.com/teamhanko/hanko/backend/v2/template"
+	auditlog "github.com/teamhanko/hanko/backend/v3/audit_log"
+	"github.com/teamhanko/hanko/backend/v3/config"
+	"github.com/teamhanko/hanko/backend/v3/dto"
+	"github.com/teamhanko/hanko/backend/v3/flow_api"
+	"github.com/teamhanko/hanko/backend/v3/flow_api/flow_locker"
+	"github.com/teamhanko/hanko/backend/v3/mapper"
+	hankoMiddleware "github.com/teamhanko/hanko/backend/v3/middleware"
+	"github.com/teamhanko/hanko/backend/v3/persistence"
+	"github.com/teamhanko/hanko/backend/v3/saml"
+	"github.com/teamhanko/hanko/backend/v3/template"
 )
 
 func NewPublicRouter(cfg *config.Config, persister persistence.Persister, prometheus echo.MiddlewareFunc, authenticatorMetadata mapper.AuthenticatorMetadata) *echo.Echo {
 	e := echo.New()
-
+	e.HideBanner = true
 	e.Renderer = template.NewTemplateRenderer()
+	e.Validator = dto.NewCustomValidator()
+	e.HTTPErrorHandler = dto.NewHTTPErrorHandler(dto.HTTPErrorHandlerConfig{Debug: cfg.Debug, Logger: e.Logger})
 
+	g := e.Group("")
+	if cfg.Log.LogHealthAndMetrics {
+		e.Use(hankoMiddleware.GetLoggerMiddleware())
+	} else {
+		g.Use(hankoMiddleware.GetLoggerMiddleware())
+	}
+
+	if prometheus != nil {
+		e.Use(prometheus)
+	}
+
+	if cfg.Log.LogHealthAndMetrics {
+		e.Use(hankoMiddleware.GetLoggerMiddleware())
+	}
+
+	e.Use(middleware.RequestID())
 	e.Static("/flowpilot", "flow_api/static") // TODO: remove!
 
 	auditLogger := auditlog.NewLogger(persister, cfg.AuditLog)
 
-	emailService, _ := services.NewEmailService(*cfg)
-	passcodeService := services.NewPasscodeService(*cfg, *emailService, persister)
-	passwordService := services.NewPasswordService(persister)
-	webauthnService := services.NewWebauthnService(*cfg, persister)
-	securityNotificationService := services.NewSecurityNotificationService(*cfg, *emailService, persister, auditLogger)
-
-	jwkManager, err := jwk.NewManager(cfg.Secrets, persister)
-	if err != nil {
-		panic(fmt.Errorf("failed to create jwk manager: %w", err))
-	}
-	sessionManager, err := session.NewManager(jwkManager, *cfg)
-	if err != nil {
-		panic(fmt.Errorf("failed to create session generator: %w", err))
-	}
-
-	var otpRateLimiter limiter.Store
-	var passcodeRateLimiter limiter.Store
-	var passwordRateLimiter limiter.Store
-	var tokenExchangeRateLimiter limiter.Store
-	if cfg.RateLimiter.Enabled {
-		otpRateLimiter = rate_limiter.NewRateLimiter(cfg.RateLimiter, cfg.RateLimiter.OTPLimits)
-		passcodeRateLimiter = rate_limiter.NewRateLimiter(cfg.RateLimiter, cfg.RateLimiter.PasscodeLimits)
-		passwordRateLimiter = rate_limiter.NewRateLimiter(cfg.RateLimiter, cfg.RateLimiter.PasswordLimits)
-		tokenExchangeRateLimiter = rate_limiter.NewRateLimiter(cfg.RateLimiter, cfg.RateLimiter.TokenLimits)
-	}
-
-	samlService := saml.NewSamlService(cfg, persister)
-
-	flowAPIHandler := flow_api.FlowPilotHandler{
-		Persister:                   persister,
-		Cfg:                         *cfg,
-		PasscodeService:             passcodeService,
-		SecurityNotificationService: securityNotificationService,
-		PasswordService:             passwordService,
-		WebauthnService:             webauthnService,
-		SessionManager:              sessionManager,
-		OTPRateLimiter:              otpRateLimiter,
-		PasscodeRateLimiter:         passcodeRateLimiter,
-		PasswordRateLimiter:         passwordRateLimiter,
-		TokenExchangeRateLimiter:    tokenExchangeRateLimiter,
-		AuthenticatorMetadata:       authenticatorMetadata,
-		AuditLogger:                 auditLogger,
-		SamlService:                 samlService,
-	}
+	flowAPIHandler := flow_api.NewFlowAPIHandler(*cfg, persister, auditLogger, authenticatorMetadata)
 
 	flowLocker, err := flow_locker.NewFlowLocker(cfg.FlowLocker)
 	if err != nil {
@@ -84,155 +52,61 @@ func NewPublicRouter(cfg *config.Config, persister persistence.Persister, promet
 	}
 	flowAPIHandler.FlowLocker = flowLocker
 
-	if cfg.Saml.Enabled {
-		saml.CreateSamlRoutes(e, sessionManager, auditLogger, samlService)
-	}
+	sessionMiddleware := hankoMiddleware.Session(persister)
+	webhookMiddleware := hankoMiddleware.WebhookMiddleware(persister)
+	corsMiddleware := hankoMiddleware.TenantAwareCORS()
+	jwkMiddleware := hankoMiddleware.JWKMiddleware(cfg.ApplicationConfig, persister)
+	sessionManagerMiddleware := hankoMiddleware.SessionManager()
 
-	sessionMiddleware := hankoMiddleware.Session(cfg, persister, sessionManager)
-
-	webhookMiddleware := hankoMiddleware.WebhookMiddleware(cfg, jwkManager, persister)
-
-	e.POST("/registration", flowAPIHandler.RegistrationFlowHandler, webhookMiddleware)
-	e.POST("/login", flowAPIHandler.LoginFlowHandler, webhookMiddleware)
-	e.POST("/profile", flowAPIHandler.ProfileFlowHandler, webhookMiddleware)
-
-	if cfg.Saml.Enabled {
-		e.POST("/token_exchange", flowAPIHandler.TokenExchangeFlowHandler, webhookMiddleware)
-	}
-
-	e.HideBanner = true
-	g := e.Group("")
-
-	e.HTTPErrorHandler = dto.NewHTTPErrorHandler(dto.HTTPErrorHandlerConfig{Debug: false, Logger: e.Logger})
-	e.Use(middleware.RequestID())
-	if cfg.Log.LogHealthAndMetrics {
-		e.Use(hankoMiddleware.GetLoggerMiddleware())
+	var tenantGroupRoot *echo.Group
+	if cfg.MultiTenancy.Enabled {
+		tenantMiddleware := hankoMiddleware.TenantMiddlewareMultitenancy(persister)
+		tenantGroupRoot = e.Group("/:tenant_id", tenantMiddleware)
 	} else {
-		g.Use(hankoMiddleware.GetLoggerMiddleware())
+		tenantMiddleware := hankoMiddleware.TenantMiddlewareSingleTenant(cfg.TenantConfig)
+		tenantGroupRoot = e.Group("", tenantMiddleware)
 	}
 
-	exposeHeader := []string{
-		httplimit.HeaderRetryAfter,
-		httplimit.HeaderRateLimitLimit,
-		httplimit.HeaderRateLimitRemaining,
-		httplimit.HeaderRateLimitReset,
-		"X-Session-Lifetime",
-		"X-Session-Retention",
-	}
+	tenantGroup := tenantGroupRoot.Group("", corsMiddleware, jwkMiddleware, sessionManagerMiddleware)
 
-	if cfg.Session.EnableAuthTokenHeader {
-		exposeHeader = append(exposeHeader, "X-Auth-Token")
-	}
-
-	e.Use(middleware.CORSWithConfig(middleware.CORSConfig{
-		UnsafeWildcardOriginWithAllowCredentials: cfg.Server.Public.Cors.UnsafeWildcardOriginAllowed,
-		AllowOrigins:                             cfg.Server.Public.Cors.AllowOrigins,
-		ExposeHeaders:                            exposeHeader,
-		AllowCredentials:                         true,
-		// Based on: Chromium (starting in v76) caps at 2 hours (7200 seconds).
-		MaxAge: 7200,
-	}))
-
-	if prometheus != nil {
-		e.Use(prometheus)
-	}
-
-	e.Validator = dto.NewCustomValidator()
-
-	mailer, err := mail.NewMailer(cfg.EmailDelivery.SMTP)
-	if err != nil {
-		panic(fmt.Errorf("failed to create mailer: %w", err))
-	}
-
-	if !cfg.MFA.Enabled && cfg.Password.Enabled {
-		passwordHandler := NewPasswordHandler(persister, sessionManager, cfg, auditLogger)
-
-		password := g.Group("/password")
-		password.PUT("", passwordHandler.Set, sessionMiddleware)
-		password.POST("/login", passwordHandler.Login)
-	}
-
-	userHandler := NewUserHandler(cfg, persister, sessionManager, auditLogger)
+	userHandler := NewUserHandler(persister, auditLogger)
 	statusHandler := NewStatusHandler(persister)
-
-	e.GET("/", statusHandler.Status)
-	g.GET("/me", userHandler.Me, sessionMiddleware)
-
-	user := g.Group("/users", webhookMiddleware)
-	user.POST("", userHandler.Create)
-	user.GET("/:id", userHandler.Get, sessionMiddleware)
-
-	g.POST("/user", userHandler.GetUserIdByEmail)
-	g.POST("/logout", userHandler.Logout, sessionMiddleware)
-
-	if cfg.Account.AllowDeletion {
-		g.DELETE("/user", userHandler.Delete, sessionMiddleware, webhookMiddleware)
-	}
-
 	healthHandler := NewHealthHandler()
 
-	health := e.Group("/health")
+	tenantGroup.POST("/registration", flowAPIHandler.RegistrationFlowHandler, webhookMiddleware)
+	tenantGroup.POST("/login", flowAPIHandler.LoginFlowHandler, webhookMiddleware)
+	tenantGroup.POST("/profile", flowAPIHandler.ProfileFlowHandler, webhookMiddleware)
+
+	samlProviderService := saml.NewSamlProviderService(persister)
+	samlHandler := NewSamlHandler(cfg.ApplicationConfig, auditLogger, samlProviderService)
+	samlGroup := tenantGroup.Group("/saml")
+	samlGroup.GET("/metadata", samlHandler.Metadata)
+	samlGroup.GET("/auth", samlHandler.Auth)
+	samlGroup.POST("/callback", samlHandler.CallbackPost)
+	tenantGroup.POST("/token_exchange", flowAPIHandler.TokenExchangeFlowHandler, webhookMiddleware)
+
+	tenantGroup.GET("/", statusHandler.Status)
+	tenantGroup.GET("/me", userHandler.Me, sessionMiddleware)
+	tenantGroup.POST("/logout", userHandler.Logout, sessionMiddleware)
+
+	health := tenantGroup.Group("/health")
 	health.GET("/alive", healthHandler.Alive)
 	health.GET("/ready", healthHandler.Ready)
 
-	wellKnownHandler, err := NewWellKnownHandler(*cfg, jwkManager)
+	wellKnownHandler, err := NewWellKnownHandler()
 	if err != nil {
 		panic(fmt.Errorf("failed to create well-known handler: %w", err))
 	}
-	wellKnown := g.Group("/.well-known")
+	wellKnown := tenantGroup.Group("/.well-known")
 	wellKnown.GET("/jwks.json", wellKnownHandler.GetPublicKeys)
-	wellKnown.GET("/config", wellKnownHandler.GetConfig)
 
-	emailHandler := NewEmailHandler(cfg, persister, auditLogger)
-
-	if cfg.Passkey.Enabled {
-		webauthnHandler, err := NewWebauthnHandler(cfg, persister, sessionManager, auditLogger, authenticatorMetadata)
-		if err != nil {
-			panic(fmt.Errorf("failed to create public webauthn handler: %w", err))
-		}
-		webauthn := g.Group("/webauthn")
-		webauthnRegistration := webauthn.Group("/registration", sessionMiddleware)
-		webauthnRegistration.POST("/initialize", webauthnHandler.BeginRegistration)
-		webauthnRegistration.POST("/finalize", webauthnHandler.FinishRegistration)
-
-		webauthnLogin := webauthn.Group("/login")
-		webauthnLogin.POST("/initialize", webauthnHandler.BeginAuthentication)
-		webauthnLogin.POST("/finalize", webauthnHandler.FinishAuthentication)
-
-		webauthnCredentials := webauthn.Group("/credentials", sessionMiddleware)
-		webauthnCredentials.GET("", webauthnHandler.ListCredentials)
-		webauthnCredentials.PATCH("/:id", webauthnHandler.UpdateCredential)
-		webauthnCredentials.DELETE("/:id", webauthnHandler.DeleteCredential)
-	}
-
-	if !cfg.MFA.Enabled && cfg.Email.Enabled && cfg.Email.UseForAuthentication {
-		passcodeHandler, err := NewPasscodeHandler(cfg, persister, sessionManager, mailer, auditLogger)
-		if err != nil {
-			panic(fmt.Errorf("failed to create public passcode handler: %w", err))
-		}
-		passcode := g.Group("/passcode")
-		passcodeLogin := passcode.Group("/login", webhookMiddleware)
-		passcodeLogin.POST("/initialize", passcodeHandler.Init)
-		passcodeLogin.POST("/finalize", passcodeHandler.Finish)
-	}
-
-	email := g.Group("/emails", sessionMiddleware, webhookMiddleware)
-	email.GET("", emailHandler.List)
-	email.POST("", emailHandler.Create)
-	email.DELETE("/:id", emailHandler.Delete)
-	email.POST("/:id/set_primary", emailHandler.SetPrimaryEmail)
-
-	thirdPartyHandler := NewThirdPartyHandler(cfg, persister, sessionManager, auditLogger)
-	thirdparty := g.Group("thirdparty")
-	thirdparty.GET("/auth", thirdPartyHandler.Auth)
+	thirdPartyHandler := NewThirdPartyHandler(cfg.ApplicationConfig, persister, auditLogger)
+	thirdparty := tenantGroup.Group("/thirdparty")
 	thirdparty.GET("/callback", thirdPartyHandler.Callback, webhookMiddleware)
 	thirdparty.POST("/callback", thirdPartyHandler.CallbackPost, webhookMiddleware)
 
-	tokenHandler := NewTokenHandler(cfg, persister, sessionManager, auditLogger)
-	g.POST("/token", tokenHandler.Validate)
-
-	sessionHandler := NewSessionHandler(persister, sessionManager, *cfg)
-	sessions := g.Group("sessions")
+	sessionHandler := NewSessionHandler(persister)
+	sessions := tenantGroup.Group("/sessions")
 	sessions.GET("/validate", sessionHandler.ValidateSession)
 	sessions.POST("/validate", sessionHandler.ValidateSessionFromBody)
 

@@ -3,14 +3,16 @@ package handler
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/gofrs/uuid"
-	"github.com/stretchr/testify/suite"
-	"github.com/teamhanko/hanko/backend/v2/persistence/models"
-	"github.com/teamhanko/hanko/backend/v2/test"
 	"net/http"
 	"net/http/httptest"
 	"strings"
 	"testing"
+
+	"github.com/gofrs/uuid"
+	"github.com/stretchr/testify/suite"
+	"github.com/teamhanko/hanko/backend/v3/config"
+	"github.com/teamhanko/hanko/backend/v3/persistence/models"
+	"github.com/teamhanko/hanko/backend/v3/test"
 )
 
 func TestUserHandlerAdminSuite(t *testing.T) {
@@ -29,7 +31,10 @@ func (s *userAdminSuite) TestUserHandlerAdmin_Delete() {
 	err := s.LoadFixtures("../test/fixtures/user_admin")
 	s.Require().NoError(err)
 
-	e := NewAdminRouter(&test.DefaultConfig, s.Storage, nil)
+	cfg := test.DefaultConfig
+	err = cfg.PostProcess()
+	s.Require().NoError(err)
+	e := NewAdminRouter(&cfg, s.Storage, nil)
 
 	req := httptest.NewRequest(http.MethodDelete, fmt.Sprintf("/users/%s", "38bf5a00-d7ea-40a5-a5de-48722c148925"), nil)
 	rec := httptest.NewRecorder()
@@ -38,7 +43,7 @@ func (s *userAdminSuite) TestUserHandlerAdmin_Delete() {
 
 	s.Equal(http.StatusNoContent, rec.Code)
 
-	count, err := s.Storage.GetUserPersister().Count([]uuid.UUID{}, "", "")
+	count, err := s.Storage.GetUserPersister().Count([]uuid.UUID{}, "", "", uuid.FromStringOrNil(config.DefaultTenantID))
 	s.Require().NoError(err)
 	s.Equal(3, count)
 }
@@ -50,7 +55,10 @@ func (s *userAdminSuite) TestUserHandlerAdmin_Delete_UnknownUserId() {
 	err := s.LoadFixtures("../test/fixtures/user_admin")
 	s.Require().NoError(err)
 
-	e := NewAdminRouter(&test.DefaultConfig, s.Storage, nil)
+	cfg := test.DefaultConfig
+	err = cfg.PostProcess()
+	s.Require().NoError(err)
+	e := NewAdminRouter(&cfg, s.Storage, nil)
 
 	req := httptest.NewRequest(http.MethodDelete, fmt.Sprintf("/users/%s", "1e5dcc5c-8570-43cb-ba8b-caa88bbfc7ac"), nil)
 	rec := httptest.NewRecorder()
@@ -59,13 +67,16 @@ func (s *userAdminSuite) TestUserHandlerAdmin_Delete_UnknownUserId() {
 
 	s.Equal(http.StatusNotFound, rec.Code)
 
-	count, err := s.Storage.GetUserPersister().Count([]uuid.UUID{}, "", "")
+	count, err := s.Storage.GetUserPersister().Count([]uuid.UUID{}, "", "", uuid.FromStringOrNil(config.DefaultTenantID))
 	s.Require().NoError(err)
 	s.Equal(4, count)
 }
 
 func (s *userAdminSuite) TestUserHandlerAdmin_Delete_InvalidUserId() {
-	e := NewAdminRouter(&test.DefaultConfig, s.Storage, nil)
+	cfg := test.DefaultConfig
+	err := cfg.PostProcess()
+	s.Require().NoError(err)
+	e := NewAdminRouter(&cfg, s.Storage, nil)
 
 	req := httptest.NewRequest(http.MethodDelete, fmt.Sprintf("/users/%s", "invalidId"), nil)
 	rec := httptest.NewRecorder()
@@ -257,10 +268,12 @@ func (s *userAdminSuite) TestUserHandlerAdmin_Create() {
 	for _, currentTest := range tests {
 		s.Run(currentTest.name, func() {
 			s.Require().NoError(s.Storage.MigrateUp())
+			cfg := test.DefaultConfig
+			err := cfg.PostProcess()
+			s.Require().NoError(err)
+			e := NewAdminRouter(&cfg, s.Storage, nil)
 
-			e := NewAdminRouter(&test.DefaultConfig, s.Storage, nil)
-
-			err := s.LoadFixtures("../test/fixtures/user_admin")
+			err = s.LoadFixtures("../test/fixtures/user_admin")
 			s.Require().NoError(err)
 
 			req := httptest.NewRequest(http.MethodPost, "/users", strings.NewReader(currentTest.body))

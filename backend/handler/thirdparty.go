@@ -5,94 +5,61 @@ import (
 	"fmt"
 	"net/http"
 	"net/url"
+	"strconv"
+	"time"
 
 	"github.com/gobuffalo/pop/v6"
 	"github.com/labstack/echo/v4"
-	auditlog "github.com/teamhanko/hanko/backend/v2/audit_log"
-	"github.com/teamhanko/hanko/backend/v2/config"
-	"github.com/teamhanko/hanko/backend/v2/dto"
-	"github.com/teamhanko/hanko/backend/v2/dto/admin"
-	"github.com/teamhanko/hanko/backend/v2/persistence"
-	"github.com/teamhanko/hanko/backend/v2/persistence/models"
-	"github.com/teamhanko/hanko/backend/v2/session"
-	"github.com/teamhanko/hanko/backend/v2/thirdparty"
-	"github.com/teamhanko/hanko/backend/v2/utils"
-	webhookUtils "github.com/teamhanko/hanko/backend/v2/webhooks/utils"
+	zeroLogger "github.com/rs/zerolog/log"
+	auditlog "github.com/teamhanko/hanko/backend/v3/audit_log"
+	"github.com/teamhanko/hanko/backend/v3/config"
+	"github.com/teamhanko/hanko/backend/v3/context"
+	"github.com/teamhanko/hanko/backend/v3/dto"
+	"github.com/teamhanko/hanko/backend/v3/dto/admin"
+	"github.com/teamhanko/hanko/backend/v3/persistence"
+	"github.com/teamhanko/hanko/backend/v3/persistence/models"
+	"github.com/teamhanko/hanko/backend/v3/thirdparty"
+	"github.com/teamhanko/hanko/backend/v3/utils"
+	webhookUtils "github.com/teamhanko/hanko/backend/v3/webhooks/utils"
 	"golang.org/x/oauth2"
 )
 
 type ThirdPartyHandler struct {
-	auditLogger    auditlog.Logger
-	cfg            *config.Config
-	persister      persistence.Persister
-	sessionManager session.Manager
+	appConfig   config.ApplicationConfig
+	auditLogger auditlog.Logger
+	persister   persistence.Persister
 }
 
-func NewThirdPartyHandler(cfg *config.Config, persister persistence.Persister, sessionManager session.Manager, auditLogger auditlog.Logger) *ThirdPartyHandler {
+func NewThirdPartyHandler(appConfig config.ApplicationConfig, persister persistence.Persister, auditLogger auditlog.Logger) *ThirdPartyHandler {
 	return &ThirdPartyHandler{
-		auditLogger:    auditLogger,
-		cfg:            cfg,
-		persister:      persister,
-		sessionManager: sessionManager,
+		appConfig:   appConfig,
+		auditLogger: auditLogger,
+		persister:   persister,
 	}
-}
-
-func (h *ThirdPartyHandler) Auth(c echo.Context) error {
-	errorRedirectTo := c.Request().Header.Get("Referer")
-	if errorRedirectTo == "" {
-		errorRedirectTo = h.cfg.ThirdParty.ErrorRedirectURL
-	}
-
-	var request dto.ThirdPartyAuthRequest
-	err := c.Bind(&request)
-	if err != nil {
-		return h.redirectError(c, thirdparty.ErrorServer("could not decode request payload").WithCause(err), errorRedirectTo)
-	}
-
-	err = c.Validate(request)
-	if err != nil {
-		return h.redirectError(c, thirdparty.ErrorInvalidRequest(err.Error()).WithCause(err), errorRedirectTo)
-	}
-
-	if ok := thirdparty.IsAllowedRedirect(h.cfg.ThirdParty, request.RedirectTo); !ok {
-		return h.redirectError(c, thirdparty.ErrorInvalidRequest(fmt.Sprintf("redirect to '%s' not allowed", request.RedirectTo)), errorRedirectTo)
-	}
-
-	provider, err := thirdparty.GetProvider(h.cfg.ThirdParty, request.Provider)
-	if err != nil {
-		return h.redirectError(c, thirdparty.ErrorInvalidRequest(err.Error()).WithCause(err), errorRedirectTo)
-	}
-
-	state, err := thirdparty.GenerateState(h.cfg, provider.ID(), request.RedirectTo)
-	if err != nil {
-		return h.redirectError(c, thirdparty.ErrorServer("could not generate state").WithCause(err), errorRedirectTo)
-	}
-
-	authCodeUrl := provider.AuthCodeURL(string(state))
-
-	cookie := utils.GenerateStateCookie(h.cfg, utils.HankoThirdpartyStateCookie, string(state), utils.CookieOptions{
-		MaxAge:   300,
-		Path:     "/",
-		SameSite: http.SameSiteLaxMode,
-	})
-
-	c.SetCookie(cookie)
-
-	return c.Redirect(http.StatusTemporaryRedirect, authCodeUrl)
 }
 
 func (h *ThirdPartyHandler) CallbackPost(c echo.Context) error {
+	tenant, err := context.GetTenant(c)
+	if err != nil {
+		return h.redirectError(c, thirdparty.ErrorServer("failed to get tenant from context"), "/error") // TODO:
+	}
+
 	q, err := c.FormParams()
 	if err != nil {
-		return h.redirectError(c, thirdparty.ErrorServer("could not get form parameters"), h.cfg.ThirdParty.ErrorRedirectURL)
+		return h.redirectError(c, thirdparty.ErrorServer("could not get form parameters"), tenant.Config.ThirdParty.ErrorRedirectURL)
 	}
 	return c.Redirect(http.StatusSeeOther, fmt.Sprintf("/thirdparty/callback?%s", q.Encode()))
 }
 
 func (h *ThirdPartyHandler) Callback(c echo.Context) error {
+	tenant, err := context.GetTenant(c)
+	if err != nil {
+		return thirdparty.ErrorServer("failed to get tenant from context").WithCause(err)
+	}
+
 	var redirectToURL *url.URL
 	var accountLinkingResult *thirdparty.AccountLinkingResult
-	err := h.persister.Transaction(func(tx *pop.Connection) error {
+	err = h.persister.Transaction(func(tx *pop.Connection) error {
 		var callback dto.ThirdPartyAuthCallback
 		terr := c.Bind(&callback)
 		if terr != nil {
@@ -122,7 +89,7 @@ func (h *ThirdPartyHandler) Callback(c echo.Context) error {
 			expectedState = expectedStateCookie.Value
 		}
 		var state *thirdparty.State
-		state, terr = thirdparty.VerifyState(h.cfg, callback.State, expectedState)
+		state, terr = thirdparty.VerifyState(h.appConfig, callback.State, expectedState)
 		if terr != nil {
 			return thirdparty.ErrorInvalidRequest(terr.Error()).WithCause(terr)
 		}
@@ -136,7 +103,7 @@ func (h *ThirdPartyHandler) Callback(c echo.Context) error {
 			return thirdparty.NewThirdPartyError(callback.Error, callback.ErrorDescription)
 		}
 
-		provider, terr := thirdparty.GetProvider(h.cfg.ThirdParty, state.Provider)
+		provider, terr := thirdparty.GetProvider(tenant.Config.ThirdParty, state.Provider)
 		if terr != nil {
 			return thirdparty.ErrorInvalidRequest(terr.Error()).WithCause(terr)
 		}
@@ -149,23 +116,23 @@ func (h *ThirdPartyHandler) Callback(c echo.Context) error {
 		if state.CodeVerifier != "" && provider.ID() != "linkedin" {
 			opts = append(opts, oauth2.VerifierOption(state.CodeVerifier))
 		}
-		oAuthToken, terr := provider.GetOAuthToken(callback.AuthCode, opts...)
+		oAuthToken, terr := provider.GetOAuthToken(c.Request().Context(), callback.AuthCode, opts...)
 		if terr != nil {
 			return thirdparty.ErrorInvalidRequest("could not exchange authorization code for access token").WithCause(terr)
 		}
 
-		userData, terr := provider.GetUserData(oAuthToken)
+		userData, terr := provider.GetUserData(c.Request().Context(), oAuthToken)
 		if terr != nil {
 			return thirdparty.ErrorInvalidRequest("could not retrieve user data from provider").WithCause(terr)
 		}
 
-		linkingResult, terr := thirdparty.LinkAccount(tx, h.cfg, h.persister, userData, provider.ID(), false, nil, state.IsFlow, state.UserID)
+		linkingResult, terr := thirdparty.LinkAccount(tx, &tenant.Config, h.persister, userData, provider.ID(), false, nil, state.IsFlow, state.UserID, tenant.ID)
 		if terr != nil {
 			return terr
 		}
 		accountLinkingResult = linkingResult
 
-		identityModel, err := h.persister.GetIdentityPersisterWithConnection(tx).Get(userData.Metadata.Subject, provider.ID())
+		identityModel, err := h.persister.GetIdentityPersisterWithConnection(tx).Get(userData.Metadata.Subject, provider.ID(), tenant.ID)
 		if err != nil {
 			return thirdparty.ErrorServer("could not get identity").WithCause(err)
 		}
@@ -185,6 +152,7 @@ func (h *ThirdPartyHandler) Callback(c echo.Context) error {
 		}
 		token, terr := models.NewToken(
 			linkingResult.User.ID,
+			tenant.ID,
 			tokenOpts...,
 		)
 		if terr != nil {
@@ -204,17 +172,17 @@ func (h *ThirdPartyHandler) Callback(c echo.Context) error {
 			Name:     utils.HankoThirdpartyStateCookie,
 			Value:    "",
 			Path:     "/",
-			Domain:   h.cfg.Session.Cookie.Domain,
+			Domain:   tenant.Config.Session.Cookie.Domain,
 			MaxAge:   -1,
-			Secure:   h.cfg.Session.Cookie.Secure,
-			HttpOnly: h.cfg.Session.Cookie.HttpOnly,
+			Secure:   tenant.Config.Session.Cookie.Secure,
+			HttpOnly: tenant.Config.Session.Cookie.HttpOnly,
 			SameSite: http.SameSiteLaxMode,
 		})
 
 		return nil
 	})
 
-	errorRedirect := h.cfg.ThirdParty.ErrorRedirectURL
+	errorRedirect := tenant.Config.ThirdParty.ErrorRedirectURL
 	if redirectToURL != nil {
 		errorRedirect = redirectToURL.String()
 	}
@@ -223,13 +191,13 @@ func (h *ThirdPartyHandler) Callback(c echo.Context) error {
 		return h.redirectError(c, err, errorRedirect)
 	}
 
-	err = h.auditLogger.Create(c, accountLinkingResult.Type, accountLinkingResult.User, nil)
+	err = h.auditLogger.Create(c, accountLinkingResult.Type, accountLinkingResult.User, nil, tenant.ID)
 	if err != nil {
 		return h.redirectError(c, thirdparty.ErrorServer("could not create audit log").WithCause(err), errorRedirect)
 	}
 
 	if accountLinkingResult.WebhookEvent != nil {
-		err = webhookUtils.TriggerWebhooks(c, h.persister.GetConnection(), *accountLinkingResult.WebhookEvent, admin.FromUserModel(*accountLinkingResult.User))
+		err = webhookUtils.TriggerWebhooks(c, h.persister.GetConnection(), tenant.ID, *accountLinkingResult.WebhookEvent, admin.FromUserModel(*accountLinkingResult.User))
 		if err != nil {
 			c.Logger().Warn(err)
 		}
@@ -239,26 +207,43 @@ func (h *ThirdPartyHandler) Callback(c echo.Context) error {
 }
 
 func (h *ThirdPartyHandler) redirectError(c echo.Context, error error, to string) error {
-	redirectTo := h.cfg.ThirdParty.ErrorRedirectURL
-	if to != "" {
-		redirectTo = to
-	}
+	// TODO:
+	//redirectTo := h.cfg.ThirdParty.ErrorRedirectURL
+	//if to != "" {
+	//	redirectTo = to
+	//}
 
 	err := h.auditError(c, error)
 	if err != nil {
 		error = err
 	}
 
-	redirectURL := thirdparty.GetErrorUrl(redirectTo, error)
+	redirectURL := thirdparty.GetErrorUrl(to, error)
 	return c.Redirect(http.StatusTemporaryRedirect, redirectURL)
 }
 
-func (h *ThirdPartyHandler) auditError(c echo.Context, err error) error {
-	e, ok := err.(*thirdparty.ThirdPartyError)
+func (h *ThirdPartyHandler) auditError(c echo.Context, logError error) error {
+	e, ok := logError.(*thirdparty.ThirdPartyError)
+
+	tenant, err := context.GetTenant(c)
+	if err != nil {
+		return fmt.Errorf("failed to get tenant from context: %w", err)
+	}
 
 	var auditLogError error
 	if ok && e.Code != thirdparty.ErrorCodeServerError {
-		auditLogError = h.auditLogger.Create(c, models.AuditLogThirdPartySignInSignUpFailed, nil, err)
+		auditLogError = h.auditLogger.Create(c, models.AuditLogThirdPartySignInSignUpFailed, nil, logError, tenant.ID)
+	} else {
+		zeroLogger.Error().
+			Str("time_unix", strconv.FormatInt(time.Now().Unix(), 10)).
+			Str("id", c.Response().Header().Get(echo.HeaderXRequestID)).
+			Str("remote_ip", c.RealIP()).
+			Str("host", c.Request().Host).
+			Str("method", c.Request().Method).
+			Str("uri", c.Request().RequestURI).
+			Str("user_agent", c.Request().UserAgent()).
+			Err(logError).
+			Send()
 	}
 	return auditLogError
 }

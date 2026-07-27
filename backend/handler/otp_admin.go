@@ -2,11 +2,14 @@ package handler
 
 import (
 	"fmt"
+
+	"net/http"
+
 	"github.com/gofrs/uuid"
 	"github.com/labstack/echo/v4"
-	"github.com/teamhanko/hanko/backend/v2/dto/admin"
-	"github.com/teamhanko/hanko/backend/v2/persistence"
-	"net/http"
+	"github.com/teamhanko/hanko/backend/v3/context"
+	"github.com/teamhanko/hanko/backend/v3/dto/admin"
+	"github.com/teamhanko/hanko/backend/v3/persistence"
 )
 
 type OTPAdminHandler interface {
@@ -23,6 +26,11 @@ func NewOTPAdminHandler(persister persistence.Persister) OTPAdminHandler {
 }
 
 func (h *otpAdminHandler) Get(ctx echo.Context) error {
+	tenant, err := context.GetTenant(ctx)
+	if err != nil {
+		return fmt.Errorf("failed to get tenant from context: %w", err)
+	}
+
 	getDto, err := loadDto[admin.GetOTPRequestDto](ctx)
 	if err != nil {
 		return err
@@ -33,7 +41,7 @@ func (h *otpAdminHandler) Get(ctx echo.Context) error {
 		return fmt.Errorf(parseUserUuidFailureMessage, err)
 	}
 
-	userModel, err := h.persister.GetUserPersister().Get(userID)
+	userModel, err := h.persister.GetUserPersister().Get(userID, tenant.ID)
 	if err != nil {
 		return err
 	}
@@ -49,6 +57,11 @@ func (h *otpAdminHandler) Get(ctx echo.Context) error {
 }
 
 func (h *otpAdminHandler) Delete(ctx echo.Context) error {
+	tenant, err := context.GetTenant(ctx)
+	if err != nil {
+		return fmt.Errorf("failed to get tenant from context: %w", err)
+	}
+
 	deleteDto, err := loadDto[admin.GetOTPRequestDto](ctx)
 	if err != nil {
 		return err
@@ -59,7 +72,7 @@ func (h *otpAdminHandler) Delete(ctx echo.Context) error {
 		return fmt.Errorf(parseUserUuidFailureMessage, err)
 	}
 
-	userModel, err := h.persister.GetUserPersister().Get(userID)
+	userModel, err := h.persister.GetUserPersister().Get(userID, tenant.ID)
 	if err != nil {
 		return err
 	}

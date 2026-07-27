@@ -6,11 +6,11 @@ import (
 	"regexp"
 	"strings"
 
-	auditlog "github.com/teamhanko/hanko/backend/v2/audit_log"
-	"github.com/teamhanko/hanko/backend/v2/flow_api/flow/shared"
-	"github.com/teamhanko/hanko/backend/v2/flow_api/services"
-	"github.com/teamhanko/hanko/backend/v2/flowpilot"
-	"github.com/teamhanko/hanko/backend/v2/persistence/models"
+	auditlog "github.com/teamhanko/hanko/backend/v3/audit_log"
+	"github.com/teamhanko/hanko/backend/v3/flow_api/flow/shared"
+	"github.com/teamhanko/hanko/backend/v3/flow_api/services"
+	"github.com/teamhanko/hanko/backend/v3/flowpilot"
+	"github.com/teamhanko/hanko/backend/v3/persistence/models"
 )
 
 type ContinueWithLoginIdentifier struct {
@@ -54,7 +54,7 @@ func (a ContinueWithLoginIdentifier) Initialize(c flowpilot.InitializationContex
 
 	if !deps.Cfg.Password.Enabled &&
 		!deps.Cfg.Email.UseForAuthentication &&
-		!(emailEnabled && deps.Cfg.Saml.Enabled && len(deps.SamlService.Providers()) > 0) {
+		!(emailEnabled && deps.Cfg.Saml.Enabled) {
 		c.SuspendAction()
 	}
 
@@ -87,8 +87,10 @@ func (a ContinueWithLoginIdentifier) Execute(c flowpilot.ExecutionContext) error
 
 		if deps.Cfg.Saml.Enabled {
 			domain := strings.Split(identifierInputValue, "@")[1]
-			if provider, err := deps.SamlService.GetProviderByDomain(domain); err == nil && provider != nil {
-				authUrl, err := deps.SamlService.GetAuthUrl(provider, deps.Cfg.Saml.DefaultRedirectUrl, true)
+			// Try to get SAML provider by domain
+			providerModel, err := deps.Persister.GetSamlProviderPersister().GetEnabledByDomain(deps.TenantID, domain)
+			if err == nil && providerModel != nil {
+				authUrl, err := deps.SamlService.GetAuthUrl(deps.TenantID, deps.Cfg, providerModel.ID, deps.Cfg.Saml.DefaultRedirectUrl, true)
 
 				if err != nil {
 					return fmt.Errorf("failed to get auth url: %w", err)
@@ -102,7 +104,7 @@ func (a ContinueWithLoginIdentifier) Execute(c flowpilot.ExecutionContext) error
 
 		var err error
 
-		userModel, err = deps.Persister.GetUserPersisterWithConnection(deps.Tx).GetByEmailAddress(identifierInputValue)
+		userModel, err = deps.Persister.GetUserPersisterWithConnection(deps.Tx).GetByEmailAddress(identifierInputValue, deps.TenantID)
 		if err != nil {
 			return err
 		}
@@ -116,6 +118,7 @@ func (a ContinueWithLoginIdentifier) Execute(c flowpilot.ExecutionContext) error
 				models.AuditLogLoginFailure,
 				nil,
 				flowInputError,
+				deps.TenantID,
 				auditlog.Detail("flow_id", c.GetFlowID()))
 
 			if err != nil {
@@ -144,7 +147,7 @@ func (a ContinueWithLoginIdentifier) Execute(c flowpilot.ExecutionContext) error
 		// User has submitted a username.
 		var err error
 
-		userModel, err = deps.Persister.GetUserPersisterWithConnection(deps.Tx).GetByUsername(identifierInputValue)
+		userModel, err = deps.Persister.GetUserPersisterWithConnection(deps.Tx).GetByUsername(identifierInputValue, deps.TenantID)
 		if err != nil {
 			return fmt.Errorf("failed to get user by username from db: %w", err)
 		}
@@ -157,6 +160,7 @@ func (a ContinueWithLoginIdentifier) Execute(c flowpilot.ExecutionContext) error
 				models.AuditLogLoginFailure,
 				nil,
 				flowInputError,
+				deps.TenantID,
 				auditlog.Detail("flow_id", c.GetFlowID()))
 
 			if err != nil {
@@ -222,8 +226,7 @@ func (a ContinueWithLoginIdentifier) Execute(c flowpilot.ExecutionContext) error
 			return c.Continue(shared.StateLoginPassword)
 		case passkeysAvailable:
 			//goland:noinspection GoDfaNilDereference
-			userModel.WebauthnCredentials = userModel.GetPasskeys()
-			params := services.GenerateRequestOptionsPasskeyParams{Tx: deps.Tx, User: userModel}
+			params := services.GenerateRequestOptionsPasskeyParams{Tx: deps.Tx, User: userModel, TenantID: deps.TenantID, Cfg: deps.Cfg.TenantConfig}
 
 			sessionDataModel, requestOptions, err := deps.WebauthnService.GenerateRequestOptionsPasskey(params)
 			if err != nil {

@@ -8,12 +8,13 @@ import (
 	"github.com/gobuffalo/pop/v6"
 	"github.com/gofrs/uuid"
 	"github.com/labstack/echo/v4"
-	"github.com/teamhanko/hanko/backend/v2/config"
-	"github.com/teamhanko/hanko/backend/v2/dto/admin"
-	"github.com/teamhanko/hanko/backend/v2/persistence"
-	"github.com/teamhanko/hanko/backend/v2/persistence/models"
-	"github.com/teamhanko/hanko/backend/v2/webhooks"
-	"github.com/teamhanko/hanko/backend/v2/webhooks/events"
+	"github.com/teamhanko/hanko/backend/v3/config"
+	"github.com/teamhanko/hanko/backend/v3/context"
+	"github.com/teamhanko/hanko/backend/v3/dto/admin"
+	"github.com/teamhanko/hanko/backend/v3/persistence"
+	"github.com/teamhanko/hanko/backend/v3/persistence/models"
+	"github.com/teamhanko/hanko/backend/v3/webhooks"
+	"github.com/teamhanko/hanko/backend/v3/webhooks/events"
 )
 
 type WebhookHandler interface {
@@ -41,8 +42,13 @@ func NewWebhookHandler(cfg config.WebhookSettings, persister persistence.Persist
 }
 
 func (w *webhookHandler) List(ctx echo.Context) error {
+	tenant, err := context.GetTenant(ctx)
+	if err != nil {
+		return fmt.Errorf("failed to get tenant from context: %w", err)
+	}
+
 	persister := w.persister.GetWebhookPersister(nil)
-	dbHooks, err := persister.List(true)
+	dbHooks, err := persister.List(true, tenant.ID)
 	if err != nil {
 		ctx.Logger().Error(err)
 		return fmt.Errorf("failed to list users: %w", err)
@@ -57,8 +63,13 @@ func (w *webhookHandler) List(ctx echo.Context) error {
 }
 
 func (w *webhookHandler) Create(ctx echo.Context) error {
+	tenant, err := context.GetTenant(ctx)
+	if err != nil {
+		return fmt.Errorf("failed to get tenant from context: %w", err)
+	}
+
 	var dto admin.CreateWebhookRequestDto
-	err := ctx.Bind(&dto)
+	err = ctx.Bind(&dto)
 	if err != nil {
 		ctx.Logger().Error(err)
 		return echo.NewHTTPError(http.StatusBadRequest, err)
@@ -78,8 +89,9 @@ func (w *webhookHandler) Create(ctx echo.Context) error {
 		return echo.NewHTTPError(http.StatusInternalServerError, fmt.Errorf(uuidErrorFormat, err))
 	}
 
-	model := models.Webhook{
+	model := models.Webhook{ // TODO: where is tenant ID?
 		ID:            newUuid,
+		TenantID:      tenant.ID,
 		Callback:      dto.Callback,
 		Enabled:       true,
 		Failures:      0,
@@ -89,7 +101,7 @@ func (w *webhookHandler) Create(ctx echo.Context) error {
 		UpdatedAt:     now,
 	}
 
-	dbEvents, err := w.createWebhookEvents(dto.Events, model, now)
+	dbEvents, err := w.createWebhookEvents(dto.Events, model, now, tenant.ID)
 	if err != nil {
 		ctx.Logger().Error(err)
 		return echo.NewHTTPError(http.StatusInternalServerError, fmt.Errorf(uuidErrorFormat, err))
@@ -107,7 +119,7 @@ func (w *webhookHandler) Create(ctx echo.Context) error {
 	return ctx.JSON(http.StatusCreated, model)
 }
 
-func (w *webhookHandler) createWebhookEvents(evts events.Events, webhook models.Webhook, now time.Time) (models.WebhookEvents, error) {
+func (w *webhookHandler) createWebhookEvents(evts events.Events, webhook models.Webhook, now time.Time, tenantID uuid.UUID) (models.WebhookEvents, error) {
 	eventList := make(models.WebhookEvents, 0)
 	for _, event := range evts {
 		newUuid, err := uuid.NewV4()
@@ -117,6 +129,7 @@ func (w *webhookHandler) createWebhookEvents(evts events.Events, webhook models.
 
 		model := models.WebhookEvent{
 			ID:        newUuid,
+			TenantID:  tenantID,
 			Webhook:   &webhook,
 			Event:     string(event),
 			CreatedAt: now,
@@ -130,8 +143,13 @@ func (w *webhookHandler) createWebhookEvents(evts events.Events, webhook models.
 }
 
 func (w *webhookHandler) Get(ctx echo.Context) error {
+	tenant, err := context.GetTenant(ctx)
+	if err != nil {
+		return fmt.Errorf("failed to get tenant from context: %w", err)
+	}
+
 	var dto admin.GetWebhookRequestDto
-	err := ctx.Bind(&dto)
+	err = ctx.Bind(&dto)
 	if err != nil {
 		ctx.Logger().Error(err)
 		return echo.NewHTTPError(http.StatusBadRequest, err)
@@ -144,7 +162,7 @@ func (w *webhookHandler) Get(ctx echo.Context) error {
 	}
 
 	webhookId, _ := uuid.FromString(dto.ID)
-	webhook, err := w.getWebhook(webhookId, w.persister.GetWebhookPersister(nil))
+	webhook, err := w.getWebhook(webhookId, w.persister.GetWebhookPersister(nil), tenant.ID)
 	if err != nil {
 		ctx.Logger().Error(err)
 		return err
@@ -154,8 +172,13 @@ func (w *webhookHandler) Get(ctx echo.Context) error {
 }
 
 func (w *webhookHandler) Delete(ctx echo.Context) error {
+	tenant, err := context.GetTenant(ctx)
+	if err != nil {
+		return fmt.Errorf("failed to get tenant from context: %w", err)
+	}
+
 	var dto admin.GetWebhookRequestDto
-	err := ctx.Bind(&dto)
+	err = ctx.Bind(&dto)
 	if err != nil {
 		ctx.Logger().Error(err)
 		return echo.NewHTTPError(http.StatusBadRequest, err)
@@ -170,7 +193,7 @@ func (w *webhookHandler) Delete(ctx echo.Context) error {
 	persister := w.persister.GetWebhookPersister(nil)
 
 	webhookId, _ := uuid.FromString(dto.ID)
-	webhook, err := w.getWebhook(webhookId, persister)
+	webhook, err := w.getWebhook(webhookId, persister, tenant.ID)
 	if err != nil {
 		ctx.Logger().Error(err)
 		return err
@@ -186,8 +209,13 @@ func (w *webhookHandler) Delete(ctx echo.Context) error {
 }
 
 func (w *webhookHandler) Update(ctx echo.Context) error {
+	tenant, err := context.GetTenant(ctx)
+	if err != nil {
+		return fmt.Errorf("failed to get tenant from context: %w", err)
+	}
+
 	var dto admin.UpdateWebhookRequestDto
-	err := ctx.Bind(&dto)
+	err = ctx.Bind(&dto)
 	if err != nil {
 		ctx.Logger().Error(err)
 		return echo.NewHTTPError(http.StatusBadRequest, err)
@@ -204,7 +232,7 @@ func (w *webhookHandler) Update(ctx echo.Context) error {
 
 		webhookId, _ := uuid.FromString(dto.ID)
 
-		webhook, err := w.getWebhook(webhookId, persister)
+		webhook, err := w.getWebhook(webhookId, persister, tenant.ID)
 		if err != nil {
 			ctx.Logger().Error(err)
 			return err
@@ -219,7 +247,7 @@ func (w *webhookHandler) Update(ctx echo.Context) error {
 		}
 
 		now := time.Now()
-		dbEvents, err := w.createWebhookEvents(dto.Events, *webhook, now)
+		dbEvents, err := w.createWebhookEvents(dto.Events, *webhook, now, tenant.ID)
 		if err != nil {
 			ctx.Logger().Error(err)
 			return echo.NewHTTPError(http.StatusInternalServerError, fmt.Errorf(uuidErrorFormat, err))
@@ -228,7 +256,7 @@ func (w *webhookHandler) Update(ctx echo.Context) error {
 		webhook.WebhookEvents = dbEvents
 		webhook.Callback = dto.Callback
 		webhook.UpdatedAt = now
-		webhook.Enabled = dto.Enabled
+		webhook.Enabled = *dto.Enabled
 		webhook.Failures = 0
 		webhook.ExpiresAt = now.Add(webhooks.WebhookExpireDuration)
 
@@ -242,8 +270,8 @@ func (w *webhookHandler) Update(ctx echo.Context) error {
 	})
 }
 
-func (w *webhookHandler) getWebhook(id uuid.UUID, persister persistence.WebhookPersister) (*models.Webhook, error) {
-	webhook, err := persister.Get(id)
+func (w *webhookHandler) getWebhook(id uuid.UUID, persister persistence.WebhookPersister, tenantID uuid.UUID) (*models.Webhook, error) {
+	webhook, err := persister.Get(id, tenantID)
 	if err != nil {
 		return nil, fmt.Errorf("unable to fetch webhook from database: %w", err)
 	}

@@ -1,16 +1,21 @@
 - id: b5dd5267-b462-48be-b70d-bcd6f1bbe7a5
+  tenant_id: 00000000-0000-0000-0000-000000000001
   created_at: 2020-12-31 23:59:59
   updated_at: 2020-12-31 23:59:59
 - id: 38bf5a00-d7ea-40a5-a5de-48722c148925
+  tenant_id: 00000000-0000-0000-0000-000000000001
   created_at: 2020-12-31 23:59:59
   updated_at: 2020-12-31 23:59:59
 - id: e0282f3f-b211-4f0e-b777-6fabc69287c9
+  tenant_id: 00000000-0000-0000-0000-000000000001
   created_at: 2020-12-31 23:59:59
   updated_at: 2020-12-31 23:59:59
 - id: d41df4b7-c055-45e6-9faf-61aa92a4032e
+  tenant_id: 00000000-0000-0000-0000-000000000001
   created_at: 2020-12-31 23:59:59
   updated_at: 2020-12-31 23:59:59
 - id: 6be8e0e7-05e6-4223-807b-06fe1d5e7b75
+  tenant_id: 00000000-0000-0000-0000-000000000001
   created_at: 2020-12-31 23:59:59
   updated_at: 2020-12-31 23:59:59
   picture: https://example.com/user1.jpg
@@ -18,6 +23,7 @@
   given_name: "Foo"
   family_name: "User"
 - id: b3210fd8-c71f-4c9d-8123-a58f5f46a07f
+  tenant_id: 00000000-0000-0000-0000-000000000001
   created_at: 2020-12-31 23:59:59
   updated_at: 2020-12-31 23:59:59
   picture: https://example.com/user1.jpg

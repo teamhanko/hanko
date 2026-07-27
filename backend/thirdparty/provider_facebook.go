@@ -8,7 +8,7 @@ import (
 	"errors"
 	"net/url"
 
-	"github.com/teamhanko/hanko/backend/v2/config"
+	"github.com/teamhanko/hanko/backend/v3/config"
 	"golang.org/x/oauth2"
 )
 
@@ -73,11 +73,11 @@ func (f facebookProvider) AuthCodeURL(state string, opts ...oauth2.AuthCodeOptio
 	return f.oauthConfig.AuthCodeURL(state, opts...)
 }
 
-func (f facebookProvider) GetOAuthToken(code string, opts ...oauth2.AuthCodeOption) (*oauth2.Token, error) {
-	return f.oauthConfig.Exchange(context.Background(), code, opts...)
+func (f facebookProvider) GetOAuthToken(ctx context.Context, code string, opts ...oauth2.AuthCodeOption) (*oauth2.Token, error) {
+	return f.oauthConfig.Exchange(ctx, code, opts...)
 }
 
-func (f facebookProvider) GetUserData(token *oauth2.Token) (*UserData, error) {
+func (f facebookProvider) GetUserData(ctx context.Context, token *oauth2.Token) (*UserData, error) {
 	endpointURL, err := url.Parse(FacebookUserInfoEndpoint)
 	if err != nil {
 		return nil, err
@@ -96,7 +96,7 @@ func (f facebookProvider) GetUserData(token *oauth2.Token) (*UserData, error) {
 	endpointURL.RawQuery = endpointURLQuery.Encode()
 
 	var fbUser FacebookUser
-	if err = makeRequest(token, f.oauthConfig, endpointURL.String(), &fbUser); err != nil {
+	if err = makeRequest(ctx, token, f.oauthConfig, endpointURL.String(), &fbUser); err != nil {
 		return nil, err
 	}
 

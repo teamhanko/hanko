@@ -4,14 +4,14 @@ import (
 	"fmt"
 
 	"github.com/gofrs/uuid"
-	auditlog "github.com/teamhanko/hanko/backend/v2/audit_log"
-	"github.com/teamhanko/hanko/backend/v2/dto/webhook"
-	"github.com/teamhanko/hanko/backend/v2/flow_api/flow/shared"
-	"github.com/teamhanko/hanko/backend/v2/flow_api/services"
-	"github.com/teamhanko/hanko/backend/v2/flowpilot"
-	"github.com/teamhanko/hanko/backend/v2/persistence/models"
-	"github.com/teamhanko/hanko/backend/v2/webhooks/events"
-	"github.com/teamhanko/hanko/backend/v2/webhooks/utils"
+	auditlog "github.com/teamhanko/hanko/backend/v3/audit_log"
+	"github.com/teamhanko/hanko/backend/v3/dto/webhook"
+	"github.com/teamhanko/hanko/backend/v3/flow_api/flow/shared"
+	"github.com/teamhanko/hanko/backend/v3/flow_api/services"
+	"github.com/teamhanko/hanko/backend/v3/flowpilot"
+	"github.com/teamhanko/hanko/backend/v3/persistence/models"
+	"github.com/teamhanko/hanko/backend/v3/webhooks/events"
+	"github.com/teamhanko/hanko/backend/v3/webhooks/utils"
 )
 
 type EmailSetPrimary struct {
@@ -84,7 +84,7 @@ func (a EmailSetPrimary) Execute(c flowpilot.ExecutionContext) error {
 	}
 
 	if primaryEmail == nil {
-		primaryEmail = models.NewPrimaryEmail(emailModel.ID, userModel.ID)
+		primaryEmail = models.NewPrimaryEmail(emailModel.ID, userModel.ID, deps.TenantID)
 		err := deps.Persister.GetPrimaryEmailPersisterWithConnection(deps.Tx).Create(*primaryEmail)
 		if err != nil {
 			return fmt.Errorf("failed to store new primary email: %w", err)
@@ -99,6 +99,7 @@ func (a EmailSetPrimary) Execute(c flowpilot.ExecutionContext) error {
 
 	if deps.Cfg.SecurityNotifications.Notifications.EmailCreate.Enabled && existingPrimaryEmailAddress != "" {
 		deps.SecurityNotificationService.SendNotification(deps.Tx, services.SendSecurityNotificationParams{
+			TenantID:     deps.TenantID,
 			EmailAddress: existingPrimaryEmailAddress,
 			Template:     "primary_email_update",
 			HttpContext:  deps.HttpContext,
@@ -120,6 +121,7 @@ func (a EmailSetPrimary) Execute(c flowpilot.ExecutionContext) error {
 		models.AuditLogPrimaryEmailChanged,
 		&models.User{ID: userModel.ID},
 		nil,
+		deps.TenantID,
 		auditlog.Detail("email", emailModel.Address),
 		auditlog.Detail("flow_id", c.GetFlowID()))
 

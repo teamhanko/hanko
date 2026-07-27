@@ -182,6 +182,8 @@ export const zh: Translation = {
     technical_error: "发生技术错误。请稍后再试。",
     flow_expired_error: "会话已过期，请点击按钮重新启动。",
     value_invalid_error: "输入的值无效。",
+    otp_code_invalid: "提供的OTP码不正确。",
+    otp_code_already_used: "该OTP码已被使用。",
     passcode_invalid: "提供的密码不正确。",
     passkey_invalid: "此密码无法再使用。",
     passcode_max_attempts_reached:

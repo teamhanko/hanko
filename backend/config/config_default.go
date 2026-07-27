@@ -4,27 +4,87 @@ import "time"
 
 func DefaultConfig() *Config {
 	return &Config{
-		ConvertLegacyConfig:                  false,
-		ConvertLegacyServerSideSessionConfig: true,
+		ApplicationConfig: DefaultApplicationConfig(),
+		TenantConfig:      DefaultTenantConfig(),
+	}
+}
+
+func DefaultApplicationConfig() ApplicationConfig {
+	return ApplicationConfig{
+		Server: Server{
+			Public: ServerSettings{
+				Address: ":8000",
+			},
+			Admin: ServerSettings{
+				Address: ":8001",
+			},
+			Management: ServerSettings{
+				Address: ":8002",
+			},
+		},
+		Database: Database{
+			Database:        "hanko",
+			User:            "hanko",
+			Password:        "hanko",
+			Port:            "5432",
+			Dialect:         "postgres",
+			Host:            "localhost",
+			Pool:            5,
+			IdlePool:        0,
+			ConnMaxIdleTime: 5 * time.Minute,
+			ConnMaxLifetime: 1 * time.Hour,
+		},
+		AuditLog: AuditLog{
+			ConsoleOutput: AuditLogConsole{
+				Enabled:      true,
+				OutputStream: OutputStreamStdOut,
+			},
+			Mask:      true,
+			Retention: "720h",
+		},
+		RateLimiter: RateLimiter{
+			Enabled: true,
+			Store:   RATE_LIMITER_STORE_IN_MEMORY,
+			OTPLimits: RateLimits{
+				Tokens:   3,
+				Interval: 1 * time.Minute,
+			},
+			PasswordLimits: RateLimits{
+				Tokens:   5,
+				Interval: 1 * time.Minute,
+			},
+			PasscodeLimits: RateLimits{
+				Tokens:   3,
+				Interval: 1 * time.Minute,
+			},
+			TokenLimits: RateLimits{
+				Tokens:   3,
+				Interval: 1 * time.Minute,
+			},
+		},
+		MultiTenancy: MultiTenancy{Enabled: false},
+		Debug:        false,
+		FlowLocker: FlowLocker{
+			Enabled: true,
+			Store:   FLOW_LOCKER_STORE_IN_MEMORY,
+		},
+		SecretKeys: []string{"abcedfghijklmnopqrstuvwxyz"}, // TODO: should we really set this?
+	}
+}
+
+func DefaultTenantConfig() TenantConfig {
+	return TenantConfig{
+		Cors: Cors{
+			AllowOrigins:                []string{"http://localhost:8888"},
+			UnsafeWildcardOriginAllowed: false,
+		},
 		Service: Service{
 			Name: "Hanko Authentication Service",
 		},
 		Secrets: Secrets{
-			Keys: []string{"abcedfghijklmnopqrstuvwxyz"},
+			// Keys: []string{"abcedfghijklmnopqrstuvwxyz"},
 			KeyManagement: KeyManagement{
 				Type: "local",
-			},
-		},
-		Server: Server{
-			Public: ServerSettings{
-				Address: ":8000",
-				Cors: Cors{
-					AllowOrigins:                []string{"http://localhost:8888"},
-					UnsafeWildcardOriginAllowed: false,
-				},
-			},
-			Admin: ServerSettings{
-				Address: ":8001",
 			},
 		},
 		Webauthn: WebauthnSettings{
@@ -33,8 +93,6 @@ func DefaultConfig() *Config {
 				DisplayName: "Hanko Authentication Service",
 				Origins:     []string{"http://localhost:8888"},
 			},
-			UserVerification: "preferred",
-			Timeout:          600000,
 			Timeouts: WebauthnTimeouts{
 				Registration: 600000,
 				Login:        600000,
@@ -65,10 +123,6 @@ func DefaultConfig() *Config {
 				},
 			},
 		},
-		Smtp: SMTP{
-			Host: "localhost",
-			Port: "465",
-		},
 		EmailDelivery: EmailDelivery{
 			Enabled: true,
 			SMTP: SMTP{
@@ -78,9 +132,6 @@ func DefaultConfig() *Config {
 			FromAddress: "noreply@hanko.io",
 			FromName:    "Hanko",
 		},
-		Passcode: Passcode{
-			TTL: 300,
-		},
 		Password: Password{
 			Enabled:               true,
 			Optional:              false,
@@ -88,14 +139,6 @@ func DefaultConfig() *Config {
 			AcquireOnLogin:        "never",
 			Recovery:              true,
 			MinLength:             8,
-		},
-		Database: Database{
-			Database: "hanko",
-			User:     "hanko",
-			Password: "hanko",
-			Port:     "5432",
-			Dialect:  "postgres",
-			Host:     "localhost",
 		},
 		Session: Session{
 			AllowRevocation:  true,
@@ -110,38 +153,7 @@ func DefaultConfig() *Config {
 			},
 			Limit:         5,
 			ShowOnProfile: true,
-		},
-		AuditLog: AuditLog{
-			ConsoleOutput: AuditLogConsole{
-				Enabled:      true,
-				OutputStream: OutputStreamStdOut,
-			},
-			Mask:      true,
-			Retention: "720h",
-		},
-		Emails: Emails{
-			RequireVerification: true,
-			MaxNumOfAddresses:   5,
-		},
-		RateLimiter: RateLimiter{
-			Enabled: true,
-			Store:   RATE_LIMITER_STORE_IN_MEMORY,
-			OTPLimits: RateLimits{
-				Tokens:   3,
-				Interval: 1 * time.Minute,
-			},
-			PasswordLimits: RateLimits{
-				Tokens:   5,
-				Interval: 1 * time.Minute,
-			},
-			PasscodeLimits: RateLimits{
-				Tokens:   3,
-				Interval: 1 * time.Minute,
-			},
-			TokenLimits: RateLimits{
-				Tokens:   3,
-				Interval: 1 * time.Minute,
-			},
+			IdleTimeout:   "0m",
 		},
 		Account: Account{
 			AllowDeletion: false,
@@ -240,11 +252,6 @@ func DefaultConfig() *Config {
 		Privacy: Privacy{
 			ShowAccountExistenceHints:  false,
 			OnlyShowActualLoginMethods: false,
-		},
-		Debug: false,
-		FlowLocker: FlowLocker{
-			Enabled: true,
-			Store:   FLOW_LOCKER_STORE_IN_MEMORY,
 		},
 	}
 }

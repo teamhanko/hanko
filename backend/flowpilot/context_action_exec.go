@@ -58,6 +58,7 @@ func (aec *defaultActionExecutionContext) closeExecutionContext() error {
 		data:      aec.stash.String(),
 		version:   newVersion,
 		csrfToken: csrfToken,
+		tenantID:  aec.flowModel.TenantID,
 		expiresAt: aec.flowModel.ExpiresAt,
 		createdAt: aec.flowModel.CreatedAt,
 	}

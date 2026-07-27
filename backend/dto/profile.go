@@ -4,8 +4,8 @@ import (
 	"time"
 
 	"github.com/gofrs/uuid"
-	"github.com/teamhanko/hanko/backend/v2/config"
-	"github.com/teamhanko/hanko/backend/v2/persistence/models"
+	"github.com/teamhanko/hanko/backend/v3/config"
+	"github.com/teamhanko/hanko/backend/v3/persistence/models"
 )
 
 type MFAConfig struct {
@@ -34,7 +34,7 @@ type ProfileData struct {
 	Picture      string                       `json:"picture,omitempty"`
 }
 
-func ProfileDataFromUserModel(user *models.User, cfg *config.Config) *ProfileData {
+func ProfileDataFromUserModel(user *models.User, cfg *config.TenantConfig) *ProfileData {
 	var webauthnCredentials, securityKeys []WebauthnCredentialResponse
 	for _, webauthnCredentialModel := range user.WebauthnCredentials {
 		webauthnCredential := FromWebauthnCredentialModel(&webauthnCredentialModel)

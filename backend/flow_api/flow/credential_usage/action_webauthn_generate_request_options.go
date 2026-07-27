@@ -2,10 +2,11 @@ package credential_usage
 
 import (
 	"fmt"
+
 	"github.com/gofrs/uuid"
-	"github.com/teamhanko/hanko/backend/v2/flow_api/flow/shared"
-	"github.com/teamhanko/hanko/backend/v2/flow_api/services"
-	"github.com/teamhanko/hanko/backend/v2/flowpilot"
+	"github.com/teamhanko/hanko/backend/v3/flow_api/flow/shared"
+	"github.com/teamhanko/hanko/backend/v3/flow_api/services"
+	"github.com/teamhanko/hanko/backend/v3/flowpilot"
 )
 
 type WebauthnGenerateRequestOptions struct {
@@ -32,12 +33,12 @@ func (a WebauthnGenerateRequestOptions) Initialize(c flowpilot.InitializationCon
 func (a WebauthnGenerateRequestOptions) Execute(c flowpilot.ExecutionContext) error {
 	deps := a.GetDeps(c)
 
-	params := services.GenerateRequestOptionsPasskeyParams{Tx: deps.Tx, User: nil}
+	params := services.GenerateRequestOptionsPasskeyParams{Tx: deps.Tx, User: nil, TenantID: deps.TenantID, Cfg: deps.Cfg.TenantConfig}
 
 	userIdStash := c.Stash().Get(shared.StashPathUserID)
 	if userIdStash.Exists() && deps.Cfg.Privacy.OnlyShowActualLoginMethods {
 		userId := uuid.FromStringOrNil(userIdStash.String())
-		userModel, err := deps.Persister.GetUserPersisterWithConnection(deps.Tx).Get(userId)
+		userModel, err := deps.Persister.GetUserPersisterWithConnection(deps.Tx).Get(userId, deps.TenantID)
 		if err != nil {
 			return err
 		}

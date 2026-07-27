@@ -4,29 +4,29 @@ import "github.com/invopop/jsonschema"
 
 type Passkey struct {
 	// `acquire_on_registration` configures how users are prompted creating a passkey on registration.
-	AcquireOnRegistration string `yaml:"acquire_on_registration" json:"acquire_on_registration,omitempty" koanf:"acquire_on_registration" split_words:"true" jsonschema:"default=always,enum=always,enum=conditional,enum=never"`
+	AcquireOnRegistration string `yaml:"acquire_on_registration" json:"acquire_on_registration" koanf:"acquire_on_registration" split_words:"true" jsonschema:"default=always,enum=always,enum=conditional,enum=never"`
 	// `acquire_on_login` configures how users are prompted creating a passkey on login.
-	AcquireOnLogin string `yaml:"acquire_on_login" json:"acquire_on_login,omitempty" koanf:"acquire_on_login" split_words:"true" jsonschema:"default=always,enum=always,enum=conditional,enum=never"`
+	AcquireOnLogin string `yaml:"acquire_on_login" json:"acquire_on_login" koanf:"acquire_on_login" split_words:"true" jsonschema:"default=always,enum=always,enum=conditional,enum=never"`
 	// `attestation_preference` is used to specify the preference regarding attestation conveyance during
 	// credential generation.
-	AttestationPreference string `yaml:"attestation_preference" json:"attestation_preference,omitempty" koanf:"attestation_preference" split_words:"true" jsonschema:"default=direct,enum=direct,enum=indirect,enum=none"`
+	AttestationPreference string `yaml:"attestation_preference" json:"attestation_preference" koanf:"attestation_preference" split_words:"true" jsonschema:"default=direct,enum=direct,enum=indirect,enum=none"`
 	// `enabled` determines whether users can create or authenticate with passkeys.
-	Enabled bool `yaml:"enabled" json:"enabled,omitempty" koanf:"enabled" jsonschema:"default=true"`
+	Enabled bool `yaml:"enabled" json:"enabled" koanf:"enabled" jsonschema:"default=true"`
 	// `limit` defines the maximum number of passkeys a user can have.
-	Limit int `yaml:"limit" json:"limit,omitempty" koanf:"limit" jsonschema:"default=10"`
+	Limit int `yaml:"limit" json:"limit" koanf:"limit" jsonschema:"default=10"`
 	// `optional` determines whether users must create a passkey when prompted. The last remaining passkey cannot be
 	// deleted if passkeys are required (`optional: false`).
 	//
 	// It also takes part in determining the order of password and passkey acquisition
 	// on login and registration (see also `acquire_on_login` and `acquire_on_registration`): if one credential type is
 	// required (`optional: false`) then that one takes precedence, i.e. is acquired first.
-	Optional bool `yaml:"optional" json:"optional,omitempty" koanf:"optional" jsonschema:"default=true"`
+	Optional bool `yaml:"optional" json:"optional" koanf:"optional" jsonschema:"default=true"`
 	// `user_verification` specifies the requirements regarding local authorization with an authenticator through
 	//  various authorization gesture modalities; for example, through a touch plus pin code,
 	//  password entry, or biometric recognition.
 	//
 	// The setting applies to both WebAuthn registration and authentication ceremonies.
-	UserVerification string `yaml:"user_verification" json:"user_verification,omitempty" koanf:"user_verification" split_words:"true" jsonschema:"default=preferred,enum=required,enum=preferred,enum=discouraged"`
+	UserVerification string `yaml:"user_verification" json:"user_verification" koanf:"user_verification" split_words:"true" jsonschema:"default=preferred,enum=required,enum=preferred,enum=discouraged"`
 }
 
 func (Passkey) JSONSchemaExtend(schema *jsonschema.Schema) {

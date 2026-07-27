@@ -1,24 +1,27 @@
 package utils
 
 import (
-	"github.com/gobuffalo/pop/v6"
-	"github.com/labstack/echo/v4"
-	"github.com/stretchr/testify/require"
-	"github.com/teamhanko/hanko/backend/v2/webhooks/events"
 	"net/http"
 	"net/http/httptest"
 	"testing"
+
+	"github.com/gobuffalo/pop/v6"
+	"github.com/gofrs/uuid"
+	"github.com/labstack/echo/v4"
+	"github.com/stretchr/testify/require"
+	"github.com/teamhanko/hanko/backend/v3/config"
+	"github.com/teamhanko/hanko/backend/v3/webhooks/events"
 )
 
 type testManager struct {
 	TestFunc func()
 }
 
-func (tm *testManager) Trigger(tx *pop.Connection, evt events.Event, data interface{}) {
+func (tm *testManager) Trigger(tx *pop.Connection, evt events.Event, data interface{}, tenantID uuid.UUID) {
 	tm.TestFunc()
 }
 
-func (tm *testManager) GenerateJWT(data interface{}, event events.Event) (string, error) {
+func (tm *testManager) GenerateJWT(data interface{}, event events.Event, tenantID uuid.UUID) (string, error) {
 	return "", nil
 }
 
@@ -29,7 +32,7 @@ func TestWebhook_TriggerWithoutManager(t *testing.T) {
 
 	ctx := e.NewContext(req, rec)
 
-	err := TriggerWebhooks(ctx, nil, "user", "lorem")
+	err := TriggerWebhooks(ctx, nil, uuid.FromStringOrNil(config.DefaultTenantID), "user", "lorem")
 	require.Error(t, err)
 
 	err = e.Close()
@@ -48,7 +51,7 @@ func TestWebhook_Trigger(t *testing.T) {
 	ctx := e.NewContext(req, rec)
 	ctx.Set("webhook_manager", tm)
 
-	err := TriggerWebhooks(ctx, nil, "user", "lorem")
+	err := TriggerWebhooks(ctx, nil, uuid.FromStringOrNil(config.DefaultTenantID), "user", "lorem")
 	require.NoError(t, err)
 
 	err = e.Close()

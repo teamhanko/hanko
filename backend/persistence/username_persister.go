@@ -4,13 +4,15 @@ import (
 	"database/sql"
 	"errors"
 	"fmt"
+
 	"github.com/gobuffalo/pop/v6"
-	"github.com/teamhanko/hanko/backend/v2/persistence/models"
+	"github.com/gofrs/uuid"
+	"github.com/teamhanko/hanko/backend/v3/persistence/models"
 )
 
 type UsernamePersister interface {
 	Create(username models.Username) error
-	GetByName(name string) (*models.Username, error)
+	GetByName(name string, tenantID uuid.UUID) (*models.Username, error)
 	Update(username *models.Username) error
 	Delete(username *models.Username) error
 }
@@ -36,9 +38,10 @@ func (p *usernamePersister) Create(username models.Username) error {
 	return nil
 }
 
-func (p *usernamePersister) GetByName(username string) (*models.Username, error) {
+func (p *usernamePersister) GetByName(username string, tenantID uuid.UUID) (*models.Username, error) {
 	pw := models.Username{}
 	query := p.db.Where("username = (?)", username)
+	query = query.Where("tenant_id = ?", tenantID)
 	err := query.First(&pw)
 	if err != nil && errors.Is(err, sql.ErrNoRows) {
 		return nil, nil

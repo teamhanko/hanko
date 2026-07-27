@@ -5,9 +5,9 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/teamhanko/hanko/backend/v2/flowpilot"
-	"github.com/teamhanko/hanko/backend/v2/persistence/models"
-	"github.com/teamhanko/hanko/backend/v2/rate_limiter"
+	"github.com/teamhanko/hanko/backend/v3/flowpilot"
+	"github.com/teamhanko/hanko/backend/v3/persistence/models"
+	"github.com/teamhanko/hanko/backend/v3/rate_limiter"
 )
 
 type ExchangeToken struct {
@@ -52,7 +52,7 @@ func (a ExchangeToken) Execute(c flowpilot.ExecutionContext) error {
 		}
 	}
 
-	tokenModel, err := deps.Persister.GetTokenPersisterWithConnection(deps.Tx).GetByValue(c.Input().Get("token").String())
+	tokenModel, err := deps.Persister.GetTokenPersisterWithConnection(deps.Tx).GetByValue(c.Input().Get("token").String(), deps.TenantID)
 	if err != nil {
 		return fmt.Errorf("failed to fetch token from db: %w", err)
 	}
@@ -69,12 +69,12 @@ func (a ExchangeToken) Execute(c flowpilot.ExecutionContext) error {
 		return errors.New("token expired")
 	}
 
-	identity, err := deps.Persister.GetIdentityPersisterWithConnection(deps.Tx).GetByID(*tokenModel.IdentityID)
+	identity, err := deps.Persister.GetIdentityPersisterWithConnection(deps.Tx).GetByID(*tokenModel.IdentityID, deps.TenantID)
 	if err != nil {
 		return fmt.Errorf("failed to fetch identity from db: %w", err)
 	}
 
-	user, err := deps.Persister.GetUserPersisterWithConnection(deps.Tx).Get(tokenModel.UserID)
+	user, err := deps.Persister.GetUserPersisterWithConnection(deps.Tx).Get(tokenModel.UserID, deps.TenantID)
 	if err != nil {
 		return fmt.Errorf("failed to fetch user from db: %w", err)
 	}
@@ -99,11 +99,11 @@ func (a ExchangeToken) Execute(c flowpilot.ExecutionContext) error {
 
 	var onboardingStates []flowpilot.StateName
 	if isSaml {
-		samlProvider, err := deps.SamlService.GetProviderByIssuer(identity.ProviderID)
+		_, providerConfig, err := deps.SamlService.GetProviderByIssuer(deps.TenantID, deps.Cfg.TenantConfig, identity.ProviderID)
 		if err != nil {
 			return fmt.Errorf("could not fetch saml provider for identity: %w", err)
 		}
-		mustDoEmailVerification := !samlProvider.GetConfig().SkipEmailVerification && identity.Email != nil && !identity.Email.Verified
+		mustDoEmailVerification := !providerConfig.SkipEmailVerification && identity.Email != nil && !identity.Email.Verified
 		onboardingStates, err = a.determineOnboardingStates(c, identity, user, tokenModel.UserCreated, mustDoEmailVerification)
 	} else {
 		mustDoEmailVerification := deps.Cfg.Email.RequireVerification && identity.Email != nil && !identity.Email.Verified

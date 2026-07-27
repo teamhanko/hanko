@@ -1,4 +1,5 @@
 - id: a47fe92a-1e4b-4119-8653-55ad82737c88
+  tenant_id: 00000000-0000-0000-0000-000000000001
   callback: http://lorem
   enabled: 1
   failures: 0
@@ -6,6 +7,7 @@
   created_at: 2020-12-31 23:59:59
   updated_at: 2020-12-31 23:59:59
 - id: 279beae1-8a6d-4eaf-a791-1fa79d21d37a
+  tenant_id: 00000000-0000-0000-0000-000000000001
   callback: http://ipsum
   enabled: 0
   failures: 6
@@ -13,6 +15,7 @@
   created_at: 2020-12-31 23:59:59
   updated_at: 2020-12-31 23:59:59
 - id: 8b00da9a-cacf-45ea-b25d-c1ce0f0d7da4
+  tenant_id: 00000000-0000-0000-0000-000000000001
   callback: http://localhost
   enabled: 0
   failures: 3
@@ -20,6 +23,7 @@
   created_at: 2020-12-31 23:59:59
   updated_at: 2020-12-31 23:59:59
 - id: 8b00da9a-cacf-45ea-b25d-c1ce0f0d7da3
+  tenant_id: 00000000-0000-0000-0000-000000000001
   callback: http://localhost
   enabled: 1
   failures: 0
@@ -27,6 +31,7 @@
   created_at: 2020-12-31 23:59:59
   updated_at: 2020-12-31 23:59:59
 - id: 8b00da9a-cacf-45ea-b25d-c1ce0f0d7da2
+  tenant_id: 00000000-0000-0000-0000-000000000001
   callback: http://localhost
   enabled: 1
   failures: 5

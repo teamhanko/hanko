@@ -7,9 +7,9 @@ import (
 	"time"
 
 	"github.com/gofrs/uuid"
-	"github.com/teamhanko/hanko/backend/v2/config"
-	"github.com/teamhanko/hanko/backend/v2/crypto"
-	"github.com/teamhanko/hanko/backend/v2/crypto/aes_gcm"
+	"github.com/teamhanko/hanko/backend/v3/config"
+	"github.com/teamhanko/hanko/backend/v3/crypto"
+	"github.com/teamhanko/hanko/backend/v3/crypto/aes_gcm"
 )
 
 func GenerateStateForFlowAPI(isFlow bool) func(*State) {
@@ -41,7 +41,7 @@ func GenerateState(config *config.Config, provider string, redirectTo string, op
 	}
 
 	if redirectTo == "" {
-		redirectTo = config.ThirdParty.ErrorRedirectURL
+		redirectTo = config.TenantConfig.ThirdParty.ErrorRedirectURL
 	}
 
 	nonce, err := crypto.GenerateRandomStringURLSafe(32)
@@ -64,7 +64,7 @@ func GenerateState(config *config.Config, provider string, redirectTo string, op
 
 	stateJson, err := json.Marshal(state)
 
-	aes, err := aes_gcm.NewAESGCM(config.Secrets.Keys)
+	aes, err := aes_gcm.NewAESGCM(config.ApplicationConfig.SecretKeys)
 	if err != nil {
 		return nil, fmt.Errorf("could not instantiate aesgcm: %w", err)
 	}
@@ -88,7 +88,7 @@ type State struct {
 	UserID       *uuid.UUID `json:"user_id,omitempty"`
 }
 
-func VerifyState(config *config.Config, state string, expectedState string) (*State, error) {
+func VerifyState(config config.ApplicationConfig, state string, expectedState string) (*State, error) {
 	decodedState, err := decodeState(config, state)
 	if err != nil {
 		return nil, fmt.Errorf("could not decode state: %w", err)
@@ -115,8 +115,8 @@ func VerifyState(config *config.Config, state string, expectedState string) (*St
 	return decodedState, nil
 }
 
-func decodeState(config *config.Config, state string) (*State, error) {
-	aes, err := aes_gcm.NewAESGCM(config.Secrets.Keys)
+func decodeState(config config.ApplicationConfig, state string) (*State, error) {
+	aes, err := aes_gcm.NewAESGCM(config.SecretKeys)
 	if err != nil {
 		return nil, fmt.Errorf("could not instantiate aesgcm: %w", err)
 	}

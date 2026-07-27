@@ -1,6 +1,5 @@
 /*
 Copyright © 2022 Hanko GmbH <developers@hanko.io>
-
 */
 package serve
 
@@ -21,5 +20,6 @@ func RegisterCommands(parent *cobra.Command) {
 	parent.AddCommand(cmd)
 	cmd.AddCommand(NewServePublicCommand())
 	cmd.AddCommand(NewServeAdminCommand())
+	cmd.AddCommand(NewServeManagementCommand())
 	cmd.AddCommand(NewServeAllCommand())
 }

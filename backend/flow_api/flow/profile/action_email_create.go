@@ -3,14 +3,14 @@ package profile
 import (
 	"fmt"
 
-	auditlog "github.com/teamhanko/hanko/backend/v2/audit_log"
-	"github.com/teamhanko/hanko/backend/v2/dto/webhook"
-	"github.com/teamhanko/hanko/backend/v2/flow_api/flow/shared"
-	"github.com/teamhanko/hanko/backend/v2/flow_api/services"
-	"github.com/teamhanko/hanko/backend/v2/flowpilot"
-	"github.com/teamhanko/hanko/backend/v2/persistence/models"
-	"github.com/teamhanko/hanko/backend/v2/webhooks/events"
-	"github.com/teamhanko/hanko/backend/v2/webhooks/utils"
+	auditlog "github.com/teamhanko/hanko/backend/v3/audit_log"
+	"github.com/teamhanko/hanko/backend/v3/dto/webhook"
+	"github.com/teamhanko/hanko/backend/v3/flow_api/flow/shared"
+	"github.com/teamhanko/hanko/backend/v3/flow_api/services"
+	"github.com/teamhanko/hanko/backend/v3/flowpilot"
+	"github.com/teamhanko/hanko/backend/v3/persistence/models"
+	"github.com/teamhanko/hanko/backend/v3/webhooks/events"
+	"github.com/teamhanko/hanko/backend/v3/webhooks/utils"
 )
 
 type EmailCreate struct {
@@ -51,7 +51,7 @@ func (a EmailCreate) Execute(c flowpilot.ExecutionContext) error {
 
 	newEmailAddress := c.Input().Get("email").String()
 
-	existingEmailModel, err := deps.Persister.GetEmailPersisterWithConnection(deps.Tx).FindByAddress(newEmailAddress)
+	existingEmailModel, err := deps.Persister.GetEmailPersisterWithConnection(deps.Tx).FindByAddress(newEmailAddress, deps.TenantID)
 	if err != nil {
 		return fmt.Errorf("could not fetch email: %w", err)
 	}
@@ -98,7 +98,7 @@ func (a EmailCreate) Execute(c flowpilot.ExecutionContext) error {
 
 		return c.Continue(shared.StatePasscodeConfirmation, shared.StateProfileInit)
 	} else {
-		emailModel := models.NewEmail(&userModel.ID, newEmailAddress)
+		emailModel := models.NewEmail(&userModel.ID, newEmailAddress, deps.TenantID)
 
 		err = deps.Persister.GetEmailPersisterWithConnection(deps.Tx).Create(*emailModel)
 		if err != nil {
@@ -108,7 +108,7 @@ func (a EmailCreate) Execute(c flowpilot.ExecutionContext) error {
 		if len(userModel.Emails) == 0 {
 			// The user has only one 1 email and it is the email we just added. It makes sense then,
 			// to automatically set this as the primary email.
-			primaryEmailModel := models.NewPrimaryEmail(emailModel.ID, userModel.ID)
+			primaryEmailModel := models.NewPrimaryEmail(emailModel.ID, userModel.ID, deps.TenantID)
 			err = deps.Persister.GetPrimaryEmailPersisterWithConnection(deps.Tx).Create(*primaryEmailModel)
 			if err != nil {
 				return fmt.Errorf("could not save primary email: %w", err)
@@ -122,6 +122,7 @@ func (a EmailCreate) Execute(c flowpilot.ExecutionContext) error {
 			models.AuditLogEmailCreated,
 			&models.User{ID: userModel.ID},
 			nil,
+			deps.TenantID,
 			auditlog.Detail("email", emailModel.Address),
 			auditlog.Detail("flow_id", c.GetFlowID()))
 
@@ -131,6 +132,7 @@ func (a EmailCreate) Execute(c flowpilot.ExecutionContext) error {
 
 		if deps.Cfg.SecurityNotifications.Notifications.EmailCreate.Enabled {
 			deps.SecurityNotificationService.SendNotification(deps.Tx, services.SendSecurityNotificationParams{
+				TenantID:     deps.TenantID,
 				EmailAddress: currentPrimaryEmail,
 				Template:     "email_create",
 				HttpContext:  deps.HttpContext,

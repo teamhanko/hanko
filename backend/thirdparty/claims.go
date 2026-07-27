@@ -4,8 +4,8 @@ import (
 	"errors"
 
 	zeroLogger "github.com/rs/zerolog/log"
-	"github.com/teamhanko/hanko/backend/v2/persistence/models"
-	"github.com/teamhanko/hanko/backend/v2/utils"
+	"github.com/teamhanko/hanko/backend/v3/persistence/models"
+	"github.com/teamhanko/hanko/backend/v3/utils"
 )
 
 type ClaimsAddress struct {

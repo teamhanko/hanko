@@ -2,10 +2,11 @@ package profile
 
 import (
 	"fmt"
-	auditlog "github.com/teamhanko/hanko/backend/v2/audit_log"
-	"github.com/teamhanko/hanko/backend/v2/flow_api/flow/shared"
-	"github.com/teamhanko/hanko/backend/v2/flowpilot"
-	"github.com/teamhanko/hanko/backend/v2/persistence/models"
+
+	auditlog "github.com/teamhanko/hanko/backend/v3/audit_log"
+	"github.com/teamhanko/hanko/backend/v3/flow_api/flow/shared"
+	"github.com/teamhanko/hanko/backend/v3/flowpilot"
+	"github.com/teamhanko/hanko/backend/v3/persistence/models"
 )
 
 type PasswordCreate struct {
@@ -56,9 +57,9 @@ func (a PasswordCreate) Execute(c flowpilot.ExecutionContext) error {
 
 	password := c.Input().Get("password").String()
 
-	passwordCredential := models.NewPasswordCredential(userModel.ID, password) // ?
+	passwordCredential := models.NewPasswordCredential(userModel.ID, password, deps.TenantID) // ?
 
-	err := deps.PasswordService.CreatePassword(deps.Tx, userModel.ID, password) // ?
+	err := deps.PasswordService.CreatePassword(deps.Tx, userModel.ID, password, deps.TenantID) // ?
 	if err != nil {
 		return fmt.Errorf("could not set password: %w", err)
 	}
@@ -69,6 +70,7 @@ func (a PasswordCreate) Execute(c flowpilot.ExecutionContext) error {
 		models.AuditLogPasswordChanged,
 		&models.User{ID: userModel.ID},
 		nil,
+		deps.TenantID,
 		auditlog.Detail("context", "profile"),
 		auditlog.Detail("flow_id", c.GetFlowID()))
 

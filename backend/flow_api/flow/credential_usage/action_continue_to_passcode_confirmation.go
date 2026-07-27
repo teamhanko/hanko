@@ -2,8 +2,8 @@ package credential_usage
 
 import (
 	"fmt"
-	"github.com/teamhanko/hanko/backend/v2/flow_api/flow/shared"
-	"github.com/teamhanko/hanko/backend/v2/flowpilot"
+	"github.com/teamhanko/hanko/backend/v3/flow_api/flow/shared"
+	"github.com/teamhanko/hanko/backend/v3/flowpilot"
 )
 
 type ContinueToPasscodeConfirmation struct {

@@ -10,7 +10,7 @@ import (
 	"github.com/lestrrat-go/jwx/v2/jwk"
 	"github.com/lestrrat-go/jwx/v2/jwt"
 	zeroLogger "github.com/rs/zerolog/log"
-	"github.com/teamhanko/hanko/backend/v2/config"
+	"github.com/teamhanko/hanko/backend/v3/config"
 	"golang.org/x/oauth2"
 )
 
@@ -65,17 +65,17 @@ func (a appleProvider) AuthCodeURL(state string, args ...oauth2.AuthCodeOption) 
 	return authURL
 }
 
-func (a appleProvider) GetOAuthToken(code string, opts ...oauth2.AuthCodeOption) (*oauth2.Token, error) {
-	return a.oauthConfig.Exchange(context.Background(), code, opts...)
+func (a appleProvider) GetOAuthToken(ctx context.Context, code string, opts ...oauth2.AuthCodeOption) (*oauth2.Token, error) {
+	return a.oauthConfig.Exchange(ctx, code, opts...)
 }
 
-func (a appleProvider) GetUserData(token *oauth2.Token) (*UserData, error) {
+func (a appleProvider) GetUserData(ctx context.Context, token *oauth2.Token) (*UserData, error) {
 	rawIDToken, ok := token.Extra("id_token").(string)
 	if !ok {
 		return nil, errors.New("id_token missing")
 	}
 
-	set, err := jwk.Fetch(context.Background(), AppleKeysEndpoint)
+	set, err := jwk.Fetch(ctx, AppleKeysEndpoint)
 	if err != nil {
 		return nil, err
 	}

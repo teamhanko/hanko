@@ -6,12 +6,12 @@ import (
 	"fmt"
 	"github.com/gobuffalo/pop/v6"
 	"github.com/gofrs/uuid"
-	"github.com/teamhanko/hanko/backend/v2/persistence/models"
+	"github.com/teamhanko/hanko/backend/v3/persistence/models"
 )
 
 type PasswordCredentialPersister interface {
 	Create(password models.PasswordCredential) error
-	GetByUserID(userId uuid.UUID) (*models.PasswordCredential, error)
+	GetByUserID(userId uuid.UUID, tenantID uuid.UUID) (*models.PasswordCredential, error)
 	Update(password models.PasswordCredential) error
 	Delete(password models.PasswordCredential) error
 }
@@ -37,9 +37,10 @@ func (p *passwordCredentialPersister) Create(password models.PasswordCredential)
 	return nil
 }
 
-func (p *passwordCredentialPersister) GetByUserID(userId uuid.UUID) (*models.PasswordCredential, error) {
+func (p *passwordCredentialPersister) GetByUserID(userId uuid.UUID, tenantID uuid.UUID) (*models.PasswordCredential, error) {
 	pw := models.PasswordCredential{}
 	query := p.db.Where("user_id = (?)", userId.String())
+	query = query.Where("tenant_id = ?", tenantID)
 	err := query.First(&pw)
 	if err != nil && errors.Is(err, sql.ErrNoRows) {
 		return nil, nil

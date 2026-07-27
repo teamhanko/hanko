@@ -13,6 +13,7 @@ type Passcode struct {
 	ID        uuid.UUID  `db:"id"`
 	UserId    *uuid.UUID `db:"user_id"`
 	EmailID   *uuid.UUID `db:"email_id"`
+	TenantID  uuid.UUID  `db:"tenant_id"`
 	Ttl       int        `db:"ttl"` // in seconds
 	Code      string     `db:"code"`
 	TryCount  int        `db:"try_count"`

@@ -1,7 +1,7 @@
 package models
 
 import (
-	"github.com/teamhanko/hanko/backend/v2/flowpilot"
+	"github.com/teamhanko/hanko/backend/v3/flowpilot"
 	"time"
 
 	"github.com/gobuffalo/pop/v6"
@@ -12,6 +12,7 @@ import (
 // Flow is used by pop to map your flows database table to your go code.
 type Flow struct {
 	ID        uuid.UUID `json:"id" db:"id"`
+	TenantID  uuid.UUID `db:"tenant_id"`
 	Data      string    `json:"data" db:"data"`
 	Version   int       `json:"version" db:"version"`
 	CSRFToken string    `json:"csrf_token" db:"csrf_token"`

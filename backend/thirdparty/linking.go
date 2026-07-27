@@ -7,10 +7,10 @@ import (
 
 	"github.com/gobuffalo/pop/v6"
 	"github.com/gofrs/uuid"
-	"github.com/teamhanko/hanko/backend/v2/config"
-	"github.com/teamhanko/hanko/backend/v2/persistence"
-	"github.com/teamhanko/hanko/backend/v2/persistence/models"
-	"github.com/teamhanko/hanko/backend/v2/webhooks/events"
+	"github.com/teamhanko/hanko/backend/v3/config"
+	"github.com/teamhanko/hanko/backend/v3/persistence"
+	"github.com/teamhanko/hanko/backend/v3/persistence/models"
+	"github.com/teamhanko/hanko/backend/v3/webhooks/events"
 )
 
 type AccountLinkingResult struct {
@@ -20,7 +20,7 @@ type AccountLinkingResult struct {
 	UserCreated  bool
 }
 
-func LinkAccount(tx *pop.Connection, cfg *config.Config, p persistence.Persister, userData *UserData, providerID string, isSaml bool, samlDomain *string, isFlow bool, userID *uuid.UUID) (*AccountLinkingResult, error) {
+func LinkAccount(tx *pop.Connection, cfg *config.TenantConfig, p persistence.Persister, userData *UserData, providerID string, isSaml bool, samlDomain *string, isFlow bool, userID *uuid.UUID, tenantID uuid.UUID) (*AccountLinkingResult, error) {
 	if !isFlow {
 		if cfg.Email.RequireVerification && !userData.Metadata.EmailVerified {
 			return nil, ErrorUnverifiedProviderEmail("third party provider email must be verified")
@@ -35,7 +35,7 @@ func LinkAccount(tx *pop.Connection, cfg *config.Config, p persistence.Persister
 	// Ensure the email is lowercase to avoid case sensitivity issues
 	userData.Metadata.Email = strings.ToLower(userData.Metadata.Email)
 
-	identity, err := p.GetIdentityPersister().Get(userData.Metadata.Subject, providerID)
+	identity, err := p.GetIdentityPersister().Get(userData.Metadata.Subject, providerID, tenantID)
 	if err != nil {
 		return nil, ErrorServer("could not get identity").WithCause(err)
 	}
@@ -43,25 +43,25 @@ func LinkAccount(tx *pop.Connection, cfg *config.Config, p persistence.Persister
 	if identity == nil {
 		var user *models.User
 		if userID != nil {
-			user, err = p.GetUserPersisterWithConnection(tx).Get(*userID)
+			user, err = p.GetUserPersisterWithConnection(tx).Get(*userID, tenantID)
 		} else {
-			user, err = p.GetUserPersisterWithConnection(tx).GetByEmailAddress(userData.Metadata.Email)
+			user, err = p.GetUserPersisterWithConnection(tx).GetByEmailAddress(userData.Metadata.Email, tenantID)
 		}
 		if err != nil {
 			return nil, ErrorServer("could not get email").WithCause(err)
 		}
 
 		if user == nil {
-			return signUp(tx, cfg, p, userData, providerID, isSaml, samlDomain)
+			return signUp(tx, cfg, p, userData, providerID, isSaml, samlDomain, tenantID)
 		} else {
-			return link(tx, cfg, p, userData, providerID, user, isSaml, samlDomain, userID != nil)
+			return link(tx, cfg, p, userData, providerID, user, isSaml, samlDomain, userID != nil, tenantID)
 		}
 	} else {
-		return signIn(tx, cfg, p, userData, identity)
+		return signIn(tx, cfg, p, userData, identity, tenantID)
 	}
 }
 
-func link(tx *pop.Connection, cfg *config.Config, p persistence.Persister, userData *UserData, providerID string, user *models.User, isSaml bool, samlDomain *string, comesFromProfile bool) (*AccountLinkingResult, error) {
+func link(tx *pop.Connection, cfg *config.TenantConfig, p persistence.Persister, userData *UserData, providerID string, user *models.User, isSaml bool, samlDomain *string, comesFromProfile bool, tenantID uuid.UUID) (*AccountLinkingResult, error) {
 	if !isSaml {
 		if strings.HasPrefix(providerID, "custom_") {
 			provider, ok := cfg.ThirdParty.CustomProviders[strings.TrimPrefix(providerID, "custom_")]
@@ -100,7 +100,7 @@ func link(tx *pop.Connection, cfg *config.Config, p persistence.Persister, userD
 		return nil, ErrorServer("could not link account").WithCause(err)
 	}
 
-	identity, err := models.NewIdentity(providerID, userDataMap, emailID, userID)
+	identity, err := models.NewIdentity(providerID, userDataMap, emailID, userID, tenantID)
 	if err != nil {
 		return nil, ErrorServer("could not create identity").WithCause(err)
 	}
@@ -138,6 +138,7 @@ func link(tx *pop.Connection, cfg *config.Config, p persistence.Persister, userD
 			now := time.Now().UTC()
 			samlIdentity := &models.SamlIdentity{
 				ID:         samlIdentityID,
+				TenantID:   tenantID,
 				IdentityID: identity.ID,
 				Domain:     *samlDomain,
 				CreatedAt:  now,
@@ -151,7 +152,7 @@ func link(tx *pop.Connection, cfg *config.Config, p persistence.Persister, userD
 		}
 	}
 
-	u, terr := p.GetUserPersisterWithConnection(tx).Get(user.ID)
+	u, terr := p.GetUserPersisterWithConnection(tx).Get(user.ID, tenantID)
 	if terr != nil {
 		return nil, ErrorServer("could not get user").WithCause(terr)
 	}
@@ -164,7 +165,7 @@ func link(tx *pop.Connection, cfg *config.Config, p persistence.Persister, userD
 	}, nil
 }
 
-func signIn(tx *pop.Connection, cfg *config.Config, p persistence.Persister, userData *UserData, identity *models.Identity) (*AccountLinkingResult, error) {
+func signIn(tx *pop.Connection, cfg *config.TenantConfig, p persistence.Persister, userData *UserData, identity *models.Identity, tenantID uuid.UUID) (*AccountLinkingResult, error) {
 	var linkingResult *AccountLinkingResult
 	var webhookEvent events.Event
 
@@ -176,7 +177,7 @@ func signIn(tx *pop.Connection, cfg *config.Config, p persistence.Persister, use
 	email := identity.Email
 	if userData.Metadata.Email != "" && ((email == nil) || (email.Address != userData.Metadata.Email)) {
 		// The primary email address at the provider has changed, check if the new provider email already exists
-		email, terr = emailPersister.FindByAddress(userData.Metadata.Email)
+		email, terr = emailPersister.FindByAddress(userData.Metadata.Email, tenantID)
 		if terr != nil {
 			return nil, ErrorServer("could not get email").WithCause(terr)
 		}
@@ -207,7 +208,7 @@ func signIn(tx *pop.Connection, cfg *config.Config, p persistence.Persister, use
 			}
 		} else {
 			// The email does not exist. Create a new one and associate the identity with it.
-			emailCount, err := emailPersister.CountByUserId(*identity.UserID)
+			emailCount, err := emailPersister.CountByUserId(*identity.UserID, tenantID)
 			if err != nil {
 				return nil, ErrorServer("failed to count user emails").WithCause(err)
 			}
@@ -216,7 +217,7 @@ func signIn(tx *pop.Connection, cfg *config.Config, p persistence.Persister, use
 				return nil, ErrorMaxNumberOfAddresses("max number of email addresses reached")
 			}
 
-			email = models.NewEmail(identity.UserID, userData.Metadata.Email)
+			email = models.NewEmail(identity.UserID, userData.Metadata.Email, tenantID)
 			email.Verified = userData.Metadata.EmailVerified
 			terr = emailPersister.Create(*email)
 			if terr != nil {
@@ -239,7 +240,7 @@ func signIn(tx *pop.Connection, cfg *config.Config, p persistence.Persister, use
 		return nil, ErrorServer("could not update identity").WithCause(terr)
 	}
 
-	user, terr := userPersister.Get(*identity.UserID)
+	user, terr := userPersister.Get(*identity.UserID, tenantID)
 	if terr != nil {
 		return nil, ErrorServer("could not get user").WithCause(terr)
 	}
@@ -263,7 +264,7 @@ func signIn(tx *pop.Connection, cfg *config.Config, p persistence.Persister, use
 	return linkingResult, nil
 }
 
-func signUp(tx *pop.Connection, cfg *config.Config, p persistence.Persister, userData *UserData, providerID string, isSaml bool, samlDomain *string) (*AccountLinkingResult, error) {
+func signUp(tx *pop.Connection, cfg *config.TenantConfig, p persistence.Persister, userData *UserData, providerID string, isSaml bool, samlDomain *string, tenantID uuid.UUID) (*AccountLinkingResult, error) {
 	if !cfg.Account.AllowSignup {
 		return nil, ErrorSignUpDisabled("account signup is disabled")
 	}
@@ -275,12 +276,12 @@ func signUp(tx *pop.Connection, cfg *config.Config, p persistence.Persister, use
 	primaryEmailPersister := p.GetPrimaryEmailPersisterWithConnection(tx)
 	identityPersister := p.GetIdentityPersisterWithConnection(tx)
 
-	email, terr := emailPersister.FindByAddress(userData.Metadata.Email)
+	email, terr := emailPersister.FindByAddress(userData.Metadata.Email, tenantID)
 	if terr != nil {
 		return nil, ErrorServer("could not get email").WithCause(terr)
 	}
 
-	user := models.NewUser()
+	user := models.NewUser(tenantID)
 
 	profile := userData.Metadata.ProviderProfileWithLogging("thirdparty_sign_up", providerID)
 
@@ -303,7 +304,7 @@ func signUp(tx *pop.Connection, cfg *config.Config, p persistence.Persister, use
 
 	} else if userData.Metadata.Email != "" {
 		// No email exists, create a new one using the provider user data email
-		email = models.NewEmail(&user.ID, userData.Metadata.Email)
+		email = models.NewEmail(&user.ID, userData.Metadata.Email, tenantID)
 		email.Verified = userData.Metadata.EmailVerified
 		terr = emailPersister.Create(*email)
 		if terr != nil {
@@ -314,7 +315,7 @@ func signUp(tx *pop.Connection, cfg *config.Config, p persistence.Persister, use
 	var emailID *uuid.UUID = nil
 	if email != nil {
 		emailID = &email.ID
-		primaryEmail := models.NewPrimaryEmail(email.ID, *email.UserID)
+		primaryEmail := models.NewPrimaryEmail(email.ID, *email.UserID, tenantID)
 		terr = primaryEmailPersister.Create(*primaryEmail)
 		if terr != nil {
 			return nil, ErrorServer("failed to store primary email").WithCause(terr)
@@ -326,7 +327,7 @@ func signUp(tx *pop.Connection, cfg *config.Config, p persistence.Persister, use
 		return nil, ErrorServer("could not link account").WithCause(err)
 	}
 
-	identity, terr := models.NewIdentity(providerID, userDataMap, emailID, &user.ID)
+	identity, terr := models.NewIdentity(providerID, userDataMap, emailID, &user.ID, tenantID)
 	if terr != nil {
 		return nil, ErrorServer("could not create identity").WithCause(terr)
 	}
@@ -343,6 +344,7 @@ func signUp(tx *pop.Connection, cfg *config.Config, p persistence.Persister, use
 			ID:         samlIdentityID,
 			IdentityID: identity.ID,
 			Domain:     *samlDomain,
+			TenantID:   tenantID,
 			CreatedAt:  now,
 			UpdatedAt:  now,
 		}
@@ -353,7 +355,7 @@ func signUp(tx *pop.Connection, cfg *config.Config, p persistence.Persister, use
 		}
 	}
 
-	u, terr := userPersister.Get(user.ID)
+	u, terr := userPersister.Get(user.ID, tenantID)
 	if terr != nil {
 		return nil, ErrorServer("could not get user").WithCause(terr)
 	}

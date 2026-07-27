@@ -5,13 +5,13 @@ import (
 	"fmt"
 
 	"github.com/gofrs/uuid"
-	auditlog "github.com/teamhanko/hanko/backend/v2/audit_log"
-	"github.com/teamhanko/hanko/backend/v2/dto/webhook"
-	"github.com/teamhanko/hanko/backend/v2/flow_api/services"
-	"github.com/teamhanko/hanko/backend/v2/flowpilot"
-	"github.com/teamhanko/hanko/backend/v2/persistence/models"
-	"github.com/teamhanko/hanko/backend/v2/webhooks/events"
-	"github.com/teamhanko/hanko/backend/v2/webhooks/utils"
+	auditlog "github.com/teamhanko/hanko/backend/v3/audit_log"
+	"github.com/teamhanko/hanko/backend/v3/dto/webhook"
+	"github.com/teamhanko/hanko/backend/v3/flow_api/services"
+	"github.com/teamhanko/hanko/backend/v3/flowpilot"
+	"github.com/teamhanko/hanko/backend/v3/persistence/models"
+	"github.com/teamhanko/hanko/backend/v3/webhooks/events"
+	"github.com/teamhanko/hanko/backend/v3/webhooks/utils"
 )
 
 type EmailPersistVerifiedStatus struct {
@@ -38,21 +38,21 @@ func (h EmailPersistVerifiedStatus) Execute(c flowpilot.HookExecutionContext) er
 		return fmt.Errorf("failed to parse stashed user_id into a uuid: %w", err)
 	}
 
-	user, err := deps.Persister.GetUserPersister().Get(userId)
+	user, err := deps.Persister.GetUserPersister().Get(userId, deps.TenantID)
 	if err != nil {
 		return fmt.Errorf("failed to get user by user_id: %w", err)
 	}
 
 	emailAddressToVerify := c.Stash().Get(StashPathEmail).String()
 
-	emailAddressToVerifyModel, err := deps.Persister.GetEmailPersisterWithConnection(deps.Tx).FindByAddress(emailAddressToVerify)
+	emailAddressToVerifyModel, err := deps.Persister.GetEmailPersisterWithConnection(deps.Tx).FindByAddress(emailAddressToVerify, deps.TenantID)
 	if err != nil {
 		return fmt.Errorf("could not fetch email: %w", err)
 	}
 
 	var emailCreated bool
 	if emailAddressToVerifyModel == nil {
-		newEmailModel := models.NewEmail(&userId, emailAddressToVerify)
+		newEmailModel := models.NewEmail(&userId, emailAddressToVerify, deps.TenantID)
 		newEmailModel.Verified = true
 
 		err := deps.Persister.GetEmailPersisterWithConnection(deps.Tx).Create(*newEmailModel)
@@ -60,7 +60,7 @@ func (h EmailPersistVerifiedStatus) Execute(c flowpilot.HookExecutionContext) er
 			return fmt.Errorf("could not save email: %w", err)
 		}
 
-		emailModels, err := deps.Persister.GetEmailPersisterWithConnection(deps.Tx).FindByUserId(*newEmailModel.UserID)
+		emailModels, err := deps.Persister.GetEmailPersisterWithConnection(deps.Tx).FindByUserId(*newEmailModel.UserID, deps.TenantID)
 		if err != nil {
 			return fmt.Errorf("could fetch emails: %w", err)
 		}
@@ -72,7 +72,7 @@ func (h EmailPersistVerifiedStatus) Execute(c flowpilot.HookExecutionContext) er
 		if len(emailModels) == 1 && emailModels[0].ID.String() == newEmailModel.ID.String() {
 			// The user has only one 1 email and it is the email we just added. It makes sense then,
 			// to automatically set this as the primary email.
-			primaryEmailModel := models.NewPrimaryEmail(newEmailModel.ID, userId)
+			primaryEmailModel := models.NewPrimaryEmail(newEmailModel.ID, userId, deps.TenantID)
 			err = deps.Persister.GetPrimaryEmailPersisterWithConnection(deps.Tx).Create(*primaryEmailModel)
 			if err != nil {
 				return fmt.Errorf("could not save primary email: %w", err)
@@ -105,6 +105,7 @@ func (h EmailPersistVerifiedStatus) Execute(c flowpilot.HookExecutionContext) er
 			models.AuditLogEmailVerified,
 			&models.User{ID: userId},
 			nil,
+			deps.TenantID,
 			auditlog.Detail("email", emailAddressToVerify),
 			auditlog.Detail("flow_id", c.GetFlowID()))
 
@@ -116,6 +117,7 @@ func (h EmailPersistVerifiedStatus) Execute(c flowpilot.HookExecutionContext) er
 	if emailCreated {
 		if deps.Cfg.SecurityNotifications.Notifications.EmailCreate.Enabled {
 			deps.SecurityNotificationService.SendNotification(deps.Tx, services.SendSecurityNotificationParams{
+				TenantID:     deps.TenantID,
 				EmailAddress: user.Emails.GetPrimary().Address,
 				Template:     "email_create",
 				HttpContext:  deps.HttpContext,
@@ -135,6 +137,7 @@ func (h EmailPersistVerifiedStatus) Execute(c flowpilot.HookExecutionContext) er
 			models.AuditLogEmailCreated,
 			&models.User{ID: userId},
 			nil,
+			deps.TenantID,
 			auditlog.Detail("email", emailAddressToVerify),
 			auditlog.Detail("flow_id", c.GetFlowID()))
 

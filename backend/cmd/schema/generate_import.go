@@ -2,7 +2,7 @@ package schema
 
 import (
 	"github.com/spf13/cobra"
-	"github.com/teamhanko/hanko/backend/v2/cmd/user"
+	"github.com/teamhanko/hanko/backend/v3/cmd/user"
 	"log"
 )
 

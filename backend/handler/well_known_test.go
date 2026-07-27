@@ -1,11 +1,12 @@
 package handler
 
 import (
-	"github.com/stretchr/testify/suite"
-	"github.com/teamhanko/hanko/backend/v2/test"
 	"net/http"
 	"net/http/httptest"
 	"testing"
+
+	"github.com/stretchr/testify/suite"
+	"github.com/teamhanko/hanko/backend/v3/test"
 )
 
 func TestWellKnownSuite(t *testing.T) {
@@ -21,8 +22,11 @@ func (s *wellKnownSuite) TestWellKnownHandler_GetPublicKeys() {
 	if testing.Short() {
 		s.T().Skip("skipping test in short mode")
 	}
+	cfg := test.DefaultConfig
+	err := cfg.PostProcess()
+	s.Require().NoError(err)
 
-	e := NewPublicRouter(&test.DefaultConfig, s.Storage, nil, nil)
+	e := NewPublicRouter(&cfg, s.Storage, nil, nil)
 
 	req := httptest.NewRequest(http.MethodGet, "/.well-known/jwks.json", nil)
 	rec := httptest.NewRecorder()

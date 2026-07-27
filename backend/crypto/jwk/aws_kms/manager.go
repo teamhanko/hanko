@@ -5,11 +5,12 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/gofrs/uuid"
 	"github.com/lestrrat-go/jwx/v2/jwa"
 	"github.com/lestrrat-go/jwx/v2/jwk"
 	"github.com/lestrrat-go/jwx/v2/jws"
 	"github.com/lestrrat-go/jwx/v2/jwt"
-	"github.com/teamhanko/hanko/backend/v2/config"
+	"github.com/teamhanko/hanko/backend/v3/config"
 )
 
 // AWSKMSManager implements the KeyManager interface using AWS KMS
@@ -33,11 +34,11 @@ func NewAWSKMSManager(cfg config.KeyManagement) (*AWSKMSManager, error) {
 	}, nil
 }
 
-func (m *AWSKMSManager) GenerateKey() (jwk.Key, error) {
+func (m *AWSKMSManager) GenerateKey(tenantID uuid.UUID) (jwk.Key, error) {
 	return nil, fmt.Errorf("not implemented")
 }
 
-func (m *AWSKMSManager) GetPublicKeys() (jwk.Set, error) {
+func (m *AWSKMSManager) GetPublicKeys(tenantID uuid.UUID) (jwk.Set, error) {
 	publicKey := m.awsAdapter.Public()
 	key, err := jwk.PublicKeyOf(publicKey)
 	if err != nil {
@@ -64,11 +65,11 @@ func (m *AWSKMSManager) GetPublicKeys() (jwk.Set, error) {
 	return set, nil
 }
 
-func (m *AWSKMSManager) GetSigningKey() (jwk.Key, error) {
+func (m *AWSKMSManager) GetSigningKey(tenantID uuid.UUID) (jwk.Key, error) {
 	return nil, fmt.Errorf("not implemented")
 }
 
-func (m *AWSKMSManager) Sign(token jwt.Token) ([]byte, error) {
+func (m *AWSKMSManager) Sign(token jwt.Token, tenantID uuid.UUID) ([]byte, error) {
 	headers := jws.NewHeaders()
 	_ = headers.Set(jws.KeyIDKey, m.awsAdapter.KeyId)
 
@@ -81,7 +82,7 @@ func (m *AWSKMSManager) Sign(token jwt.Token) ([]byte, error) {
 	return signed, nil
 }
 
-func (m *AWSKMSManager) Verify(bytes []byte) (jwt.Token, error) {
+func (m *AWSKMSManager) Verify(bytes []byte, tenantID uuid.UUID) (jwt.Token, error) {
 	// Use the adapter struct for verification
 	token, err := jwt.Parse(bytes, jwt.WithKey(m.algorithm, m.awsAdapter))
 	if err != nil {

@@ -1,0 +1,5 @@
+create_table("tenants") {
+  t.Column("id", "uuid", {primary: true})
+  t.Column("config", "json", {null: true})
+  t.Timestamps()
+}

@@ -1,11 +1,12 @@
 package models
 
 import (
+	"time"
+
 	"github.com/gobuffalo/pop/v6"
 	"github.com/gobuffalo/validate/v3"
 	"github.com/gobuffalo/validate/v3/validators"
 	"github.com/gofrs/uuid"
-	"time"
 )
 
 type SamlIDPInitiatedRequest struct {
@@ -14,13 +15,15 @@ type SamlIDPInitiatedRequest struct {
 	Issuer     string    `db:"issuer"`
 	ExpiresAt  time.Time `db:"expires_at"`
 	CreatedAt  time.Time `db:"created_at"`
+	TenantID   uuid.UUID `db:"tenant_id"`
 }
 
-func NewSamlIDPInitiatedRequest(responseID, issuer string, expiresAt time.Time) (*SamlIDPInitiatedRequest, error) {
+func NewSamlIDPInitiatedRequest(tenantID uuid.UUID, responseID, issuer string, expiresAt time.Time) (*SamlIDPInitiatedRequest, error) {
 	id, _ := uuid.NewV4()
 
 	return &SamlIDPInitiatedRequest{
 		ID:         id,
+		TenantID:   tenantID,
 		ResponseID: responseID,
 		Issuer:     issuer,
 		ExpiresAt:  expiresAt,

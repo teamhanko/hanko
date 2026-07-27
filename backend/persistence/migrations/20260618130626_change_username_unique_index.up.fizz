@@ -1,0 +1,3 @@
+drop_index("usernames", "usernames_username_idx")
+add_index("usernames", ["tenant_id", "username"], {"unique": true})
+

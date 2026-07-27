@@ -1,0 +1,2 @@
+drop_index("identities", "identities_tenant_id_provider_user_id_provider_id_idx")
+add_index("identities", ["provider_user_id", "provider_id"], {"unique": true})

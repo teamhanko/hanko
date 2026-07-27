@@ -3,19 +3,19 @@ package jwk
 import (
 	"fmt"
 
-	"github.com/teamhanko/hanko/backend/v2/config"
-	"github.com/teamhanko/hanko/backend/v2/crypto/jwk/aws_kms"
-	"github.com/teamhanko/hanko/backend/v2/crypto/jwk/local_db"
-	"github.com/teamhanko/hanko/backend/v2/persistence"
+	"github.com/teamhanko/hanko/backend/v3/config"
+	"github.com/teamhanko/hanko/backend/v3/crypto/jwk/aws_kms"
+	"github.com/teamhanko/hanko/backend/v3/crypto/jwk/local_db"
+	"github.com/teamhanko/hanko/backend/v3/persistence"
 )
 
-func NewManager(cfg config.Secrets, persister persistence.Persister) (KeyProvider, error) {
-	switch cfg.KeyManagement.Type {
+func NewManager(cfg config.Config, persister persistence.Persister) (KeyProvider, error) {
+	switch cfg.Secrets.KeyManagement.Type {
 	case "local":
-		return local_db.NewDefaultManager(cfg.Keys, persister.GetJwkPersister())
+		return local_db.NewDefaultManager(cfg.SecretKeys, persister.GetJwkPersister())
 	case "aws_kms":
-		return aws_kms.NewAWSKMSManager(cfg.KeyManagement)
+		return aws_kms.NewAWSKMSManager(cfg.Secrets.KeyManagement)
 	}
 
-	return nil, fmt.Errorf("unsupported key management type: %s", cfg.KeyManagement.Type)
+	return nil, fmt.Errorf("unsupported key management type: %s", cfg.Secrets.KeyManagement.Type)
 }

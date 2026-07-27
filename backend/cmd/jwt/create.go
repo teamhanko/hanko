@@ -9,18 +9,19 @@ import (
 
 	"github.com/gofrs/uuid"
 	"github.com/spf13/cobra"
-	"github.com/teamhanko/hanko/backend/v2/config"
-	"github.com/teamhanko/hanko/backend/v2/crypto/jwk"
-	"github.com/teamhanko/hanko/backend/v2/dto"
-	"github.com/teamhanko/hanko/backend/v2/persistence"
-	"github.com/teamhanko/hanko/backend/v2/persistence/models"
-	"github.com/teamhanko/hanko/backend/v2/session"
+	"github.com/teamhanko/hanko/backend/v3/config"
+	"github.com/teamhanko/hanko/backend/v3/crypto/jwk"
+	"github.com/teamhanko/hanko/backend/v3/dto"
+	"github.com/teamhanko/hanko/backend/v3/persistence"
+	"github.com/teamhanko/hanko/backend/v3/persistence/models"
+	"github.com/teamhanko/hanko/backend/v3/session"
 )
 
 func NewCreateCommand() *cobra.Command {
 	var (
 		configFile string
 		pretty     bool
+		tenantID   string
 	)
 
 	cmd := &cobra.Command{
@@ -41,17 +42,35 @@ func NewCreateCommand() *cobra.Command {
 			if err != nil {
 				log.Fatal(err)
 			}
-			persister, err := persistence.New(cfg.Database)
+
+			if !cfg.ApplicationConfig.MultiTenancy.Enabled {
+				tenantID = config.DefaultTenantID
+			} else {
+				if tenantID == "" {
+					log.Fatal("tenant_id must be present if multitenancy is enabled")
+				}
+			}
+
+			dbConnection, err := persistence.NewConnection(cfg.Database)
 			if err != nil {
 				log.Fatal(err)
 			}
-			jwkManager, err := jwk.NewManager(cfg.Secrets, persister)
+
+			var tID uuid.UUID
+			if tenantID != "" {
+				tID, err = uuid.FromString(tenantID)
+				if err != nil {
+					log.Fatalf("invalid tenant_id: %s", err)
+				}
+			}
+			persister := persistence.New(dbConnection)
+			jwkManager, err := jwk.NewManager(*cfg, persister)
 			if err != nil {
 				fmt.Printf("failed to create jwk persister: %s", err)
 				return
 			}
 
-			sessionManager, err := session.NewManager(jwkManager, *cfg)
+			sessionManager, err := session.NewManager(jwkManager, cfg.TenantConfig)
 			if err != nil {
 				fmt.Printf("failed to create session generator: %s", err)
 				return
@@ -59,13 +78,18 @@ func NewCreateCommand() *cobra.Command {
 
 			userId := uuid.FromStringOrNil(args[0])
 
-			userModel, err := persister.GetUserPersister().Get(userId)
+			userModel, err := persister.GetUserPersister().Get(userId, tID)
 			if err != nil {
 				fmt.Printf("failed to get user from db: %s", err)
 				return
 			}
 
-			token, rawToken, err := sessionManager.GenerateJWT(dto.UserJWTFromUserModel(userModel))
+			if userModel == nil {
+				fmt.Printf("user with id '%s' for tenant '%s' not found", userId, tID.String())
+				return
+			}
+
+			token, rawToken, err := sessionManager.GenerateJWT(dto.UserJWTFromUserModel(userModel), tID)
 			if err != nil {
 				fmt.Printf("failed to generate token: %s", err)
 				return
@@ -76,6 +100,7 @@ func NewCreateCommand() *cobra.Command {
 			expirationTime := rawToken.Expiration()
 			sessionModel := models.Session{
 				ID:        uuid.FromStringOrNil(sessionID.(string)),
+				TenantID:  tID,
 				UserID:    userId,
 				CreatedAt: rawToken.IssuedAt(),
 				UpdatedAt: rawToken.IssuedAt(),
@@ -108,6 +133,7 @@ func NewCreateCommand() *cobra.Command {
 
 	cmd.Flags().StringVar(&configFile, "config", "", "config file")
 	cmd.Flags().BoolVar(&pretty, "pretty", true, "pretty print the JWT payload")
+	cmd.Flags().StringVar(&tenantID, "tenant_id", "", "tenant ID (optional)")
 
 	return cmd
 }

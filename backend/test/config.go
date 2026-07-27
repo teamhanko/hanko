@@ -1,56 +1,61 @@
 package test
 
-import "github.com/teamhanko/hanko/backend/v2/config"
+import "github.com/teamhanko/hanko/backend/v3/config"
 
 var DefaultConfig = config.Config{
-	Webauthn: config.WebauthnSettings{
-		RelyingParty: config.RelyingParty{
-			Id:          "localhost",
-			DisplayName: "Test Relying Party",
-			Icon:        "",
-			Origins:     []string{"http://localhost:8080", "http://localhost:8888"},
+	ApplicationConfig: config.ApplicationConfig{
+		SecretKeys: []string{"abcdefghijklmnop"},
+	},
+	TenantConfig: config.TenantConfig{
+		Webauthn: config.WebauthnSettings{
+			RelyingParty: config.RelyingParty{
+				Id:          "localhost",
+				DisplayName: "Test Relying Party",
+				Icon:        "",
+				Origins:     []string{"http://localhost:8080", "http://localhost:8888"},
+			},
+			Timeouts: config.WebauthnTimeouts{
+				Registration: 600000,
+				Login:        600000,
+			},
 		},
-		Timeout:          60000,
-		UserVerification: "preferred",
-	},
-	Secrets: config.Secrets{
-		Keys: []string{"abcdefghijklmnop"},
-		KeyManagement: config.KeyManagement{
-			Type: "local",
+		Secrets: config.Secrets{
+			Keys: []string{"abcdefghijklmnop"},
+			KeyManagement: config.KeyManagement{
+				Type: "local",
+			},
 		},
-	},
-	Email: config.Email{
-		Enabled:              true,
-		UseForAuthentication: true,
-	},
-	EmailDelivery: config.EmailDelivery{
-		Enabled: true,
-		SMTP: config.SMTP{
-			Host: "localhost",
-			Port: "2500",
+		Email: config.Email{
+			Enabled:              true,
+			UseForAuthentication: true,
+			PasscodeTtl:          300,
 		},
-		FromAddress: "test@hanko.io",
-		FromName:    "Hanko Test",
-	},
-	Passcode: config.Passcode{
-		TTL: 300,
-	},
-	Session: config.Session{
-		Lifespan: "1h",
-		Cookie: config.Cookie{
-			SameSite: "none",
+		EmailDelivery: config.EmailDelivery{
+			Enabled: true,
+			SMTP: config.SMTP{
+				Host: "localhost",
+				Port: "2500",
+			},
+			FromAddress: "test@hanko.io",
+			FromName:    "Hanko Test",
 		},
-		Limit: 5,
-	},
-	Service: config.Service{
-		Name: "Test",
-	},
-	Account: config.Account{
-		AllowSignup:   true,
-		AllowDeletion: false,
-	},
-	Passkey: config.Passkey{
-		Enabled:          true,
-		UserVerification: "preferred",
+		Session: config.Session{
+			Lifespan: "1h",
+			Cookie: config.Cookie{
+				SameSite: "none",
+			},
+			Limit: 5,
+		},
+		Service: config.Service{
+			Name: "Test",
+		},
+		Account: config.Account{
+			AllowSignup:   true,
+			AllowDeletion: false,
+		},
+		Passkey: config.Passkey{
+			Enabled:          true,
+			UserVerification: "preferred",
+		},
 	},
 }

@@ -7,14 +7,14 @@ import (
 
 	"github.com/gofrs/uuid"
 	"github.com/lestrrat-go/jwx/v2/jwt"
-	"github.com/teamhanko/hanko/backend/v2/config"
-	"github.com/teamhanko/hanko/backend/v2/crypto/jwk"
-	"github.com/teamhanko/hanko/backend/v2/dto"
+	"github.com/teamhanko/hanko/backend/v3/config"
+	"github.com/teamhanko/hanko/backend/v3/crypto/jwk"
+	"github.com/teamhanko/hanko/backend/v3/dto"
 )
 
 type Manager interface {
-	GenerateJWT(user dto.UserJWT, opts ...JWTOptions) (string, jwt.Token, error)
-	Verify(string) (jwt.Token, error)
+	GenerateJWT(user dto.UserJWT, tenantID uuid.UUID, opts ...JWTOptions) (string, jwt.Token, error)
+	Verify(tokenString string, tenantID uuid.UUID) (jwt.Token, error)
 	GenerateCookie(token string) (*http.Cookie, error)
 	DeleteCookie() (*http.Cookie, error)
 }
@@ -42,7 +42,7 @@ const (
 )
 
 // NewManager returns a new Manager which will be used to create and verify sessions JWTs
-func NewManager(jwtGenerator jwk.Generator, config config.Config) (Manager, error) {
+func NewManager(jwtGenerator jwk.Generator, config config.TenantConfig) (Manager, error) {
 	duration, _ := time.ParseDuration(config.Session.Lifespan) // error can be ignored, value is checked in config validation
 	sameSite := http.SameSite(0)
 	switch config.Session.Cookie.SameSite {
@@ -59,7 +59,7 @@ func NewManager(jwtGenerator jwk.Generator, config config.Config) (Manager, erro
 	if config.Session.Audience != nil && len(config.Session.Audience) > 0 {
 		audience = config.Session.Audience
 	} else {
-		audience = []string{config.Webauthn.RelyingParty.Id}
+		audience = []string{config.Webauthn.RelyingParty.Id} // TODO: this could be done in config validation and then we would only need config.Session as a parameter
 	}
 
 	return &manager{
@@ -79,7 +79,7 @@ func NewManager(jwtGenerator jwk.Generator, config config.Config) (Manager, erro
 }
 
 // GenerateJWT creates a new session JWT for the given user
-func (m *manager) GenerateJWT(user dto.UserJWT, opts ...JWTOptions) (string, jwt.Token, error) {
+func (m *manager) GenerateJWT(user dto.UserJWT, tenantID uuid.UUID, opts ...JWTOptions) (string, jwt.Token, error) {
 	token := jwt.New()
 
 	// Process the claim template if found
@@ -119,7 +119,7 @@ func (m *manager) GenerateJWT(user dto.UserJWT, opts ...JWTOptions) (string, jwt
 		_ = token.Set(jwt.IssuerKey, m.issuer)
 	}
 
-	signed, err := m.jwtGenerator.Sign(token)
+	signed, err := m.jwtGenerator.Sign(token, tenantID)
 	if err != nil {
 		return "", nil, err
 	}
@@ -128,8 +128,8 @@ func (m *manager) GenerateJWT(user dto.UserJWT, opts ...JWTOptions) (string, jwt
 }
 
 // Verify verifies the given JWT and returns a parsed one if verification was successful
-func (m *manager) Verify(token string) (jwt.Token, error) {
-	parsedToken, err := m.jwtGenerator.Verify([]byte(token))
+func (m *manager) Verify(token string, tenantID uuid.UUID) (jwt.Token, error) {
+	parsedToken, err := m.jwtGenerator.Verify([]byte(token), tenantID)
 	if err != nil {
 		return nil, fmt.Errorf("failed to verify session token: %w", err)
 	}

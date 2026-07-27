@@ -4,8 +4,8 @@ import (
 	"encoding/json"
 
 	"github.com/gofrs/uuid"
-	"github.com/teamhanko/hanko/backend/v2/config"
-	"github.com/teamhanko/hanko/backend/v2/persistence/models"
+	"github.com/teamhanko/hanko/backend/v3/config"
+	"github.com/teamhanko/hanko/backend/v3/persistence/models"
 )
 
 type EmailResponse struct {
@@ -26,7 +26,7 @@ type EmailUpdateRequest struct {
 }
 
 // FromEmailModel Converts the DB model to a DTO object
-func FromEmailModel(email *models.Email, cfg *config.Config) *EmailResponse {
+func FromEmailModel(email *models.Email, cfg *config.TenantConfig) *EmailResponse {
 	emailResponse := &EmailResponse{
 		ID:         email.ID,
 		Address:    email.Address,

@@ -2,14 +2,16 @@ package cleanup
 
 import (
 	"fmt"
-	"github.com/spf13/cobra"
-	"github.com/teamhanko/hanko/backend/v2/config"
-	"github.com/teamhanko/hanko/backend/v2/persistence"
-	"github.com/teamhanko/hanko/backend/v2/persistence/models"
 	"log"
 	"sort"
 	"strings"
 	"time"
+
+	"github.com/gofrs/uuid"
+	"github.com/spf13/cobra"
+	"github.com/teamhanko/hanko/backend/v3/config"
+	"github.com/teamhanko/hanko/backend/v3/persistence"
+	"github.com/teamhanko/hanko/backend/v3/persistence/models"
 )
 
 // options holds user-provided CLI options
@@ -118,10 +120,11 @@ func newCleanupCommand() *cobra.Command {
 				log.Fatal(err)
 			}
 
-			storage, err := persistence.New(cfg.Database)
+			dbConnection, err := persistence.NewConnection(cfg.Database)
 			if err != nil {
 				log.Fatal(err)
 			}
+			storage := persistence.New(dbConnection)
 
 			log.Printf("Cleaning up table(s): %s...\n", strings.Join(opts.tables, ", "))
 
@@ -164,7 +167,7 @@ func cleanup[T any](param handlerParam, persister persistence.Cleanup[T], cutoff
 	)
 
 	for {
-		items, err := persister.FindExpired(cutoffTime, page, param.options.pageSize)
+		items, err := persister.FindExpired(cutoffTime, page, param.options.pageSize, uuid.Nil)
 		if err != nil {
 			return err
 		}

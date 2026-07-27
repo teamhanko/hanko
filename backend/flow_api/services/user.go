@@ -1,9 +1,10 @@
 package services
 
 import (
-	"github.com/teamhanko/hanko/backend/v2/config"
-	"github.com/teamhanko/hanko/backend/v2/persistence/models"
 	"regexp"
+
+	"github.com/teamhanko/hanko/backend/v3/config"
+	"github.com/teamhanko/hanko/backend/v3/persistence/models"
 )
 
 func UserCanDoThirdParty(cfg config.Config, identities models.Identities) bool {
@@ -17,9 +18,9 @@ func UserCanDoThirdParty(cfg config.Config, identities models.Identities) bool {
 }
 
 func UserCanDoSaml(cfg config.Config, identities models.Identities) bool {
-	for _, identity := range identities {
-		if provider := cfg.Saml.GetProviderByDomain(identity.ProviderID); provider != nil {
-			return cfg.Saml.Enabled && provider.Enabled
+	if cfg.Saml.Enabled {
+		for _, identity := range identities {
+			return identity.SamlIdentity != nil && identity.SamlIdentity.SamlProvider.Enabled
 		}
 	}
 

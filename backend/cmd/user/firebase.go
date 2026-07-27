@@ -17,7 +17,7 @@ import (
 
 	"github.com/go-playground/validator/v10"
 	"github.com/spf13/cobra"
-	"github.com/teamhanko/hanko/backend/v2/dto"
+	"github.com/teamhanko/hanko/backend/v3/dto"
 )
 
 // ======================================================

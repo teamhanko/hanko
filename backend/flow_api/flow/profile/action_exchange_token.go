@@ -5,10 +5,10 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/teamhanko/hanko/backend/v2/flow_api/flow/shared"
-	"github.com/teamhanko/hanko/backend/v2/flowpilot"
-	"github.com/teamhanko/hanko/backend/v2/persistence/models"
-	"github.com/teamhanko/hanko/backend/v2/rate_limiter"
+	"github.com/teamhanko/hanko/backend/v3/flow_api/flow/shared"
+	"github.com/teamhanko/hanko/backend/v3/flowpilot"
+	"github.com/teamhanko/hanko/backend/v3/persistence/models"
+	"github.com/teamhanko/hanko/backend/v3/rate_limiter"
 )
 
 type ExchangeToken struct {
@@ -53,7 +53,7 @@ func (a ExchangeToken) Execute(c flowpilot.ExecutionContext) error {
 		}
 	}
 
-	tokenModel, err := deps.Persister.GetTokenPersisterWithConnection(deps.Tx).GetByValue(c.Input().Get("token").String())
+	tokenModel, err := deps.Persister.GetTokenPersisterWithConnection(deps.Tx).GetByValue(c.Input().Get("token").String(), deps.TenantID)
 	if err != nil {
 		return fmt.Errorf("failed to fetch token from db: %w", err)
 	}
@@ -81,7 +81,7 @@ func (a ExchangeToken) Execute(c flowpilot.ExecutionContext) error {
 		))
 	}
 
-	identity, err := deps.Persister.GetIdentityPersisterWithConnection(deps.Tx).GetByID(*tokenModel.IdentityID)
+	identity, err := deps.Persister.GetIdentityPersisterWithConnection(deps.Tx).GetByID(*tokenModel.IdentityID, deps.TenantID)
 	if err != nil {
 		return fmt.Errorf("failed to fetch identity from db: %w", err)
 	}

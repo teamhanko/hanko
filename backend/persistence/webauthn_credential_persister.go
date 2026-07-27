@@ -4,17 +4,18 @@ import (
 	"database/sql"
 	"errors"
 	"fmt"
+
 	"github.com/gobuffalo/pop/v6"
 	"github.com/gofrs/uuid"
-	"github.com/teamhanko/hanko/backend/v2/persistence/models"
+	"github.com/teamhanko/hanko/backend/v3/persistence/models"
 )
 
 type WebauthnCredentialPersister interface {
-	Get(string) (*models.WebauthnCredential, error)
+	Get(id string, tenantID uuid.UUID) (*models.WebauthnCredential, error)
 	Create(models.WebauthnCredential) error
 	Update(models.WebauthnCredential) error
 	Delete(models.WebauthnCredential) error
-	GetFromUser(uuid.UUID) (models.WebauthnCredentials, error)
+	GetFromUser(userId uuid.UUID, tenantID uuid.UUID) (models.WebauthnCredentials, error)
 }
 
 type webauthnCredentialPersister struct {
@@ -25,9 +26,11 @@ func NewWebauthnCredentialPersister(db *pop.Connection) WebauthnCredentialPersis
 	return &webauthnCredentialPersister{db: db}
 }
 
-func (p *webauthnCredentialPersister) Get(id string) (*models.WebauthnCredential, error) {
+func (p *webauthnCredentialPersister) Get(id string, tenantID uuid.UUID) (*models.WebauthnCredential, error) {
 	credential := models.WebauthnCredential{}
-	err := p.db.Eager().Find(&credential, id)
+	query := p.db.Eager().Q()
+	query = query.Where("webauthn_credentials.tenant_id = ?", tenantID)
+	err := query.Find(&credential, id)
 	if err != nil && errors.Is(err, sql.ErrNoRows) {
 		return nil, nil
 	}
@@ -96,9 +99,11 @@ func (p *webauthnCredentialPersister) Delete(credential models.WebauthnCredentia
 	return nil
 }
 
-func (p *webauthnCredentialPersister) GetFromUser(userId uuid.UUID) (models.WebauthnCredentials, error) {
+func (p *webauthnCredentialPersister) GetFromUser(userId uuid.UUID, tenantID uuid.UUID) (models.WebauthnCredentials, error) {
 	var credentials []models.WebauthnCredential
-	err := p.db.Eager().Where("user_id = ?", &userId).Order("created_at asc").All(&credentials)
+	query := p.db.Eager().Where("user_id = ?", &userId)
+	query = query.Where("webauthn_credentials.tenant_id = ?", tenantID)
+	err := query.Order("created_at asc").All(&credentials)
 	if err != nil && errors.Is(err, sql.ErrNoRows) {
 		return credentials, nil
 	}

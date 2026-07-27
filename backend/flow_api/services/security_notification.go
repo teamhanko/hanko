@@ -6,24 +6,26 @@ import (
 	"github.com/gobuffalo/pop/v6"
 	"github.com/gofrs/uuid"
 	"github.com/labstack/echo/v4"
-	auditlog "github.com/teamhanko/hanko/backend/v2/audit_log"
-	"github.com/teamhanko/hanko/backend/v2/dto/webhook"
-	"github.com/teamhanko/hanko/backend/v2/persistence"
-	"github.com/teamhanko/hanko/backend/v2/persistence/models"
-	"github.com/teamhanko/hanko/backend/v2/webhooks/events"
-	webhookUtils "github.com/teamhanko/hanko/backend/v2/webhooks/utils"
+	auditlog "github.com/teamhanko/hanko/backend/v3/audit_log"
+	"github.com/teamhanko/hanko/backend/v3/dto/webhook"
+	"github.com/teamhanko/hanko/backend/v3/persistence"
+	"github.com/teamhanko/hanko/backend/v3/persistence/models"
+	"github.com/teamhanko/hanko/backend/v3/webhooks/events"
+	webhookUtils "github.com/teamhanko/hanko/backend/v3/webhooks/utils"
 
-	"github.com/teamhanko/hanko/backend/v2/config"
+	"github.com/teamhanko/hanko/backend/v3/config"
 )
 
 type SendSecurityNotificationParams struct {
 	Template     string
 	UserID       uuid.UUID
+	TenantID     uuid.UUID
 	EmailAddress string
 	BodyData     map[string]interface{}            // Data used in templates
 	Data         *webhook.SecurityNotificationData // Data used for (serialized) webhook 'data' payload
 	HttpContext  echo.Context
 	UserContext  models.User
+	Cfg          config.TenantConfig
 }
 
 type SecurityNotification interface {
@@ -31,15 +33,13 @@ type SecurityNotification interface {
 }
 
 type securityNotification struct {
-	cfg          config.Config
 	emailService Email
 	auditLog     auditlog.Logger
 	persister    persistence.Persister
 }
 
-func NewSecurityNotificationService(cfg config.Config, emailService Email, persister persistence.Persister, auditLog auditlog.Logger) SecurityNotification {
+func NewSecurityNotificationService(emailService Email, persister persistence.Persister, auditLog auditlog.Logger) SecurityNotification {
 	return &securityNotification{
-		cfg:          cfg,
 		emailService: emailService,
 		auditLog:     auditLog,
 		persister:    persister,
@@ -50,14 +50,14 @@ func (s securityNotification) SendNotification(tx *pop.Connection, p SendSecurit
 	language := p.HttpContext.Request().Header.Get("X-Language")
 
 	subject := s.emailService.RenderSubject(language, p.Template, map[string]interface{}{
-		"ServiceName": s.cfg.Service.Name,
+		"ServiceName": p.Cfg.Service.Name,
 	})
 
 	if p.BodyData == nil {
 		p.BodyData = map[string]interface{}{}
 	}
 
-	p.BodyData["ServiceName"] = s.cfg.Service.Name
+	p.BodyData["ServiceName"] = p.Cfg.Service.Name
 
 	bodyPlain, err := s.emailService.RenderBodyPlain(language, p.Template, p.BodyData)
 	if err != nil {
@@ -70,8 +70,8 @@ func (s securityNotification) SendNotification(tx *pop.Connection, p SendSecurit
 	}
 
 	deliveredByHanko := false
-	if s.cfg.EmailDelivery.Enabled {
-		err = s.emailService.SendEmail(p.EmailAddress, subject, bodyPlain, bodyHTML)
+	if p.Cfg.EmailDelivery.Enabled {
+		err = s.emailService.SendEmail(p.Cfg.EmailDelivery, p.EmailAddress, subject, bodyPlain, bodyHTML)
 		if err != nil {
 			return err
 		}
@@ -83,7 +83,7 @@ func (s securityNotification) SendNotification(tx *pop.Connection, p SendSecurit
 	}
 
 	p.Data.Template = p.Template
-	p.Data.ServiceName = s.cfg.Service.Name
+	p.Data.ServiceName = p.Cfg.Service.Name
 
 	webhookData := webhook.EmailSend{
 		Subject:          subject,
@@ -96,7 +96,7 @@ func (s securityNotification) SendNotification(tx *pop.Connection, p SendSecurit
 		Data:             p.Data,
 	}
 
-	err = webhookUtils.TriggerWebhooks(p.HttpContext, tx, events.EmailSend, webhookData)
+	err = webhookUtils.TriggerWebhooks(p.HttpContext, tx, p.TenantID, events.EmailSend, webhookData)
 	if err != nil {
 		return err
 	}
@@ -119,6 +119,7 @@ func (s securityNotification) SendNotification(tx *pop.Connection, p SendSecurit
 		models.AuditLogSecurityNotificationSent,
 		userForAudit,
 		nil,
+		p.TenantID,
 		auditLogDetails...,
 	)
 	if err != nil {

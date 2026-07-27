@@ -3,11 +3,12 @@ package profile
 import (
 	"errors"
 	"fmt"
+
 	"github.com/gofrs/uuid"
-	"github.com/teamhanko/hanko/backend/v2/dto"
-	"github.com/teamhanko/hanko/backend/v2/flow_api/flow/shared"
-	"github.com/teamhanko/hanko/backend/v2/flowpilot"
-	"github.com/teamhanko/hanko/backend/v2/persistence/models"
+	"github.com/teamhanko/hanko/backend/v3/dto"
+	"github.com/teamhanko/hanko/backend/v3/flow_api/flow/shared"
+	"github.com/teamhanko/hanko/backend/v3/flowpilot"
+	"github.com/teamhanko/hanko/backend/v3/persistence/models"
 )
 
 type GetSessions struct {
@@ -26,7 +27,7 @@ func (h GetSessions) Execute(c flowpilot.HookExecutionContext) error {
 		return errors.New("no valid session")
 	}
 
-	activeSessions, err := deps.Persister.GetSessionPersisterWithConnection(deps.Tx).ListActive(userModel.ID)
+	activeSessions, err := deps.Persister.GetSessionPersisterWithConnection(deps.Tx).ListActive(userModel.ID, deps.TenantID)
 	if err != nil {
 		return fmt.Errorf("failed to get sessions from db: %w", err)
 	}

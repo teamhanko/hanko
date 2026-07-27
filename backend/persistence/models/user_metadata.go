@@ -13,6 +13,7 @@ import (
 type UserMetadata struct {
 	ID        uuid.UUID    `db:"id"`
 	UserID    uuid.UUID    `db:"user_id"`
+	TenantID  uuid.UUID    `db:"tenant_id"`
 	Public    nulls.String `db:"public_metadata"`
 	Private   nulls.String `db:"private_metadata"`
 	Unsafe    nulls.String `db:"unsafe_metadata"`

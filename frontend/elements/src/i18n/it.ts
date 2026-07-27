@@ -193,6 +193,8 @@ export const it: Translation = {
     flow_expired_error:
       "La sessione è scaduta, clicca sul pulsante per riavviare.",
     value_invalid_error: "Il valore inserito non è valido.",
+    otp_code_invalid: "Il codice OTP inserito non è corretto.",
+    otp_code_already_used: "Il codice OTP è già stato utilizzato.",
     passcode_invalid: "Il codice inserito non è corretto.",
     passkey_invalid: "Questa chiave di accesso non può più essere utilizzata.",
     passcode_max_attempts_reached:

@@ -4,12 +4,13 @@ import (
 	"database/sql"
 	"errors"
 	"fmt"
-	"github.com/gofrs/uuid"
 	"strings"
+
+	"github.com/gofrs/uuid"
 
 	"github.com/gobuffalo/pop/v6"
 	"github.com/gobuffalo/validate/v3"
-	"github.com/teamhanko/hanko/backend/v2/persistence/models"
+	"github.com/teamhanko/hanko/backend/v3/persistence/models"
 )
 
 // MetadataLimitExceededError is returned when metadata fields exceed their length limits
@@ -35,7 +36,7 @@ func IsMetadataLimitExceededError(err error) bool {
 }
 
 type UserMetadataPersister interface {
-	Get(userID uuid.UUID) (*models.UserMetadata, error)
+	Get(userID uuid.UUID, tenantID uuid.UUID) (*models.UserMetadata, error)
 	Update(metadata *models.UserMetadata) error
 	Delete(metadata *models.UserMetadata) error
 }
@@ -48,13 +49,15 @@ func NewUserMetadataPersister(db *pop.Connection) UserMetadataPersister {
 	return &userMetadataPersister{db: db}
 }
 
-func (p *userMetadataPersister) Get(userID uuid.UUID) (*models.UserMetadata, error) {
+func (p *userMetadataPersister) Get(userID uuid.UUID, tenantID uuid.UUID) (*models.UserMetadata, error) {
 	metadata := &models.UserMetadata{}
-	err := p.db.Where("user_id = ?", userID).First(metadata)
+	query := p.db.Where("user_id = ?", userID)
+	query = query.Where("tenant_id = ?", tenantID)
+	err := query.First(metadata)
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
 			// Create new metadata if none exists
-			metadata = &models.UserMetadata{UserID: userID}
+			metadata = &models.UserMetadata{UserID: userID, TenantID: tenantID}
 			err = p.db.Create(metadata)
 			if err != nil {
 				return nil, err

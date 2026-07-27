@@ -5,7 +5,8 @@ import (
 	"time"
 
 	"github.com/gobuffalo/pop/v6"
-	"github.com/teamhanko/hanko/backend/v2/config"
+	"github.com/gofrs/uuid"
+	"github.com/teamhanko/hanko/backend/v3/config"
 )
 
 //go:embed migrations/*
@@ -42,6 +43,12 @@ type Persister interface {
 	GetSamlIdentityPersisterWithConnection(tx *pop.Connection) SamlIdentityPersister
 	GetSamlIDPInitiatedRequestPersister() SamlIDPInitiatedRequestPersister
 	GetSamlIDPInitiatedRequestPersisterWithConnection(tx *pop.Connection) SamlIDPInitiatedRequestPersister
+	GetSamlProviderPersister() SamlProviderPersister
+	GetSamlProviderPersisterWithConnection(tx *pop.Connection) SamlProviderPersister
+	GetSamlIDPMetadataPersister() SamlIDPMetadataPersister
+	GetSamlIDPMetadataPersisterWithConnection(tx *pop.Connection) SamlIDPMetadataPersister
+	GetTenantPersister() TenantPersister
+	GetTenantPersisterWithConnection(tx *pop.Connection) TenantPersister
 	GetTokenPersister() TokenPersister
 	GetTokenPersisterWithConnection(tx *pop.Connection) TokenPersister
 	GetUserPersister() UserPersister
@@ -67,7 +74,7 @@ type Persister interface {
 }
 
 type Cleanup[T any] interface {
-	FindExpired(cutoffTime time.Time, page, perPage int) ([]T, error)
+	FindExpired(cutoffTime time.Time, page, perPage int, tenantID uuid.UUID) ([]T, error)
 	Delete(item T) error
 }
 
@@ -81,13 +88,18 @@ type Storage interface {
 	Persister
 }
 
-// New return a new Persister Object with given configuration
-func New(config config.Database) (Storage, error) {
+func New(connection *pop.Connection) Storage {
+	return &persister{
+		DB: connection,
+	}
+}
+
+func NewConnection(config config.Database) (*pop.Connection, error) {
 	connectionDetails := &pop.ConnectionDetails{
-		Pool:            5,
-		IdlePool:        0,
-		ConnMaxIdleTime: 5 * time.Minute,
-		ConnMaxLifetime: 1 * time.Hour,
+		Pool:            config.Pool,
+		IdlePool:        config.IdlePool,
+		ConnMaxIdleTime: config.ConnMaxIdleTime,
+		ConnMaxLifetime: config.ConnMaxLifetime,
 	}
 	if len(config.Url) > 0 {
 		connectionDetails.URL = config.Url
@@ -110,9 +122,7 @@ func New(config config.Database) (Storage, error) {
 		return nil, err
 	}
 
-	return &persister{
-		DB: DB,
-	}, nil
+	return DB, nil
 }
 
 // MigrateUp applies all pending up migrations to the Database
@@ -301,6 +311,22 @@ func (p *persister) GetSamlIDPInitiatedRequestPersisterWithConnection(tx *pop.Co
 	return NewSamlIDPInitiatedRequestPersister(tx)
 }
 
+func (p *persister) GetSamlProviderPersister() SamlProviderPersister {
+	return NewSamlProviderPersister(p.DB)
+}
+
+func (p *persister) GetSamlProviderPersisterWithConnection(tx *pop.Connection) SamlProviderPersister {
+	return NewSamlProviderPersister(tx)
+}
+
+func (p *persister) GetSamlIDPMetadataPersister() SamlIDPMetadataPersister {
+	return NewSamlIDPMetadataPersister(p.DB)
+}
+
+func (p *persister) GetSamlIDPMetadataPersisterWithConnection(tx *pop.Connection) SamlIDPMetadataPersister {
+	return NewSamlIDPMetadataPersister(tx)
+}
+
 func (p *persister) GetWebhookPersister(tx *pop.Connection) WebhookPersister {
 	if tx != nil {
 		return NewWebhookPersister(tx)
@@ -331,4 +357,12 @@ func (p *persister) GetUserMetadataPersister() UserMetadataPersister {
 
 func (p *persister) GetUserMetadataPersisterWithConnection(tx *pop.Connection) UserMetadataPersister {
 	return NewUserMetadataPersister(tx)
+}
+
+func (p *persister) GetTenantPersister() TenantPersister {
+	return NewTenantPersister(p.DB)
+}
+
+func (p *persister) GetTenantPersisterWithConnection(tx *pop.Connection) TenantPersister {
+	return NewTenantPersister(tx)
 }

@@ -2,6 +2,8 @@ package config
 
 import "github.com/invopop/jsonschema"
 
+const DefaultTenantID = "00000000-0000-0000-0000-000000000001"
+
 type RedisConfig struct {
 	// `address` is the address of the redis instance in the form of `host[:port][/database]`.
 	Address string `yaml:"address" json:"address" koanf:"address"`

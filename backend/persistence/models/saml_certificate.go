@@ -8,8 +8,8 @@ import (
 	"encoding/pem"
 	"fmt"
 	"github.com/gobuffalo/validate/v3/validators"
-	"github.com/teamhanko/hanko/backend/v2/crypto"
-	"github.com/teamhanko/hanko/backend/v2/crypto/aes_gcm"
+	"github.com/teamhanko/hanko/backend/v3/crypto"
+	"github.com/teamhanko/hanko/backend/v3/crypto/aes_gcm"
 	"math/big"
 	"time"
 
@@ -21,6 +21,7 @@ import (
 // SamlCertificate is used by pop to map your saml_certs database table to your go code.
 type SamlCertificate struct {
 	ID            uuid.UUID `json:"id" db:"id"`
+	TenantID      uuid.UUID `db:"tenant_id"`
 	CertData      string    `json:"cert_data" db:"cert_data"`
 	CertKey       string    `json:"cert_key" db:"cert_key"`
 	EncryptionKey string    `json:"encryption_key" db:"encryption_key"`

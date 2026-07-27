@@ -1,19 +1,22 @@
 package utils
 
 import (
-	"github.com/stretchr/testify/assert"
-	"github.com/teamhanko/hanko/backend/v2/config"
 	"net/http"
 	"testing"
+
+	"github.com/stretchr/testify/assert"
+	"github.com/teamhanko/hanko/backend/v3/config"
 )
 
 func TestThirdParty_GenerateCookie(t *testing.T) {
 	cfg := &config.Config{
-		Session: config.Session{
-			Cookie: config.Cookie{
-				Domain:   "lorem",
-				HttpOnly: true,
-				Secure:   false,
+		TenantConfig: config.TenantConfig{
+			Session: config.Session{
+				Cookie: config.Cookie{
+					Domain:   "lorem",
+					HttpOnly: true,
+					Secure:   false,
+				},
 			},
 		},
 	}
@@ -26,7 +29,7 @@ func TestThirdParty_GenerateCookie(t *testing.T) {
 
 	state := "I am a test state"
 
-	cookie := GenerateStateCookie(cfg, HankoThirdpartyStateCookie, state, cookieOptions)
+	cookie := GenerateStateCookie(&cfg.TenantConfig, HankoThirdpartyStateCookie, state, cookieOptions)
 
 	assert.NotNil(t, cookie)
 	assert.Equal(t, cookie.Name, HankoThirdpartyStateCookie)
@@ -41,11 +44,13 @@ func TestThirdParty_GenerateCookie(t *testing.T) {
 
 func TestThirdParty_GenerateCookieWithEmptyPath(t *testing.T) {
 	cfg := &config.Config{
-		Session: config.Session{
-			Cookie: config.Cookie{
-				Domain:   "lorem",
-				HttpOnly: true,
-				Secure:   false,
+		TenantConfig: config.TenantConfig{
+			Session: config.Session{
+				Cookie: config.Cookie{
+					Domain:   "lorem",
+					HttpOnly: true,
+					Secure:   false,
+				},
 			},
 		},
 	}
@@ -57,18 +62,20 @@ func TestThirdParty_GenerateCookieWithEmptyPath(t *testing.T) {
 
 	state := "I am a test state"
 
-	cookie := GenerateStateCookie(cfg, HankoThirdpartyStateCookie, state, cookieOptions)
+	cookie := GenerateStateCookie(&cfg.TenantConfig, HankoThirdpartyStateCookie, state, cookieOptions)
 
 	assert.Equal(t, cookie.Path, "/")
 }
 
 func TestThirdParty_GenerateCookieWithEmptyMaxAge(t *testing.T) {
 	cfg := &config.Config{
-		Session: config.Session{
-			Cookie: config.Cookie{
-				Domain:   "lorem",
-				HttpOnly: true,
-				Secure:   false,
+		TenantConfig: config.TenantConfig{
+			Session: config.Session{
+				Cookie: config.Cookie{
+					Domain:   "lorem",
+					HttpOnly: true,
+					Secure:   false,
+				},
 			},
 		},
 	}
@@ -81,7 +88,7 @@ func TestThirdParty_GenerateCookieWithEmptyMaxAge(t *testing.T) {
 
 	state := "I am a test state"
 
-	cookie := GenerateStateCookie(cfg, HankoThirdpartyStateCookie, state, cookieOptions)
+	cookie := GenerateStateCookie(&cfg.TenantConfig, HankoThirdpartyStateCookie, state, cookieOptions)
 
 	assert.Equal(t, cookie.MaxAge, 300)
 }
