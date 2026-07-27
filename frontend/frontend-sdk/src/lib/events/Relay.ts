@@ -13,7 +13,7 @@ import { HankoOptions } from "../../Hanko";
  * and uses broadcast channels for inter-tab communication.
  *
  * @category SDK
- * @subcategory Internal
+ * @subcategory Advanced
  * @extends Dispatcher
  * @param {string} api - The API endpoint URL.
  * @param {HankoOptions} options - The internal configuration options of the SDK.
