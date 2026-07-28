@@ -12,6 +12,7 @@ export interface State {
 /**
  * Manages session state persistence using localStorage.
  *
+ * @param {string} storageKey - The key used to store session state in localStorage.
  * @category SDK
  * @subcategory Internal
  */
@@ -22,11 +23,6 @@ export class SessionState {
     lastCheck: 0,
   };
 
-  /**
-   * Creates an instance of SessionState.
-   *
-   * @param {string} storageKey - The key used to store session state in localStorage.
-   */
   constructor(storageKey: string) {
     this.storageKey = storageKey;
   }
