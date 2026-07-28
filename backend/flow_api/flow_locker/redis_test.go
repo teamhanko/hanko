@@ -186,6 +186,7 @@ func (suite *RedisLockerTestSuite) TestConcurrentLockAttempts() {
 	failCount := 0
 	var mu sync.Mutex
 	var wg sync.WaitGroup
+	ready := make(chan struct{})
 
 	wg.Add(numGoroutines)
 
@@ -193,12 +194,13 @@ func (suite *RedisLockerTestSuite) TestConcurrentLockAttempts() {
 		go func() {
 			defer wg.Done()
 
+			<-ready
+
 			unlock, err := locker.Lock(ctx, flowID)
 
 			mu.Lock()
 			if err == nil {
 				successCount++
-				time.Sleep(10 * time.Millisecond)
 				unlockErr := unlock(ctx)
 				if unlockErr != nil {
 					suite.T().Errorf("unlock failed: %v", unlockErr)
@@ -210,6 +212,7 @@ func (suite *RedisLockerTestSuite) TestConcurrentLockAttempts() {
 		}()
 	}
 
+	close(ready)
 	wg.Wait()
 
 	assert.Equal(suite.T(), 1, successCount, "exactly one lock should succeed")
