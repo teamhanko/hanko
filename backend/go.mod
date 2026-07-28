@@ -4,7 +4,7 @@ go 1.26.1
 
 require (
 	github.com/aws/aws-sdk-go-v2/config v1.32.32
-	github.com/aws/aws-sdk-go-v2/service/kms v1.55.0
+	github.com/aws/aws-sdk-go-v2/service/kms v1.55.1
 	github.com/beevik/etree v1.7.0
 	github.com/brianvoe/gofakeit/v6 v6.28.0
 	github.com/coreos/go-oidc/v3 v3.20.0
