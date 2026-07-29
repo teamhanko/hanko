@@ -38,6 +38,7 @@ type PasscodeCharset string
 var (
 	PasscodeCharsetNumeric      PasscodeCharset = "numeric"
 	PasscodeCharsetAlphanumeric PasscodeCharset = "alphanumeric"
+	PasscodeCharsetStatic       PasscodeCharset = "static"
 )
 
 func (e *Email) Validate() error {
