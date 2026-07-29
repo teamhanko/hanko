@@ -747,6 +747,57 @@
       "additionalProperties": false,
       "type": "object"
     },
+    "IPConfig": {
+      "properties": {
+        "extractor": {
+          "type": "string",
+          "enum": [
+            "direct",
+            "x_forwarded_for",
+            "x_real_ip"
+          ],
+          "description": "`extractor` determines how the client IP address is resolved.\n\nThe default `direct` uses the direct network peer address and ignores forwarding headers.\nUse `x_forwarded_for` or `x_real_ip` only when Hanko is deployed behind trusted reverse proxies.\n\nWhen using x_forwarded_for or x_real_ip, ensure the application is not directly reachable from the internet and\nthat your reverse proxy strips or overwrites incoming forwarding headers.",
+          "default": "direct",
+          "meta:enum": {
+            "direct": "Uses the direct network peer address. This is the default and ignores X-Forwarded-For / X-Real-IP.",
+            "x_forwarded_for": "Uses the X-Forwarded-For header, but only from trusted proxies. Requires trusted_proxies.\n\t\t\t\t\t\t\tWhen using this option ensure the application is not directly reachable from the internet\n\t\t\t\t\t\t\tand that your reverse proxy strips or overwrites incoming forwarding headers.",
+            "x_real_ip": "Uses the X-Real-IP header, but only from trusted proxies. Requires trusted_proxies.\n\t\t\t\t\t\t\tWhen using this option ensure the application is not directly reachable from the internet\n\t\t\t\t\t\t\tand that your reverse proxy strips or overwrites incoming forwarding headers."
+          }
+        },
+        "trusted_proxies": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array",
+          "description": "`trusted_proxies` contains CIDR ranges of reverse proxies that are trusted to provide client IP headers.\n\nRequired when `extractor` is `x_forwarded_for` or `x_real_ip`.\nDo not configure public client IP ranges here. Only configure your own reverse proxies,\nload balancers, or ingress controllers."
+        }
+      },
+      "additionalProperties": false,
+      "type": "object",
+      "if": {
+        "properties": {
+          "extractor": {
+            "enum": [
+              "x_forwarded_for",
+              "x_real_ip"
+            ]
+          }
+        },
+        "required": [
+          "extractor"
+        ]
+      },
+      "then": {
+        "properties": {
+          "trusted_proxies": {
+            "minItems": 1
+          }
+        },
+        "required": [
+          "trusted_proxies"
+        ]
+      }
+    },
     "IdentityProvider": {
       "properties": {
         "enabled": {
@@ -1520,6 +1571,10 @@
           "$ref": "#/$defs/ServerSettings",
           "title": "management",
           "description": "`management` contains the server configuration for the management API."
+        },
+        "ip": {
+          "$ref": "#/$defs/IPConfig",
+          "description": "`ip` configures how client IP addresses are resolved. This configuration is global and applies to public, admin,\nand management APIs."
         }
       },
       "additionalProperties": false,

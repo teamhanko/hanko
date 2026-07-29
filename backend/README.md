@@ -25,6 +25,7 @@ easily integrated into any web app with as little as two lines of code.
   - [User import](#user-import)
   - [Webhooks](#webhooks)
   - [Session JWT templates](#session-jwt-templates)
+  - [Client IP address resolution](#client-ip-address-resolution)
 - [API specification](#api-specification)
 - [Configuration reference](#configuration-reference)
 - [License](#license)
@@ -774,6 +775,89 @@ Notes:
 - Boolean strings ("true" or "false") from templates are automatically converted to actual booleans.
 
 For more details on template syntax, see: https://pkg.go.dev/text/template
+
+### Client IP address resolution
+
+Hanko uses the resolved client IP address in several places, including rate limiting, audit logs, request logs, and
+session-related metadata.
+
+By default, Hanko uses the direct network peer address of the incoming request and ignores client-supplied
+forwarding headers such as `X-Forwarded-For` and `X-Real-IP`.
+
+This default is secure for direct deployments and prevents clients from spoofing their IP address to bypass
+rate limits.
+
+```yaml
+server:
+  ip:
+    extractor: direct
+```
+
+#### Deployments behind reverse proxies
+
+If Hanko is deployed behind a reverse proxy, load balancer, ingress controller, or CDN, the direct peer address seen
+by Hanko may be the proxy address instead of the original client address.
+
+In this case, you can configure Hanko to use a forwarding header, but only from explicitly trusted proxy IP ranges.
+
+Example using `X-Forwarded-For`:
+
+```yaml
+server:
+  ip:
+    extractor: x_forwarded_for
+    trusted_proxies:
+      - 10.0.0.0/8
+      - 172.16.0.0/12
+      - 192.168.0.0/16
+```
+
+Example using `X-Real-IP`:
+
+```yaml
+server:
+  ip:
+    extractor: x_real_ip
+    trusted_proxies:
+      - 10.12.34.56/32
+```
+
+#### Rate limiting behind reverse proxies
+
+When Hanko is deployed behind a reverse proxy and `server.ip.extractor` is set to `direct`, Hanko sees the proxy IP
+address as the client IP. In that setup, multiple users may share the same resolved IP address and therefore the same
+IP-based rate-limit buckets.
+
+For deployments with meaningful traffic behind a reverse proxy, configure a header-based extractor such as
+`x_forwarded_for` together with narrow `trusted_proxies` ranges. This allows Hanko to resolve the original client
+IP while still ignoring forwarding headers from untrusted peers.
+
+#### Available options
+
+| Option | Description |
+|---|---|
+| `server.ip.extractor` | Determines how Hanko resolves the client IP address. |
+| `server.ip.trusted_proxies` | List of trusted reverse proxy CIDR ranges. Required when using a header-based extractor. |
+
+Supported values for `server.ip.extractor`:
+
+| Value | Description |
+|---|---|
+| `direct` | Uses the direct network peer address. Ignores `X-Forwarded-For` and `X-Real-IP`. This is the default. |
+| `x_forwarded_for` | Uses the `X-Forwarded-For` header, but only when the direct peer is in `trusted_proxies`. |
+| `x_real_ip` | Uses the `X-Real-IP` header, but only when the direct peer is in `trusted_proxies`. |
+
+#### Security considerations
+
+Only enable `x_forwarded_for` or `x_real_ip` if Hanko is reachable exclusively through trusted reverse proxies.
+
+When using a header-based extractor:
+
+- configure only your own reverse proxies, load balancers, ingress controllers, or CDN proxy ranges in `trusted_proxies`;
+- keep `trusted_proxies` as narrow as possible;
+- do not include client networks, public internet ranges, or other untrusted networks in `trusted_proxies`;
+- ensure the Hanko service is not directly reachable from the public internet;
+- ensure your proxy strips or overwrites incoming `X-Forwarded-For` and `X-Real-IP` headers from clients.
 
 ## API specification
 
