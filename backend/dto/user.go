@@ -54,8 +54,13 @@ func (u *UserJWT) String() string {
 }
 
 func UserJWTFromUserModel(userModel *models.User) UserJWT {
+	publicID := userModel.ID
+	if userModel.PublicID != nil {
+		publicID = *userModel.PublicID
+	}
+
 	userJWT := UserJWT{
-		UserID: userModel.ID.String(),
+		UserID: publicID.String(),
 	}
 
 	if primaryEmail := userModel.Emails.GetPrimary(); primaryEmail != nil {
