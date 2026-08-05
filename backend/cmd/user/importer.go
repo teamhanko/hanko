@@ -17,19 +17,34 @@ type Importer struct {
 }
 
 func (i *Importer) createUser(newUser ImportOrExportEntry, tenantID uuid.UUID) (*models.User, error) {
-	userID, err := uuid.NewV4()
+	userInternalID, err := uuid.NewV4()
 	if err != nil {
 		return nil, err
 	}
+
+	// The internal id is always freshly generated, regardless of what the import
+	// file supplies - a supplied user_id sets the tenant-scoped public_id instead.
+	publicID := userInternalID
+	if newUser.UserID != "" {
+		publicID = uuid.FromStringOrNil(newUser.UserID)
+
+		existingUser, err := i.persister.GetUserPersisterWithConnection(i.tx).GetByPublicID(publicID, tenantID)
+		if err != nil {
+			return nil, err
+		}
+		if existingUser != nil {
+			// Re-importing the same file into the same tenant updates the existing
+			// user rather than colliding on a duplicate public_id.
+			return existingUser, nil
+		}
+	}
+
 	userModel := models.User{
-		ID:        userID,
+		ID:        userInternalID,
+		PublicID:  &publicID,
 		CreatedAt: i.importTimestamp,
 		UpdatedAt: i.importTimestamp,
 		TenantID:  tenantID,
-	}
-
-	if newUser.UserID != "" {
-		userModel.ID = uuid.FromStringOrNil(newUser.UserID)
 	}
 
 	if newUser.CreatedAt != nil {
