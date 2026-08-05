@@ -277,7 +277,7 @@ func (p *userPersister) addQueryParamsToSqlQuery(query *pop.Query, userIDs []uui
 	}
 
 	if len(userIDs) > 0 {
-		query = query.Where("users.id in (?)", userIDs)
+		query = query.Where("users.public_id in (?)", userIDs)
 	}
 
 	return query
