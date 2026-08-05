@@ -11,6 +11,7 @@ import (
 	"github.com/gofrs/uuid"
 	"github.com/stretchr/testify/suite"
 	"github.com/teamhanko/hanko/backend/v3/config"
+	"github.com/teamhanko/hanko/backend/v3/dto/admin"
 	"github.com/teamhanko/hanko/backend/v3/persistence/models"
 	"github.com/teamhanko/hanko/backend/v3/test"
 )
@@ -84,6 +85,37 @@ func (s *userAdminSuite) TestUserHandlerAdmin_Delete_InvalidUserId() {
 	e.ServeHTTP(rec, req)
 
 	s.Equal(http.StatusBadRequest, rec.Code)
+}
+
+// TestUserHandlerAdmin_Get_UsesPublicIdNotInternalId is the regression test called out in the
+// plan: :id in the URL must resolve via public_id, and the real internal id must no longer work
+// as a lookup key at all.
+func (s *userAdminSuite) TestUserHandlerAdmin_Get_UsesPublicIdNotInternalId() {
+	if testing.Short() {
+		s.T().Skip("skipping test in short mode.")
+	}
+	err := s.LoadFixtures("../test/fixtures/user_admin_public_id")
+	s.Require().NoError(err)
+
+	e := NewAdminRouter(&test.DefaultConfig, s.Storage, nil)
+
+	internalID := "3c1c8f0a-1111-4a11-8a11-111111111111"
+	publicID := "4d2d9f1b-2222-4b22-8b22-222222222222"
+
+	req := httptest.NewRequest(http.MethodGet, fmt.Sprintf("/users/%s", internalID), nil)
+	rec := httptest.NewRecorder()
+	e.ServeHTTP(rec, req)
+	s.Equal(http.StatusNotFound, rec.Code, "the real internal id must not resolve a user")
+
+	req = httptest.NewRequest(http.MethodGet, fmt.Sprintf("/users/%s", publicID), nil)
+	rec = httptest.NewRecorder()
+	e.ServeHTTP(rec, req)
+	s.Equal(http.StatusOK, rec.Code, "the public_id must resolve the user")
+
+	var user admin.User
+	err = json.Unmarshal(rec.Body.Bytes(), &user)
+	s.Require().NoError(err)
+	s.Equal(publicID, user.ID.String(), "the returned \"id\" must be the public_id, never the internal id")
 }
 
 func (s *userAdminSuite) TestUserHandlerAdmin_List() {
