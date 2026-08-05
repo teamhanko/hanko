@@ -12,6 +12,7 @@ import (
 
 type UserPersister interface {
 	Get(id uuid.UUID, tenantID uuid.UUID) (*models.User, error)
+	GetByPublicID(publicID uuid.UUID, tenantID uuid.UUID) (*models.User, error)
 	GetByEmailAddress(emailAddress string, tenantID uuid.UUID) (*models.User, error)
 	Create(models.User) error
 	Update(models.User) error
@@ -81,6 +82,24 @@ func (p *userPersister) Get(id uuid.UUID, tenantID uuid.UUID) (*models.User, err
 	}
 
 	return &user, nil
+}
+
+// GetByPublicID resolves a user by their tenant-scoped public identifier (the only
+// identifier ever exposed via the API/JWT) and delegates to Get for the actual
+// eager-loaded fetch, so callers get identical results regardless of which
+// identifier they looked the user up by.
+func (p *userPersister) GetByPublicID(publicID uuid.UUID, tenantID uuid.UUID) (*models.User, error) {
+	user := models.User{}
+	query := p.db.Select("id").Where("users.tenant_id = ?", tenantID).Where("users.public_id = ?", publicID)
+	err := query.First(&user)
+	if err != nil && errors.Is(err, sql.ErrNoRows) {
+		return nil, nil
+	}
+	if err != nil {
+		return nil, fmt.Errorf("failed to get user by public id: %w", err)
+	}
+
+	return p.Get(user.ID, tenantID)
 }
 
 func (p *userPersister) GetByEmailAddress(emailAddress string, tenantID uuid.UUID) (*models.User, error) {
