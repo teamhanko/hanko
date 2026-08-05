@@ -57,7 +57,16 @@ func (h *emailAdminHandler) List(ctx echo.Context) error {
 		return fmt.Errorf(parseUserUuidFailureMessage, err)
 	}
 
-	emails, err := h.persister.GetEmailPersister().FindByUserId(userId, tenant.ID)
+	user, err := h.persister.GetUserPersister().GetByPublicID(userId, tenant.ID)
+	if err != nil {
+		return fmt.Errorf(fetchUserFromDbFailureMessage, err)
+	}
+
+	if user == nil {
+		return echo.NewHTTPError(http.StatusNotFound, fmt.Sprintf("user with id '%s' was not found", userId))
+	}
+
+	emails, err := h.persister.GetEmailPersister().FindByUserId(user.ID, tenant.ID)
 	if err != nil {
 		return fmt.Errorf("failed to fetch emails from db: %w", err)
 	}
@@ -103,7 +112,7 @@ func (h *emailAdminHandler) Create(ctx echo.Context) error {
 		return fmt.Errorf("failed to fetch email from db: %w", err)
 	}
 
-	user, err := h.persister.GetUserPersister().Get(userId, tenant.ID)
+	user, err := h.persister.GetUserPersister().GetByPublicID(userId, tenant.ID)
 	if err != nil {
 		return fmt.Errorf(fetchUserFromDbFailureMessage, err)
 	}
@@ -142,7 +151,7 @@ func (h *emailAdminHandler) Create(ctx echo.Context) error {
 			err = h.persister.GetPrimaryEmailPersisterWithConnection(tx).Create(*primaryEmail)
 		}
 
-		webhookUtils.NotifyUserChange(ctx, tx, h.persister, events.UserEmailCreate, userId)
+		webhookUtils.NotifyUserChange(ctx, tx, h.persister, events.UserEmailCreate, user.ID)
 
 		return ctx.JSON(http.StatusCreated, admin.FromEmailModel(email))
 	})
@@ -169,7 +178,7 @@ func (h *emailAdminHandler) Get(ctx echo.Context) error {
 		return fmt.Errorf("failed to parse email_id as uuid: %w", err)
 	}
 
-	user, err := h.persister.GetUserPersister().Get(userId, tenant.ID)
+	user, err := h.persister.GetUserPersister().GetByPublicID(userId, tenant.ID)
 	if err != nil {
 		return fmt.Errorf(fetchUserFromDbFailureMessage, err)
 	}
@@ -207,7 +216,7 @@ func (h *emailAdminHandler) Delete(ctx echo.Context) error {
 		return fmt.Errorf("failed to parse email_id as uuid: %w", err)
 	}
 
-	user, err := h.persister.GetUserPersister().Get(userId, tenant.ID)
+	user, err := h.persister.GetUserPersister().GetByPublicID(userId, tenant.ID)
 	if err != nil {
 		return fmt.Errorf(fetchUserFromDbFailureMessage, err)
 	}
@@ -231,7 +240,7 @@ func (h *emailAdminHandler) Delete(ctx echo.Context) error {
 			return fmt.Errorf("failed to delete email from db: %w", err)
 		}
 
-		webhookUtils.NotifyUserChange(ctx, tx, h.persister, events.UserEmailDelete, userId)
+		webhookUtils.NotifyUserChange(ctx, tx, h.persister, events.UserEmailDelete, user.ID)
 
 		return ctx.NoContent(http.StatusNoContent)
 	})
@@ -258,7 +267,7 @@ func (h *emailAdminHandler) SetPrimaryEmail(ctx echo.Context) error {
 		return echo.NewHTTPError(http.StatusBadRequest).SetInternal(err)
 	}
 
-	user, err := h.persister.GetUserPersister().Get(userId, tenant.ID)
+	user, err := h.persister.GetUserPersister().GetByPublicID(userId, tenant.ID)
 	if err != nil {
 		return fmt.Errorf(fetchUserFromDbFailureMessage, err)
 	}
@@ -282,7 +291,7 @@ func (h *emailAdminHandler) SetPrimaryEmail(ctx echo.Context) error {
 			return err
 		}
 
-		webhookUtils.NotifyUserChange(ctx, tx, h.persister, events.UserEmailPrimary, userId)
+		webhookUtils.NotifyUserChange(ctx, tx, h.persister, events.UserEmailPrimary, user.ID)
 
 		return ctx.NoContent(http.StatusNoContent)
 	})
