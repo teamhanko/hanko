@@ -85,6 +85,7 @@ func (h CreateUser) createUser(c flowpilot.HookExecutionContext, id uuid.UUID, e
 
 	err := deps.Persister.GetUserPersisterWithConnection(deps.Tx).Create(models.User{
 		ID:        id,
+		PublicID:  &id,
 		CreatedAt: now,
 		UpdatedAt: now,
 		TenantID:  tenantID,
