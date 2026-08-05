@@ -27,6 +27,7 @@ type ProviderProfile struct {
 // User is used by pop to map your users database table to your go code.
 type User struct {
 	ID                  uuid.UUID           `db:"id" json:"id"`
+	PublicID            *uuid.UUID          `db:"public_id" json:"public_id,omitempty"`
 	TenantID            uuid.UUID           `db:"tenant_id"`
 	WebauthnCredentials WebauthnCredentials `has_many:"webauthn_credentials" json:"webauthn_credentials,omitempty"`
 	Emails              Emails              `has_many:"emails" json:"-"`
@@ -62,8 +63,10 @@ func (user *User) GetIdentities() Identities {
 
 func NewUser(tenantID uuid.UUID) User {
 	id, _ := uuid.NewV4()
+	pubID := id
 	return User{
 		ID:        id,
+		PublicID:  &pubID,
 		TenantID:  tenantID,
 		CreatedAt: time.Now(),
 		UpdatedAt: time.Now(),
