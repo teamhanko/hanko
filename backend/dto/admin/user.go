@@ -77,8 +77,16 @@ func FromUserModel(model models.User) User {
 		metadata = NewMetadata(model.Metadata)
 	}
 
+	// PublicID is the only identifier ever exposed via the API; it should always be
+	// populated (backfilled/defaulted at creation), id is a fallback only for rows
+	// that somehow predate that guarantee.
+	publicID := model.ID
+	if model.PublicID != nil {
+		publicID = *model.PublicID
+	}
+
 	return User{
-		ID:                  model.ID,
+		ID:                  publicID,
 		WebauthnCredentials: credentials,
 		Emails:              emails,
 		Username:            username,
@@ -96,6 +104,8 @@ func FromUserModel(model models.User) User {
 }
 
 type CreateUser struct {
+	// ID, if supplied, sets the user's tenant-scoped public_id, not the internal
+	// primary key - the internal id is always server-generated regardless.
 	ID        uuid.UUID     `json:"id"`
 	Emails    []CreateEmail `json:"emails" validate:"unique=Address,dive"`
 	Username  *string       `json:"username"`
