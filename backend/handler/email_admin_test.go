@@ -525,3 +525,41 @@ func (s *emailAdminSuite) TestEmailAdminHandler_SetPrimaryEmail() {
 		})
 	}
 }
+
+// TestEmailAdminHandler_List_UsesPublicIdNotInternalId closes the one gap flagged in review:
+// List is the only email_admin.go handler that didn't already pre-fetch the user before this
+// change, so it's the one most worth a dedicated regression test proving :user_id resolves via
+// public_id and not the real internal id.
+func (s *emailAdminSuite) TestEmailAdminHandler_List_UsesPublicIdNotInternalId() {
+	if testing.Short() {
+		s.T().Skip("skipping test in short mode.")
+	}
+
+	err := s.LoadFixtures("../test/fixtures/email_admin_public_id")
+	s.Require().NoError(err)
+
+	cfg := test.DefaultConfig
+	err = cfg.PostProcess()
+	s.Require().NoError(err)
+
+	e := NewAdminRouter(&cfg, s.Storage, nil)
+
+	internalID := "9e1e8f0a-7777-4a11-8a11-777777777777"
+	publicID := "af2f9f1b-8888-4b22-8b22-888888888888"
+
+	req := httptest.NewRequest(http.MethodGet, fmt.Sprintf("/users/%s/emails", internalID), nil)
+	rec := httptest.NewRecorder()
+	e.ServeHTTP(rec, req)
+	s.Equal(http.StatusNotFound, rec.Code, "the real internal id must not resolve the user or their emails")
+
+	req = httptest.NewRequest(http.MethodGet, fmt.Sprintf("/users/%s/emails", publicID), nil)
+	rec = httptest.NewRecorder()
+	e.ServeHTTP(rec, req)
+	s.Require().Equal(http.StatusOK, rec.Code, "the public_id must resolve the user and their emails")
+
+	var emails []*admin.Email
+	err = json.Unmarshal(rec.Body.Bytes(), &emails)
+	s.Require().NoError(err)
+	s.Require().Len(emails, 1)
+	s.Equal("divergent-id-user@example.com", emails[0].Address)
+}
