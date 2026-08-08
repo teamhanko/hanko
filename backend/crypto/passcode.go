@@ -48,3 +48,16 @@ func (a *alphanumericPasscodeGenerator) Generate() (string, error) {
 	}
 	return string(b), nil
 }
+
+type staticPasscodeGenerator struct {
+}
+
+func NewStaticPasscodeGenerator() PasscodeGenerator {
+	return &staticPasscodeGenerator{}
+}
+
+func (g *staticPasscodeGenerator) Generate() (string, error) {
+	// this is just a POC for now. I can imagine config option for it, or an env variable...
+	n := 123456
+	return fmt.Sprintf("%06d", n), nil
+}
