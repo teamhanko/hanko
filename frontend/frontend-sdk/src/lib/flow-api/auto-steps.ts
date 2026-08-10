@@ -122,10 +122,14 @@ export const autoSteps: AutoSteps = {
       return nextState;
     }
 
-    if (!state.isCached) {
+    if (!state.isCached && state.payload?.redirect_url) {
       state.saveToLocalStorage();
       window.location.assign(state.payload.redirect_url);
     } else {
+      // The payload may re-enter the thirdparty state without a redirect_url
+      // (e.g. after a failed token exchange, once hanko_token was already
+      // stripped from the URL). Assigning it directly would navigate to
+      // "/undefined", so fall back to the back action instead.
       return await state.actions.back.run();
     }
 
