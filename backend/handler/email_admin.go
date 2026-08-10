@@ -96,7 +96,16 @@ func (h *emailAdminHandler) Create(ctx echo.Context) error {
 		return fmt.Errorf(parseUserUuidFailureMessage, err)
 	}
 
-	emailCount, err := h.persister.GetEmailPersister().CountByUserId(userId, tenant.ID)
+	user, err := h.persister.GetUserPersister().GetByPublicID(userId, tenant.ID)
+	if err != nil {
+		return fmt.Errorf(fetchUserFromDbFailureMessage, err)
+	}
+
+	if user == nil {
+		return echo.NewHTTPError(http.StatusNotFound).SetInternal(errors.New("user not found"))
+	}
+
+	emailCount, err := h.persister.GetEmailPersister().CountByUserId(user.ID, tenant.ID)
 	if err != nil {
 		return fmt.Errorf("failed to count user emails: %w", err)
 	}
@@ -112,16 +121,7 @@ func (h *emailAdminHandler) Create(ctx echo.Context) error {
 		return fmt.Errorf("failed to fetch email from db: %w", err)
 	}
 
-	user, err := h.persister.GetUserPersister().GetByPublicID(userId, tenant.ID)
-	if err != nil {
-		return fmt.Errorf(fetchUserFromDbFailureMessage, err)
-	}
-
 	return h.persister.Transaction(func(tx *pop.Connection) error {
-		if user == nil {
-			return echo.NewHTTPError(http.StatusNotFound).SetInternal(errors.New("user not found"))
-		}
-
 		if email != nil {
 			// The email address already exists.
 			if email.UserID != nil {

@@ -245,6 +245,50 @@ func (s *emailAdminSuite) TestEmailAdminHandler_Create() {
 	}
 }
 
+// TestEmailAdminHandler_Create_EmailLimitUsesResolvedInternalId is the regression test for the
+// email-limit bypass found in review: the limit check counted emails by the raw path variable
+// (public_id) instead of the resolved internal user id, so it always read 0 and never tripped for
+// any user whose public_id differs from their internal id. A limit of 0 (as in the existing
+// "should reject" test case above) can't distinguish buggy from fixed behavior, since 0 >= 0 is
+// true either way - this needs a non-zero limit and a user who already has an email.
+func (s *emailAdminSuite) TestEmailAdminHandler_Create_EmailLimitUsesResolvedInternalId() {
+	if testing.Short() {
+		s.T().Skip("skipping test in short mode.")
+	}
+
+	err := s.LoadFixtures("../test/fixtures/email_admin_limit_public_id")
+	s.Require().NoError(err)
+
+	cfg := test.DefaultConfig
+	err = cfg.PostProcess()
+	s.Require().NoError(err)
+	cfg.Email.Limit = 1
+
+	e := NewAdminRouter(&cfg, s.Storage, nil)
+
+	publicID := "9d3ff04a-1616-4b22-8b22-161616161616"
+
+	body := admin.CreateEmailRequestDto{
+		ListEmailRequestDto: admin.ListEmailRequestDto{
+			UserId: publicID,
+		},
+		CreateEmail: admin.CreateEmail{
+			Address:    "one-too-many@example.com",
+			IsVerified: false,
+		},
+	}
+	bodyJson, err := json.Marshal(body)
+	s.Require().NoError(err)
+
+	req := httptest.NewRequest(http.MethodPost, fmt.Sprintf("/users/%s/emails", publicID), bytes.NewReader(bodyJson))
+	req.Header.Set("Content-Type", "application/json")
+	rec := httptest.NewRecorder()
+
+	e.ServeHTTP(rec, req)
+
+	s.Equal(http.StatusConflict, rec.Code, "the user already has 1 email and the limit is 1, so the create must be rejected")
+}
+
 func (s *emailAdminSuite) TestEmailAdminHandler_Get() {
 	if testing.Short() {
 		s.T().Skip("skipping test in short mode.")
