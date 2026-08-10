@@ -298,7 +298,7 @@ func (h *UserHandlerAdmin) Create(c echo.Context) error {
 						return echo.NewHTTPError(http.StatusConflict, fmt.Errorf("failed to create username '%s' for user '%v': %w", username.Username, publicID, fmt.Errorf("username already exists")))
 					}
 				}
-				return fmt.Errorf("failed to create email '%s' for user '%v': %w", username.Username, publicID, err)
+				return fmt.Errorf("failed to create username '%s' for user '%v': %w", username.Username, publicID, err)
 			}
 		}
 		return nil
