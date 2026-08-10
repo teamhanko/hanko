@@ -1,6 +1,7 @@
 package user
 
 import (
+	"fmt"
 	"strings"
 	"time"
 
@@ -33,9 +34,7 @@ func (i *Importer) createUser(newUser ImportOrExportEntry, tenantID uuid.UUID) (
 			return nil, err
 		}
 		if existingUser != nil {
-			// Re-importing the same file into the same tenant updates the existing
-			// user rather than colliding on a duplicate public_id.
-			return existingUser, nil
+			return nil, fmt.Errorf("user with id %q already exists in this tenant", newUser.UserID)
 		}
 	}
 
