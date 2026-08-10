@@ -73,6 +73,15 @@ func NewUser(tenantID uuid.UUID) User {
 	}
 }
 
+// GetPublicID returns the tenant-scoped identifier every API surface exposes, falling back to
+// the internal id only for the pathological case where PublicID somehow isn't set.
+func (user *User) GetPublicID() uuid.UUID {
+	if user.PublicID != nil {
+		return *user.PublicID
+	}
+	return user.ID
+}
+
 func (user *User) GetUsername() *string {
 	if user.Username != nil {
 		return &user.Username.Username

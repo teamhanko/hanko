@@ -87,10 +87,7 @@ func export(persister persistence.Persister, outFile string, tenantID uuid.UUID)
 				IsVerified: email.Verified,
 			})
 		}
-		publicID := user.ID
-		if user.PublicID != nil {
-			publicID = *user.PublicID
-		}
+		publicID := user.GetPublicID()
 		entry := ImportOrExportEntry{
 			UserID:    publicID.String(),
 			Emails:    emails,

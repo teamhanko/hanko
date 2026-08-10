@@ -56,10 +56,7 @@ func ProfileDataFromUserModel(user *models.User, cfg *config.TenantConfig) *Prof
 		metadata = NewMetadata(user.Metadata)
 	}
 
-	publicID := user.ID
-	if user.PublicID != nil {
-		publicID = *user.PublicID
-	}
+	publicID := user.GetPublicID()
 
 	return &ProfileData{
 		ID:           publicID,

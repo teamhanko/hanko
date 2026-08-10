@@ -77,16 +77,8 @@ func FromUserModel(model models.User) User {
 		metadata = NewMetadata(model.Metadata)
 	}
 
-	// PublicID is the only identifier ever exposed via the API; it should always be
-	// populated (backfilled/defaulted at creation), id is a fallback only for rows
-	// that somehow predate that guarantee.
-	publicID := model.ID
-	if model.PublicID != nil {
-		publicID = *model.PublicID
-	}
-
 	return User{
-		ID:                  publicID,
+		ID:                  model.GetPublicID(),
 		WebauthnCredentials: credentials,
 		Emails:              emails,
 		Username:            username,
