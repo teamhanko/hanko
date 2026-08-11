@@ -148,26 +148,58 @@ Fetches the current user's profile information.
 
 - **Returns**: A `User` object containing the user’s profile details. The object includes:
     - `user_id`: A unique string identifier for the user.
-    - `passkeys`: An optional array of WebAuthn credentials (passkey-based authentication).
-    - `security_keys`: An optional array of WebAuthn credentials (security key-based authentication).
-    - `mfa_config`: An optional configuration object for multi-factor authentication settings.
-    - `emails`: An optional array of email objects (e.g., `{ address: string, is_primary: boolean, is_verified: boolean }`).
-    - `username`: An optional username object (e.g., `{ id: string, username: string }`).
+    - `passkeys`: An optional array of registered passkeys (`WebauthnCredential[]`).
+    - `security_keys`: An optional array of registered security keys (`WebauthnCredential[]`).
+    - `mfa_config`: An optional MFA configuration (`{ auth_app_set_up, totp_enabled, security_keys_enabled }`).
+    - `emails`: An optional array of email objects (e.g., `{ id: string, address: string, is_verified: boolean, is_primary: boolean, identities?: Identity[] }`).
+    - `username`: An optional username object (e.g., `{ id: string, username: string, created_at: string, updated_at: string }`).
+    - `metadata`: An optional custom metadata object (`{ public_metadata?, unsafe_metadata? }`).
+    - `identities`: An optional array of linked third-party identities (e.g., `{ id: string, provider: string, identity_id?: string }`).
     - `created_at`: A string timestamp (ISO 8601) of when the user was created.
     - `updated_at`: A string timestamp (ISO 8601) of when the user was last updated.
+    - `name`, `given_name`, `family_name`, `picture`: Optional profile fields, populated when the user signed up via a third-party provider.
 - **Errors**: `UnauthorizedError` (invalid or expired session), `TechnicalError` (server or network issues).
 
 ```typescript
 try {
-    const user = await hanko.getUser();
+    const user = await hanko.getCurrentUser();
     console.log("User profile:", user);
     // Example output:
     // {
     //   user_id: "123e4567-e89b-12d3-a456-426614174000",
-    //   emails: [{ address: "user@example.com", is_primary: true, is_verified: true }],
-    //   username: { id: "f2882293-3c39-451d-a7cb-4cf3375e0c66", username: "johndoe" },
+    //   passkeys: [{
+    //     id: "d6df75e0-8a2b-4c6d-9b6e-1a2b3c4d5e6f",
+    //     name: "MacBook Touch ID",
+    //     public_key: "...",
+    //     attestation_type: "none",
+    //     aaguid: "08987058-cadc-4b81-b6e1-30de50dcbe96",
+    //     created_at: "2025-01-01T10:00:00Z",
+    //     transports: "internal",
+    //     backup_eligible: "true",
+    //     backup_state: "true"
+    //   }],
+    //   security_keys: [],
+    //   mfa_config: { auth_app_set_up: false, totp_enabled: false, security_keys_enabled: false },
+    //   emails: [{
+    //     id: "f2882293-3c39-451d-a7cb-4cf3375e0c66",
+    //     address: "user@example.com",
+    //     is_verified: true,
+    //     is_primary: true,
+    //     identities: []
+    //   }],
+    //   username: {
+    //     id: "a1b2c3d4-3c39-451d-a7cb-4cf3375e0c66",
+    //     username: "johndoe",
+    //     created_at: "2025-01-01T10:00:00Z",
+    //     updated_at: "2025-01-01T10:00:00Z"
+    //   },
+    //   metadata: { public_metadata: {}, unsafe_metadata: {} },
+    //   identities: [],
     //   created_at: "2025-01-01T10:00:00Z",
-    //   updated_at: "2025-04-01T12:00:00Z"
+    //   updated_at: "2025-04-01T12:00:00Z",
+    //   name: "John Doe",
+    //   given_name: "John",
+    //   family_name: "Doe"
     // }
 } catch (error) {
     console.error("Failed to fetch user profile:", error);
