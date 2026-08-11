@@ -47,7 +47,7 @@ require (
 	github.com/pquerna/otp v1.5.0
 	github.com/rs/zerolog v1.35.1
 	github.com/russellhaering/gosaml2 v0.11.0
-	github.com/russellhaering/goxmldsig v1.6.0
+	github.com/russellhaering/goxmldsig v1.6.1
 	github.com/sethvargo/go-limiter v1.2.0
 	github.com/sethvargo/go-redisstore v0.3.0
 	github.com/spf13/cobra v1.10.2
