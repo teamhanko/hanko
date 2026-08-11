@@ -61,9 +61,13 @@ func (user *User) GetIdentities() Identities {
 	return identities
 }
 
+// NewUser generates an internal id and, independently, a public_id - deliberately not a copy of
+// the internal id - so every freshly created user exercises the public_id/id distinction the same
+// way an import/admin-create with an explicit id would. Only pre-existing rows backfilled by the
+// public_id migration have public_id == id.
 func NewUser(tenantID uuid.UUID) User {
 	id, _ := uuid.NewV4()
-	pubID := id
+	pubID, _ := uuid.NewV4()
 	return User{
 		ID:        id,
 		PublicID:  &pubID,

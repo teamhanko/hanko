@@ -25,7 +25,12 @@ func (i *Importer) createUser(newUser ImportOrExportEntry, tenantID uuid.UUID) (
 
 	// The internal id is always freshly generated, regardless of what the import
 	// file supplies - a supplied user_id sets the tenant-scoped public_id instead.
-	publicID := userInternalID
+	// Without one, public_id is independently generated, not a copy of the internal
+	// id - see the comment on models.NewUser for why.
+	publicID, err := uuid.NewV4()
+	if err != nil {
+		return nil, err
+	}
 	if newUser.UserID != "" {
 		publicID = uuid.FromStringOrNil(newUser.UserID)
 

@@ -204,9 +204,14 @@ func (h *UserHandlerAdmin) Create(c echo.Context) error {
 		return fmt.Errorf("failed to create new internal user id: %w", err)
 	}
 
+	// public_id is independently generated when not supplied, not a copy of the
+	// internal id - see the comment on models.NewUser for why.
 	publicID := body.ID
 	if publicID.IsNil() {
-		publicID = userInternalID
+		publicID, err = uuid.NewV4()
+		if err != nil {
+			return fmt.Errorf("failed to create new public user id: %w", err)
+		}
 	}
 
 	// check that only one email is marked as primary
