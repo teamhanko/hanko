@@ -80,7 +80,7 @@ func (a SessionDelete) Execute(c flowpilot.ExecutionContext) error {
 	if session != nil {
 		err = deps.Persister.GetSessionPersisterWithConnection(deps.Tx).Delete(*session)
 		if err == nil {
-			err = utils.TriggerWebhooks(deps.HttpContext, deps.Tx, deps.TenantID, events.SessionDelete, *session)
+			err = utils.TriggerWebhooks(deps.HttpContext, deps.Tx, deps.TenantID, events.SessionDeleteExplicitRevoke, *session)
 			if err != nil {
 				return fmt.Errorf("failed to trigger webhook: %w", err)
 			}

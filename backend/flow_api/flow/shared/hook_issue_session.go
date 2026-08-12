@@ -81,6 +81,11 @@ func (h IssueSession) Execute(c flowpilot.HookExecutionContext) error {
 			if err != nil {
 				return fmt.Errorf("failed to remove latest session: %w", err)
 			}
+
+			err = utils.TriggerWebhooks(deps.HttpContext, deps.Tx, deps.TenantID, events.SessionDeletePassiveLimit, activeSessions[i])
+			if err != nil {
+				return fmt.Errorf("failed to trigger webhook: %w", err)
+			}
 		}
 	}
 
@@ -110,7 +115,7 @@ func (h IssueSession) Execute(c flowpilot.HookExecutionContext) error {
 		return fmt.Errorf("failed to store session: %w", err)
 	}
 
-	err = utils.TriggerWebhooks(deps.HttpContext, deps.Tx, deps.TenantID, events.SessionCreate, sessionModel)
+	err = utils.TriggerWebhooks(deps.HttpContext, deps.Tx, deps.TenantID, events.SessionCreateFlow, sessionModel)
 	if err != nil {
 		return fmt.Errorf("failed to trigger webhook: %w", err)
 	}

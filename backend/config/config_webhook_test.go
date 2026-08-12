@@ -22,7 +22,21 @@ func TestWebhooks_Decode(t *testing.T) {
 func TestWebhook_Validate_SessionEvents(t *testing.T) {
 	webhook := Webhook{
 		Callback: "http://app.com/sessioncb",
-		Events:   events.Events{events.Session, events.SessionCreate, events.SessionDelete},
+		Events: events.Events{
+			events.Session,
+			events.SessionCreate,
+			events.SessionCreateFlow,
+			events.SessionCreateAdmin,
+			events.SessionDelete,
+			events.SessionDeleteExplicit,
+			events.SessionDeleteExplicitLogout,
+			events.SessionDeleteExplicitRevoke,
+			events.SessionDeleteAdmin,
+			events.SessionDeleteAdminRevoke,
+			events.SessionDeletePassive,
+			events.SessionDeletePassiveExpire,
+			events.SessionDeletePassiveLimit,
+		},
 	}
 
 	err := webhook.Validate()

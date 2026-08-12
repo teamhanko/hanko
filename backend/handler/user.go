@@ -93,7 +93,7 @@ func (h *UserHandler) Logout(c echo.Context) error {
 				return fmt.Errorf("failed to delete session from database: %w", err)
 			}
 
-			err = webhookUtils.TriggerWebhooks(c, h.persister.GetConnection(), tenant.ID, events.SessionDelete, *sessionModel)
+			err = webhookUtils.TriggerWebhooks(c, h.persister.GetConnection(), tenant.ID, events.SessionDeleteExplicitLogout, *sessionModel)
 			if err != nil {
 				return fmt.Errorf("failed to trigger webhook: %w", err)
 			}

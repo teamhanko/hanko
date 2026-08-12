@@ -81,6 +81,11 @@ func (h *SessionAdminHandler) Generate(ctx echo.Context) error {
 			if err != nil {
 				return fmt.Errorf("failed to remove latest session: %w", err)
 			}
+
+			err = webhookUtils.TriggerWebhooks(ctx, h.persister.GetConnection(), tenant.ID, events.SessionDeletePassiveLimit, activeSessions[i])
+			if err != nil {
+				return fmt.Errorf("failed to trigger webhook: %w", err)
+			}
 		}
 	}
 
@@ -110,7 +115,7 @@ func (h *SessionAdminHandler) Generate(ctx echo.Context) error {
 		return fmt.Errorf("failed to store session: %w", err)
 	}
 
-	err = webhookUtils.TriggerWebhooks(ctx, h.persister.GetConnection(), tenant.ID, events.SessionCreate, sessionModel)
+	err = webhookUtils.TriggerWebhooks(ctx, h.persister.GetConnection(), tenant.ID, events.SessionCreateAdmin, sessionModel)
 	if err != nil {
 		return fmt.Errorf("failed to trigger webhook: %w", err)
 	}
@@ -206,7 +211,7 @@ func (h *SessionAdminHandler) Delete(ctx echo.Context) error {
 		return err
 	}
 
-	err = webhookUtils.TriggerWebhooks(ctx, h.persister.GetConnection(), tenant.ID, events.SessionDelete, *sessionModel)
+	err = webhookUtils.TriggerWebhooks(ctx, h.persister.GetConnection(), tenant.ID, events.SessionDeleteAdminRevoke, *sessionModel)
 	if err != nil {
 		return fmt.Errorf("failed to trigger webhook: %w", err)
 	}
