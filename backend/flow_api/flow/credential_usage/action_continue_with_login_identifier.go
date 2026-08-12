@@ -109,7 +109,7 @@ func (a ContinueWithLoginIdentifier) Execute(c flowpilot.ExecutionContext) error
 			return err
 		}
 
-		// When privacy setting is off return an error when email address does not exist
+		// When privacy setting is on return an error when email address does not exist
 		if userModel == nil && deps.Cfg.Privacy.ShowAccountExistenceHints {
 			flowInputError := shared.ErrorUnknownEmail
 			err = deps.AuditLogger.CreateWithConnection(
@@ -127,6 +127,10 @@ func (a ContinueWithLoginIdentifier) Execute(c flowpilot.ExecutionContext) error
 
 			c.Input().SetError(identifierInputName, flowInputError)
 			return c.Error(flowpilot.ErrorFormDataInvalid)
+		}
+
+		if userModel == nil {
+			return c.Error(flowpilot.ErrorFlowDiscontinuity.Wrap(errors.New("email address is unknown")))
 		}
 
 		if err = c.Stash().Set(shared.StashPathEmail, identifierInputValue); err != nil {
