@@ -226,8 +226,8 @@ github.com/knadh/koanf/parsers/yaml v1.1.1 h1:u70vV5IyaM0HvONh8HoqBC97oTgO33KcpZ
 github.com/knadh/koanf/parsers/yaml v1.1.1/go.mod h1:HHmcHXUrp9cOPcuC+2wrr44GTUB0EC+PyfN3HZD9tFg=
 github.com/knadh/koanf/providers/file v1.2.1 h1:bEWbtQwYrA+W2DtdBrQWyXqJaJSG3KrP3AESOJYp9wM=
 github.com/knadh/koanf/providers/file v1.2.1/go.mod h1:bp1PM5f83Q+TOUu10J/0ApLBd9uIzg+n9UgthfY+nRA=
-github.com/knadh/koanf/providers/rawbytes v1.0.0 h1:MrKDh/HksJlKJmaZjgs4r8aVBb/zsJyc/8qaSnzcdNI=
-github.com/knadh/koanf/providers/rawbytes v1.0.0/go.mod h1:KxwYJf1uezTKy6PBtfE+m725NGp4GPVA7XoNTJ/PtLo=
+github.com/knadh/koanf/providers/rawbytes v1.0.1 h1:JCQoly+djX23Okr8kqtS19R7UXKleTAp62Vib2VrVYs=
+github.com/knadh/koanf/providers/rawbytes v1.0.1/go.mod h1:KxwYJf1uezTKy6PBtfE+m725NGp4GPVA7XoNTJ/PtLo=
 github.com/knadh/koanf/v2 v2.3.6 h1:JoQPSJmvS4aP0xNc8xMDr5tcrkSEInL23/Il7pITAKo=
 github.com/knadh/koanf/v2 v2.3.6/go.mod h1:gRb40VRAbd4iJMYYD5IxZ6hfuopFcXBpc9bbQpZwo28=
 github.com/kr/pretty v0.1.0/go.mod h1:dAy3ld7l9f0ibDNOQOHHMYYIIbhfbHSm3C4ZsoJORNo=
