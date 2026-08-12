@@ -185,6 +185,111 @@ func (s *managerSuite) TestManager_TriggerWithDisabledDbHook() {
 	s.False(triggered)
 }
 
+func (s *managerSuite) TestManager_TriggerSessionCreateWithSessionUmbrellaHook() {
+	triggered := false
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		triggered = true
+	}))
+	defer server.Close()
+
+	hooks := config.Webhooks{config.Webhook{
+		Callback: server.URL,
+		Events: events.Events{
+			events.Session,
+		},
+	}}
+
+	cfg := config.Config{
+		TenantConfig: config.TenantConfig{
+			Webhooks: config.WebhookSettings{
+				Enabled: true,
+				Hooks:   hooks,
+			},
+		},
+	}
+
+	jwkManager := test.JwkManager{}
+	manager, err := NewManager(cfg.TenantConfig, s.Storage, jwkManager, nil)
+	s.Require().NoError(err)
+
+	manager.Trigger(s.Storage.GetConnection(), events.SessionCreate, "lorem-ipsum", uuid.FromStringOrNil(config.DefaultTenantID))
+
+	// give it 1 sec to trigger
+	time.Sleep(1 * time.Second)
+
+	s.True(triggered)
+}
+
+func (s *managerSuite) TestManager_TriggerSessionDeleteWithConfigHook() {
+	triggered := false
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		triggered = true
+	}))
+	defer server.Close()
+
+	hooks := config.Webhooks{config.Webhook{
+		Callback: server.URL,
+		Events: events.Events{
+			events.SessionDelete,
+		},
+	}}
+
+	cfg := config.Config{
+		TenantConfig: config.TenantConfig{
+			Webhooks: config.WebhookSettings{
+				Enabled: true,
+				Hooks:   hooks,
+			},
+		},
+	}
+
+	jwkManager := test.JwkManager{}
+	manager, err := NewManager(cfg.TenantConfig, s.Storage, jwkManager, nil)
+	s.Require().NoError(err)
+
+	manager.Trigger(s.Storage.GetConnection(), events.SessionDelete, "lorem-ipsum", uuid.FromStringOrNil(config.DefaultTenantID))
+
+	// give it 1 sec to trigger
+	time.Sleep(1 * time.Second)
+
+	s.True(triggered)
+}
+
+func (s *managerSuite) TestManager_TriggerSessionCreateDoesNotMatchSessionDeleteHook() {
+	triggered := false
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		triggered = true
+	}))
+	defer server.Close()
+
+	hooks := config.Webhooks{config.Webhook{
+		Callback: server.URL,
+		Events: events.Events{
+			events.SessionDelete,
+		},
+	}}
+
+	cfg := config.Config{
+		TenantConfig: config.TenantConfig{
+			Webhooks: config.WebhookSettings{
+				Enabled: true,
+				Hooks:   hooks,
+			},
+		},
+	}
+
+	jwkManager := test.JwkManager{}
+	manager, err := NewManager(cfg.TenantConfig, s.Storage, jwkManager, nil)
+	s.Require().NoError(err)
+
+	manager.Trigger(s.Storage.GetConnection(), events.SessionCreate, "lorem-ipsum", uuid.FromStringOrNil(config.DefaultTenantID))
+
+	// give it 1 sec to trigger
+	time.Sleep(1 * time.Second)
+
+	s.False(triggered)
+}
+
 func (s *managerSuite) createTestDatabaseWebhook(persister persistence.WebhookPersister, isEnabled bool, callback string) {
 	now := time.Now()
 	hookId := uuid.FromStringOrNil("8b00da9a-cacf-45ea-b25d-c1ce0f0d7da1")

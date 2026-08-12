@@ -93,7 +93,7 @@ func NewPublicRouter(cfg *config.Config, persister persistence.Persister, promet
 
 	tenantGroup.GET("/", statusHandler.Status)
 	tenantGroup.GET("/me", userHandler.Me, sessionMiddleware)
-	tenantGroup.POST("/logout", userHandler.Logout, sessionMiddleware)
+	tenantGroup.POST("/logout", userHandler.Logout, sessionMiddleware, webhookMiddleware)
 
 	health := tenantGroup.Group("/health")
 	health.GET("/alive", healthHandler.Alive)

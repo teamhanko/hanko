@@ -92,6 +92,9 @@ func (Webhook) JSONSchemaExtend(schema *jsonschema.Schema) {
 		"user.update.username.delete",
 		"user.update.username.update",
 		"email.send",
+		"session",
+		"session.create",
+		"session.delete",
 	}
 	evts.Items.Extras = map[string]any{"meta:enum": map[string]string{
 		"user":                        "Triggers on: user creation, user deletion, user update, email creation, email deletion, change of primary email",
@@ -109,6 +112,9 @@ func (Webhook) JSONSchemaExtend(schema *jsonschema.Schema) {
 		"user.update.username.delete": "Triggers on: username deletion",
 		"user.update.username.update": "Triggers on: change of username",
 		"email.send":                  "Triggers on: an email was sent or should be sent",
+		"session":                     "Triggers on: session creation, session deletion",
+		"session.create":              "Triggers on: session creation",
+		"session.delete":              "Triggers on: session deletion",
 	}}
 }
 

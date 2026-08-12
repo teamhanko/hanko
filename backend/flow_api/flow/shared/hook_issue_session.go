@@ -12,6 +12,8 @@ import (
 	"github.com/teamhanko/hanko/backend/v3/flowpilot"
 	"github.com/teamhanko/hanko/backend/v3/persistence/models"
 	"github.com/teamhanko/hanko/backend/v3/session"
+	"github.com/teamhanko/hanko/backend/v3/webhooks/events"
+	"github.com/teamhanko/hanko/backend/v3/webhooks/utils"
 )
 
 type IssueSession struct {
@@ -106,6 +108,11 @@ func (h IssueSession) Execute(c flowpilot.HookExecutionContext) error {
 	err = deps.Persister.GetSessionPersisterWithConnection(deps.Tx).Create(sessionModel)
 	if err != nil {
 		return fmt.Errorf("failed to store session: %w", err)
+	}
+
+	err = utils.TriggerWebhooks(deps.HttpContext, deps.Tx, deps.TenantID, events.SessionCreate, sessionModel)
+	if err != nil {
+		return fmt.Errorf("failed to trigger webhook: %w", err)
 	}
 
 	rememberMeSelected := c.Stash().Get(StashPathRememberMeSelected).Bool()

@@ -14,6 +14,8 @@ import (
 	"github.com/teamhanko/hanko/backend/v3/dto/admin"
 	"github.com/teamhanko/hanko/backend/v3/persistence"
 	"github.com/teamhanko/hanko/backend/v3/persistence/models"
+	"github.com/teamhanko/hanko/backend/v3/webhooks/events"
+	webhookUtils "github.com/teamhanko/hanko/backend/v3/webhooks/utils"
 )
 
 type SessionAdminHandler struct {
@@ -108,6 +110,11 @@ func (h *SessionAdminHandler) Generate(ctx echo.Context) error {
 		return fmt.Errorf("failed to store session: %w", err)
 	}
 
+	err = webhookUtils.TriggerWebhooks(ctx, h.persister.GetConnection(), tenant.ID, events.SessionCreate, sessionModel)
+	if err != nil {
+		return fmt.Errorf("failed to trigger webhook: %w", err)
+	}
+
 	response := admin.CreateSessionTokenResponse{
 		SessionToken: encodedToken,
 	}
@@ -197,6 +204,11 @@ func (h *SessionAdminHandler) Delete(ctx echo.Context) error {
 	err = h.persister.GetSessionPersister().Delete(*sessionModel)
 	if err != nil {
 		return err
+	}
+
+	err = webhookUtils.TriggerWebhooks(ctx, h.persister.GetConnection(), tenant.ID, events.SessionDelete, *sessionModel)
+	if err != nil {
+		return fmt.Errorf("failed to trigger webhook: %w", err)
 	}
 
 	return ctx.NoContent(http.StatusNoContent)
