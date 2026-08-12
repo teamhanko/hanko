@@ -18,9 +18,11 @@ async function handleCredentialCreation(
     return await state.actions.webauthn_verify_attestation_response.run({
       public_key: attestationResponse,
     });
-  } catch {
+  } catch (e) {
     const nextState = await state.actions.back.run();
-    nextState.error = { code: errorCode, message: errorMessage };
+    if (e?.name !== "NotAllowedError" && e?.name !== "AbortError") {
+      nextState.error = { code: errorCode, message: errorMessage };
+    }
     return nextState;
   }
 }
