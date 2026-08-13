@@ -10,6 +10,8 @@ import (
 	"github.com/teamhanko/hanko/backend/v3/context"
 	"github.com/teamhanko/hanko/backend/v3/dto"
 	"github.com/teamhanko/hanko/backend/v3/persistence"
+	"github.com/teamhanko/hanko/backend/v3/webhooks/events"
+	webhookUtils "github.com/teamhanko/hanko/backend/v3/webhooks/utils"
 )
 
 type SessionHandler struct {
@@ -70,6 +72,10 @@ func (h *SessionHandler) ValidateSession(c echo.Context) error {
 				sessionDeletionErr := h.persister.GetSessionPersister().Delete(*sessionModel)
 				if sessionDeletionErr != nil {
 					return fmt.Errorf("failed to delete session: %w", sessionDeletionErr)
+				}
+
+				if triggerErr := webhookUtils.TriggerWebhooks(c, h.persister.GetConnection(), tenant.ID, events.SessionDeletePassiveExpire, *sessionModel); triggerErr != nil {
+					return fmt.Errorf("failed to trigger webhook: %w", triggerErr)
 				}
 
 				cookie, cookieDeletionErr := sessionManager.DeleteCookie()
@@ -152,6 +158,10 @@ func (h *SessionHandler) ValidateSessionFromBody(c echo.Context) error {
 		sessionDeletionErr := h.persister.GetSessionPersister().Delete(*sessionModel)
 		if sessionDeletionErr != nil {
 			return dto.ToHttpError(fmt.Errorf("failed to delete session: %w", sessionDeletionErr))
+		}
+
+		if triggerErr := webhookUtils.TriggerWebhooks(c, h.persister.GetConnection(), tenant.ID, events.SessionDeletePassiveExpire, *sessionModel); triggerErr != nil {
+			return dto.ToHttpError(fmt.Errorf("failed to trigger webhook: %w", triggerErr))
 		}
 
 		cookie, cookieDeletionErr := sessionManager.DeleteCookie()

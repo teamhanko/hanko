@@ -103,7 +103,7 @@ func NewAdminRouter(cfg *config.Config, persister persistence.Persister, prometh
 	passwordCredentials.PUT("", passwordCredentialHandler.Update)
 	passwordCredentials.DELETE("", passwordCredentialHandler.Delete)
 
-	userSessions := user.Group("/:user_id/sessions", jwkMiddleware, sessionManagerMiddleware)
+	userSessions := user.Group("/:user_id/sessions", jwkMiddleware, sessionManagerMiddleware, webhookMiddleware)
 	userSessions.GET("", sessionsHandler.List)
 	userSessions.DELETE("/:session_id", sessionsHandler.Delete)
 
@@ -124,7 +124,7 @@ func NewAdminRouter(cfg *config.Config, persister persistence.Persister, prometh
 	webhooks.DELETE("/:id", webhookHandler.Delete)
 	webhooks.PUT("/:id", webhookHandler.Update)
 
-	sessions := tenantGroup.Group("/sessions", jwkMiddleware, sessionManagerMiddleware)
+	sessions := tenantGroup.Group("/sessions", jwkMiddleware, sessionManagerMiddleware, webhookMiddleware)
 	sessions.POST("", sessionsHandler.Generate)
 
 	return e

@@ -14,6 +14,8 @@ import (
 	"github.com/teamhanko/hanko/backend/v3/dto/admin"
 	"github.com/teamhanko/hanko/backend/v3/persistence"
 	"github.com/teamhanko/hanko/backend/v3/persistence/models"
+	"github.com/teamhanko/hanko/backend/v3/webhooks/events"
+	webhookUtils "github.com/teamhanko/hanko/backend/v3/webhooks/utils"
 )
 
 type SessionAdminHandler struct {
@@ -79,6 +81,11 @@ func (h *SessionAdminHandler) Generate(ctx echo.Context) error {
 			if err != nil {
 				return fmt.Errorf("failed to remove latest session: %w", err)
 			}
+
+			err = webhookUtils.TriggerWebhooks(ctx, h.persister.GetConnection(), tenant.ID, events.SessionDeletePassiveLimit, activeSessions[i])
+			if err != nil {
+				return fmt.Errorf("failed to trigger webhook: %w", err)
+			}
 		}
 	}
 
@@ -106,6 +113,11 @@ func (h *SessionAdminHandler) Generate(ctx echo.Context) error {
 	err = h.persister.GetSessionPersister().Create(sessionModel)
 	if err != nil {
 		return fmt.Errorf("failed to store session: %w", err)
+	}
+
+	err = webhookUtils.TriggerWebhooks(ctx, h.persister.GetConnection(), tenant.ID, events.SessionCreateAdmin, sessionModel)
+	if err != nil {
+		return fmt.Errorf("failed to trigger webhook: %w", err)
 	}
 
 	response := admin.CreateSessionTokenResponse{
@@ -197,6 +209,11 @@ func (h *SessionAdminHandler) Delete(ctx echo.Context) error {
 	err = h.persister.GetSessionPersister().Delete(*sessionModel)
 	if err != nil {
 		return err
+	}
+
+	err = webhookUtils.TriggerWebhooks(ctx, h.persister.GetConnection(), tenant.ID, events.SessionDeleteAdminRevoke, *sessionModel)
+	if err != nil {
+		return fmt.Errorf("failed to trigger webhook: %w", err)
 	}
 
 	return ctx.NoContent(http.StatusNoContent)

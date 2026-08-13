@@ -30,6 +30,8 @@ import (
 	"github.com/teamhanko/hanko/backend/v3/rate_limiter"
 	"github.com/teamhanko/hanko/backend/v3/saml"
 	"github.com/teamhanko/hanko/backend/v3/session"
+	"github.com/teamhanko/hanko/backend/v3/webhooks/events"
+	webhookUtils "github.com/teamhanko/hanko/backend/v3/webhooks/utils"
 )
 
 type FlowPilotHandler struct {
@@ -194,6 +196,10 @@ func (h *FlowPilotHandler) validateSession(c echo.Context) error {
 				sessionDeletionErr := h.Persister.GetSessionPersister().Delete(*sessionModel)
 				if sessionDeletionErr != nil {
 					return fmt.Errorf("failed to delete session: %w", sessionDeletionErr)
+				}
+
+				if triggerErr := webhookUtils.TriggerWebhooks(c, h.Persister.GetConnection(), tenant.ID, events.SessionDeletePassiveExpire, *sessionModel); triggerErr != nil {
+					return fmt.Errorf("failed to trigger webhook: %w", triggerErr)
 				}
 
 				cookie, cookieDeletionErr := h.SessionManager.DeleteCookie()

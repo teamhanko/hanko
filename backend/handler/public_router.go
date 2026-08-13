@@ -92,8 +92,8 @@ func NewPublicRouter(cfg *config.Config, persister persistence.Persister, promet
 	tenantGroup.POST("/token_exchange", flowAPIHandler.TokenExchangeFlowHandler, webhookMiddleware)
 
 	tenantGroup.GET("/", statusHandler.Status)
-	tenantGroup.GET("/me", userHandler.Me, sessionMiddleware)
-	tenantGroup.POST("/logout", userHandler.Logout, sessionMiddleware)
+	tenantGroup.GET("/me", userHandler.Me, webhookMiddleware, sessionMiddleware)
+	tenantGroup.POST("/logout", userHandler.Logout, webhookMiddleware, sessionMiddleware)
 
 	health := tenantGroup.Group("/health")
 	health.GET("/alive", healthHandler.Alive)
@@ -112,7 +112,7 @@ func NewPublicRouter(cfg *config.Config, persister persistence.Persister, promet
 	thirdparty.POST("/callback", thirdPartyHandler.CallbackPost, webhookMiddleware)
 
 	sessionHandler := NewSessionHandler(persister)
-	sessions := tenantGroup.Group("/sessions")
+	sessions := tenantGroup.Group("/sessions", webhookMiddleware)
 	sessions.GET("/validate", sessionHandler.ValidateSession)
 	sessions.POST("/validate", sessionHandler.ValidateSessionFromBody)
 
