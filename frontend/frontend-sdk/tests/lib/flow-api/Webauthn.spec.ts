@@ -4,7 +4,7 @@ import WebauthnManager from "../../../src/lib/flow-api/WebauthnManager";
 // Regression tests for the passkey credential-creation auto-steps. Canceling the
 // passkey prompt rejects with a NotAllowedError (and superseded requests reject
 // with an AbortError); neither means the credential already exists, so they must
-// not be surfaced as "webauthn_credential_already_exists" (see issue #2265).
+// not be surfaced as "webauthn_credential_already_exists".
 describe("autoSteps webauthn credential creation error handling", () => {
   const alreadyExistsCode = "webauthn_credential_already_exists";
 

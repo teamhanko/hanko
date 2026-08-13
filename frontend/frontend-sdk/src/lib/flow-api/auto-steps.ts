@@ -23,8 +23,8 @@ async function handleCredentialCreation(
     // Only an InvalidStateError signals that the credential is already
     // registered on the authenticator. Other failures - e.g. NotAllowedError
     // when the user cancels the prompt, or AbortError when a new request
-    // supersedes this one - must not be reported as "credential already exists"
-    // (see #2265). Preserve any error the server already set instead, mirroring
+    // supersedes this one - must not be reported as "credential already exists".
+    // Preserve any error the server already set instead, mirroring
     // the login_passkey step.
     if (error instanceof DOMException && error.name === "InvalidStateError") {
       nextState.error = { code: errorCode, message: errorMessage };
