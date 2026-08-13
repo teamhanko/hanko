@@ -21,6 +21,22 @@ const (
 	UserPasswordChange Event = "user.update.password.update"
 
 	EmailSend Event = "email.send"
+
+	Session       Event = "session"
+	SessionCreate Event = "session.create"
+	SessionDelete Event = "session.delete"
+
+	SessionCreateFlow  Event = "session.create.flow"
+	SessionCreateAdmin Event = "session.create.admin"
+
+	SessionDeleteExplicit       Event = "session.delete.explicit"
+	SessionDeleteExplicitLogout Event = "session.delete.explicit.logout"
+	SessionDeleteExplicitRevoke Event = "session.delete.explicit.revoke"
+	SessionDeleteAdmin          Event = "session.delete.admin"
+	SessionDeleteAdminRevoke    Event = "session.delete.admin.revoke"
+	SessionDeletePassive        Event = "session.delete.passive"
+	SessionDeletePassiveExpire  Event = "session.delete.passive.expire"
+	SessionDeletePassiveLimit   Event = "session.delete.passive.limit"
 )
 
 func StringIsValidEvent(value string) bool {
@@ -31,7 +47,8 @@ func StringIsValidEvent(value string) bool {
 func IsValidEvent(evt Event) bool {
 	var isValid bool
 	switch evt {
-	case User, UserLogin, UserCreate, UserUpdate, UserDelete, UserEmail, UserEmailCreate, UserEmailPrimary, UserEmailDelete, UserUsername, UserUsernameCreate, UserUsernameUpdate, UserUsernameDelete, UserPasswordChange, EmailSend:
+	case User, UserLogin, UserCreate, UserUpdate, UserDelete, UserEmail, UserEmailCreate, UserEmailPrimary, UserEmailDelete, UserUsername, UserUsernameCreate, UserUsernameUpdate, UserUsernameDelete, UserPasswordChange, EmailSend,
+		Session, SessionCreate, SessionDelete, SessionCreateFlow, SessionCreateAdmin, SessionDeleteExplicit, SessionDeleteExplicitLogout, SessionDeleteExplicitRevoke, SessionDeleteAdmin, SessionDeleteAdminRevoke, SessionDeletePassive, SessionDeletePassiveExpire, SessionDeletePassiveLimit:
 		isValid = true
 	default:
 		isValid = false

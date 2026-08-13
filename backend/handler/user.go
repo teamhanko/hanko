@@ -13,6 +13,8 @@ import (
 	"github.com/teamhanko/hanko/backend/v3/dto"
 	"github.com/teamhanko/hanko/backend/v3/persistence"
 	"github.com/teamhanko/hanko/backend/v3/persistence/models"
+	"github.com/teamhanko/hanko/backend/v3/webhooks/events"
+	webhookUtils "github.com/teamhanko/hanko/backend/v3/webhooks/utils"
 )
 
 type UserHandler struct {
@@ -89,6 +91,11 @@ func (h *UserHandler) Logout(c echo.Context) error {
 			err = h.persister.GetSessionPersister().Delete(*sessionModel)
 			if err != nil {
 				return fmt.Errorf("failed to delete session from database: %w", err)
+			}
+
+			err = webhookUtils.TriggerWebhooks(c, h.persister.GetConnection(), tenant.ID, events.SessionDeleteExplicitLogout, *sessionModel)
+			if err != nil {
+				return fmt.Errorf("failed to trigger webhook: %w", err)
 			}
 		}
 	}
