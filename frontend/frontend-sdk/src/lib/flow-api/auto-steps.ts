@@ -122,6 +122,20 @@ export const autoSteps: AutoSteps = {
       return nextState;
     }
 
+    if (state.error) {
+      const nextState = await state.actions.back.run(null, {
+        dispatchAfterStateChangeEvent: false,
+      });
+
+      nextState.error = {
+        code: state.error.code,
+        message: state.error.message,
+      };
+      nextState.dispatchAfterStateChangeEvent();
+
+      return nextState;
+    }
+
     if (!state.isCached) {
       state.saveToLocalStorage();
       window.location.assign(state.payload.redirect_url);
