@@ -34,6 +34,13 @@ import {
   ThirdPartyPayload,
 } from "./payload";
 
+/**
+ * The name of a possible state within a flow. Every flow (see {@link FlowName}) transitions between
+ * a subset of these states; use {@link Actions} and {@link Payloads} to look up what a given state
+ * exposes.
+ * @category SDK
+ * @subcategory Flow Types
+ */
 export type StateName =
   | "account_deleted"
   | "credential_onboarding_chooser"
@@ -62,6 +69,13 @@ export type StateName =
   | "thirdparty"
   | "webauthn_credential_verification";
 
+/**
+ * Maps each {@link StateName} to the interface describing the actions available in that state
+ * (`null` for states that expose no actions, e.g. terminal states).
+ * @interface
+ * @category SDK
+ * @subcategory Flow Types
+ */
 export interface Actions {
   readonly account_deleted: null;
   readonly credential_onboarding_chooser: CredentialOnboardingChooserActions;
@@ -91,6 +105,13 @@ export interface Actions {
   readonly webauthn_credential_verification: OnboardingVerifyPasskeyAttestationActions;
 }
 
+/**
+ * Maps each {@link StateName} to the type describing that state's payload data
+ * (`null` for states that carry no payload).
+ * @interface
+ * @category SDK
+ * @subcategory Flow Types
+ */
 export interface Payloads {
   readonly account_deleted: null;
   readonly credential_onboarding_chooser: null;

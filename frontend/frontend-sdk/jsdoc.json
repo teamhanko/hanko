@@ -12,10 +12,25 @@
   ],
   "source": {
     "include": ["./src"],
-    "includePattern": ".(ts)$"
+    "includePattern": ".(ts)$",
+    "exclude": [
+      "./src/lib/flow-api/WebauthnManager.ts",
+      "./src/lib/flow-api/auto-steps.ts",
+      "./src/lib/flow-api/passkey-autofill-activation.ts",
+      "./src/lib/events/Dispatcher.ts",
+      "./src/lib/events/Scheduler.ts",
+      "./src/lib/events/SessionChannel.ts",
+      "./src/lib/events/SessionState.ts",
+      "./src/lib/SessionStorage.ts",
+      "./src/lib/Throttle.ts",
+      "./src/lib/events/WindowActivityManager.ts"
+    ]
   },
   "templates": {
     "cleverLinks": true
+  },
+  "markdown": {
+    "idInHeadings": true
   },
   "sourceType": "module"
 }
