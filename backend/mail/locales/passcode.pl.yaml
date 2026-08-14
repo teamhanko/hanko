@@ -1,0 +1,38 @@
+login_text:
+  description: "The sign in content of the text email."
+  other: "Wprowadź poniższy kod dostępu, aby potwierdzić swoją tożsamość:"
+ttl_text:
+  description: "The length how long the passcode is valid."
+  other: "Kod dostępu jest ważny przez {{ .TTL }} min."
+email_subject_login:
+  description: ""
+  other: "{{ .Code }} to Twój kod dostępu do usługi {{ .ServiceName }}"
+subject_email_verification:
+  description: ""
+  other: "Użyj kodu {{ .Code }}, aby zweryfikować swój adres e-mail"
+subject_login:
+  description: ""
+  other: "Użyj kodu {{ .Code }}, aby zalogować się na swoje konto"
+subject_recovery:
+  description: ""
+  other: "Użyj kodu {{ .Code }}, aby odzyskać dostęp do swojego konta"
+email_verification_text:
+  description: ""
+  other: "Wprowadź poniższy kod dostępu, aby zweryfikować swój adres e-mail:"
+recovery_text:
+  description: "The content of the recovery text email."
+  other: "Wprowadź poniższy kod dostępu na ekranie logowania:"
+
+subject_email_login_attempted:
+  description: "Subject for notification about a login attempt."
+  other: "Podany adres e-mail nie został rozpoznany"
+email_login_attempted_text:
+  description: "Notifies the recipient that either they or someone else attempted to log in to a specific service using an unrecognized email address."
+  other: "Ty lub ktoś inny próbował zalogować się do usługi {{ .ServiceName }}, ale podany adres e-mail nie został rozpoznany. Najpierw utwórz konto."
+
+subject_email_registration_attempted:
+  description: "Subject for notification about a registration attempt."
+  other: "Podany adres e-mail jest już zajęty"
+email_registration_attempted_text:
+  description: "Notifies the recipient that either they or someone else attempted to register for a specific service using an email address that is already in use."
+  other: "Ty lub ktoś inny próbował zarejestrować się w usłudze {{ .ServiceName }}, ale podany adres e-mail jest już zarejestrowany. Spróbuj się zalogować."

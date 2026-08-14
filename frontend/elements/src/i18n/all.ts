@@ -6,6 +6,7 @@ import { fr } from "./fr";
 import { it } from "./it";
 import { ko } from "./ko";
 import { nl } from "./nl";
+import { pl } from "./pl";
 import { ptBR } from "./pt-BR";
 import { zh } from "./zh";
-export const all: Translations = { bn, de, en, fr, it, ko, nl, ptBR, zh };
+export const all: Translations = { bn, de, en, fr, it, ko, nl, pl, ptBR, zh };
