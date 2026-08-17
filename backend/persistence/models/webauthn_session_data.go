@@ -2,6 +2,7 @@ package models
 
 import (
 	"encoding/base64"
+	"encoding/json"
 	"fmt"
 	"time"
 
@@ -23,16 +24,17 @@ var (
 
 // WebauthnSessionData is used by pop to map your webauthn_session_data database table to your go code.
 type WebauthnSessionData struct {
-	ID                 uuid.UUID                              `db:"id"`
-	Challenge          string                                 `db:"challenge"`
-	UserId             uuid.UUID                              `db:"user_id"`
-	UserVerification   string                                 `db:"user_verification"`
-	CreatedAt          time.Time                              `db:"created_at"`
-	UpdatedAt          time.Time                              `db:"updated_at"`
-	Operation          Operation                              `db:"operation"`
-	AllowedCredentials []WebauthnSessionDataAllowedCredential `has_many:"webauthn_session_data_allowed_credentials"`
-	ExpiresAt          nulls.Time                             `db:"expires_at"`
-	TenantID           uuid.UUID                              `db:"tenant_id"`
+	ID                   uuid.UUID                              `db:"id"`
+	Challenge            string                                 `db:"challenge"`
+	UserId               uuid.UUID                              `db:"user_id"`
+	UserVerification     string                                 `db:"user_verification"`
+	CreatedAt            time.Time                              `db:"created_at"`
+	UpdatedAt            time.Time                              `db:"updated_at"`
+	Operation            Operation                              `db:"operation"`
+	AllowedCredentials   []WebauthnSessionDataAllowedCredential `has_many:"webauthn_session_data_allowed_credentials"`
+	ExpiresAt            nulls.Time                             `db:"expires_at"`
+	TenantID             uuid.UUID                              `db:"tenant_id"`
+	CredentialParameters json.RawMessage                        `db:"credential_parameters"`
 }
 
 func (sd *WebauthnSessionData) decodeAllowedCredentials() [][]byte {
@@ -80,23 +82,29 @@ func NewWebauthnSessionDataFrom(sessionData *webauthn.SessionData, operation Ope
 		allowedCredentials[index] = allowedCredential
 	}
 
+	credentialParameters, err := json.Marshal(sessionData.CredParams)
+	if err != nil {
+		return nil, fmt.Errorf("failed to marshal credential parameters: %w", err)
+	}
+
 	sessionDataModel := &WebauthnSessionData{
-		ID:                 sessionDataID,
-		Challenge:          sessionData.Challenge,
-		UserId:             userID,
-		UserVerification:   string(sessionData.UserVerification),
-		CreatedAt:          now,
-		UpdatedAt:          now,
-		Operation:          operation,
-		AllowedCredentials: allowedCredentials,
-		ExpiresAt:          nulls.NewTime(sessionData.Expires.UTC()),
-		TenantID:           tenantID,
+		ID:                   sessionDataID,
+		Challenge:            sessionData.Challenge,
+		UserId:               userID,
+		UserVerification:     string(sessionData.UserVerification),
+		CreatedAt:            now,
+		UpdatedAt:            now,
+		Operation:            operation,
+		AllowedCredentials:   allowedCredentials,
+		ExpiresAt:            nulls.NewTime(sessionData.Expires.UTC()),
+		TenantID:             tenantID,
+		CredentialParameters: credentialParameters,
 	}
 
 	return sessionDataModel, nil
 }
 
-func (sd *WebauthnSessionData) ToSessionData() *webauthn.SessionData {
+func (sd *WebauthnSessionData) ToSessionData() (*webauthn.SessionData, error) {
 	allowedCredentials := sd.decodeAllowedCredentials()
 
 	// TODO: do we need the following lines and is the user optional?
@@ -106,15 +114,23 @@ func (sd *WebauthnSessionData) ToSessionData() *webauthn.SessionData {
 		userId = sd.UserId.Bytes()
 	}
 
+	var credParams []protocol.CredentialParameter
+	if len(sd.CredentialParameters) > 0 {
+		if err := json.Unmarshal(sd.CredentialParameters, &credParams); err != nil {
+			return nil, fmt.Errorf("failed to unmarshal credential parameters: %w", err)
+		}
+	}
+
 	sessionData := &webauthn.SessionData{
 		Challenge:            sd.Challenge,
 		UserID:               userId,
 		AllowedCredentialIDs: allowedCredentials,
 		UserVerification:     protocol.UserVerificationRequirement(sd.UserVerification),
 		Expires:              sd.ExpiresAt.Time,
+		CredParams:           credParams,
 	}
 
-	return sessionData
+	return sessionData, nil
 }
 
 // Validate gets run every time you call a "pop.Validate*" (pop.ValidateAndSave, pop.ValidateAndCreate, pop.ValidateAndUpdate) method.
