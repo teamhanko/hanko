@@ -12,7 +12,6 @@ import (
 	"github.com/teamhanko/hanko/backend/v3/persistence"
 )
 
-// TODO: should include a tenantID as parameter
 func NewExportCommand() *cobra.Command {
 	var (
 		configFile string
@@ -87,11 +86,64 @@ func export(persister persistence.Persister, outFile string, tenantID uuid.UUID)
 				IsVerified: email.Verified,
 			})
 		}
+		var username *string = nil
+		if user.Username != nil {
+			username = &user.Username.Username
+		}
+		var password *ImportPasswordCredential = nil
+		if user.PasswordCredential != nil {
+			password = &ImportPasswordCredential{
+				Password:  user.PasswordCredential.Password,
+				CreatedAt: &user.PasswordCredential.CreatedAt,
+				UpdatedAt: &user.PasswordCredential.UpdatedAt,
+			}
+		}
+		var webauthnCredentials []ImportWebauthnCredential = nil
+		if len(user.WebauthnCredentials) > 0 {
+			for _, credential := range user.WebauthnCredentials {
+				var userHandle *string = nil
+				if credential.UserHandle != nil {
+					userHandle = &credential.UserHandle.Handle
+				}
+				var transports []string = nil
+				for _, transport := range credential.Transports {
+					transports = append(transports, transport.Name)
+				}
+				webauthnCredentials = append(webauthnCredentials, ImportWebauthnCredential{
+					ID:              credential.ID,
+					Name:            credential.Name,
+					PublicKey:       credential.PublicKey,
+					AttestationType: credential.AttestationType,
+					AAGUID:          credential.AAGUID,
+					SignCount:       credential.SignCount,
+					LastUsedAt:      credential.LastUsedAt,
+					CreatedAt:       &credential.CreatedAt,
+					UpdatedAt:       &credential.UpdatedAt,
+					Transports:      transports,
+					BackupEligible:  credential.BackupEligible,
+					BackupState:     credential.BackupState,
+					MFAOnly:         credential.MFAOnly,
+					UserHandle:      userHandle,
+				})
+			}
+		}
+		var otpSecret *ImportOTPSecret = nil
+		if user.OTPSecret != nil {
+			otpSecret = &ImportOTPSecret{
+				Secret:    user.OTPSecret.Secret,
+				CreatedAt: &user.OTPSecret.CreatedAt,
+				UpdatedAt: &user.OTPSecret.UpdatedAt,
+			}
+		}
 		entry := ImportOrExportEntry{
-			UserID:    user.ID.String(),
-			Emails:    emails,
-			CreatedAt: &user.CreatedAt,
-			UpdatedAt: &user.UpdatedAt,
+			UserID:              user.ID.String(),
+			Emails:              emails,
+			Username:            username,
+			Password:            password,
+			WebauthnCredentials: webauthnCredentials,
+			OTPSecret:           otpSecret,
+			CreatedAt:           &user.CreatedAt,
+			UpdatedAt:           &user.UpdatedAt,
 		}
 		entries = append(entries, entry)
 	}
