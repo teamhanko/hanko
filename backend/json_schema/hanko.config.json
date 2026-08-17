@@ -643,10 +643,9 @@
           "type": "string",
           "enum": [
             "numeric",
-            "alphanumeric",
-            "static"
+            "alphanumeric"
           ],
-          "description": "`passcode_charset` specifies the characters that can be used in passcodes.\nE.g. `numeric` allows only numbers, `alphanumeric` allows both numbers and letters, `static` returns always the same passcode 123456.\nThe `static` should be used in local test runs only.",
+          "description": "`passcode_charset` specifies the characters that can be used in passcodes.\nE.g. `numeric` allows only numbers, `alphanumeric` allows both numbers and letters.",
           "default": "numeric"
         },
         "require_verification": {
