@@ -21,8 +21,8 @@ type Email struct {
 	// `passcode_ttl` specifies, in seconds, how long a passcode is valid for.
 	PasscodeTtl int `yaml:"passcode_ttl" json:"passcode_ttl" koanf:"passcode_ttl" jsonschema:"default=300"`
 	// `passcode_charset` specifies the characters that can be used in passcodes.
-// `passcode_charset` specifies the characters that can be used in passcodes.
-// E.g. `numeric` allows only numbers, `alphanumeric` allows both numbers and letters. `static` returns always the same passcode 123456, it SHOULD ONLY BE USED FOR DEVELOPMENT/DEBUG/TESTING PURPOSES.
+	// `passcode_charset` specifies the characters that can be used in passcodes.
+	// E.g. `numeric` allows only numbers, `alphanumeric` allows both numbers and letters. `static` returns always the same passcode 123456, it SHOULD ONLY BE USED FOR DEVELOPMENT/DEBUG/TESTING PURPOSES.
 	PasscodeCharset PasscodeCharset `yaml:"passcode_charset" json:"passcode_charset" koanf:"passcode_charset" jsonschema:"default=numeric,enum=numeric,enum=alphanumeric,enum=static"`
 	// `require_verification` determines whether newly created emails must be verified by providing a passcode sent
 	// to respective address.
