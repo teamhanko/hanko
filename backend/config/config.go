@@ -60,6 +60,9 @@ type TenantConfig struct {
 	SecurityNotifications SecurityNotifications `yaml:"security_notifications" json:"security_notifications" koanf:"security_notifications"`
 	// `cors` configures Cross-Origin Resource Sharing settings for this tenant.
 	Cors Cors `yaml:"cors" json:"cors" koanf:"cors" jsonschema:"title=cors"`
+	// `custom_claims` declares the tenant-wide set of custom claims that SAML/OIDC connections
+	// may map their own attributes/claims onto.
+	CustomClaims CustomClaims `yaml:"custom_claims" json:"custom_claims" koanf:"custom_claims" jsonschema:"title=custom_claims"`
 	// `service` configures general service information.
 	Service Service `yaml:"service" json:"service" koanf:"service" jsonschema:"title=service"`
 	// `session` configures settings for session JWTs and Cookies issued by the API.
@@ -200,6 +203,10 @@ func (c *TenantConfig) Validate(multiTenancy bool) error {
 	if err != nil {
 		return fmt.Errorf("failed to validate email settings: %w", err)
 	}
+	err = c.CustomClaims.Validate()
+	if err != nil {
+		return fmt.Errorf("failed to validate custom_claims settings: %w", err)
+	}
 	return nil
 }
 
@@ -265,6 +272,11 @@ func (c *TenantConfig) PostProcess() error {
 	err = c.Email.PostProcess()
 	if err != nil {
 		return fmt.Errorf("failed to post process email settings: %w", err)
+	}
+
+	err = c.CustomClaims.PostProcess()
+	if err != nil {
+		return fmt.Errorf("failed to post process custom_claims settings: %w", err)
 	}
 
 	return nil
