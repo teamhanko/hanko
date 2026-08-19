@@ -15,6 +15,14 @@ type ThirdParty struct {
 	// `providers` contains the configurations for the available OAuth/OIDC identity providers.
 	Providers ThirdPartyProviders `yaml:"providers" json:"providers" koanf:"providers" jsonschema:"title=providers,uniqueItems=true"`
 	// `custom_providers contains the configurations for custom OAuth/OIDC identity providers.
+	//
+	// Treat each key here as permanent once you've configured custom_claim_mapping on it: if
+	// this provider maps to any tenant-defined custom claim (see custom_claims.definitions),
+	// renaming the key changes the provider's internal identity, and any custom claims
+	// already set by users who signed in through it become orphaned - still stored, but no
+	// longer recognized as belonging to this connection, so it can no longer update or clear
+	// them on its own (an admin can still fix individual users via the custom claims Admin
+	// API). Prefer adding a new entry over renaming an existing one if this applies to you.
 	CustomProviders CustomThirdPartyProviders `yaml:"custom_providers" json:"custom_providers" koanf:"custom_providers" jsonschema:"title=custom_providers"`
 	// `redirect_url` is the URL the third party provider redirects to with an authorization code. Must consist of the base URL
 	// of your running Hanko backend instance and the `callback` endpoint of the API,

@@ -7,6 +7,11 @@ import (
 	"github.com/teamhanko/hanko/backend/v3/config"
 )
 
+func TestCustomClaimConnectionSource(t *testing.T) {
+	assert.Equal(t, "saml:https://idp.example.com/metadata", customClaimConnectionSource("https://idp.example.com/metadata", true))
+	assert.Equal(t, "third_party:custom_myprovider", customClaimConnectionSource("custom_myprovider", false))
+}
+
 func customClaimDefs() config.CustomClaimDefinitions {
 	return config.CustomClaimDefinitions{
 		"matriculation_number": {Name: "matriculation_number", Type: config.CustomClaimTypeString},
