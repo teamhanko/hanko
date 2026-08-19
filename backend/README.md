@@ -693,6 +693,11 @@ The template has access to user data via the `.User` field, which includes:
 - `.User.Metadata`: The user's public and unsafe metadata (optional)
     - `.User.Metadata.Public`: The user's public metadata (object)
     - `.User.Metadata.Unsafe`: The user's unsafe metadata (object)
+- `.User.CustomClaims`: The user's tenant-defined custom claims (optional, see
+  [Accessing custom claims](#accessing-custom-claims) below) - not to be confused with the
+  "custom claims" you define via `session.jwt_template.claims` itself, which is this whole
+  feature; `.User.CustomClaims` is one specific, optional data source you can pull *into* a
+  jwt_template claim, sourced from SAML/OIDC connections via `custom_claims.definitions`.
 
 #### Accessing user metadata
 
@@ -735,6 +740,49 @@ favorite_genres: '{{ .User.Metadata.Public "favorite_games.#.genre" }}'
 are function calls internally and the given path argument must be a string, so it must be double quoted.
 If you use use double quotes for your entire claim template then the path argument must be escaped, i.e.:
 `"{{ .User.Metadata.Public \"display_name\" }}"`
+
+#### Accessing custom claims
+
+A tenant can declare custom claims under `custom_claims.definitions`, and have SAML or OIDC
+connections map their own attributes onto them - see the `custom` field of a SAML identity
+provider's `attribute_map`, or `custom_claim_mapping` on a custom OIDC provider, for how a
+connection populates them. Nothing is included in the session JWT automatically; as with
+metadata, you opt a claim in explicitly via `session.jwt_template.claims`.
+
+Assume a tenant declared these custom claims, and a user's resolved values look like this:
+
+```json
+{
+    "matriculation_number": "12345",
+    "is_staff": true,
+    "affiliation": ["student", "staff"]
+}
+```
+
+Like metadata, individual values can be accessed with `.User.CustomClaims.Get`, using
+[GJSON Path Syntax](https://github.com/tidwall/gjson/blob/master/SYNTAX.md):
+
+```yaml
+mat_nr: '{{ .User.CustomClaims.Get "matriculation_number" }}'
+is_staff: '{{ .User.CustomClaims.Get "is_staff" }}'
+affiliation: '{{ .User.CustomClaims.Get "affiliation" }}'
+```
+
+Or the whole object can be embedded directly, with all value types preserved:
+
+```yaml
+university: '{{ .User.CustomClaims }}'
+```
+
+> **Note**
+>
+> `.User.CustomClaims` has a single `Get` accessor (unlike `.User.Metadata`'s separate `Public`/`Unsafe`,
+> which exist because metadata has that split - custom claims don't). The same coercion rules
+> documented below apply: a `boolean` custom claim accessed via `.Get` becomes a real boolean in the
+> output, and a JSON array or object round-trips correctly, but a `number` custom claim accessed via
+> `.Get` arrives as a plain string (e.g. `"42"`, not `42`) - there is no automatic numeric coercion,
+> only the boolean and array/object cases below. Use `{{ .User.CustomClaims }}` (the whole object) if
+> you need the number to stay a number.
 
 
 Example usage in YAML configuration:
