@@ -55,6 +55,8 @@ type Persister interface {
 	GetUserPersisterWithConnection(tx *pop.Connection) UserPersister
 	GetUserMetadataPersister() UserMetadataPersister
 	GetUserMetadataPersisterWithConnection(tx *pop.Connection) UserMetadataPersister
+	GetUserCustomClaimsPersister() UserCustomClaimsPersister
+	GetUserCustomClaimsPersisterWithConnection(tx *pop.Connection) UserCustomClaimsPersister
 	GetWebauthnCredentialPersister() WebauthnCredentialPersister
 	GetWebauthnCredentialPersisterWithConnection(tx *pop.Connection) WebauthnCredentialPersister
 	GetWebauthnSessionDataPersister() WebauthnSessionDataPersister
@@ -357,6 +359,14 @@ func (p *persister) GetUserMetadataPersister() UserMetadataPersister {
 
 func (p *persister) GetUserMetadataPersisterWithConnection(tx *pop.Connection) UserMetadataPersister {
 	return NewUserMetadataPersister(tx)
+}
+
+func (p *persister) GetUserCustomClaimsPersister() UserCustomClaimsPersister {
+	return NewUserCustomClaimsPersister(p.DB)
+}
+
+func (p *persister) GetUserCustomClaimsPersisterWithConnection(tx *pop.Connection) UserCustomClaimsPersister {
+	return NewUserCustomClaimsPersister(tx)
 }
 
 func (p *persister) GetTenantPersister() TenantPersister {
