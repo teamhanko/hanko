@@ -52,6 +52,14 @@ type CustomClaimDefinition struct {
 	// a clear rejection from Validate() below rather than a silent rewrite.
 	Name string `yaml:"-" json:"-" koanf:"-" jsonschema:"-"`
 	// `type` declares how a mapped connection attribute value is coerced before storage.
+	//
+	// Deliberately scalar/list-of-scalar only, no nested/object type: SAML attributes are
+	// structurally flat (a single value or a list of values, never nested), and matching that
+	// on the OIDC side keeps one claim shape across both connection types. An OIDC provider
+	// claim that resolves to a JSON object or an array of objects is treated the same as any
+	// other coercion failure (logged and skipped, never fails the login) rather than stored
+	// as-is - see the "value transformation" note on CustomClaimMapping for how a nested OIDC
+	// claim can still supply one of these flat values via a gjson path.
 	Type string `yaml:"type" json:"type" koanf:"type" jsonschema:"default=string,enum=string,enum=number,enum=boolean,enum=string_list"`
 	// `description` is a human-readable note about the claim's meaning, for admin UIs/docs.
 	Description string `yaml:"description" json:"description,omitempty" koanf:"description"`
