@@ -261,6 +261,36 @@ func TestProcessJWTTemplate(t *testing.T) {
 				"ui_theme": "dark"
 			}`),
 		},
+		{
+			name: "should process access to custom claims",
+			claims: map[string]interface{}{
+				"custom_claims_whole":  "{{ .User.CustomClaims }}",
+				"matriculation_number": `{{ .User.CustomClaims.Get "matriculation_number" }}`,
+				"age_via_get":          `{{ .User.CustomClaims.Get "age" }}`,
+				"is_staff_via_get":     `{{ .User.CustomClaims.Get "is_staff" }}`,
+				"affiliation_via_get":  `{{ .User.CustomClaims.Get "affiliation" }}`,
+			},
+			user: dto.UserJWT{
+				CustomClaims: dto.NewCustomClaimsJWT(json.RawMessage(`{
+					"matriculation_number": "12345",
+					"age": 29,
+					"is_staff": true,
+					"affiliation": ["student", "staff"]
+				}`)),
+			},
+			expectedClaims: json.RawMessage(`{
+				"custom_claims_whole": {
+					"matriculation_number": "12345",
+					"age": 29,
+					"is_staff": true,
+					"affiliation": ["student", "staff"]
+				},
+				"matriculation_number": "12345",
+				"age_via_get": "29",
+				"is_staff_via_get": true,
+				"affiliation_via_get": ["student", "staff"]
+			}`),
+		},
 	}
 
 	for _, tt := range tests {

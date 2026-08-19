@@ -34,14 +34,15 @@ type UserInfoResponse struct {
 
 // UserJWT represents an abstracted user model for session management
 type UserJWT struct {
-	UserID     string       `json:"user_id"`
-	Email      *EmailJWT    `json:"email,omitempty"`
-	Username   string       `json:"username"`
-	Metadata   *MetadataJWT `json:"metadata,omitempty"`
-	Name       string       `json:"name"`
-	FamilyName string       `json:"family_name"`
-	GivenName  string       `json:"given_name"`
-	Picture    string       `json:"picture"`
+	UserID       string           `json:"user_id"`
+	Email        *EmailJWT        `json:"email,omitempty"`
+	Username     string           `json:"username"`
+	Metadata     *MetadataJWT     `json:"metadata,omitempty"`
+	CustomClaims *CustomClaimsJWT `json:"custom_claims,omitempty"`
+	Name         string           `json:"name"`
+	FamilyName   string           `json:"family_name"`
+	GivenName    string           `json:"given_name"`
+	Picture      string           `json:"picture"`
 }
 
 func (u *UserJWT) String() string {
@@ -70,6 +71,13 @@ func UserJWTFromUserModel(userModel *models.User) UserJWT {
 		metadataJWT := MetadataJWTFromUserModel(userModel.Metadata)
 		if metadataJWT != nil {
 			userJWT.Metadata = metadataJWT
+		}
+	}
+
+	if userModel.CustomClaims != nil {
+		customClaimsJWT := CustomClaimsJWTFromUserModel(userModel.CustomClaims)
+		if customClaimsJWT != nil {
+			userJWT.CustomClaims = customClaimsJWT
 		}
 	}
 
