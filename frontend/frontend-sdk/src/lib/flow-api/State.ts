@@ -7,24 +7,65 @@ import { AnyState, FlowName, FlowResponse } from "./types/flow";
 import { autoSteps } from "./auto-steps";
 import { passkeyAutofillActivationHandlers } from "./passkey-autofill-activation";
 
+/**
+ * The names of states that support an automatic follow-up step (see {@link State#autoStep}).
+ * @category SDK
+ * @subcategory Flow Types
+ */
 export type AutoSteppedStates = keyof typeof autoSteps;
 
+/**
+ * The names of states that support WebAuthn passkey autofill activation (see {@link State#passkeyAutofillActivation}).
+ * @category SDK
+ * @subcategory Flow Types
+ */
 export type PasskeyAutofillStates =
   keyof typeof passkeyAutofillActivationHandlers;
 
+/**
+ * Controls which {@link AutoSteppedStates} should be skipped when initializing a {@link State}
+ * (`"all"` to skip every automatic step).
+ * @category SDK
+ * @subcategory Flow Types
+ */
 export type AutoStepExclusion = AutoSteppedStates[] | "all";
 
+/**
+ * Maps every action available in a given {@link StateName} to an {@link Action} instance bound to
+ * that action's concrete input value types. This is the type of {@link State#actions}.
+ * @template TState - The state name to look up actions for.
+ * @category SDK
+ * @subcategory Flow Types
+ */
 export type ActionMap<TState extends StateName> = {
   [K in keyof Actions[TState]]: Action<
     Actions[TState][K] extends ActionType<infer TInputs> ? TInputs : never
   >;
 };
 
+/**
+ * Identifies an action that was (or can be) run, and the state it is associated with.
+ * @category SDK
+ * @subcategory Flow Types
+ * @property {string} name - The name of the action.
+ * @property {StateName} relatedStateName - The name of the state the action belongs to.
+ */
 export type ActionInfo = {
   name: string;
   relatedStateName: StateName;
 };
 
+/**
+ * Configuration options accepted when constructing a new {@link State}.
+ * @interface
+ * @category SDK
+ * @subcategory Flow Types
+ * @property {boolean} [dispatchAfterStateChangeEvent] - Whether to dispatch a state-change event after this state is created.
+ * @property {AutoStepExclusion} [excludeAutoSteps] - States to exclude from automatic stepping.
+ * @property {ActionInfo} [previousAction] - The action that led to this state, if any.
+ * @property {boolean} [isCached] - Whether this state was loaded from cache rather than fetched from the backend.
+ * @property {string} [cacheKey] - The cache key associated with this state.
+ */
 export interface StateInitConfig {
   dispatchAfterStateChangeEvent?: boolean;
   excludeAutoSteps?: AutoStepExclusion;
@@ -33,6 +74,12 @@ export interface StateInitConfig {
   cacheKey?: string;
 }
 
+/**
+ * Configuration options accepted when creating the initial {@link State} of a flow.
+ * @category SDK
+ * @subcategory Flow Types
+ * @property {boolean} [loadFromCache] - Whether to attempt loading a previously cached state instead of fetching a fresh one.
+ */
 export type StateCreateConfig = Pick<
   StateInitConfig,
   "dispatchAfterStateChangeEvent" | "excludeAutoSteps" | "cacheKey"
@@ -40,6 +87,11 @@ export type StateCreateConfig = Pick<
   loadFromCache?: boolean;
 };
 
+/**
+ * Configuration options accepted when running an {@link Action}.
+ * @category SDK
+ * @subcategory Flow Types
+ */
 export type ActionRunConfig = Pick<
   StateInitConfig,
   "dispatchAfterStateChangeEvent"
@@ -88,13 +140,6 @@ export class State<TState extends StateName = StateName> {
     ? () => Promise<void>
     : never;
 
-  /**
-   * Constructs a new State instance.
-   * @param {Hanko} hanko - The Hanko instance for API interactions.
-   * @param {FlowName} flowName - The name of the flow this state belongs to.
-   * @param {FlowResponse<TState>} response - The flow response containing state data.
-   * @param {StateInitConfig} [options={}] - Configuration options for state initialization.
-   */
   constructor(
     hanko: Hanko,
     flowName: FlowName,
@@ -400,12 +445,6 @@ export class Action<TInputs> {
   public readonly inputs: TInputs;
   private readonly parentState: State;
 
-  /**
-   * Constructs a new Action instance.
-   * @param {ActionType<TInputs>} action - The action type definition.
-   * @param {State} parentState - The state this action belongs to.
-   * @param {boolean} [enabled=true] - Whether the action is enabled.
-   */
   constructor(
     action: ActionType<TInputs>,
     parentState: State,

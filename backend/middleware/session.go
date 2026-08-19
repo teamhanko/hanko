@@ -12,6 +12,8 @@ import (
 	"github.com/teamhanko/hanko/backend/v3/context"
 	"github.com/teamhanko/hanko/backend/v3/persistence"
 	"github.com/teamhanko/hanko/backend/v3/session"
+	"github.com/teamhanko/hanko/backend/v3/webhooks/events"
+	webhookUtils "github.com/teamhanko/hanko/backend/v3/webhooks/utils"
 )
 
 // Session is a convenience function to create a middleware.JWT with custom JWT verification
@@ -76,6 +78,10 @@ func parseToken(tenant context.Tenant, persister persistence.Persister, generato
 			sessionDeletionErr := persister.GetSessionPersister().Delete(*sessionModel)
 			if sessionDeletionErr != nil {
 				return nil, fmt.Errorf("failed to delete session: %w", sessionDeletionErr)
+			}
+
+			if triggerErr := webhookUtils.TriggerWebhooks(c, persister.GetConnection(), tenant.ID, events.SessionDeletePassiveExpire, *sessionModel); triggerErr != nil {
+				return nil, fmt.Errorf("failed to trigger webhook: %w", triggerErr)
 			}
 
 			cookie, cookieDeletionErr := generator.DeleteCookie()

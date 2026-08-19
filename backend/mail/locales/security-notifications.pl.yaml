@@ -1,0 +1,48 @@
+password_update_text:
+  description: ""
+  other: "Hasło do Twojego konta w usłudze {{ .ServiceName }} zostało zmienione."
+subject_password_update:
+  description: ""
+  other: "Twoje hasło zostało zmienione"
+
+primary_email_update_text:
+  description: ""
+  other: "Główny adres e-mail Twojego konta w usłudze {{ .ServiceName }} został zmieniony z {{ .OldEmailAddress }} na {{ .NewEmailAddress }}."
+subject_primary_email_update:
+  description: ""
+  other: "Twój główny adres e-mail został zmieniony"
+
+email_create_text:
+  description: ""
+  other: "Adres e-mail {{ .NewEmailAddress }} został dodany do Twojego konta w usłudze {{ .ServiceName }}."
+subject_email_create:
+  description: ""
+  other: "Dodano nowy adres e-mail"
+
+email_delete_text:
+  description: ""
+  other: "Adres e-mail {{ .DeletedEmailAddress }} został usunięty z Twojego konta w usłudze {{ .ServiceName }}."
+subject_email_delete:
+  description: ""
+  other: "Usunięto adres e-mail"
+
+passkey_create_text:
+  description: ""
+  other: "Do Twojego konta w usłudze {{ .ServiceName }} dodano nowy passkey."
+subject_passkey_create:
+  description: ""
+  other: "Dodano nowy passkey"
+
+mfa_create_text:
+  description: ""
+  other: "Do Twojego konta w usłudze {{ .ServiceName }} dodano nową metodę uwierzytelniania wieloskładnikowego (MFA)."
+subject_mfa_create:
+  description: ""
+  other: "Dodano nową metodę MFA"
+
+mfa_delete_text:
+  description: ""
+  other: "Z Twojego konta w usłudze {{ .ServiceName }} usunięto metodę uwierzytelniania wieloskładnikowego (MFA)."
+subject_mfa_delete:
+  description: ""
+  other: "Usunięto metodę MFA"

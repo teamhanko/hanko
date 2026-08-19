@@ -5,7 +5,7 @@ import { HttpClient, HttpClientOptions } from "./HttpClient";
  *
  * @abstract
  * @category SDK
- * @subcategory Internal
+ * @subcategory Advanced
  * @param {string} api - The URL of your Hanko API instance
  * @param {HttpClientOptions} options - The options that can be used
  */
