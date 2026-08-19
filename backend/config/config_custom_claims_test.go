@@ -7,6 +7,103 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
+func TestCustomClaimDefinitions_ValidateMapping_Success(t *testing.T) {
+	defs := customClaimDefsForTest()
+
+	err := defs.ValidateMapping(map[string]string{"matriculation_number": "urn:oid:mat_nr"})
+
+	assert.NoError(t, err)
+}
+
+func TestCustomClaimDefinitions_ValidateMapping_UndeclaredClaim(t *testing.T) {
+	defs := customClaimDefsForTest()
+
+	err := defs.ValidateMapping(map[string]string{"not_a_real_claim": "urn:oid:mat_nr"})
+
+	assert.Error(t, err)
+}
+
+func customClaimDefsForTest() CustomClaimDefinitions {
+	return CustomClaimDefinitions{
+		"matriculation_number": {Name: "matriculation_number", Type: CustomClaimTypeString},
+	}
+}
+
+func TestConfig_ValidateCrossConfig_RejectsUndeclaredSamlAttributeMapCustom(t *testing.T) {
+	cfg := Config{
+		ApplicationConfig: ApplicationConfig{SecretKeys: []string{"abcdefghijklmnop"}},
+		TenantConfig: TenantConfig{
+			CustomClaims: CustomClaims{Definitions: customClaimDefsForTest()},
+			Saml: Saml{
+				IdentityProviders: []IdentityProvider{
+					{
+						Name: "uni-a",
+						AttributeMap: AttributeMap{
+							Custom: map[string]string{"not_a_real_claim": "urn:oid:mat_nr"},
+						},
+					},
+				},
+			},
+		},
+	}
+
+	err := cfg.ValidateCrossConfig()
+
+	assert.Error(t, err)
+	assert.Contains(t, err.Error(), "uni-a")
+}
+
+func TestConfig_ValidateCrossConfig_RejectsUndeclaredCustomProviderClaimMapping(t *testing.T) {
+	cfg := Config{
+		ApplicationConfig: ApplicationConfig{SecretKeys: []string{"abcdefghijklmnop"}},
+		TenantConfig: TenantConfig{
+			CustomClaims: CustomClaims{Definitions: customClaimDefsForTest()},
+			ThirdParty: ThirdParty{
+				CustomProviders: CustomThirdPartyProviders{
+					"myprovider": CustomThirdPartyProvider{
+						CustomClaimMapping: map[string]string{"not_a_real_claim": "some_claim"},
+					},
+				},
+			},
+		},
+	}
+
+	err := cfg.ValidateCrossConfig()
+
+	assert.Error(t, err)
+	assert.Contains(t, err.Error(), "myprovider")
+}
+
+func TestConfig_ValidateCrossConfig_AllowsDeclaredMappings(t *testing.T) {
+	cfg := Config{
+		ApplicationConfig: ApplicationConfig{SecretKeys: []string{"abcdefghijklmnop"}},
+		TenantConfig: TenantConfig{
+			CustomClaims: CustomClaims{Definitions: customClaimDefsForTest()},
+			Saml: Saml{
+				IdentityProviders: []IdentityProvider{
+					{
+						Name: "uni-a",
+						AttributeMap: AttributeMap{
+							Custom: map[string]string{"matriculation_number": "urn:oid:mat_nr"},
+						},
+					},
+				},
+			},
+			ThirdParty: ThirdParty{
+				CustomProviders: CustomThirdPartyProviders{
+					"myprovider": CustomThirdPartyProvider{
+						CustomClaimMapping: map[string]string{"matriculation_number": "some_claim"},
+					},
+				},
+			},
+		},
+	}
+
+	err := cfg.ValidateCrossConfig()
+
+	assert.NoError(t, err)
+}
+
 func TestCustomClaims_PostProcess_CopiesKeyVerbatimIntoName(t *testing.T) {
 	claims := CustomClaims{
 		Definitions: CustomClaimDefinitions{

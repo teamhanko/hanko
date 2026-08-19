@@ -37,7 +37,7 @@ func (h *SamlProviderHandler) Create(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusBadRequest, "invalid tenant ID")
 	}
 
-	err = h.ensureSamlEnabled(tenantID)
+	tenantConfig, err := h.ensureSamlEnabled(tenantID)
 	if err != nil {
 		return err
 	}
@@ -55,6 +55,10 @@ func (h *SamlProviderHandler) Create(c echo.Context) error {
 	attributeMap := config.AttributeMap{}
 	if req.AttributeMap != nil {
 		attributeMap = *req.AttributeMap
+	}
+
+	if err := tenantConfig.CustomClaims.Definitions.ValidateMapping(attributeMap.Custom); err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("invalid attribute_map: %v", err))
 	}
 
 	// Create provider
@@ -87,7 +91,7 @@ func (h *SamlProviderHandler) List(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusBadRequest, "invalid tenant ID")
 	}
 
-	err = h.ensureSamlEnabled(tenantID)
+	_, err = h.ensureSamlEnabled(tenantID)
 	if err != nil {
 		return err
 	}
@@ -107,7 +111,7 @@ func (h *SamlProviderHandler) Get(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusBadRequest, "invalid tenant ID")
 	}
 
-	err = h.ensureSamlEnabled(tenantID)
+	_, err = h.ensureSamlEnabled(tenantID)
 	if err != nil {
 		return err
 	}
@@ -136,7 +140,7 @@ func (h *SamlProviderHandler) Update(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusBadRequest, "invalid tenant ID")
 	}
 
-	err = h.ensureSamlEnabled(tenantID)
+	tenantConfig, err := h.ensureSamlEnabled(tenantID)
 	if err != nil {
 		return err
 	}
@@ -159,6 +163,10 @@ func (h *SamlProviderHandler) Update(c echo.Context) error {
 	attributeMap := config.AttributeMap{}
 	if req.AttributeMap != nil {
 		attributeMap = *req.AttributeMap
+	}
+
+	if err := tenantConfig.CustomClaims.Definitions.ValidateMapping(attributeMap.Custom); err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("invalid attribute_map: %v", err))
 	}
 
 	// Update provider
@@ -198,7 +206,7 @@ func (h *SamlProviderHandler) Delete(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusBadRequest, "invalid tenant ID")
 	}
 
-	err = h.ensureSamlEnabled(tenantID)
+	_, err = h.ensureSamlEnabled(tenantID)
 	if err != nil {
 		return err
 	}
@@ -216,31 +224,34 @@ func (h *SamlProviderHandler) Delete(c echo.Context) error {
 	return c.NoContent(http.StatusNoContent)
 }
 
-func (h *SamlProviderHandler) ensureSamlEnabled(tenantID uuid.UUID) error {
+// ensureSamlEnabled also returns the tenant's parsed config, so callers that need to
+// validate something else against it (e.g. attribute_map.custom against
+// CustomClaims.Definitions) don't have to fetch and unmarshal it a second time.
+func (h *SamlProviderHandler) ensureSamlEnabled(tenantID uuid.UUID) (*config.TenantConfig, error) {
 	tenant, err := h.persister.GetTenantPersister().Get(tenantID)
 	if err != nil {
-		return echo.NewHTTPError(http.StatusInternalServerError, fmt.Sprintf("failed to get tenant persister: %v", err))
+		return nil, echo.NewHTTPError(http.StatusInternalServerError, fmt.Sprintf("failed to get tenant persister: %v", err))
 	}
 
 	if tenant == nil {
-		return echo.NewHTTPError(http.StatusNotFound, fmt.Sprintf("tenant with ID %s not found", tenantID))
+		return nil, echo.NewHTTPError(http.StatusNotFound, fmt.Sprintf("tenant with ID %s not found", tenantID))
 	}
 
 	k := koanf.New(".")
 
 	if err := k.Load(rawbytes.Provider(tenant.Config), koanfJson.Parser()); err != nil {
-		return echo.NewHTTPError(http.StatusInternalServerError, fmt.Sprintf("failed to unmarshal tenant config: %v", err))
+		return nil, echo.NewHTTPError(http.StatusInternalServerError, fmt.Sprintf("failed to unmarshal tenant config: %v", err))
 	}
 
 	// Unmarshal into TenantConfig to validate structure
 	var tenantConfig = config.TenantConfig{}
 	if err := k.Unmarshal("", &tenantConfig); err != nil {
-		return echo.NewHTTPError(http.StatusInternalServerError, fmt.Sprintf("failed to unmarshal tenant config: %v", err))
+		return nil, echo.NewHTTPError(http.StatusInternalServerError, fmt.Sprintf("failed to unmarshal tenant config: %v", err))
 	}
 
 	if !tenantConfig.Saml.Enabled {
-		return echo.NewHTTPError(http.StatusForbidden, "SAML is not enabled for this tenant")
+		return nil, echo.NewHTTPError(http.StatusForbidden, "SAML is not enabled for this tenant")
 	}
 
-	return nil
+	return &tenantConfig, nil
 }

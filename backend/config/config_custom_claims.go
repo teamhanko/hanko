@@ -108,3 +108,17 @@ func (c *CustomClaims) Validate() error {
 
 	return nil
 }
+
+// ValidateMapping rejects a connection's claim mapping (SAML AttributeMap.Custom, or a
+// custom third-party provider's CustomClaimMapping) if it references a claim name not
+// currently declared here. Called from Config.ValidateCrossConfig (config-side connections)
+// and from handler/saml_provider.go (DB-side SAML providers) - the two places connection
+// mappings are actually saved.
+func (d CustomClaimDefinitions) ValidateMapping(mapping map[string]string) error {
+	for claimName := range mapping {
+		if _, declared := d[claimName]; !declared {
+			return fmt.Errorf("references undeclared custom claim %q", claimName)
+		}
+	}
+	return nil
+}
