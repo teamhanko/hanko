@@ -248,6 +248,24 @@ type CustomThirdPartyProvider struct {
 	//
 	// Mappings are one-to-one mappings, complex mappings (e.g. mapping concatenations of two claims) are not possible.
 	AttributeMapping map[string]string `yaml:"attribute_mapping" json:"attribute_mapping" koanf:"attribute_mapping"`
+	// `custom_claim_mapping` maps tenant-defined custom claims (key, declared under
+	// custom_claims.definitions) to provider claim names (value) - deliberately separate from
+	// `attribute_mapping` above, which has different semantics (renames a provider claim into
+	// a standard slot and removes the original; this instead resolves a value for a claim the
+	// tenant declared, and leaves the provider's own claims untouched).
+	//
+	// The value may be a plain top-level claim name, or a gjson path
+	// (https://github.com/tidwall/gjson#path-syntax) to reach into a nested provider claim,
+	// e.g. `address.locality` for a claim shaped like `{"address": {"locality": "Hamburg"}}`.
+	// Whatever the path resolves to must still be a single value or a list of values matching
+	// the target custom claim's declared type (string/number/boolean/string_list) - resolving
+	// to a JSON object or a list of objects is treated as a coercion failure like any other
+	// (logged and skipped, never fails the login), not stored as-is. An admin who wants such a
+	// nested provider claim represented as a nested structure in the session JWT can still
+	// declare several flat custom claims (one per leaf field) and recompose them into a nested
+	// shape in session.jwt_template.claims, which already supports arbitrary nested map
+	// literals with templated leaves.
+	CustomClaimMapping map[string]string `yaml:"custom_claim_mapping" json:"custom_claim_mapping" koanf:"custom_claim_mapping"`
 	// URL of the provider's authorization endpoint where the end-user is redirected to authenticate and grant consent for
 	// an application to access their resources.
 	//
