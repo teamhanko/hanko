@@ -44,10 +44,10 @@ var (
 
 func (e *Email) Validate() error {
 	switch e.PasscodeCharset {
-	case PasscodeCharsetNumeric, PasscodeCharsetAlphanumeric:
+	case PasscodeCharsetNumeric, PasscodeCharsetAlphanumeric, PasscodeCharsetStatic:
 		return nil
 	}
-	return fmt.Errorf("invalid passcode_characters: %s (allowed: 'numeric', 'alphanumeric')", e.PasscodeCharset)
+	return fmt.Errorf("invalid passcode_characters: %s (allowed: 'numeric', 'alphanumeric', 'static')", e.PasscodeCharset)
 }
 
 func (e *Email) PostProcess() error {
