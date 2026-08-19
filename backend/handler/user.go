@@ -40,7 +40,7 @@ func (h *UserHandler) Me(c echo.Context) error {
 		return errors.New("failed to cast session object")
 	}
 
-	user, err := h.persister.GetUserPersister().Get(uuid.FromStringOrNil(sessionToken.Subject()), tenant.ID)
+	user, err := h.persister.GetUserPersister().GetByPublicID(uuid.FromStringOrNil(sessionToken.Subject()), tenant.ID)
 	if err != nil {
 		return fmt.Errorf("failed to get user: %w", err)
 	}
@@ -71,7 +71,7 @@ func (h *UserHandler) Logout(c echo.Context) error {
 
 	userId := uuid.FromStringOrNil(sessionToken.Subject())
 
-	user, err := h.persister.GetUserPersister().Get(userId, tenant.ID)
+	user, err := h.persister.GetUserPersister().GetByPublicID(userId, tenant.ID)
 	if err != nil {
 		return fmt.Errorf("failed to get user: %w", err)
 	}

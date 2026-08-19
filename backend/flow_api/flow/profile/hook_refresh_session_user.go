@@ -27,7 +27,7 @@ func (h RefreshSessionUser) Execute(c flowpilot.HookExecutionContext) error {
 		return fmt.Errorf("failed to parse userId from JWT subject: %w", err)
 	}
 
-	userModel, err := deps.Persister.GetUserPersisterWithConnection(deps.Tx).Get(userId, deps.TenantID)
+	userModel, err := deps.Persister.GetUserPersisterWithConnection(deps.Tx).GetByPublicID(userId, deps.TenantID)
 	if err != nil {
 		return fmt.Errorf("failed to fetch user: %w", err)
 	}

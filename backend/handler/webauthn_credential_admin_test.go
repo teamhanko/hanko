@@ -171,6 +171,41 @@ func (s *webauthnCredentialAdminSuite) TestWebauthnCredentialAdminHandler_Get() 
 	}
 }
 
+// TestWebauthnCredentialAdminHandler_Get_OwnershipCheckUsesPublicId is the regression test for
+// the bug called out in the plan: the ownership check (credential.UserId != userID) compared the
+// raw path variable directly against the credential's real internal FK. Once :user_id means
+// public_id, that comparison must use the resolved user.ID instead, or a credential would never
+// be found for any user whose public_id differs from their internal id.
+func (s *webauthnCredentialAdminSuite) TestWebauthnCredentialAdminHandler_Get_OwnershipCheckUsesPublicId() {
+	if testing.Short() {
+		s.T().Skip("skipping test in short mode.")
+	}
+
+	err := s.LoadFixtures("../test/fixtures/webauthn_credential_admin_public_id")
+	s.Require().NoError(err)
+
+	e := NewAdminRouter(&test.DefaultConfig, s.Storage, nil)
+
+	internalID := "5a1a8f0a-3333-4a11-8a11-333333333333"
+	publicID := "6b2b9f1b-4444-4b22-8b22-444444444444"
+	credentialID := "AaFdkcD4SuPjF-jwUoRwH8-ZHuY5RW46fsZmEvBX6RNKHaGtVzpATs06KQVheIOjYz-YneG4cmQOedzl0e0jF951ukx17Hl9jeGgWz5_DKZCO12p2-2LlzjZ"
+
+	req := httptest.NewRequest(http.MethodGet, fmt.Sprintf("/users/%s/webauthn_credentials/%s", internalID, credentialID), nil)
+	rec := httptest.NewRecorder()
+	e.ServeHTTP(rec, req)
+	s.Equal(http.StatusNotFound, rec.Code, "the real internal id must not resolve the user or its credentials")
+
+	req = httptest.NewRequest(http.MethodGet, fmt.Sprintf("/users/%s/webauthn_credentials/%s", publicID, credentialID), nil)
+	rec = httptest.NewRecorder()
+	e.ServeHTTP(rec, req)
+	s.Equal(http.StatusOK, rec.Code, "the public_id must resolve the user and their credential")
+
+	var credential dto.WebauthnCredentialResponse
+	err = json.Unmarshal(rec.Body.Bytes(), &credential)
+	s.Require().NoError(err)
+	s.Equal(credentialID, credential.ID)
+}
+
 func (s *webauthnCredentialAdminSuite) TestWebauthnCredentialAdminHandler_Delete() {
 	if testing.Short() {
 		s.T().Skip("skipping test in short mode.")

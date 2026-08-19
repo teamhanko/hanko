@@ -83,8 +83,16 @@ func (h CreateUser) createUser(c flowpilot.HookExecutionContext, id uuid.UUID, e
 	enrolledTotp := false
 	enrolledSecurityKey := false
 
-	err := deps.Persister.GetUserPersisterWithConnection(deps.Tx).Create(models.User{
+	// public_id is independently generated, not a copy of id - see the comment on
+	// models.NewUser for why fresh users don't default to public_id == id.
+	publicID, err := uuid.NewV4()
+	if err != nil {
+		return err
+	}
+
+	err = deps.Persister.GetUserPersisterWithConnection(deps.Tx).Create(models.User{
 		ID:        id,
+		PublicID:  &publicID,
 		CreatedAt: now,
 		UpdatedAt: now,
 		TenantID:  tenantID,

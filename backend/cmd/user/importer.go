@@ -1,6 +1,7 @@
 package user
 
 import (
+	"fmt"
 	"strings"
 	"time"
 
@@ -17,19 +18,37 @@ type Importer struct {
 }
 
 func (i *Importer) createUser(newUser ImportOrExportEntry, tenantID uuid.UUID) (*models.User, error) {
-	userID, err := uuid.NewV4()
+	userInternalID, err := uuid.NewV4()
 	if err != nil {
 		return nil, err
 	}
+
+	// The internal id is always freshly generated, regardless of what the import
+	// file supplies - a supplied user_id sets the tenant-scoped public_id instead.
+	// Without one, public_id is independently generated, not a copy of the internal
+	// id - see the comment on models.NewUser for why.
+	publicID, err := uuid.NewV4()
+	if err != nil {
+		return nil, err
+	}
+	if newUser.UserID != "" {
+		publicID = uuid.FromStringOrNil(newUser.UserID)
+
+		existingUser, err := i.persister.GetUserPersisterWithConnection(i.tx).GetByPublicID(publicID, tenantID)
+		if err != nil {
+			return nil, err
+		}
+		if existingUser != nil {
+			return nil, fmt.Errorf("user with id %q already exists in this tenant", newUser.UserID)
+		}
+	}
+
 	userModel := models.User{
-		ID:        userID,
+		ID:        userInternalID,
+		PublicID:  &publicID,
 		CreatedAt: i.importTimestamp,
 		UpdatedAt: i.importTimestamp,
 		TenantID:  tenantID,
-	}
-
-	if newUser.UserID != "" {
-		userModel.ID = uuid.FromStringOrNil(newUser.UserID)
 	}
 
 	if newUser.CreatedAt != nil {

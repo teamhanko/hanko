@@ -56,9 +56,11 @@ func ProfileDataFromUserModel(user *models.User, cfg *config.TenantConfig) *Prof
 		metadata = NewMetadata(user.Metadata)
 	}
 
+	publicID := user.GetPublicID()
+
 	return &ProfileData{
-		ID:           user.ID,
-		UserID:       user.ID,
+		ID:           publicID,
+		UserID:       publicID,
 		Passkeys:     webauthnCredentials,
 		SecurityKeys: securityKeys,
 		MFAConfig: MFAConfig{

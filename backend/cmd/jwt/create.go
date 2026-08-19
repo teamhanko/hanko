@@ -78,7 +78,7 @@ func NewCreateCommand() *cobra.Command {
 
 			userId := uuid.FromStringOrNil(args[0])
 
-			userModel, err := persister.GetUserPersister().Get(userId, tID)
+			userModel, err := persister.GetUserPersister().GetByPublicID(userId, tID)
 			if err != nil {
 				fmt.Printf("failed to get user from db: %s", err)
 				return
@@ -101,7 +101,7 @@ func NewCreateCommand() *cobra.Command {
 			sessionModel := models.Session{
 				ID:        uuid.FromStringOrNil(sessionID.(string)),
 				TenantID:  tID,
-				UserID:    userId,
+				UserID:    userModel.ID,
 				CreatedAt: rawToken.IssuedAt(),
 				UpdatedAt: rawToken.IssuedAt(),
 				ExpiresAt: &expirationTime,

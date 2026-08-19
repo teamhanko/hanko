@@ -576,7 +576,10 @@ Unsafe metadata can be set and modified through the Public API and the Admin API
 
 
 ### User import
-You can import an existing user pool into Hanko using json in the following format:
+You can import an existing user pool into Hanko using json in the following format. `user_id`, if provided, only
+needs to be unique within the target tenant, not globally - if it already belongs to a user in that tenant, that
+user is reused rather than a duplicate being created, so the same file can be imported into multiple tenants (e.g.
+production and a staging/test tenant) without collision.
 ```json
 [
   {
@@ -680,7 +683,7 @@ These claims are processed at JWT generation time and can include static values,
 templated strings using Go's text/template syntax, or nested structures (maps and slices).
 
 The template has access to user data via the `.User` field, which includes:
-- `.User.UserID`: The user's unique ID (string)
+- `.User.UserID`: The user's unique ID (string), unique within the tenant rather than globally
 - `.User.Email`: Email details (optional)
   - `User.Email.Address`: The actual email address
   - `User.Email.IsPrimary`: Whether this email address is the primary email address of this user

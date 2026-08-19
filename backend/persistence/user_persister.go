@@ -12,6 +12,7 @@ import (
 
 type UserPersister interface {
 	Get(id uuid.UUID, tenantID uuid.UUID) (*models.User, error)
+	GetByPublicID(publicID uuid.UUID, tenantID uuid.UUID) (*models.User, error)
 	GetByEmailAddress(emailAddress string, tenantID uuid.UUID) (*models.User, error)
 	Create(models.User) error
 	Update(models.User) error
@@ -30,25 +31,45 @@ func NewUserPersister(db *pop.Connection) UserPersister {
 	return &userPersister{db: db}
 }
 
+// userEagerPreloadFields is shared by every full-user-fetch query (Get, GetByPublicID) so both
+// return identical result shapes regardless of which identifier was used to look the user up.
+var userEagerPreloadFields = []string{
+	"Emails",
+	"Emails.PrimaryEmail",
+	"Emails.Identities.SamlIdentity",
+	"WebauthnCredentials",
+	"WebauthnCredentials.Transports",
+	"Username",
+	"PasswordCredential",
+	"OTPSecret",
+	"Metadata",
+	"Identities",
+	"Identities.SamlIdentity",
+}
+
 func (p *userPersister) Get(id uuid.UUID, tenantID uuid.UUID) (*models.User, error) {
+	query := p.db.EagerPreload(userEagerPreloadFields...).
+		Where("users.tenant_id = ?", tenantID).
+		Where("users.id = ?", id)
+	return p.findUser(query, tenantID)
+}
+
+// GetByPublicID resolves a user by their tenant-scoped public identifier (the only
+// identifier ever exposed via the API/JWT) in a single query, returning the same
+// eager-loaded shape as Get regardless of which identifier was used to look the user up.
+func (p *userPersister) GetByPublicID(publicID uuid.UUID, tenantID uuid.UUID) (*models.User, error) {
+	query := p.db.EagerPreload(userEagerPreloadFields...).
+		Where("users.tenant_id = ?", tenantID).
+		Where("users.public_id = ?", publicID)
+	return p.findUser(query, tenantID)
+}
+
+// findUser runs an already-scoped, eager-loaded query for a single user and attaches the
+// matching SAML provider to each SAML-backed identity. Shared by Get and GetByPublicID so
+// the SAML fixup logic isn't duplicated per lookup method.
+func (p *userPersister) findUser(query *pop.Query, tenantID uuid.UUID) (*models.User, error) {
 	user := models.User{}
-
-	eagerPreloadFields := []string{
-		"Emails",
-		"Emails.PrimaryEmail",
-		"Emails.Identities.SamlIdentity",
-		"WebauthnCredentials",
-		"WebauthnCredentials.Transports",
-		"Username",
-		"PasswordCredential",
-		"OTPSecret",
-		"Metadata",
-		"Identities",
-		"Identities.SamlIdentity",
-	}
-
-	query := p.db.EagerPreload(eagerPreloadFields...).Where("users.tenant_id = ?", tenantID)
-	err := query.Find(&user, id)
+	err := query.First(&user)
 	if err != nil && errors.Is(err, sql.ErrNoRows) {
 		return nil, nil
 	}
@@ -258,7 +279,7 @@ func (p *userPersister) addQueryParamsToSqlQuery(query *pop.Query, userIDs []uui
 	}
 
 	if len(userIDs) > 0 {
-		query = query.Where("users.id in (?)", userIDs)
+		query = query.Where("users.public_id in (?)", userIDs)
 	}
 
 	return query
