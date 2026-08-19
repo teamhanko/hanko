@@ -62,7 +62,31 @@ func ExtractUserData(
 		CustomClaims:      mapCustomClaims(assertionInfo.Values, attributeMap),
 	}
 
+	userData.CustomClaimSource = buildCustomClaimSource(attributeMap.Custom, assertionValues)
+
 	return userData
+}
+
+// buildCustomClaimSource resolves each AttributeMap.Custom value - the IdP's literal SAML
+// attribute Name, never a path - against the assertion. Uses GetAll rather than Get since a
+// SAML attribute can carry multiple values (e.g. eduPersonAffiliation); Get would silently
+// keep only the first.
+func buildCustomClaimSource(mapping map[string]string, values saml2.Values) *thirdparty.CustomClaimSource {
+	if len(mapping) == 0 {
+		return nil
+	}
+
+	attributes := make(map[string]any, len(mapping))
+	for _, attributeName := range mapping {
+		if all := values.GetAll(attributeName); len(all) > 0 {
+			attributes[attributeName] = all
+		}
+	}
+
+	return &thirdparty.CustomClaimSource{
+		Mapping:    mapping,
+		Attributes: attributes,
+	}
 }
 
 // mapCustomClaims extracts custom claims that are not in the standard attribute map
