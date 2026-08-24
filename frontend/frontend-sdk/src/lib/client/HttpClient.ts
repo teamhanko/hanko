@@ -10,6 +10,7 @@ export type SessionTokenLocation = "cookie" | "sessionStorage";
 /**
  * This class wraps an XMLHttpRequest to maintain compatibility with the fetch API.
  *
+ * @ignore
  * @category SDK
  * @subcategory Internal
  * @param {XMLHttpRequest} xhr - The request to be wrapped.
@@ -37,6 +38,7 @@ class Headers {
 /**
  * This class wraps an XMLHttpRequest to maintain compatibility with the fetch API.
  *
+ * @ignore
  * @category SDK
  * @subcategory Internal
  * @param {XMLHttpRequest} xhr - The request to be wrapped.
@@ -113,6 +115,7 @@ class Response {
 /**
  * Options for the HttpClient
  *
+ * @ignore
  * @category SDK
  * @subcategory Internal
  * @property {number=} timeout - The http request timeout in milliseconds.
@@ -139,7 +142,7 @@ export interface HttpClientOptions {
  * we can easily return to the fetch API.
  *
  * @category SDK
- * @subcategory Internal
+ * @subcategory Advanced
  * @param {string} api - The URL of your Hanko API instance
  * @param {HttpClientOptions} options - The options the HttpClient must be provided
  */

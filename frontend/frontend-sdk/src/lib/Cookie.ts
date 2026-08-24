@@ -4,6 +4,7 @@ import { TechnicalError } from "./Errors";
 /**
  * Options for Cookie
  *
+ * @ignore
  * @category SDK
  * @subcategory Internal
  * @property {string=} cookieName - The name of the session cookie set from the SDK. Defaults to "hanko".
@@ -27,6 +28,7 @@ export type CookieSameSite =
 /**
  * A class to manage cookies.
  *
+ * @ignore
  * @category SDK
  * @subcategory Internal
  * @param {CookieOptions} options - The options that can be used

@@ -18,9 +18,19 @@ async function handleCredentialCreation(
     return await state.actions.webauthn_verify_attestation_response.run({
       public_key: attestationResponse,
     });
-  } catch {
+  } catch (error) {
     const nextState = await state.actions.back.run();
-    nextState.error = { code: errorCode, message: errorMessage };
+    // Only an InvalidStateError signals that the credential is already
+    // registered on the authenticator. Other failures - e.g. NotAllowedError
+    // when the user cancels the prompt, or AbortError when a new request
+    // supersedes this one - must not be reported as "credential already exists".
+    // Preserve any error the server already set instead, mirroring
+    // the login_passkey step.
+    if (error instanceof DOMException && error.name === "InvalidStateError") {
+      nextState.error = { code: errorCode, message: errorMessage };
+    } else if (state.error) {
+      nextState.error = state.error;
+    }
     return nextState;
   }
 }
@@ -117,6 +127,20 @@ export const autoSteps: AutoSteps = {
       });
 
       nextState.error = { code: errorCode, message };
+      nextState.dispatchAfterStateChangeEvent();
+
+      return nextState;
+    }
+
+    if (state.error) {
+      const nextState = await state.actions.back.run(null, {
+        dispatchAfterStateChangeEvent: false,
+      });
+
+      nextState.error = {
+        code: state.error.code,
+        message: state.error.message,
+      };
       nextState.dispatchAfterStateChangeEvent();
 
       return nextState;

@@ -42,6 +42,8 @@ yarn add @teamhanko/hanko-frontend-sdk
 pnpm install @teamhanko/hanko-frontend-sdk
 ```
 
+[⬆ Back to top](#hanko-frontend-sdk)
+
 ## Usage
 
 Import as a module:
@@ -63,6 +65,8 @@ With a script tag via CDN:
 </script>
 ```
 
+[⬆ Back to top](#hanko-frontend-sdk)
+
 ### Options
 
 You can pass certain options, when creating a new `Hanko` instance:
@@ -78,6 +82,8 @@ const defaultOptions = {
 };
 const hanko = new Hanko("http://localhost:3000", defaultOptions);
 ```
+
+[⬆ Back to top](#hanko-frontend-sdk)
 
 ### Session Events
 
@@ -138,6 +144,8 @@ hanko.onUserDeleted(() => {
 
 Please Take a look into the [docs](https://teamhanko.github.io/hanko/jsdoc/hanko-frontend-sdk/) for more details.
 
+[⬆ Back to top](#hanko-frontend-sdk)
+
 ### Session Management
 
 The SDK provides methods to manage user sessions and retrieve user information.
@@ -148,26 +156,58 @@ Fetches the current user's profile information.
 
 - **Returns**: A `User` object containing the user’s profile details. The object includes:
     - `user_id`: A unique string identifier for the user.
-    - `passkeys`: An optional array of WebAuthn credentials (passkey-based authentication).
-    - `security_keys`: An optional array of WebAuthn credentials (security key-based authentication).
-    - `mfa_config`: An optional configuration object for multi-factor authentication settings.
-    - `emails`: An optional array of email objects (e.g., `{ address: string, is_primary: boolean, is_verified: boolean }`).
-    - `username`: An optional username object (e.g., `{ id: string, username: string }`).
+    - `passkeys`: An optional array of registered passkeys (`WebauthnCredential[]`).
+    - `security_keys`: An optional array of registered security keys (`WebauthnCredential[]`).
+    - `mfa_config`: An optional MFA configuration (`{ auth_app_set_up, totp_enabled, security_keys_enabled }`).
+    - `emails`: An optional array of email objects (e.g., `{ id: string, address: string, is_verified: boolean, is_primary: boolean, identities?: Identity[] }`).
+    - `username`: An optional username object (e.g., `{ id: string, username: string, created_at: string, updated_at: string }`).
+    - `metadata`: An optional custom metadata object (`{ public_metadata?, unsafe_metadata? }`).
+    - `identities`: An optional array of linked third-party identities (e.g., `{ id: string, provider: string, identity_id?: string }`).
     - `created_at`: A string timestamp (ISO 8601) of when the user was created.
     - `updated_at`: A string timestamp (ISO 8601) of when the user was last updated.
+    - `name`, `given_name`, `family_name`, `picture`: Optional profile fields, populated when the user signed up via a third-party provider.
 - **Errors**: `UnauthorizedError` (invalid or expired session), `TechnicalError` (server or network issues).
 
 ```typescript
 try {
-    const user = await hanko.getUser();
+    const user = await hanko.getCurrentUser();
     console.log("User profile:", user);
     // Example output:
     // {
     //   user_id: "123e4567-e89b-12d3-a456-426614174000",
-    //   emails: [{ address: "user@example.com", is_primary: true, is_verified: true }],
-    //   username: { id: "f2882293-3c39-451d-a7cb-4cf3375e0c66", username: "johndoe" },
+    //   passkeys: [{
+    //     id: "d6df75e0-8a2b-4c6d-9b6e-1a2b3c4d5e6f",
+    //     name: "MacBook Touch ID",
+    //     public_key: "...",
+    //     attestation_type: "none",
+    //     aaguid: "08987058-cadc-4b81-b6e1-30de50dcbe96",
+    //     created_at: "2025-01-01T10:00:00Z",
+    //     transports: "internal",
+    //     backup_eligible: "true",
+    //     backup_state: "true"
+    //   }],
+    //   security_keys: [],
+    //   mfa_config: { auth_app_set_up: false, totp_enabled: false, security_keys_enabled: false },
+    //   emails: [{
+    //     id: "f2882293-3c39-451d-a7cb-4cf3375e0c66",
+    //     address: "user@example.com",
+    //     is_verified: true,
+    //     is_primary: true,
+    //     identities: []
+    //   }],
+    //   username: {
+    //     id: "a1b2c3d4-3c39-451d-a7cb-4cf3375e0c66",
+    //     username: "johndoe",
+    //     created_at: "2025-01-01T10:00:00Z",
+    //     updated_at: "2025-01-01T10:00:00Z"
+    //   },
+    //   metadata: { public_metadata: {}, unsafe_metadata: {} },
+    //   identities: [],
     //   created_at: "2025-01-01T10:00:00Z",
-    //   updated_at: "2025-04-01T12:00:00Z"
+    //   updated_at: "2025-04-01T12:00:00Z",
+    //   name: "John Doe",
+    //   given_name: "John",
+    //   family_name: "Doe"
     // }
 } catch (error) {
     console.error("Failed to fetch user profile:", error);
@@ -179,9 +219,12 @@ try {
 
 Checks the validity of the current session.
 
-- **Returns**: A SessionCheckResponse object containing:
+- **Returns**: A `SessionCheckResponse` object containing:
     - `is_valid`: A boolean indicating whether the session is valid.
-    - `claims`: An optional object with session details, including:
+    - `expiration_time`: An optional string timestamp (ISO 8601) when the session expires.
+    - `user_id`: An optional string with the ID of the user the session belongs to.
+    - `idle_expires_at`: An optional string timestamp (ISO 8601) indicating when the session will expire due to inactivity, if idle timeouts are configured.
+    - `claims`: An optional object with the session's claims, including:
         - `subject`: The user ID or session identifier.
         - `session_id`: The unique session identifier.
         - `expiration`: A string timestamp (ISO 8601) when the session expires.
@@ -198,6 +241,9 @@ try {
     // Example output:
     // {
     //   is_valid: true,
+    //   expiration_time: "2025-04-25T12:00:00Z",
+    //   user_id: "123e4567-e89b-12d3-a456-426614174000",
+    //   idle_expires_at: "2025-04-25T11:00:00Z",
     //   claims: {
     //     subject: "123e4567-e89b-12d3-a456-426614174000",
     //     session_id: "789abc",
@@ -243,6 +289,8 @@ try {
 }
 ```
 
+[⬆ Back to top](#hanko-frontend-sdk)
+
 ### Translation of outgoing emails
 
 If you use the main `Hanko` client provided by the Frontend SDK, you can use the `lang` parameter in the options when
@@ -250,6 +298,8 @@ instantiating the client to configure the language that is used to convey to the
 language to use for outgoing emails. If you have disabled email delivery through Hanko and configured a webhook for the
 `email.send` event, the value for the `lang` parameter is reflected in the JWT payload of the token contained in the
 webhook request in the "Language" claim.
+
+[⬆ Back to top](#hanko-frontend-sdk)
 
 ### Custom session claim type safety
 
@@ -297,12 +347,20 @@ async function session() {
 };
 ```
 
+[⬆ Back to top](#hanko-frontend-sdk)
+
 ## FlowAPI
 
 The SDK offers a TypeScript-based interface for managing authentication and profile flows with Hanko, enabling the
 development of custom frontends with the Hanko FlowAPI. It handles state transitions, action execution, input
 validation, and event dispatching, while also providing built-in support for auto-stepping and passkey autofill.
 This guide explores its core functionality and usage patterns.
+
+For the full reference of every action, input, and payload type available per flow and state, see the generated
+[API reference](https://teamhanko.github.io/hanko/jsdoc/hanko-frontend-sdk/) — look under the **Flow Actions**,
+**Flow Inputs**, **Flow Payloads**, **Flow Errors**, and **Flow Types** categories in the sidebar.
+
+[⬆ Back to top](#hanko-frontend-sdk)
 
 ### Initializing a New Flow
 
@@ -328,6 +386,8 @@ const state = await hanko.createState("login", {
     - **cacheKey**: `string` - The key used for localStorage caching (default: "hanko-flow-state").
 
 
+[⬆ Back to top](#hanko-frontend-sdk)
+
 ### Understanding the State Object
 
 The `state` object represents the current step in the flow. It contains properties and methods to interact with the flow.
@@ -348,6 +408,8 @@ The `state` object represents the current step in the flow. It contains properti
 - **excludeAutoSteps**: `AutoStepExclusion` - An array of `StateNames` excluded from auto-stepping.
 
 
+[⬆ Back to top](#hanko-frontend-sdk)
+
 ### Action Availability
 
 Actions can be enabled or disabled based on the backend configuration or the user's state and properties. You can check
@@ -361,6 +423,8 @@ if (state.actions.example_action.enabled) {
 }
 ```
 
+[⬆ Back to top](#hanko-frontend-sdk)
+
 ### Accessing Action Inputs
 
 Each action in `state.actions` has an `inputs` property defining expected input fields.
@@ -369,15 +433,19 @@ Each action in `state.actions` has an `inputs` property defining expected input 
 console.log(state.actions.continue_with_login_identifier.inputs);
 // Example output:
 // {
+//   identifier: { name: "identifier", type: "string", required: false },
+//   email: { name: "email", type: "string", required: false },
 //   username: {
-//     required: true,
+//     name: "username",
 //     type: "string",
-//     minLength: 3,
-//     maxLength: 20,
-//     description: "User’s login name"
+//     required: true,
+//     min_length: 3,
+//     max_length: 20
 //   }
 // }
 ```
+
+[⬆ Back to top](#hanko-frontend-sdk)
 
 ### Running an Action
 
@@ -400,6 +468,8 @@ if (state.name === "login_init") {
 - **Type Narrowing**: Check `state.name` to ensure the action exists and inputs are valid for that state.
 - **Events**: By default, `run` triggers `onBeforeStateChange` before the action and `onAfterStateChange` after the new state is loaded.
 - **Validation Errors**: If the action fails due to invalid input (e.g., wrong format or length), `newState.error` will be set to "invalid_form_data", and specific errors will be attached to the related input fields (see "Error Handling" below).
+
+[⬆ Back to top](#hanko-frontend-sdk)
 
 ### Event Handlers
 
@@ -441,6 +511,8 @@ hanko.onAfterStateChange(({ state }) => {
 });
 ```
 
+[⬆ Back to top](#hanko-frontend-sdk)
+
 ### Controlling the AfterStateChanged Event
 
 You can disable the automatic `onAfterStateChange` event and dispatch it manually after custom logic.
@@ -457,6 +529,8 @@ if (state.name === "login_init") {
   newState.dispatchAfterStateChangeEvent(); // Manually trigger the event
 }
 ```
+
+[⬆ Back to top](#hanko-frontend-sdk)
 
 ### Auto-Steps
 
@@ -493,6 +567,8 @@ hanko.onAfterStateChange(({ state }) => {
 });
 ```
 
+[⬆ Back to top](#hanko-frontend-sdk)
+
 ### Error Handling
 
 #### Input Errors
@@ -515,6 +591,8 @@ if (state.name === "error") {
     console.error("Flow error:", state.error);
 }
 ```
+
+[⬆ Back to top](#hanko-frontend-sdk)
 
 ### Caching Flow State
 
@@ -568,14 +646,22 @@ const recoveredState = await State.deserialize(hanko, serialized, {
 This allows integration with other storage mechanisms.
 
 
+[⬆ Back to top](#hanko-frontend-sdk)
+
 ## Bugs
 
 Found a bug? Please report on our [GitHub](https://github.com/teamhanko/hanko/issues) page.
+
+[⬆ Back to top](#hanko-frontend-sdk)
 
 ## Documentation
 
 To see the latest documentation, please click [here](https://teamhanko.github.io/hanko/jsdoc/hanko-frontend-sdk/).
 
+[⬆ Back to top](#hanko-frontend-sdk)
+
 ## License
 
 The `hanko-frontend-sdk` project is licensed under the [MIT License](LICENSE).
+
+[⬆ Back to top](#hanko-frontend-sdk)

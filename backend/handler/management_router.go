@@ -8,12 +8,17 @@ import (
 	"github.com/teamhanko/hanko/backend/v3/dto"
 	hankoMiddleware "github.com/teamhanko/hanko/backend/v3/middleware"
 	"github.com/teamhanko/hanko/backend/v3/persistence"
+	"github.com/teamhanko/hanko/backend/v3/utils"
 )
 
 func NewManagementRouter(cfg *config.Config, persister persistence.Persister) *echo.Echo {
 
 	e := echo.New()
 	e.HideBanner = true
+
+	if err := utils.ConfigureIPExtractor(e, cfg.Server.IP); err != nil {
+		panic(err)
+	}
 
 	e.HTTPErrorHandler = dto.NewHTTPErrorHandler(dto.HTTPErrorHandlerConfig{Debug: false, Logger: e.Logger})
 	e.Use(middleware.RequestID())

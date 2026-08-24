@@ -10,11 +10,17 @@ import (
 	hankoMiddleware "github.com/teamhanko/hanko/backend/v3/middleware"
 	"github.com/teamhanko/hanko/backend/v3/persistence"
 	"github.com/teamhanko/hanko/backend/v3/template"
+	"github.com/teamhanko/hanko/backend/v3/utils"
 )
 
 func NewAdminRouter(cfg *config.Config, persister persistence.Persister, prometheus echo.MiddlewareFunc) *echo.Echo {
 	e := echo.New()
 	e.Renderer = template.NewTemplateRenderer()
+
+	if err := utils.ConfigureIPExtractor(e, cfg.Server.IP); err != nil {
+		panic(err)
+	}
+
 	e.HideBanner = true
 	g := e.Group("")
 
@@ -97,7 +103,7 @@ func NewAdminRouter(cfg *config.Config, persister persistence.Persister, prometh
 	passwordCredentials.PUT("", passwordCredentialHandler.Update)
 	passwordCredentials.DELETE("", passwordCredentialHandler.Delete)
 
-	userSessions := user.Group("/:user_id/sessions", jwkMiddleware, sessionManagerMiddleware)
+	userSessions := user.Group("/:user_id/sessions", jwkMiddleware, sessionManagerMiddleware, webhookMiddleware)
 	userSessions.GET("", sessionsHandler.List)
 	userSessions.DELETE("/:session_id", sessionsHandler.Delete)
 
@@ -118,7 +124,7 @@ func NewAdminRouter(cfg *config.Config, persister persistence.Persister, prometh
 	webhooks.DELETE("/:id", webhookHandler.Delete)
 	webhooks.PUT("/:id", webhookHandler.Update)
 
-	sessions := tenantGroup.Group("/sessions", jwkMiddleware, sessionManagerMiddleware)
+	sessions := tenantGroup.Group("/sessions", jwkMiddleware, sessionManagerMiddleware, webhookMiddleware)
 	sessions.POST("", sessionsHandler.Generate)
 
 	return e

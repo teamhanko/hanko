@@ -239,7 +239,7 @@ const token = hanko.getSessionToken();
 console.log("Session token:", token);
 
 // Fetch the user profile
-const user = await hanko.getUser();
+const user = await hanko.getCurrentUser();
 console.log("User profile:", user.user_id, user.emails);
 
 // Log out the user

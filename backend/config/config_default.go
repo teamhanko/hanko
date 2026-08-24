@@ -21,6 +21,9 @@ func DefaultApplicationConfig() ApplicationConfig {
 			Management: ServerSettings{
 				Address: ":8002",
 			},
+			IP: IPConfig{
+				Extractor: IPExtractorDirect,
+			},
 		},
 		Database: Database{
 			Database:        "hanko",

@@ -2,17 +2,6 @@
  * @interface
  * @category SDK
  * @subcategory DTO
- * @property {string} id - The UUID of the current user.
- * @ignore
- */
-export interface Me {
-  id: string;
-}
-
-/**
- * @interface
- * @category SDK
- * @subcategory DTO
  * @property {string} id - The UUID of the email address.
  * @property {string} address - The email address.
  * @property {boolean} is_verified - Indicates whether the email address is verified.
@@ -20,6 +9,9 @@ export interface Me {
  * @property {Identity} identity - Indicates that this email is linked to a third party account.
  * @property {Identity[]} identities - A list of identities, each identity indicates that this email is linked to a third party account.
  */
+// Known docs limitation: `flow-api/types/payload.ts` declares its own, differently-shaped
+// `Email` interface. JSDoc has no default file/module scoping, so both land on the same
+// generated Email.html page as two separate "Properties" tables. See the note there too.
 export interface Email {
   id: string;
   address: string;
@@ -44,6 +36,9 @@ export interface Emails extends Array<Email> {}
  * @property {string} id - The subject ID with the third party provider.
  * @property {string} provider - The third party provider name.
  */
+// Known docs limitation: `flow-api/types/payload.ts` declares its own `Identity` interface.
+// JSDoc has no default file/module scoping, so both land on the same generated Identity.html
+// page as two separate "Properties" tables. See the note there too.
 export interface Identity {
   id: string;
   provider: string;
