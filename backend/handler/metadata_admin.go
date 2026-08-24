@@ -38,13 +38,13 @@ func (h *MetadataAdminHandler) GetMetadata(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusBadRequest, "invalid user id")
 	}
 
-	userExists, err := h.persister.GetConnection().Where("id = ?", userID).Exists(&models.User{ID: userID})
+	user, err := h.persister.GetUserPersister().Get(userID, tenant.ID)
 	if err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, "could not fetch user").SetInternal(err)
 	}
 
-	if !userExists {
-		return echo.NewHTTPError(http.StatusNotFound, "user not found").SetInternal(err)
+	if user == nil {
+		return echo.NewHTTPError(http.StatusNotFound, "user not found")
 	}
 
 	metadataModel, err := h.persister.GetUserMetadataPersister().Get(userID, tenant.ID)
@@ -76,13 +76,13 @@ func (h *MetadataAdminHandler) PatchMetadata(c echo.Context) error {
 		return err
 	}
 
-	userExists, err := h.persister.GetConnection().Where("id = ?", userID).Exists(&models.User{ID: userID})
+	user, err := h.persister.GetUserPersister().Get(userID, tenant.ID)
 	if err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, "could not fetch user").SetInternal(err)
 	}
 
-	if !userExists {
-		return echo.NewHTTPError(http.StatusNotFound, "user not found").SetInternal(err)
+	if user == nil {
+		return echo.NewHTTPError(http.StatusNotFound, "user not found")
 	}
 
 	currentMetadataModel, err := h.persister.GetUserMetadataPersister().Get(userID, tenant.ID)
