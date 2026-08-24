@@ -6,8 +6,10 @@ import (
 	"log"
 
 	"github.com/kelseyhightower/envconfig"
+	"github.com/knadh/koanf/parsers/json"
 	"github.com/knadh/koanf/parsers/yaml"
 	"github.com/knadh/koanf/providers/file"
+	"github.com/knadh/koanf/providers/rawbytes"
 	"github.com/knadh/koanf/v2"
 )
 
@@ -293,6 +295,27 @@ func (c *TenantConfig) PostProcess() error {
 	}
 
 	return nil
+}
+
+// ParseMultitenancyTenantConfig unmarshals a tenant's config JSON, as stored in the `tenants.config`
+// database column under multitenancy, into a TenantConfig and runs its PostProcess step.
+func ParseMultitenancyTenantConfig(raw []byte) (*TenantConfig, error) {
+	tenantConfig := DefaultTenantConfig()
+	k := koanf.New(".")
+
+	if err := k.Load(rawbytes.Provider(raw), json.Parser()); err != nil {
+		return nil, fmt.Errorf("failed to parse tenant config: %w", err)
+	}
+
+	if err := k.Unmarshal("", &tenantConfig); err != nil {
+		return nil, fmt.Errorf("failed to unmarshal tenant config: %w", err)
+	}
+
+	if err := tenantConfig.PostProcess(); err != nil {
+		return nil, fmt.Errorf("failed to post process tenant settings: %w", err)
+	}
+
+	return &tenantConfig, nil
 }
 
 func (c *Config) PostProcess() error {
