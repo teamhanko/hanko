@@ -311,9 +311,6 @@ func (p *CustomThirdPartyProvider) Validate() error {
 		if p.ClientID == "" {
 			return errors.New("missing client_id")
 		}
-		if p.Secret == "" {
-			return errors.New("missing client secret")
-		}
 		if len(p.Scopes) == 0 {
 			return errors.New("missing scopes")
 		}
@@ -489,9 +486,6 @@ func (p *ThirdPartyProvider) Validate() error {
 	if p.Enabled {
 		if p.ClientID == "" {
 			return errors.New("missing client ID")
-		}
-		if p.Secret == "" {
-			return errors.New("missing client secret")
 		}
 	}
 	return nil
