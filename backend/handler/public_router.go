@@ -88,7 +88,7 @@ func NewPublicRouter(cfg *config.Config, persister persistence.Persister, promet
 	samlGroup := tenantGroup.Group("/saml")
 	samlGroup.GET("/metadata", samlHandler.Metadata)
 	samlGroup.GET("/auth", samlHandler.Auth)
-	samlGroup.POST("/callback", samlHandler.CallbackPost)
+	samlGroup.POST("/callback", samlHandler.CallbackPost, webhookMiddleware)
 	tenantGroup.POST("/token_exchange", flowAPIHandler.TokenExchangeFlowHandler, webhookMiddleware)
 
 	tenantGroup.GET("/", statusHandler.Status)
