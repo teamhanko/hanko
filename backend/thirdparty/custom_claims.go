@@ -10,6 +10,7 @@ import (
 	zeroLogger "github.com/rs/zerolog/log"
 	"github.com/teamhanko/hanko/backend/v3/config"
 	"github.com/teamhanko/hanko/backend/v3/persistence"
+	"github.com/teamhanko/hanko/backend/v3/persistence/models"
 )
 
 // ResolveCustomClaims coerces mapped provider attributes into the tenant's declared claim
@@ -170,29 +171,34 @@ func customClaimConnectionSource(providerID string, isSaml bool) string {
 // Unlike ResolveCustomClaims (which never fails - bad claim *data* is tolerated by design),
 // persistence errors here propagate, consistent with how this file already treats every
 // other write in the same transaction (e.g. User.SyncFromProviderProfile's Update below).
-func applyCustomClaims(tx *pop.Connection, p persistence.Persister, cfg *config.TenantConfig, userData *UserData, source string, userID uuid.UUID, tenantID uuid.UUID) (changed bool, err error) {
+// applyCustomClaims returns the updated *models.UserCustomClaims record when a write
+// happened, or nil when nothing changed - callers must assign this back onto the in-memory
+// User.CustomClaims themselves (e.g. before building a webhook payload from that User), since
+// this function only touches the database and has no reference to the caller's User struct.
+func applyCustomClaims(tx *pop.Connection, p persistence.Persister, cfg *config.TenantConfig, userData *UserData, source string, userID uuid.UUID, tenantID uuid.UUID) (record *models.UserCustomClaims, err error) {
 	if userData.CustomClaimSource == nil {
-		return false, nil
+		return nil, nil
 	}
 
 	resolvedValues, managed := ResolveCustomClaims(cfg.CustomClaims.Definitions, userData.CustomClaimSource)
 	if len(managed) == 0 {
-		return false, nil
+		return nil, nil
 	}
 
 	persister := p.GetUserCustomClaimsPersisterWithConnection(tx)
-	record, err := persister.Get(userID, tenantID)
+	record, err = persister.Get(userID, tenantID)
 	if err != nil {
-		return false, fmt.Errorf("could not get user custom claims: %w", err)
+		return nil, fmt.Errorf("could not get user custom claims: %w", err)
 	}
 
 	stored := make(map[string]StoredCustomClaim)
 	if len(record.Claims) > 0 {
 		if err := json.Unmarshal(record.Claims, &stored); err != nil {
-			return false, fmt.Errorf("could not unmarshal existing custom claims: %w", err)
+			return nil, fmt.Errorf("could not unmarshal existing custom claims: %w", err)
 		}
 	}
 
+	changed := false
 	for _, claimName := range managed {
 		if value, ok := resolvedValues[claimName]; ok {
 			stored[claimName] = StoredCustomClaim{Value: value, Source: source}
@@ -207,18 +213,18 @@ func applyCustomClaims(tx *pop.Connection, p persistence.Persister, cfg *config.
 	}
 
 	if !changed {
-		return false, nil
+		return nil, nil
 	}
 
 	claimsJSON, err := json.Marshal(stored)
 	if err != nil {
-		return false, fmt.Errorf("could not marshal custom claims: %w", err)
+		return nil, fmt.Errorf("could not marshal custom claims: %w", err)
 	}
 	record.Claims = claimsJSON
 
 	if err := persister.Update(record); err != nil {
-		return false, fmt.Errorf("could not update user custom claims: %w", err)
+		return nil, fmt.Errorf("could not update user custom claims: %w", err)
 	}
 
-	return true, nil
+	return record, nil
 }

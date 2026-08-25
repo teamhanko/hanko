@@ -66,15 +66,22 @@ func LinkAccount(tx *pop.Connection, cfg *config.TenantConfig, p persistence.Per
 
 	// Custom claims: applied after signUp/link/signIn's own branch-specific logic, once
 	// result.User is known, regardless of which branch ran.
-	customClaimsChanged, err := applyCustomClaims(tx, p, cfg, userData, customClaimConnectionSource(providerID, isSaml), result.User.ID, tenantID)
+	updatedCustomClaims, err := applyCustomClaims(tx, p, cfg, userData, customClaimConnectionSource(providerID, isSaml), result.User.ID, tenantID)
 	if err != nil {
 		return nil, ErrorServer("could not apply custom claims").WithCause(err)
+	}
+	// Callers (e.g. the webhook payload built from result.User right after LinkAccount returns)
+	// would otherwise see whatever CustomClaims was eager-loaded before this write - stale by
+	// exactly one change - since applyCustomClaims only touches the database, it has no way to
+	// update result.User itself.
+	if updatedCustomClaims != nil {
+		result.User.CustomClaims = updatedCustomClaims
 	}
 	// Only fill in a webhook event if the branch above didn't already set a real one - link()
 	// always leaves it nil, and signIn() leaves it at its zero value whenever the provider's
 	// email didn't change (the common case) - see applyCustomClaims's call site discussion for
 	// why this can never overwrite a real event like UserCreate/UserEmailCreate.
-	if customClaimsChanged && (result.WebhookEvent == nil || *result.WebhookEvent == "") {
+	if updatedCustomClaims != nil && (result.WebhookEvent == nil || *result.WebhookEvent == "") {
 		userUpdate := events.UserUpdate
 		result.WebhookEvent = &userUpdate
 	}
