@@ -92,15 +92,14 @@ func (p customProvider) GetUserData(ctx context.Context, token *oauth2.Token) (*
 	}
 
 	// Resolve CustomClaimMapping against the raw claims before AttributeMapping below
-	// renames/deletes any of them - the two mapping mechanisms must read from the same
-	// untouched source, or a claim AttributeMapping already consumed would be gone by the
-	// time custom-claim resolution looks for it (see CustomClaimMapping's doc comment).
+	// renames any of them - the two mapping mechanisms must read from the same untouched
+	// source, or a claim AttributeMapping already consumed would be gone by the time
+	// custom-claim resolution looks for it (see CustomClaimMapping's doc comment).
 	customClaimSource := buildCustomClaimSource(p.config.CustomClaimMapping, userInfoClaims)
 
 	if p.config.AttributeMapping != nil {
 		for hankoClaim, providerClaim := range p.config.AttributeMapping {
 			userInfoClaims[hankoClaim] = userInfoClaims[providerClaim]
-			delete(userInfoClaims, providerClaim)
 		}
 	}
 

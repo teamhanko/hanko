@@ -3,9 +3,7 @@ package saml
 import (
 	"time"
 
-	"github.com/fatih/structs"
 	saml2 "github.com/russellhaering/gosaml2"
-	samlConfig "github.com/teamhanko/hanko/backend/v3/config"
 	"github.com/teamhanko/hanko/backend/v3/thirdparty"
 )
 
@@ -59,7 +57,6 @@ func ExtractUserData(
 		EmailVerified:     email.Verified || providerConfig.SkipEmailVerification,
 		Phone:             assertionValues.Get(attributeMap.Phone),
 		PhoneVerified:     assertionValues.Get(attributeMap.PhoneVerified) != "",
-		CustomClaims:      mapCustomClaims(assertionInfo.Values, attributeMap),
 	}
 
 	userData.CustomClaimSource = buildCustomClaimSource(attributeMap.Custom, assertionValues)
@@ -87,27 +84,4 @@ func buildCustomClaimSource(mapping map[string]string, values saml2.Values) *thi
 		Mapping:    mapping,
 		Attributes: attributes,
 	}
-}
-
-// mapCustomClaims extracts custom claims that are not in the standard attribute map
-func mapCustomClaims(values saml2.Values, attributeMap *samlConfig.AttributeMap) map[string]interface{} {
-	customAttributes := make(map[string]interface{})
-
-	// Get all standard attribute names
-	s := structs.New(attributeMap)
-	standardAttributes := make(map[string]bool)
-	for _, field := range s.Fields() {
-		if attrValue, ok := field.Value().(string); ok && attrValue != "" {
-			standardAttributes[attrValue] = true
-		}
-	}
-
-	// Extract any attributes not in the standard map
-	for name := range values {
-		if !standardAttributes[name] {
-			customAttributes[name] = values.Get(name)
-		}
-	}
-
-	return customAttributes
 }
