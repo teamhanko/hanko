@@ -9,7 +9,7 @@ import (
 	"github.com/teamhanko/hanko/backend/v3/persistence/models"
 )
 
-func TestCustomClaimsJWTFromUserModel_UnwrapsSourceEnvelope(t *testing.T) {
+func TestCustomClaimsFromUserModel_UnwrapsSourceEnvelope(t *testing.T) {
 	model := &models.UserCustomClaims{
 		UserID: uuid.Must(uuid.NewV4()),
 		Claims: nulls.NewString(`{
@@ -18,39 +18,43 @@ func TestCustomClaimsJWTFromUserModel_UnwrapsSourceEnvelope(t *testing.T) {
 		}`),
 	}
 
-	jwt := CustomClaimsJWTFromUserModel(model)
+	claims := CustomClaimsFromUserModel(model)
+	user := UserJWT{}.WithCustomClaims(claims)
 
-	assert.NotNil(t, jwt)
-	assert.Equal(t, "12345", jwt.Get("matriculation_number"))
-	assert.Equal(t, "true", jwt.Get("is_staff"))
-	assert.NotContains(t, jwt.String(), "source", "internal source tag must never reach the JWT")
-	assert.NotContains(t, jwt.String(), "saml:uni-a")
+	assert.NotNil(t, claims)
+	assert.Equal(t, "12345", user.CustomClaims("matriculation_number"))
+	assert.Equal(t, "true", user.CustomClaims("is_staff"))
+	assert.NotContains(t, string(claims), "source", "internal source tag must never reach the JWT")
+	assert.NotContains(t, string(claims), "saml:uni-a")
 }
 
-func TestCustomClaimsJWTFromUserModel_NilModel(t *testing.T) {
-	assert.Nil(t, CustomClaimsJWTFromUserModel(nil))
+func TestCustomClaimsFromUserModel_NilModel(t *testing.T) {
+	assert.Nil(t, CustomClaimsFromUserModel(nil))
 }
 
-func TestCustomClaimsJWTFromUserModel_EmptyClaims(t *testing.T) {
-	assert.Nil(t, CustomClaimsJWTFromUserModel(&models.UserCustomClaims{}))
-	assert.Nil(t, CustomClaimsJWTFromUserModel(&models.UserCustomClaims{Claims: nulls.NewString(`{}`)}))
+func TestCustomClaimsFromUserModel_EmptyClaims(t *testing.T) {
+	assert.Nil(t, CustomClaimsFromUserModel(&models.UserCustomClaims{}))
+	assert.Nil(t, CustomClaimsFromUserModel(&models.UserCustomClaims{Claims: nulls.NewString(`{}`)}))
 }
 
-func TestCustomClaimsJWTFromUserModel_InvalidJSONOmitted(t *testing.T) {
+func TestCustomClaimsFromUserModel_InvalidJSONOmitted(t *testing.T) {
 	model := &models.UserCustomClaims{
 		UserID: uuid.Must(uuid.NewV4()),
 		Claims: nulls.NewString(`not valid json`),
 	}
 
-	assert.Nil(t, CustomClaimsJWTFromUserModel(model))
+	assert.Nil(t, CustomClaimsFromUserModel(model))
 }
 
 // A user with no resolved custom claims yet (no UserCustomClaims row, or an empty one) leaves
-// UserJWT.CustomClaims nil by design - see dto/user.go. A JWT template referencing
-// `.User.CustomClaims.Get "some_claim"` must not panic in that case.
-func TestCustomClaimsJWT_Get_NilReceiver(t *testing.T) {
-	var jwt *CustomClaimsJWT
+// UserJWT.customClaims nil by design - see dto/user.go. A JWT template referencing
+// `.User.CustomClaims "some_claim"` must not panic in that case, nor must a nil *UserJWT.
+func TestUserJWT_CustomClaims_NoData(t *testing.T) {
+	var user *UserJWT
+	assert.Equal(t, "", user.CustomClaims("matriculation_number"))
+	assert.Equal(t, "", user.CustomClaims())
 
-	assert.Equal(t, "", jwt.Get("matriculation_number"))
-	assert.Equal(t, "", jwt.Get())
+	empty := UserJWT{}
+	assert.Equal(t, "", empty.CustomClaims("matriculation_number"))
+	assert.Equal(t, "", empty.CustomClaims())
 }

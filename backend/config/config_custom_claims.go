@@ -17,9 +17,9 @@ const (
 // to keep session JWTs and the user_custom_claims row from growing unbounded.
 const maxCustomClaimDefinitions = 50
 
-// customClaimNamePattern keeps names safe for gjson path lookups (CustomClaimsJWT.Get,
-// dto/custom_claims.go), which treat `.`, `|`, `#`, `@`, `*`, `?` as meaningful
-// metacharacters. Case is not restricted - that's the admin's choice, not ours.
+// customClaimNamePattern keeps names safe for gjson path lookups (UserJWT.CustomClaims,
+// dto/user.go), which treat `.`, `|`, `#`, `@`, `*`, `?` as meaningful metacharacters. Case is
+// not restricted - that's the admin's choice, not ours.
 var customClaimNamePattern = regexp.MustCompile(`^[A-Za-z][A-Za-z0-9_]{0,63}$`)
 
 // reservedCustomClaimNames mirrors the claim keys documented as always-ignored in

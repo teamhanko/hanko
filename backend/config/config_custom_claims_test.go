@@ -148,7 +148,7 @@ func TestCustomClaimDefinition_Validate_BadName(t *testing.T) {
 	cases := []string{
 		"1_number", // must start with a letter
 		"has-dash", // dash not allowed
-		"a.b",      // gjson path separator - would break CustomClaimsJWT.Get lookups
+		"a.b",      // gjson path separator - would break UserJWT.CustomClaims lookups
 		"a|b",      // gjson union operator
 		"",         // empty
 		strings.Repeat("a", 65),

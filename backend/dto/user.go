@@ -2,10 +2,12 @@ package dto
 
 import (
 	"encoding/json"
+	"strings"
 	"time"
 
 	"github.com/gofrs/uuid"
 	"github.com/teamhanko/hanko/backend/v3/persistence/models"
+	"github.com/tidwall/gjson"
 )
 
 type CreateUserResponse struct {
@@ -34,15 +36,35 @@ type UserInfoResponse struct {
 
 // UserJWT represents an abstracted user model for session management
 type UserJWT struct {
-	UserID       string           `json:"user_id"`
-	Email        *EmailJWT        `json:"email,omitempty"`
-	Username     string           `json:"username"`
-	Metadata     *MetadataJWT     `json:"metadata,omitempty"`
-	CustomClaims *CustomClaimsJWT `json:"custom_claims,omitempty"`
-	Name         string           `json:"name"`
-	FamilyName   string           `json:"family_name"`
-	GivenName    string           `json:"given_name"`
-	Picture      string           `json:"picture"`
+	UserID     string       `json:"user_id"`
+	Email      *EmailJWT    `json:"email,omitempty"`
+	Username   string       `json:"username"`
+	Metadata   *MetadataJWT `json:"metadata,omitempty"`
+	Name       string       `json:"name"`
+	FamilyName string       `json:"family_name"`
+	GivenName  string       `json:"given_name"`
+	Picture    string       `json:"picture"`
+
+	// customClaims holds this user's tenant-declared custom claims as flat {name: value} JSON,
+	// or nil if the user has none. Private, exposed only via the CustomClaims method below (not
+	// a field) so JWT templates can call it directly - `.User.CustomClaims "name"`, or bare
+	// `.User.CustomClaims` for everything - with no extra hop. Unlike Metadata (which has a
+	// public/unsafe split and so needs its own wrapper type with two accessors), there's only
+	// one namespace here, so a single method directly on UserJWT is all that's needed.
+	customClaims json.RawMessage
+}
+
+// CustomClaims returns this user's tenant-declared custom claims: the whole object with no
+// argument, or one named claim's value with a single argument - mirroring the calling
+// convention of Metadata's Public/Unsafe accessors (path is a gjson path, joined with ".").
+func (u *UserJWT) CustomClaims(path ...string) string {
+	if u == nil || len(u.customClaims) == 0 {
+		return ""
+	}
+	if len(path) < 1 {
+		return gjson.GetBytes(u.customClaims, "@this").String()
+	}
+	return gjson.GetBytes(u.customClaims, strings.Join(path, ".")).String()
 }
 
 func (u *UserJWT) String() string {
@@ -52,6 +74,28 @@ func (u *UserJWT) String() string {
 
 	jsonBytes, _ := json.Marshal(u)
 	return string(jsonBytes)
+}
+
+// MarshalJSON includes customClaims (unexported, so not covered by the default struct
+// marshaling) under the same "custom_claims" key it used to occupy as a field.
+func (u *UserJWT) MarshalJSON() ([]byte, error) {
+	type userJWTAlias UserJWT
+	return json.Marshal(struct {
+		*userJWTAlias
+		CustomClaims json.RawMessage `json:"custom_claims,omitempty"`
+	}{
+		userJWTAlias: (*userJWTAlias)(u),
+		CustomClaims: u.customClaims,
+	})
+}
+
+// WithCustomClaims returns a copy of u with its custom claims set to the given flat
+// {claimName: value} JSON. Exported setter for the otherwise-private customClaims field, for
+// tests in other packages (e.g. session/template_test.go) that construct a UserJWT directly -
+// UserJWTFromUserModel (below, same package) sets the field directly instead.
+func (u UserJWT) WithCustomClaims(claims json.RawMessage) UserJWT {
+	u.customClaims = claims
+	return u
 }
 
 func UserJWTFromUserModel(userModel *models.User) UserJWT {
@@ -75,10 +119,7 @@ func UserJWTFromUserModel(userModel *models.User) UserJWT {
 	}
 
 	if userModel.CustomClaims != nil {
-		customClaimsJWT := CustomClaimsJWTFromUserModel(userModel.CustomClaims)
-		if customClaimsJWT != nil {
-			userJWT.CustomClaims = customClaimsJWT
-		}
+		userJWT.customClaims = CustomClaimsFromUserModel(userModel.CustomClaims)
 	}
 
 	if userModel.GivenName.Valid {

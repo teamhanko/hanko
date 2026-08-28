@@ -264,20 +264,18 @@ func TestProcessJWTTemplate(t *testing.T) {
 		{
 			name: "should process access to custom claims",
 			claims: map[string]interface{}{
-				"custom_claims_whole":  "{{ .User.CustomClaims }}",
-				"matriculation_number": `{{ .User.CustomClaims.Get "matriculation_number" }}`,
-				"age_via_get":          `{{ .User.CustomClaims.Get "age" }}`,
-				"is_staff_via_get":     `{{ .User.CustomClaims.Get "is_staff" }}`,
-				"affiliation_via_get":  `{{ .User.CustomClaims.Get "affiliation" }}`,
+				"custom_claims_whole": "{{ .User.CustomClaims }}",
+				"matriculation_number": `{{ .User.CustomClaims "matriculation_number" }}`,
+				"age":                  `{{ .User.CustomClaims "age" }}`,
+				"is_staff":             `{{ .User.CustomClaims "is_staff" }}`,
+				"affiliation":          `{{ .User.CustomClaims "affiliation" }}`,
 			},
-			user: dto.UserJWT{
-				CustomClaims: dto.NewCustomClaimsJWT(json.RawMessage(`{
-					"matriculation_number": "12345",
-					"age": 29,
-					"is_staff": true,
-					"affiliation": ["student", "staff"]
-				}`)),
-			},
+			user: dto.UserJWT{}.WithCustomClaims(json.RawMessage(`{
+				"matriculation_number": "12345",
+				"age": 29,
+				"is_staff": true,
+				"affiliation": ["student", "staff"]
+			}`)),
 			expectedClaims: json.RawMessage(`{
 				"custom_claims_whole": {
 					"matriculation_number": "12345",
@@ -286,9 +284,9 @@ func TestProcessJWTTemplate(t *testing.T) {
 					"affiliation": ["student", "staff"]
 				},
 				"matriculation_number": "12345",
-				"age_via_get": "29",
-				"is_staff_via_get": true,
-				"affiliation_via_get": ["student", "staff"]
+				"age": "29",
+				"is_staff": true,
+				"affiliation": ["student", "staff"]
 			}`),
 		},
 	}
