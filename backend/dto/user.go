@@ -57,29 +57,22 @@ type UserJWT struct {
 // CustomClaims returns this user's tenant-declared custom claims: the whole object with no
 // argument, or one named claim's value with a single argument - mirroring the calling
 // convention of Metadata's Public/Unsafe accessors (path is a gjson path, joined with ".").
+// Returns "" for a claim that doesn't exist, or for a user with no custom claims at all.
 //
-// Always returns a string, so a number/boolean-typed claim's own type is lost here - Go's
-// text/template can only ever render text (see session.ProcessJWTTemplate), so this is correct
-// for the general case (a value glued into other text has no meaningful "typed" form anyway).
-// CustomClaimsValue below exists specifically for the one case where the real type CAN be
-// preserved: a claim template that's nothing but a single bare reference to this accessor.
-func (u *UserJWT) CustomClaims(path ...string) string {
-	if u == nil || len(u.customClaims) == 0 {
-		return ""
-	}
-	if len(path) < 1 {
-		return gjson.GetBytes(u.customClaims, "@this").String()
-	}
-	return gjson.GetBytes(u.customClaims, strings.Join(path, ".")).String()
-}
-
-// CustomClaimsValue is CustomClaims, but returns the value with its real JSON type intact
-// (float64/bool/string/[]interface{}/map[string]interface{}) instead of always a string.
-// Used exclusively by session.parseClaimTemplateValue's bare-single-accessor fast path, which
-// bypasses text/template's execution entirely for that one case - not by general template
-// execution (Execute always stringifies its output regardless of a method's return type, so
-// this wouldn't help there; see CustomClaims's doc comment).
-func (u *UserJWT) CustomClaimsValue(path ...string) interface{} {
+// Returns interface{}, not string, so the value's real JSON type (float64/bool/string/
+// []interface{}/map[string]interface{}) survives when Go's text/template evaluates it as part
+// of a larger expression - e.g. `{{if .User.CustomClaims "is_staff"}}`: Go's `if`/`and`/`or`/
+// `not`/`eq` all inspect the actual reflected value a subexpression produces, which is
+// determined by this method's return type, not by how the template's FINAL output gets
+// rendered to text. A `string`-typed return would make a `false`-valued boolean claim print as
+// the non-empty text "false", which `if` treats as truthy - silently backwards.
+//
+// This alone does NOT fix a bare `{{ .User.CustomClaims "age" }}` claim template's own output
+// type, though: Execute always stringifies whatever the template as a whole renders to,
+// regardless of any one method's return type. That's handled separately, by
+// session.parseClaimTemplateValue's bare-accessor fast path, which bypasses Execute entirely
+// for that one case and calls this same method directly.
+func (u *UserJWT) CustomClaims(path ...string) interface{} {
 	if u == nil || len(u.customClaims) == 0 {
 		return ""
 	}

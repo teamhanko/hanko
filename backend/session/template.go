@@ -87,9 +87,9 @@ func parseClaimTemplateValue(tmplStr string, data JWTTemplateData) (interface{},
 	// anyway.
 	if m := bareCustomClaimsPattern.FindStringSubmatch(tmplStr); m != nil {
 		if m[1] == "" {
-			return data.User.CustomClaimsValue(), nil
+			return data.User.CustomClaims(), nil
 		}
-		return data.User.CustomClaimsValue(m[1]), nil
+		return data.User.CustomClaims(m[1]), nil
 	}
 
 	tmpl, err := template.New("").Parse(tmplStr)
