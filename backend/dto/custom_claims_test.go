@@ -44,3 +44,13 @@ func TestCustomClaimsJWTFromUserModel_InvalidJSONOmitted(t *testing.T) {
 
 	assert.Nil(t, CustomClaimsJWTFromUserModel(model))
 }
+
+// A user with no resolved custom claims yet (no UserCustomClaims row, or an empty one) leaves
+// UserJWT.CustomClaims nil by design - see dto/user.go. A JWT template referencing
+// `.User.CustomClaims.Get "some_claim"` must not panic in that case.
+func TestCustomClaimsJWT_Get_NilReceiver(t *testing.T) {
+	var jwt *CustomClaimsJWT
+
+	assert.Equal(t, "", jwt.Get("matriculation_number"))
+	assert.Equal(t, "", jwt.Get())
+}

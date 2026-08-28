@@ -64,6 +64,9 @@ func CustomClaimsJWTFromUserModel(customClaims *models.UserCustomClaims) *Custom
 // Get looks up path (a gjson path, joined with "." - see MetadataJWT.Public/Unsafe for the
 // same convention) within the flat claims object. With no path, returns the whole object.
 func (c *CustomClaimsJWT) Get(path ...string) string {
+	if c == nil {
+		return ""
+	}
 	if len(path) < 1 {
 		return gjson.GetBytes(c.claims, "@this").String()
 	}
