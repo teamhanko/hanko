@@ -284,9 +284,43 @@ func TestProcessJWTTemplate(t *testing.T) {
 					"affiliation": ["student", "staff"]
 				},
 				"matriculation_number": "12345",
-				"age": "29",
+				"age": 29,
 				"is_staff": true,
 				"affiliation": ["student", "staff"]
+			}`),
+		},
+		{
+			name: "should preserve a custom claim's real type only for a bare accessor, not glued to other text",
+			claims: map[string]interface{}{
+				"age_bare":      `{{ .User.CustomClaims "age" }}`,
+				"age_composite": `Age: {{ .User.CustomClaims "age" }}`,
+			},
+			user: dto.UserJWT{}.WithCustomClaims(json.RawMessage(`{"age": 29}`)),
+			expectedClaims: json.RawMessage(`{
+				"age_bare": 29,
+				"age_composite": "Age: 29"
+			}`),
+		},
+		{
+			name: "should return an empty string for a claim key that isn't in the user's data",
+			claims: map[string]interface{}{
+				"missing_claim": `{{ .User.CustomClaims "not_a_real_claim" }}`,
+			},
+			user:           dto.UserJWT{}.WithCustomClaims(json.RawMessage(`{"age": 29}`)),
+			expectedClaims: json.RawMessage(`{"missing_claim": ""}`),
+		},
+		{
+			name: "should return an empty string for a user with no custom claims at all",
+			claims: map[string]interface{}{
+				"bare":  "{{ .User.CustomClaims }}",
+				"named": `{{ .User.CustomClaims "age" }}`,
+			},
+			user: dto.UserJWT{
+				Username: "test_user",
+			},
+			expectedClaims: json.RawMessage(`{
+				"bare": "",
+				"named": ""
 			}`),
 		},
 	}

@@ -57,6 +57,12 @@ type UserJWT struct {
 // CustomClaims returns this user's tenant-declared custom claims: the whole object with no
 // argument, or one named claim's value with a single argument - mirroring the calling
 // convention of Metadata's Public/Unsafe accessors (path is a gjson path, joined with ".").
+//
+// Always returns a string, so a number/boolean-typed claim's own type is lost here - Go's
+// text/template can only ever render text (see session.ProcessJWTTemplate), so this is correct
+// for the general case (a value glued into other text has no meaningful "typed" form anyway).
+// CustomClaimsValue below exists specifically for the one case where the real type CAN be
+// preserved: a claim template that's nothing but a single bare reference to this accessor.
 func (u *UserJWT) CustomClaims(path ...string) string {
 	if u == nil || len(u.customClaims) == 0 {
 		return ""
@@ -65,6 +71,28 @@ func (u *UserJWT) CustomClaims(path ...string) string {
 		return gjson.GetBytes(u.customClaims, "@this").String()
 	}
 	return gjson.GetBytes(u.customClaims, strings.Join(path, ".")).String()
+}
+
+// CustomClaimsValue is CustomClaims, but returns the value with its real JSON type intact
+// (float64/bool/string/[]interface{}/map[string]interface{}) instead of always a string.
+// Used exclusively by session.parseClaimTemplateValue's bare-single-accessor fast path, which
+// bypasses text/template's execution entirely for that one case - not by general template
+// execution (Execute always stringifies its output regardless of a method's return type, so
+// this wouldn't help there; see CustomClaims's doc comment).
+func (u *UserJWT) CustomClaimsValue(path ...string) interface{} {
+	if u == nil || len(u.customClaims) == 0 {
+		return ""
+	}
+	var result gjson.Result
+	if len(path) < 1 {
+		result = gjson.GetBytes(u.customClaims, "@this")
+	} else {
+		result = gjson.GetBytes(u.customClaims, strings.Join(path, "."))
+	}
+	if !result.Exists() {
+		return ""
+	}
+	return result.Value()
 }
 
 func (u *UserJWT) String() string {

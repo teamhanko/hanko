@@ -1,6 +1,7 @@
 package dto
 
 import (
+	"encoding/json"
 	"testing"
 
 	"github.com/gobuffalo/nulls"
@@ -57,4 +58,30 @@ func TestUserJWT_CustomClaims_NoData(t *testing.T) {
 	empty := UserJWT{}
 	assert.Equal(t, "", empty.CustomClaims("matriculation_number"))
 	assert.Equal(t, "", empty.CustomClaims())
+}
+
+// CustomClaimsValue is CustomClaims's type-preserving counterpart, used only by
+// session.parseClaimTemplateValue's bare-accessor fast path (see its doc comment) - it should
+// return the value's real JSON type, not the stringified form CustomClaims returns.
+func TestUserJWT_CustomClaimsValue(t *testing.T) {
+	user := UserJWT{}.WithCustomClaims(json.RawMessage(`{
+		"matriculation_number": "12345",
+		"age": 29,
+		"is_staff": true,
+		"affiliation": ["student", "staff"]
+	}`))
+
+	assert.Equal(t, "12345", user.CustomClaimsValue("matriculation_number"))
+	assert.Equal(t, float64(29), user.CustomClaimsValue("age"))
+	assert.Equal(t, true, user.CustomClaimsValue("is_staff"))
+	assert.Equal(t, []interface{}{"student", "staff"}, user.CustomClaimsValue("affiliation"))
+	assert.Equal(t, "", user.CustomClaimsValue("not_a_real_claim"))
+
+	whole, ok := user.CustomClaimsValue().(map[string]interface{})
+	assert.True(t, ok)
+	assert.Equal(t, float64(29), whole["age"])
+
+	var nilUser *UserJWT
+	assert.Equal(t, "", nilUser.CustomClaimsValue("age"))
+	assert.Equal(t, "", nilUser.CustomClaimsValue())
 }
