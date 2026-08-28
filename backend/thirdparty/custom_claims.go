@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"strconv"
 
+	"github.com/gobuffalo/nulls"
 	"github.com/gobuffalo/pop/v6"
 	"github.com/gofrs/uuid"
 	zeroLogger "github.com/rs/zerolog/log"
@@ -192,8 +193,8 @@ func applyCustomClaims(tx *pop.Connection, p persistence.Persister, cfg *config.
 	}
 
 	stored := make(map[string]StoredCustomClaim)
-	if len(record.Claims) > 0 {
-		if err := json.Unmarshal(record.Claims, &stored); err != nil {
+	if record.Claims.Valid && record.Claims.String != "" {
+		if err := json.Unmarshal([]byte(record.Claims.String), &stored); err != nil {
 			return nil, fmt.Errorf("could not unmarshal existing custom claims: %w", err)
 		}
 	}
@@ -220,7 +221,7 @@ func applyCustomClaims(tx *pop.Connection, p persistence.Persister, cfg *config.
 	if err != nil {
 		return nil, fmt.Errorf("could not marshal custom claims: %w", err)
 	}
-	record.Claims = claimsJSON
+	record.Claims = nulls.NewString(string(claimsJSON))
 
 	if err := persister.Update(record); err != nil {
 		return nil, fmt.Errorf("could not update user custom claims: %w", err)

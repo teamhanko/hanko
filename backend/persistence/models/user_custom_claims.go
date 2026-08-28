@@ -1,10 +1,10 @@
 package models
 
 import (
-	"encoding/json"
 	"fmt"
 	"time"
 
+	"github.com/gobuffalo/nulls"
 	"github.com/gobuffalo/pop/v6"
 	"github.com/gobuffalo/validate/v3"
 	"github.com/gobuffalo/validate/v3/validators"
@@ -19,13 +19,18 @@ import (
 //
 // source is the writing connection's identifier ("saml:<provider_id>", "oidc:<provider_id>"),
 // or "admin" for a value set via the Admin API. It stays internal to this table.
+//
+// Claims is nulls.String, not json.RawMessage: this is a has_one association (see
+// User.CustomClaims), and pop's eager-preload for a user with no row here scans a NULL
+// "claims" column - json.RawMessage isn't a sql.Scanner and panics on that, the same problem
+// UserMetadata's Public/Private/Unsafe fields already solve with nulls.String.
 type UserCustomClaims struct {
-	ID        uuid.UUID       `db:"id"`
-	UserID    uuid.UUID       `db:"user_id"`
-	TenantID  uuid.UUID       `db:"tenant_id"`
-	Claims    json.RawMessage `db:"claims"`
-	CreatedAt time.Time       `db:"created_at"`
-	UpdatedAt time.Time       `db:"updated_at"`
+	ID        uuid.UUID    `db:"id"`
+	UserID    uuid.UUID    `db:"user_id"`
+	TenantID  uuid.UUID    `db:"tenant_id"`
+	Claims    nulls.String `db:"claims"`
+	CreatedAt time.Time    `db:"created_at"`
+	UpdatedAt time.Time    `db:"updated_at"`
 }
 
 func (c *UserCustomClaims) Validate(_ *pop.Connection) (*validate.Errors, error) {
@@ -39,7 +44,7 @@ func (c *UserCustomClaims) Validate(_ *pop.Connection) (*validate.Errors, error)
 		&validators.TimeIsPresent{Name: "CreatedAt", Field: c.CreatedAt},
 		&validators.StringLengthInRange{
 			Name:    "Claims",
-			Field:   string(c.Claims),
+			Field:   c.Claims.String,
 			Max:     claimsMax,
 			Message: fmt.Sprintf("custom claims must not exceed %d characters", claimsMax),
 		},

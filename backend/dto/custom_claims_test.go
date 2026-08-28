@@ -1,9 +1,9 @@
 package dto
 
 import (
-	"encoding/json"
 	"testing"
 
+	"github.com/gobuffalo/nulls"
 	"github.com/gofrs/uuid"
 	"github.com/stretchr/testify/assert"
 	"github.com/teamhanko/hanko/backend/v3/persistence/models"
@@ -12,7 +12,7 @@ import (
 func TestCustomClaimsJWTFromUserModel_UnwrapsSourceEnvelope(t *testing.T) {
 	model := &models.UserCustomClaims{
 		UserID: uuid.Must(uuid.NewV4()),
-		Claims: json.RawMessage(`{
+		Claims: nulls.NewString(`{
 			"matriculation_number": {"value": "12345", "source": "saml:uni-a"},
 			"is_staff": {"value": true, "source": "admin"}
 		}`),
@@ -33,13 +33,13 @@ func TestCustomClaimsJWTFromUserModel_NilModel(t *testing.T) {
 
 func TestCustomClaimsJWTFromUserModel_EmptyClaims(t *testing.T) {
 	assert.Nil(t, CustomClaimsJWTFromUserModel(&models.UserCustomClaims{}))
-	assert.Nil(t, CustomClaimsJWTFromUserModel(&models.UserCustomClaims{Claims: json.RawMessage(`{}`)}))
+	assert.Nil(t, CustomClaimsJWTFromUserModel(&models.UserCustomClaims{Claims: nulls.NewString(`{}`)}))
 }
 
 func TestCustomClaimsJWTFromUserModel_InvalidJSONOmitted(t *testing.T) {
 	model := &models.UserCustomClaims{
 		UserID: uuid.Must(uuid.NewV4()),
-		Claims: json.RawMessage(`not valid json`),
+		Claims: nulls.NewString(`not valid json`),
 	}
 
 	assert.Nil(t, CustomClaimsJWTFromUserModel(model))

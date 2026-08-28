@@ -19,12 +19,12 @@ type CustomClaims map[string]any
 // {claimName: value} view. Returns nil (leading to 204 No Content, mirroring metadata) if
 // the user has no custom claims at all.
 func NewCustomClaims(model *models.UserCustomClaims) (CustomClaims, error) {
-	if len(model.Claims) == 0 {
+	if !model.Claims.Valid || model.Claims.String == "" {
 		return nil, nil
 	}
 
 	stored := make(map[string]thirdparty.StoredCustomClaim)
-	if err := json.Unmarshal(model.Claims, &stored); err != nil {
+	if err := json.Unmarshal([]byte(model.Claims.String), &stored); err != nil {
 		return nil, fmt.Errorf("could not unmarshal custom claims: %w", err)
 	}
 

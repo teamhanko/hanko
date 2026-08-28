@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"net/http"
 
+	"github.com/gobuffalo/nulls"
 	"github.com/gofrs/uuid"
 	"github.com/labstack/echo/v4"
 	"github.com/teamhanko/hanko/backend/v3/config"
@@ -124,13 +125,13 @@ func (h *UserCustomClaimsAdminHandler) PatchCustomClaims(c echo.Context) error {
 // *echo.HTTPError(400) directly, which the caller unwraps and returns as-is.
 func applyCustomClaimsPatch(defs config.CustomClaimDefinitions, model *models.UserCustomClaims, patch *admin.PatchCustomClaimsRequest) error {
 	if patch.Claims.Raw == "null" {
-		model.Claims = json.RawMessage("{}")
+		model.Claims = nulls.NewString("{}")
 		return nil
 	}
 
 	stored := make(map[string]thirdparty.StoredCustomClaim)
-	if len(model.Claims) > 0 {
-		if err := json.Unmarshal(model.Claims, &stored); err != nil {
+	if model.Claims.Valid && model.Claims.String != "" {
+		if err := json.Unmarshal([]byte(model.Claims.String), &stored); err != nil {
 			return fmt.Errorf("could not unmarshal existing custom claims: %w", err)
 		}
 	}
@@ -168,7 +169,7 @@ func applyCustomClaimsPatch(defs config.CustomClaimDefinitions, model *models.Us
 	if err != nil {
 		return fmt.Errorf("could not marshal custom claims: %w", err)
 	}
-	model.Claims = claimsJSON
+	model.Claims = nulls.NewString(string(claimsJSON))
 
 	return nil
 }

@@ -30,12 +30,12 @@ func NewCustomClaimsJWT(claims json.RawMessage) *CustomClaimsJWT {
 // {claimName: value} view - source is internal bookkeeping (thirdparty.applyCustomClaims's
 // source-scoped clear semantics) and must never reach the JWT.
 func CustomClaimsJWTFromUserModel(customClaims *models.UserCustomClaims) *CustomClaimsJWT {
-	if customClaims == nil || len(customClaims.Claims) == 0 {
+	if customClaims == nil || !customClaims.Claims.Valid || customClaims.Claims.String == "" {
 		return nil
 	}
 
 	stored := make(map[string]thirdparty.StoredCustomClaim)
-	if err := json.Unmarshal(customClaims.Claims, &stored); err != nil {
+	if err := json.Unmarshal([]byte(customClaims.Claims.String), &stored); err != nil {
 		// Should never happen - this backend is the only writer of this column and always
 		// writes valid JSON. Omit rather than fail token issuance over corrupted data.
 		zeroLogger.Warn().Err(err).Str("component", "dto").Str("user_id", customClaims.UserID.String()).
