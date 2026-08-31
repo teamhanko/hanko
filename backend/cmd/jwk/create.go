@@ -18,6 +18,7 @@ func NewCreateCommand() *cobra.Command {
 		configFile string
 		tenantID   string
 		store      bool
+		ifMissing  bool
 	)
 
 	cmd := &cobra.Command{
@@ -36,6 +37,10 @@ Against a running multi-tenant deployment (e.g. in a Kubernetes cluster): run it
 instead of setting up a local DB connection, so it reuses the pod's already-mounted config and DB connectivity:
 
   kubectl exec -n <namespace> deploy/hanko -- /hanko jwk create --store --config /etc/config/config.yaml --tenant_id <tenant_id>
+
+Add --if-missing to make this safe to call unconditionally (e.g. from a bootstrap script run
+after every fresh deploy): it no-ops instead of creating an additional key if the tenant already
+has one. Without it, --store always generates and persists a new key, every time.
 `,
 		Run: func(cmd *cobra.Command, args []string) {
 			if !store {
@@ -94,6 +99,17 @@ instead of setting up a local DB connection, so it reuses the pod's already-moun
 				log.Fatalf("failed to post process config: %s", err)
 			}
 
+			if ifMissing {
+				existing, err := persister.GetJwkPersister().GetAll(tID)
+				if err != nil {
+					log.Fatalf("failed to check for an existing jwk: %s", err)
+				}
+				if len(existing) > 0 {
+					fmt.Printf("Tenant '%s' already has %d JWK(s), skipping (--if-missing)\n", tID.String(), len(existing))
+					return
+				}
+			}
+
 			jwkManager, err := jwk.NewManager(*cfg, persister)
 			if err != nil {
 				log.Fatalf("failed to create jwk manager: %s", err)
@@ -111,6 +127,7 @@ instead of setting up a local DB connection, so it reuses the pod's already-moun
 	cmd.Flags().BoolVar(&store, "store", false, "encrypt and persist the generated JWK for a tenant instead of printing it")
 	cmd.Flags().StringVar(&configFile, "config", "", "config file (only used with --store)")
 	cmd.Flags().StringVar(&tenantID, "tenant_id", "", "tenant ID, required if multitenancy is enabled (only used with --store)")
+	cmd.Flags().BoolVar(&ifMissing, "if-missing", false, "skip instead of creating an additional key if the tenant already has one (only used with --store)")
 
 	return cmd
 }
