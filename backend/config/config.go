@@ -255,13 +255,13 @@ func (c *Config) ValidateCrossConfig() error {
 
 	for _, idp := range c.TenantConfig.Saml.IdentityProviders {
 		if err := c.TenantConfig.CustomClaims.Definitions.ValidateMapping(idp.AttributeMap.Custom); err != nil {
-			return fmt.Errorf("failed to validate saml identity provider %q: %w", idp.Name, err)
+			return fmt.Errorf("invalid custom claim mapping for saml identity provider %q: %w", idp.Name, err)
 		}
 	}
 
 	for key, provider := range c.TenantConfig.ThirdParty.CustomProviders {
 		if err := c.TenantConfig.CustomClaims.Definitions.ValidateMapping(provider.CustomClaimMapping); err != nil {
-			return fmt.Errorf("failed to validate custom third party provider %q: %w", key, err)
+			return fmt.Errorf("invalid custom claim mapping for custom third party provider %q: %w", key, err)
 		}
 	}
 

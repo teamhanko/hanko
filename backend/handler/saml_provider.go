@@ -58,7 +58,7 @@ func (h *SamlProviderHandler) Create(c echo.Context) error {
 	}
 
 	if err := tenantConfig.CustomClaims.Definitions.ValidateMapping(attributeMap.Custom); err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("invalid attribute_map: %v", err))
+		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("invalid custom claim mapping: %v", err))
 	}
 
 	// Create provider
@@ -166,7 +166,7 @@ func (h *SamlProviderHandler) Update(c echo.Context) error {
 	}
 
 	if err := tenantConfig.CustomClaims.Definitions.ValidateMapping(attributeMap.Custom); err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("invalid attribute_map: %v", err))
+		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("invalid custom claim mapping: %v", err))
 	}
 
 	// Update provider
