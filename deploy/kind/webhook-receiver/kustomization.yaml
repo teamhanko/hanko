@@ -1,0 +1,5 @@
+# Opt-in addition to the base deploy/kind deployment - see the "kind-webhooks" skaffold
+# profile. Not referenced by deploy/kind/kustomization.yaml.
+namespace: hanko
+resources:
+  - webhook-receiver.yaml
