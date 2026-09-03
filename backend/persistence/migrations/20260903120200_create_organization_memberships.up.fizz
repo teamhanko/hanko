@@ -1,4 +1,4 @@
-create_table("organization_memberships") {
+create_table("organization_memberships", {"timestamps": false}) {
 	t.Column("id", "uuid", {primary: true})
 	t.Column("tenant_id", "uuid", {"null": false})
 	t.Column("user_id", "uuid", {"null": false})
