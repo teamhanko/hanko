@@ -1,8 +1,6 @@
 package handler
 
 import (
-	"bytes"
-	"encoding/json"
 	"errors"
 	"fmt"
 	"net/http"
@@ -326,38 +324,12 @@ func (h *UserHandlerAdmin) Create(c echo.Context) error {
 	return c.JSON(http.StatusOK, userDto)
 }
 
-// OptionalString represents a PATCH-able string field with 3 states:
-// - not present in JSON => Present=false (no change)
-// - present with string => Present=true, Value!=nil (set)
-// - present with null   => Present=true, Value==nil (clear)
-type OptionalString struct {
-	Present bool
-	Value   *string
-}
-
-func (o *OptionalString) UnmarshalJSON(b []byte) error {
-	o.Present = true
-
-	if bytes.Equal(bytes.TrimSpace(b), []byte("null")) {
-		o.Value = nil
-		return nil
-	}
-
-	var s string
-	if err := json.Unmarshal(b, &s); err != nil {
-		return fmt.Errorf("expected string or null: %w", err)
-	}
-
-	o.Value = &s
-	return nil
-}
-
 type PatchUserAdminRequest struct {
-	Username   OptionalString `json:"username"`
-	Name       OptionalString `json:"name"`
-	GivenName  OptionalString `json:"given_name"`
-	FamilyName OptionalString `json:"family_name"`
-	Picture    OptionalString `json:"picture"`
+	Username   dto.OptionalString `json:"username"`
+	Name       dto.OptionalString `json:"name"`
+	GivenName  dto.OptionalString `json:"given_name"`
+	FamilyName dto.OptionalString `json:"family_name"`
+	Picture    dto.OptionalString `json:"picture"`
 }
 
 func (h *UserHandlerAdmin) Patch(c echo.Context) error {
@@ -377,7 +349,7 @@ func (h *UserHandlerAdmin) Patch(c echo.Context) error {
 	}
 
 	// Empty/whitespace-only strings are invalid (`null` is used to clear).
-	normalizeOptionalString := func(field string, v OptionalString, lower bool) (OptionalString, error) {
+	normalizeOptionalString := func(field string, v dto.OptionalString, lower bool) (dto.OptionalString, error) {
 		if !v.Present || v.Value == nil {
 			return v, nil
 		}
@@ -434,7 +406,7 @@ func (h *UserHandlerAdmin) Patch(c echo.Context) error {
 
 		changed := false
 
-		applyNullsString := func(dst *nulls.String, in OptionalString) {
+		applyNullsString := func(dst *nulls.String, in dto.OptionalString) {
 			if !in.Present {
 				return
 			}

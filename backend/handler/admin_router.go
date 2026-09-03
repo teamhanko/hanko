@@ -112,6 +112,15 @@ func NewAdminRouter(cfg *config.Config, persister persistence.Persister, prometh
 	otp.GET("", otpHandler.Get)
 	otp.DELETE("", otpHandler.Delete)
 
+	organizationHandler := NewOrganizationHandlerAdmin(persister)
+
+	organizations := tenantGroup.Group("/organizations")
+	organizations.POST("", organizationHandler.Create)
+	organizations.GET("", organizationHandler.List)
+	organizations.GET("/:id", organizationHandler.Get)
+	organizations.PATCH("/:id", organizationHandler.Patch)
+	organizations.DELETE("/:id", organizationHandler.Delete)
+
 	auditLogHandler := NewAuditLogHandler(persister)
 
 	auditLogs := tenantGroup.Group("/audit_logs")
