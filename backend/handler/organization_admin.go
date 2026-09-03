@@ -228,3 +228,175 @@ func (h *OrganizationHandlerAdmin) Delete(c echo.Context) error {
 
 	return c.NoContent(http.StatusNoContent)
 }
+
+// AddMember adds an existing user to an existing organization.
+// org_id and user_id are both path segments identifying the resources
+// being linked, so an unrecognized id here is a 404, not a 400 - unlike
+// a reference embedded in a request body (see RoleBindingHandlerAdmin).
+func (h *OrganizationHandlerAdmin) AddMember(c echo.Context) error {
+	tenant, err := context.GetTenant(c)
+	if err != nil {
+		return fmt.Errorf("failed to get tenant from context: %w", err)
+	}
+
+	organizationId, err := uuid.FromString(c.Param("org_id"))
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, "failed to parse organizationId as uuid").SetInternal(err)
+	}
+
+	userId, err := uuid.FromString(c.Param("user_id"))
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, "failed to parse userId as uuid").SetInternal(err)
+	}
+
+	organization, err := h.persister.GetOrganizationPersister().Get(organizationId, tenant.ID)
+	if err != nil {
+		return fmt.Errorf("failed to get organization: %w", err)
+	}
+	if organization == nil {
+		return echo.NewHTTPError(http.StatusNotFound, "organization not found")
+	}
+
+	user, err := h.persister.GetUserPersister().Get(userId, tenant.ID)
+	if err != nil {
+		return fmt.Errorf("failed to get user: %w", err)
+	}
+	if user == nil {
+		return echo.NewHTTPError(http.StatusNotFound, "user not found")
+	}
+
+	id, err := uuid.NewV4()
+	if err != nil {
+		return fmt.Errorf("failed to create new organization membership id: %w", err)
+	}
+
+	membership := models.OrganizationMembership{
+		ID:             id,
+		TenantID:       tenant.ID,
+		UserID:         userId,
+		OrganizationID: organizationId,
+		CreatedAt:      time.Now(),
+	}
+
+	err = h.persister.GetOrganizationMembershipPersister().Create(membership)
+	if err != nil {
+		if pgErr, ok := errors.AsType[*pgconn.PgError](err); ok {
+			if pgErr.Code == "23505" {
+				return echo.NewHTTPError(http.StatusConflict, "user is already a member of this organization")
+			}
+		} else if mysqlErr, ok2 := errors.AsType[*mysql.MySQLError](err); ok2 {
+			if mysqlErr.Number == 1062 {
+				return echo.NewHTTPError(http.StatusConflict, "user is already a member of this organization")
+			}
+		}
+		return fmt.Errorf("failed to add organization member: %w", err)
+	}
+
+	return c.JSON(http.StatusOK, admin.FromOrganizationMembershipModel(membership))
+}
+
+// RemoveMember removes a user from an organization. This cascades to
+// delete that user's role bindings for the organization (enforced by the
+// composite foreign key on role_bindings, see the schema migration).
+func (h *OrganizationHandlerAdmin) RemoveMember(c echo.Context) error {
+	tenant, err := context.GetTenant(c)
+	if err != nil {
+		return fmt.Errorf("failed to get tenant from context: %w", err)
+	}
+
+	organizationId, err := uuid.FromString(c.Param("org_id"))
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, "failed to parse organizationId as uuid").SetInternal(err)
+	}
+
+	userId, err := uuid.FromString(c.Param("user_id"))
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, "failed to parse userId as uuid").SetInternal(err)
+	}
+
+	organization, err := h.persister.GetOrganizationPersister().Get(organizationId, tenant.ID)
+	if err != nil {
+		return fmt.Errorf("failed to get organization: %w", err)
+	}
+	if organization == nil {
+		return echo.NewHTTPError(http.StatusNotFound, "organization not found")
+	}
+
+	p := h.persister.GetOrganizationMembershipPersister()
+	membership, err := p.Get(userId, organizationId, tenant.ID)
+	if err != nil {
+		return fmt.Errorf("failed to get organization membership: %w", err)
+	}
+	if membership == nil {
+		return echo.NewHTTPError(http.StatusNotFound, "user is not a member of this organization")
+	}
+
+	err = p.Delete(*membership)
+	if err != nil {
+		return fmt.Errorf("failed to remove organization member: %w", err)
+	}
+
+	return c.NoContent(http.StatusNoContent)
+}
+
+type ListMembersRequest struct {
+	PerPage int `query:"per_page"`
+	Page    int `query:"page"`
+}
+
+func (h *OrganizationHandlerAdmin) ListMembers(c echo.Context) error {
+	tenant, err := context.GetTenant(c)
+	if err != nil {
+		return fmt.Errorf("failed to get tenant from context: %w", err)
+	}
+
+	organizationId, err := uuid.FromString(c.Param("org_id"))
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, "failed to parse organizationId as uuid").SetInternal(err)
+	}
+
+	organization, err := h.persister.GetOrganizationPersister().Get(organizationId, tenant.ID)
+	if err != nil {
+		return fmt.Errorf("failed to get organization: %w", err)
+	}
+	if organization == nil {
+		return echo.NewHTTPError(http.StatusNotFound, "organization not found")
+	}
+
+	var request ListMembersRequest
+	err = (&echo.DefaultBinder{}).BindQueryParams(c, &request)
+	if err != nil {
+		return dto.ToHttpError(err)
+	}
+
+	if request.Page == 0 {
+		request.Page = 1
+	}
+
+	if request.PerPage == 0 {
+		request.PerPage = 20
+	}
+
+	p := h.persister.GetOrganizationMembershipPersister()
+	memberships, err := p.ListByOrganization(organizationId, request.Page, request.PerPage, tenant.ID)
+	if err != nil {
+		return fmt.Errorf("failed to get list of organization members: %w", err)
+	}
+
+	memberCount, err := p.CountByOrganization(organizationId, tenant.ID)
+	if err != nil {
+		return fmt.Errorf("failed to get total count of organization members: %w", err)
+	}
+
+	u, _ := url.Parse(fmt.Sprintf("%s://%s%s", c.Scheme(), c.Request().Host, c.Request().RequestURI))
+
+	c.Response().Header().Set("Link", pagination.CreateHeader(u, memberCount, request.Page, request.PerPage))
+	c.Response().Header().Set("X-Total-Count", strconv.FormatInt(int64(memberCount), 10))
+
+	l := make([]admin.OrganizationMember, len(memberships))
+	for i := range memberships {
+		l[i] = admin.FromOrganizationMembershipModel(memberships[i])
+	}
+
+	return c.JSON(http.StatusOK, l)
+}

@@ -121,6 +121,18 @@ func NewAdminRouter(cfg *config.Config, persister persistence.Persister, prometh
 	organizations.PATCH("/:id", organizationHandler.Patch)
 	organizations.DELETE("/:id", organizationHandler.Delete)
 
+	roleBindingHandler := NewRoleBindingHandlerAdmin(persister)
+
+	orgMembers := organizations.Group("/:org_id/users")
+	orgMembers.GET("", organizationHandler.ListMembers)
+	orgMembers.POST("/:user_id", organizationHandler.AddMember)
+	orgMembers.DELETE("/:user_id", organizationHandler.RemoveMember)
+
+	orgRoles := orgMembers.Group("/:user_id/roles")
+	orgRoles.POST("", roleBindingHandler.Create)
+	orgRoles.GET("", roleBindingHandler.List)
+	orgRoles.DELETE("/:role_ref", roleBindingHandler.Delete)
+
 	roleHandler := NewRoleHandlerAdmin(persister)
 
 	roles := tenantGroup.Group("/roles")
