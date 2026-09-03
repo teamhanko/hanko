@@ -124,17 +124,12 @@ func (h *RoleBindingHandlerAdmin) List(c echo.Context) error {
 		return fmt.Errorf("failed to get list of role bindings: %w", err)
 	}
 
-	rolePersister := h.persister.GetRolePersister()
 	l := make([]admin.RoleBinding, 0, len(bindings))
 	for _, binding := range bindings {
-		role, err := rolePersister.Get(binding.RoleID, tenant.ID)
-		if err != nil {
-			return fmt.Errorf("failed to get role: %w", err)
-		}
-		if role == nil {
+		if binding.Role == nil {
 			continue
 		}
-		l = append(l, admin.FromRoleBindingModel(binding, *role))
+		l = append(l, admin.FromRoleBindingModel(binding, *binding.Role))
 	}
 
 	return c.JSON(http.StatusOK, l)

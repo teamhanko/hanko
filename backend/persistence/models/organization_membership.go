@@ -12,11 +12,12 @@ import (
 // OrganizationMembership is used by pop to map your organization_memberships database table to your go code.
 // It records a user belonging to an organization, independent of any role.
 type OrganizationMembership struct {
-	ID             uuid.UUID `json:"id" db:"id"`
-	TenantID       uuid.UUID `json:"-" db:"tenant_id"`
-	UserID         uuid.UUID `json:"user_id" db:"user_id"`
-	OrganizationID uuid.UUID `json:"organization_id" db:"organization_id"`
-	CreatedAt      time.Time `json:"created_at" db:"created_at"`
+	ID             uuid.UUID     `json:"id" db:"id"`
+	TenantID       uuid.UUID     `json:"-" db:"tenant_id"`
+	UserID         uuid.UUID     `json:"user_id" db:"user_id"`
+	OrganizationID uuid.UUID     `json:"organization_id" db:"organization_id"`
+	Organization   *Organization `json:"organization,omitempty" belongs_to:"organization"`
+	CreatedAt      time.Time     `json:"created_at" db:"created_at"`
 }
 
 type OrganizationMemberships []OrganizationMembership

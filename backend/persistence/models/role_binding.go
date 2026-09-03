@@ -16,6 +16,7 @@ type RoleBinding struct {
 	TenantID       uuid.UUID `json:"-" db:"tenant_id"`
 	UserID         uuid.UUID `json:"user_id" db:"user_id"`
 	RoleID         uuid.UUID `json:"role_id" db:"role_id"`
+	Role           *Role     `json:"role,omitempty" belongs_to:"role"`
 	OrganizationID uuid.UUID `json:"organization_id" db:"organization_id"`
 	CreatedAt      time.Time `json:"created_at" db:"created_at"`
 }

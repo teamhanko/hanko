@@ -16,6 +16,10 @@ type OrganizationMembershipPersister interface {
 	Delete(membership models.OrganizationMembership) error
 	ListByOrganization(organizationID uuid.UUID, page int, perPage int, tenantID uuid.UUID) ([]models.OrganizationMembership, error)
 	CountByOrganization(organizationID uuid.UUID, tenantID uuid.UUID) (int, error)
+	// ListByUser returns every organization userID belongs to. Not
+	// paginated - used internally by /sessions/validate to compute the
+	// full organizations claim on every call, not exposed via an API list.
+	ListByUser(userID uuid.UUID, tenantID uuid.UUID) ([]models.OrganizationMembership, error)
 }
 
 type organizationMembershipPersister struct {
@@ -95,4 +99,28 @@ func (p *organizationMembershipPersister) CountByOrganization(organizationID uui
 	}
 
 	return count, nil
+}
+
+// ListByUser eager-loads the Organization association so callers get the
+// organization name without an extra Get() call per membership - pop
+// batches this into one additional query (an IN on organization ids)
+// rather than one per row.
+func (p *organizationMembershipPersister) ListByUser(userID uuid.UUID, tenantID uuid.UUID) ([]models.OrganizationMembership, error) {
+	memberships := []models.OrganizationMembership{}
+
+	err := p.db.
+		EagerPreload("Organization").
+		Where("tenant_id = ?", tenantID).
+		Where("user_id = ?", userID).
+		Order("created_at desc").
+		All(&memberships)
+
+	if err != nil && errors.Is(err, sql.ErrNoRows) {
+		return memberships, nil
+	}
+	if err != nil {
+		return nil, fmt.Errorf("failed to fetch organization memberships: %w", err)
+	}
+
+	return memberships, nil
 }
