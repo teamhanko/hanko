@@ -1,0 +1,14 @@
+create_table("organization_memberships") {
+	t.Column("id", "uuid", {primary: true})
+	t.Column("tenant_id", "uuid", {"null": false})
+	t.Column("user_id", "uuid", {"null": false})
+	t.Column("organization_id", "uuid", {"null": false})
+	t.Column("created_at", "timestamp", {})
+
+	t.Index(["user_id", "organization_id"], {"unique": true})
+	t.Index(["tenant_id", "id"], {"unique": true})
+	t.ForeignKey("tenant_id", {"tenants": ["id"]}, {"on_delete": "cascade", "on_update": "cascade"})
+}
+
+sql("ALTER TABLE organization_memberships ADD CONSTRAINT organization_memberships_tenant_user_fkey FOREIGN KEY (tenant_id, user_id) REFERENCES users(tenant_id, id) ON DELETE CASCADE ON UPDATE CASCADE;")
+sql("ALTER TABLE organization_memberships ADD CONSTRAINT organization_memberships_tenant_org_fkey FOREIGN KEY (tenant_id, organization_id) REFERENCES organizations(tenant_id, id) ON DELETE CASCADE ON UPDATE CASCADE;")
