@@ -327,6 +327,117 @@ func (s *userAdminSuite) TestUserHandlerAdmin_Create() {
 	}
 }
 
+func (s *userAdminSuite) TestUserHandlerAdmin_Create_WithOrganizations() {
+	if testing.Short() {
+		s.T().Skip("skipping test in short mode.")
+	}
+
+	const existingOrgID = "cafecafe-0000-0000-0000-000000000001"
+	const existingRoleID = "cafecafe-0000-0000-0000-000000000002" // slug "admin"
+
+	tests := []struct {
+		name               string
+		body               string
+		expectedStatusCode int
+	}{
+		{
+			name:               "membership only, no roles",
+			body:               `{"emails": [{"address": "org1@test.com", "is_primary": true}], "organizations": [{"id": "` + existingOrgID + `"}]}`,
+			expectedStatusCode: http.StatusOK,
+		},
+		{
+			name:               "membership with role by slug",
+			body:               `{"emails": [{"address": "org2@test.com", "is_primary": true}], "organizations": [{"id": "` + existingOrgID + `", "roles": ["admin"]}]}`,
+			expectedStatusCode: http.StatusOK,
+		},
+		{
+			name:               "membership with role by id",
+			body:               `{"emails": [{"address": "org3@test.com", "is_primary": true}], "organizations": [{"id": "` + existingOrgID + `", "roles": ["` + existingRoleID + `"]}]}`,
+			expectedStatusCode: http.StatusOK,
+		},
+		{
+			name:               "unrecognized organization",
+			body:               `{"emails": [{"address": "org4@test.com", "is_primary": true}], "organizations": [{"id": "00000000-0000-0000-0000-000000000099"}]}`,
+			expectedStatusCode: http.StatusBadRequest,
+		},
+		{
+			name:               "unrecognized role",
+			body:               `{"emails": [{"address": "org5@test.com", "is_primary": true}], "organizations": [{"id": "` + existingOrgID + `", "roles": ["does-not-exist"]}]}`,
+			expectedStatusCode: http.StatusBadRequest,
+		},
+	}
+
+	for _, currentTest := range tests {
+		s.Run(currentTest.name, func() {
+			s.Require().NoError(s.Storage.MigrateUp())
+			cfg := test.DefaultConfig
+			err := cfg.PostProcess()
+			s.Require().NoError(err)
+			e := NewAdminRouter(&cfg, s.Storage, nil)
+
+			err = s.LoadFixtures("../test/fixtures/user_admin")
+			s.Require().NoError(err)
+
+			req := httptest.NewRequest(http.MethodPost, "/users", strings.NewReader(currentTest.body))
+			req.Header.Set("Content-Type", "application/json")
+			rec := httptest.NewRecorder()
+
+			e.ServeHTTP(rec, req)
+
+			s.Equal(currentTest.expectedStatusCode, rec.Code)
+
+			err = e.Close()
+			s.Require().NoError(err)
+
+			s.Require().NoError(s.Storage.MigrateDown(-1))
+		})
+	}
+}
+
+func (s *userAdminSuite) TestUserHandlerAdmin_Create_WithOrganizations_PersistsMembershipAndRoleBinding() {
+	if testing.Short() {
+		s.T().Skip("skipping test in short mode.")
+	}
+	s.Require().NoError(s.Storage.MigrateUp())
+	defer func() { s.Require().NoError(s.Storage.MigrateDown(-1)) }()
+
+	cfg := test.DefaultConfig
+	err := cfg.PostProcess()
+	s.Require().NoError(err)
+	e := NewAdminRouter(&cfg, s.Storage, nil)
+	defer e.Close()
+
+	err = s.LoadFixtures("../test/fixtures/user_admin")
+	s.Require().NoError(err)
+
+	const orgID = "cafecafe-0000-0000-0000-000000000001"
+	const roleID = "cafecafe-0000-0000-0000-000000000002"
+
+	body := `{"emails": [{"address": "orgpersist@test.com", "is_primary": true}], "organizations": [{"id": "` + orgID + `", "roles": ["admin"]}]}`
+	req := httptest.NewRequest(http.MethodPost, "/users", strings.NewReader(body))
+	req.Header.Set("Content-Type", "application/json")
+	rec := httptest.NewRecorder()
+
+	e.ServeHTTP(rec, req)
+	s.Require().Equal(http.StatusOK, rec.Code)
+
+	var got map[string]any
+	err = json.Unmarshal(rec.Body.Bytes(), &got)
+	s.Require().NoError(err)
+	userID := uuid.FromStringOrNil(got["id"].(string))
+	s.Require().False(userID.IsNil())
+
+	tenantID := uuid.FromStringOrNil(config.DefaultTenantID)
+
+	membership, err := s.Storage.GetOrganizationMembershipPersister().Get(userID, uuid.FromStringOrNil(orgID), tenantID)
+	s.Require().NoError(err)
+	s.NotNil(membership)
+
+	binding, err := s.Storage.GetRoleBindingPersister().Get(userID, uuid.FromStringOrNil(roleID), uuid.FromStringOrNil(orgID), tenantID)
+	s.Require().NoError(err)
+	s.NotNil(binding)
+}
+
 func (s *userAdminSuite) TestUserHandlerAdmin_Patch_Success() {
 	if testing.Short() {
 		s.T().Skip("skipping test in short mode.")

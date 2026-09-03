@@ -96,8 +96,16 @@ func FromUserModel(model models.User) User {
 }
 
 type CreateUser struct {
-	ID        uuid.UUID     `json:"id"`
-	Emails    []CreateEmail `json:"emails" validate:"unique=Address,dive"`
-	Username  *string       `json:"username"`
-	CreatedAt time.Time     `json:"created_at"`
+	ID            uuid.UUID                `json:"id"`
+	Emails        []CreateEmail            `json:"emails" validate:"unique=Address,dive"`
+	Username      *string                  `json:"username"`
+	CreatedAt     time.Time                `json:"created_at"`
+	Organizations []CreateUserOrganization `json:"organizations,omitempty" validate:"dive"`
+}
+
+// CreateUserOrganization.Roles entries may reference a role by either its
+// id or its slug - resolved via RolePersister.GetByIDOrSlug.
+type CreateUserOrganization struct {
+	ID    uuid.UUID `json:"id" validate:"required"`
+	Roles []string  `json:"roles,omitempty"`
 }

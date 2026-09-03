@@ -218,6 +218,43 @@ func (h *UserHandlerAdmin) Create(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusBadRequest, "only one primary email is allowed")
 	}
 
+	// Resolve every organization and role reference before any writes, so
+	// an unrecognized reference fails with a clean 400 rather than
+	// partway through the transaction below.
+	type resolvedOrganization struct {
+		id      uuid.UUID
+		roleIDs []uuid.UUID
+	}
+	resolvedOrganizations := make([]resolvedOrganization, 0, len(body.Organizations))
+	if len(body.Organizations) > 0 {
+		organizationPersister := h.persister.GetOrganizationPersister()
+		rolePersister := h.persister.GetRolePersister()
+
+		for _, orgEntry := range body.Organizations {
+			organization, err := organizationPersister.Get(orgEntry.ID, tenant.ID)
+			if err != nil {
+				return fmt.Errorf("failed to get organization: %w", err)
+			}
+			if organization == nil {
+				return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("organization '%s' not found", orgEntry.ID))
+			}
+
+			roleIDs := make([]uuid.UUID, 0, len(orgEntry.Roles))
+			for _, roleRef := range orgEntry.Roles {
+				role, err := rolePersister.GetByIDOrSlug(roleRef, tenant.ID)
+				if err != nil {
+					return fmt.Errorf("failed to resolve role: %w", err)
+				}
+				if role == nil {
+					return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("role '%s' not found", roleRef))
+				}
+				roleIDs = append(roleIDs, role.ID)
+			}
+
+			resolvedOrganizations = append(resolvedOrganizations, resolvedOrganization{id: orgEntry.ID, roleIDs: roleIDs})
+		}
+	}
+
 	err = h.persister.GetConnection().Transaction(func(tx *pop.Connection) error {
 		u := models.User{
 			ID:        body.ID,
@@ -295,6 +332,49 @@ func (h *UserHandlerAdmin) Create(c echo.Context) error {
 				return fmt.Errorf("failed to create email '%s' for user '%v': %w", username.Username, u.ID, err)
 			}
 		}
+
+		if len(resolvedOrganizations) > 0 {
+			membershipPersister := h.persister.GetOrganizationMembershipPersisterWithConnection(tx)
+			roleBindingPersister := h.persister.GetRoleBindingPersisterWithConnection(tx)
+
+			for _, org := range resolvedOrganizations {
+				membershipId, err := uuid.NewV4()
+				if err != nil {
+					return fmt.Errorf("failed to create new organization membership id: %w", err)
+				}
+
+				err = membershipPersister.Create(models.OrganizationMembership{
+					ID:             membershipId,
+					TenantID:       tenant.ID,
+					UserID:         u.ID,
+					OrganizationID: org.id,
+					CreatedAt:      now,
+				})
+				if err != nil {
+					return fmt.Errorf("failed to add user '%v' to organization '%v': %w", u.ID, org.id, err)
+				}
+
+				for _, roleID := range org.roleIDs {
+					bindingId, err := uuid.NewV4()
+					if err != nil {
+						return fmt.Errorf("failed to create new role binding id: %w", err)
+					}
+
+					err = roleBindingPersister.Create(models.RoleBinding{
+						ID:             bindingId,
+						TenantID:       tenant.ID,
+						UserID:         u.ID,
+						RoleID:         roleID,
+						OrganizationID: org.id,
+						CreatedAt:      now,
+					})
+					if err != nil {
+						return fmt.Errorf("failed to bind role '%v' for user '%v' in organization '%v': %w", roleID, u.ID, org.id, err)
+					}
+				}
+			}
+		}
+
 		return nil
 	})
 
