@@ -1,0 +1,4 @@
+sql("UPDATE sessions SET user_agent = LEFT(user_agent, 255) WHERE LENGTH(user_agent) > 255")
+sql("UPDATE audit_logs SET meta_user_agent = LEFT(meta_user_agent, 255) WHERE LENGTH(meta_user_agent) > 255")
+change_column("sessions", "user_agent", "string", {"null": true})
+change_column("audit_logs", "meta_user_agent", "string", {})
