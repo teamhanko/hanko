@@ -6,6 +6,12 @@ import {
   create,
   get,
 } from "@github/webauthn-json";
+import { RequestTimeoutError } from "../Errors";
+
+// Applied when the creation options carry no usable `timeout`. Mirrors the
+// Hanko API's own `webauthn.timeouts.registration` default, so the deadline
+// enforced here matches the one the server would have asked for.
+const DEFAULT_CREATION_TIMEOUT_MS = 600000;
 
 /**
  * Manages WebAuthn credential operations as a singleton, ensuring only one active request at a time.
@@ -76,17 +82,46 @@ class WebauthnManager {
   /**
    * Creates a new WebAuthn credential using the provided options.
    * Aborts any previous request before starting a new one.
+   *
+   * The ceremony is bounded by the `timeout` given in the creation options
+   * (falling back to {@link DEFAULT_CREATION_TIMEOUT_MS}). Some authenticators
+   * leave `navigator.credentials.create()` pending indefinitely and do not
+   * honor the WebAuthn `timeout` themselves, which would keep the caller
+   * waiting forever; enforcing the deadline here turns that into a regular
+   * rejection the caller can recover from.
    * @param {CredentialCreationOptionsJSON} options - The options for credential creation
    * @returns {Promise<PublicKeyCredentialWithAttestationJSON>} A promise resolving to the created credential
    * @throws {DOMException} If the WebAuthn request fails (e.g., aborted, not allowed)
+   * @throws {RequestTimeoutError} If the ceremony does not complete before the deadline
    */
   public async createWebauthnCredential(
     options: CredentialCreationOptionsJSON,
   ): Promise<PublicKeyCredentialWithAttestationJSON> {
-    return await create({
-      ...options,
-      signal: this.createAbortSignal(),
-    });
+    const signal = this.createAbortSignal();
+    // createAbortSignal() has just installed a fresh controller; hold on to it
+    // so the deadline below aborts this ceremony rather than a later one.
+    const controller = this.abortController;
+    // A missing or zero `timeout` is not a request to end the ceremony at once
+    // - the WebAuthn timeout is a hint that clients clamp anyway - so fall back
+    // to the default instead of aborting before the user can even respond.
+    const requestedTimeout = options.publicKey?.timeout;
+    const timeout =
+      requestedTimeout > 0 ? requestedTimeout : DEFAULT_CREATION_TIMEOUT_MS;
+    let deadline: ReturnType<typeof setTimeout>;
+
+    try {
+      return await Promise.race([
+        create({ ...options, signal }),
+        new Promise<never>((_resolve, reject) => {
+          deadline = setTimeout(() => {
+            controller.abort();
+            reject(new RequestTimeoutError());
+          }, timeout);
+        }),
+      ]);
+    } finally {
+      clearTimeout(deadline);
+    }
   }
 }
 
