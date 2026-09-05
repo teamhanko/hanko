@@ -1,5 +1,6 @@
 import { autoSteps } from "../../../src/lib/flow-api/auto-steps";
 import WebauthnManager from "../../../src/lib/flow-api/WebauthnManager";
+import { RequestTimeoutError } from "../../../src/lib/Errors";
 
 // Regression tests for the passkey credential-creation auto-steps. Canceling the
 // passkey prompt rejects with a NotAllowedError (and superseded requests reject
@@ -63,6 +64,16 @@ describe("autoSteps webauthn credential creation error handling", () => {
       code: alreadyExistsCode,
       message: "Webauthn credential already exists",
     });
+  });
+
+  it("surfaces an error when the ceremony times out", async () => {
+    mockCreate(() => Promise.reject(new RequestTimeoutError()));
+    const state = buildState();
+
+    const result = await autoSteps.webauthn_credential_verification(state as never);
+
+    expect(state.actions.back.run).toHaveBeenCalled();
+    expect(result.error.code).toBe("technical_error");
   });
 
   it("verifies the attestation response on success", async () => {
