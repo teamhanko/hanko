@@ -19,15 +19,15 @@ type roleBindingPersisterSuite struct {
 	test.Suite
 }
 
-func (s *roleBindingPersisterSuite) createMembership() {
+func (s *roleBindingPersisterSuite) createMembership(userID uuid.UUID, organizationID uuid.UUID) {
 	membershipID, err := uuid.NewV4()
 	s.Require().NoError(err)
 
 	err = s.Storage.GetOrganizationMembershipPersister().Create(models.OrganizationMembership{
 		ID:             membershipID,
 		TenantID:       tenant1ID,
-		UserID:         user1ID,
-		OrganizationID: org1ID,
+		UserID:         userID,
+		OrganizationID: organizationID,
 		CreatedAt:      time.Now(),
 	})
 	s.Require().NoError(err)
@@ -67,7 +67,7 @@ func (s *roleBindingPersisterSuite) TestCreate_RejectsCrossTenantRole() {
 	err := s.LoadFixtures("../test/fixtures/organization_persister")
 	s.Require().NoError(err)
 
-	s.createMembership()
+	s.createMembership(user1ID, org1ID)
 
 	bindingID, err := uuid.NewV4()
 	s.Require().NoError(err)
@@ -84,17 +84,20 @@ func (s *roleBindingPersisterSuite) TestCreate_RejectsCrossTenantRole() {
 	s.Require().Error(err)
 }
 
-// Deleting a role that is still bound to a user must fail (RESTRICT), rather
-// than silently revoking it from everyone holding it - this is a deliberate
-// decision, distinct from how organization/user deletion cascade.
-func (s *roleBindingPersisterSuite) TestRoleDelete_RestrictedWhenBindingsExist() {
+// Deleting a role cascades to every one of its role_bindings rows, even
+// when they span different organizations within the tenant - e.g. the same
+// role held by one user in org1 and by a different user in org1b. Deleting
+// the role revokes it from both at once, rather than requiring it to be
+// unassigned from every user first.
+func (s *roleBindingPersisterSuite) TestRoleDelete_CascadesToRoleBindingsAcrossOrganizations() {
 	if testing.Short() {
 		s.T().Skip("skipping test in short mode.")
 	}
 	err := s.LoadFixtures("../test/fixtures/organization_persister")
 	s.Require().NoError(err)
 
-	s.createMembership()
+	s.createMembership(user1ID, org1ID)
+	s.createMembership(user1bID, org1bID)
 
 	bindingID, err := uuid.NewV4()
 	s.Require().NoError(err)
@@ -108,12 +111,42 @@ func (s *roleBindingPersisterSuite) TestRoleDelete_RestrictedWhenBindingsExist()
 	})
 	s.Require().NoError(err)
 
+	bindingBID, err := uuid.NewV4()
+	s.Require().NoError(err)
+	err = s.Storage.GetRoleBindingPersister().Create(models.RoleBinding{
+		ID:             bindingBID,
+		TenantID:       tenant1ID,
+		UserID:         user1bID,
+		RoleID:         role1ID,
+		OrganizationID: org1bID,
+		CreatedAt:      time.Now(),
+	})
+	s.Require().NoError(err)
+
 	role, err := s.Storage.GetRolePersister().Get(role1ID, tenant1ID)
 	s.Require().NoError(err)
 	s.Require().NotNil(role)
 
 	err = s.Storage.GetRolePersister().Delete(*role)
-	s.Require().Error(err)
+	s.Require().NoError(err)
+
+	remainingA, err := s.Storage.GetRoleBindingPersister().Get(user1ID, role1ID, org1ID, tenant1ID)
+	s.Require().NoError(err)
+	s.Nil(remainingA)
+
+	remainingB, err := s.Storage.GetRoleBindingPersister().Get(user1bID, role1ID, org1bID, tenant1ID)
+	s.Require().NoError(err)
+	s.Nil(remainingB)
+
+	// The organizations and memberships themselves are untouched - only the
+	// role bindings referencing the deleted role are gone.
+	orgA, err := s.Storage.GetOrganizationPersister().Get(org1ID, tenant1ID)
+	s.Require().NoError(err)
+	s.NotNil(orgA)
+
+	membershipB, err := s.Storage.GetOrganizationMembershipPersister().Get(user1bID, org1bID, tenant1ID)
+	s.Require().NoError(err)
+	s.NotNil(membershipB)
 }
 
 // This is the FK that makes "removing a user from an organization cascades to
@@ -127,7 +160,7 @@ func (s *roleBindingPersisterSuite) TestMembershipDelete_CascadesToRoleBindings(
 	err := s.LoadFixtures("../test/fixtures/organization_persister")
 	s.Require().NoError(err)
 
-	s.createMembership()
+	s.createMembership(user1ID, org1ID)
 
 	bindingID, err := uuid.NewV4()
 	s.Require().NoError(err)
@@ -160,7 +193,7 @@ func (s *roleBindingPersisterSuite) TestOrganizationDelete_CascadesToRoleBinding
 	err := s.LoadFixtures("../test/fixtures/organization_persister")
 	s.Require().NoError(err)
 
-	s.createMembership()
+	s.createMembership(user1ID, org1ID)
 
 	bindingID, err := uuid.NewV4()
 	s.Require().NoError(err)

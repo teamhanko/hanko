@@ -28,6 +28,11 @@ var (
 	org2ID    = uuid.FromStringOrNil("44444444-4444-4444-4444-444444444444")
 	role1ID   = uuid.FromStringOrNil("55555555-5555-5555-5555-555555555555")
 	role2ID   = uuid.FromStringOrNil("66666666-6666-6666-6666-666666666666")
+	// A second user and organization, both in tenant1 - for scenarios where
+	// the same role is bound to different users across different
+	// organizations within one tenant.
+	user1bID = uuid.FromStringOrNil("11111111-1111-1111-1111-111111111114")
+	org1bID  = uuid.FromStringOrNil("33333333-3333-3333-3333-333333333336")
 )
 
 // This is the core tenant-isolation guarantee from the design: a membership

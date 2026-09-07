@@ -275,7 +275,7 @@ func (s *roleAdminSuite) TestRoleHandlerAdmin_Delete_NotFound() {
 	s.Equal(http.StatusNotFound, rec.Code)
 }
 
-func (s *roleAdminSuite) TestRoleHandlerAdmin_Delete_RestrictedWhenBindingsExist() {
+func (s *roleAdminSuite) TestRoleHandlerAdmin_Delete_CascadesToRoleBindings() {
 	if testing.Short() {
 		s.T().Skip("skipping test in short mode.")
 	}
@@ -294,9 +294,18 @@ func (s *roleAdminSuite) TestRoleHandlerAdmin_Delete_RestrictedWhenBindingsExist
 
 	e.ServeHTTP(rec, req)
 
-	s.Equal(http.StatusConflict, rec.Code)
+	s.Equal(http.StatusNoContent, rec.Code)
 
 	count, err := s.Storage.GetRolePersister().Count(uuid.FromStringOrNil(config.DefaultTenantID))
 	s.Require().NoError(err)
-	s.Equal(2, count)
+	s.Equal(1, count)
+
+	binding, err := s.Storage.GetRoleBindingPersister().Get(
+		uuid.FromStringOrNil("bbbbbbbb-0000-0000-0000-000000000001"),
+		uuid.FromStringOrNil("dddddddd-0000-0000-0000-000000000002"),
+		uuid.FromStringOrNil("cccccccc-0000-0000-0000-000000000001"),
+		uuid.FromStringOrNil(config.DefaultTenantID),
+	)
+	s.Require().NoError(err)
+	s.Nil(binding)
 }

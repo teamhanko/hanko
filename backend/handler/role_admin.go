@@ -219,28 +219,11 @@ func (h *RoleHandlerAdmin) Delete(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusNotFound, "role not found")
 	}
 
-	// Role deletion does not cascade, unlike organization/user deletion:
-	// checked explicitly here for a clean error message, backstopped by
-	// the RESTRICT foreign key on role_bindings.role_id in case of a race.
-	bindingCount, err := p.CountBindings(roleId, tenant.ID)
-	if err != nil {
-		return fmt.Errorf("failed to count role bindings: %w", err)
-	}
-	if bindingCount > 0 {
-		return echo.NewHTTPError(http.StatusConflict, fmt.Sprintf("role still has %d binding(s)", bindingCount))
-	}
-
+	// Deleting a role cascades to its role_bindings rows, in every
+	// organization the role was held in - it does not need to be
+	// unassigned from every user first.
 	err = p.Delete(*role)
 	if err != nil {
-		if pgErr, ok := errors.AsType[*pgconn.PgError](err); ok {
-			if pgErr.Code == "23503" {
-				return echo.NewHTTPError(http.StatusConflict, "role still has bindings")
-			}
-		} else if mysqlErr, ok2 := errors.AsType[*mysql.MySQLError](err); ok2 {
-			if mysqlErr.Number == 1451 {
-				return echo.NewHTTPError(http.StatusConflict, "role still has bindings")
-			}
-		}
 		return fmt.Errorf("failed to delete role: %w", err)
 	}
 

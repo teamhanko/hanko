@@ -21,7 +21,6 @@ type RolePersister interface {
 	Delete(role models.Role) error
 	List(page int, perPage int, tenantID uuid.UUID) ([]models.Role, error)
 	Count(tenantID uuid.UUID) (int, error)
-	CountBindings(roleID uuid.UUID, tenantID uuid.UUID) (int, error)
 }
 
 type rolePersister struct {
@@ -124,18 +123,6 @@ func (p *rolePersister) Count(tenantID uuid.UUID) (int, error) {
 	count, err := p.db.Where("tenant_id = ?", tenantID).Count(&models.Role{})
 	if err != nil {
 		return 0, fmt.Errorf("failed to get role count: %w", err)
-	}
-
-	return count, nil
-}
-
-func (p *rolePersister) CountBindings(roleID uuid.UUID, tenantID uuid.UUID) (int, error) {
-	count, err := p.db.
-		Where("tenant_id = ?", tenantID).
-		Where("role_id = ?", roleID).
-		Count(&models.RoleBinding{})
-	if err != nil {
-		return 0, fmt.Errorf("failed to count role bindings: %w", err)
 	}
 
 	return count, nil
