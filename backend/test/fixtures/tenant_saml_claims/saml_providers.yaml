@@ -1,0 +1,11 @@
+- id: 7c9e6679-7425-40de-944b-e07fc1f90ae8
+  tenant_id: 00000000-0000-0000-0000-000000000001
+  name: "Uni A"
+  entity_id: "https://idp.uni-a.example.com/metadata"
+  metadata_url: "https://idp.uni-a.example.com/metadata"
+  domain: "uni-a.example.com"
+  enabled: true
+  skip_email_verification: false
+  attribute_map: {"custom":{"matriculation_number":"mat_nr"}}
+  created_at: 2020-12-31 23:59:59
+  updated_at: 2020-12-31 23:59:59

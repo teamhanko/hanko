@@ -201,9 +201,19 @@ func (h *TenantHandler) Update(c echo.Context) error {
 	}
 
 	// Parse and validate the config using koanf
-	cfg, _, err := h.validateTenantConfig(body.Config)
+	cfg, tenantConfig, err := h.validateTenantConfig(body.Config)
 	if err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("invalid config: %v", err))
+	}
+
+	// ValidateTenantAndCrossConfig (inside validateTenantConfig) only ever sees
+	// TenantConfig.Saml.IdentityProviders, the config-file-style field that's unused once
+	// multi-tenancy is enabled - real SAML connections live in the saml_providers DB table
+	// instead, so this is a separate, DB-aware pass just for those.
+	if h.cfg.ApplicationConfig.MultiTenancy.Enabled {
+		if err := h.validateSamlProviderClaimMappings(tenantId, tenantConfig.CustomClaims.Definitions); err != nil {
+			return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("invalid custom claim mapping: %v", err))
+		}
 	}
 
 	err = h.persister.Transaction(func(tx *pop.Connection) error {
@@ -314,4 +324,31 @@ func (h *TenantHandler) validateTenantConfig(configJSON json.RawMessage) (json.R
 		return nil, nil, fmt.Errorf("failed to marshal config JSON: %w", err)
 	}
 	return b, tenantConfig, nil
+}
+
+// validateSamlProviderClaimMappings checks the tenant's real, DB-backed SAML providers against
+// the newly submitted custom claim definitions, so deleting/renaming a definition still
+// referenced by a SAML connection's attribute_map.custom is rejected - the same way it already
+// is for OIDC custom providers (via ValidateCrossConfig, which sees their mappings directly in
+// the config JSON) and for the SAML provider create/update endpoints themselves.
+func (h *TenantHandler) validateSamlProviderClaimMappings(tenantID uuid.UUID, definitions config.CustomClaimDefinitions) error {
+	providers, err := h.persister.GetSamlProviderPersister().List(tenantID)
+	if err != nil {
+		return fmt.Errorf("failed to list saml providers: %w", err)
+	}
+
+	for _, provider := range providers {
+		if len(provider.AttributeMap) == 0 {
+			continue
+		}
+		var attributeMap config.AttributeMap
+		if err := json.Unmarshal(provider.AttributeMap, &attributeMap); err != nil {
+			return fmt.Errorf("failed to unmarshal attribute map for saml provider %q: %w", provider.Name, err)
+		}
+		if err := definitions.ValidateMapping(attributeMap.Custom); err != nil {
+			return fmt.Errorf("saml provider %q: %w", provider.Name, err)
+		}
+	}
+
+	return nil
 }
