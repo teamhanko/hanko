@@ -7,6 +7,84 @@ import (
 	"github.com/teamhanko/hanko/backend/v3/config"
 )
 
+func TestCustomClaimValueEqual(t *testing.T) {
+	assert.True(t, customClaimValueEqual("student", "student"))
+	assert.False(t, customClaimValueEqual("student", "staff"))
+	assert.True(t, customClaimValueEqual(float64(29), float64(29)))
+	assert.True(t, customClaimValueEqual(true, true))
+	// []string (coerceCustomClaim's output) vs []interface{} (what a stored value round-trips
+	// to via json.Unmarshal into an `any`) - different dynamic types, same content.
+	assert.True(t, customClaimValueEqual([]string{"student", "staff"}, []interface{}{"student", "staff"}))
+	assert.False(t, customClaimValueEqual([]string{"student"}, []interface{}{"student", "staff"}))
+}
+
+func TestMergeCustomClaims_FirstWriteAlwaysChanges(t *testing.T) {
+	stored := map[string]StoredCustomClaim{}
+
+	wrote, valueChanged := mergeCustomClaims(stored, map[string]any{"role": "student"}, []string{"role"}, "saml:uni-a")
+
+	assert.True(t, wrote)
+	assert.True(t, valueChanged)
+	assert.Equal(t, StoredCustomClaim{Value: "student", Source: "saml:uni-a"}, stored["role"])
+}
+
+func TestMergeCustomClaims_SameConnectionSameValue_NoChange(t *testing.T) {
+	stored := map[string]StoredCustomClaim{"role": {Value: "student", Source: "saml:uni-a"}}
+
+	wrote, valueChanged := mergeCustomClaims(stored, map[string]any{"role": "student"}, []string{"role"}, "saml:uni-a")
+
+	assert.False(t, wrote, "an IdP re-asserting an unchanged value must not produce a write")
+	assert.False(t, valueChanged)
+}
+
+func TestMergeCustomClaims_SameConnectionDifferentValue_Changes(t *testing.T) {
+	stored := map[string]StoredCustomClaim{"role": {Value: "student", Source: "saml:uni-a"}}
+
+	wrote, valueChanged := mergeCustomClaims(stored, map[string]any{"role": "staff"}, []string{"role"}, "saml:uni-a")
+
+	assert.True(t, wrote)
+	assert.True(t, valueChanged)
+	assert.Equal(t, "staff", stored["role"].Value)
+}
+
+func TestMergeCustomClaims_DifferentConnectionSameValue_WritesOwnershipButNotAChange(t *testing.T) {
+	// uni-b now asserts the same value uni-a previously set - a real, anticipated scenario
+	// (it's the reason "any source" write semantics exist at all). Ownership must transfer so
+	// a later silence from uni-a can't incorrectly clear a claim uni-b is still maintaining -
+	// but nothing looks different from outside, so no webhook should fire for it.
+	stored := map[string]StoredCustomClaim{"role": {Value: "student", Source: "saml:uni-a"}}
+
+	wrote, valueChanged := mergeCustomClaims(stored, map[string]any{"role": "student"}, []string{"role"}, "saml:uni-b")
+
+	assert.True(t, wrote, "ownership handoff must still be persisted")
+	assert.False(t, valueChanged, "same value from outside's perspective - must not fire a webhook")
+	assert.Equal(t, StoredCustomClaim{Value: "student", Source: "saml:uni-b"}, stored["role"])
+}
+
+func TestMergeCustomClaims_OwnerSilence_ClearsClaim(t *testing.T) {
+	stored := map[string]StoredCustomClaim{"role": {Value: "student", Source: "saml:uni-a"}}
+
+	// uni-a still manages "role" (it's in `managed`) but no longer resolves a value for it.
+	wrote, valueChanged := mergeCustomClaims(stored, map[string]any{}, []string{"role"}, "saml:uni-a")
+
+	assert.True(t, wrote)
+	assert.True(t, valueChanged)
+	_, exists := stored["role"]
+	assert.False(t, exists)
+}
+
+func TestMergeCustomClaims_NonOwnerSilence_LeavesClaimIntact(t *testing.T) {
+	// After a handoff to uni-b (see the ownership-handoff test above), uni-a going quiet must
+	// not be able to clear a claim it no longer owns.
+	stored := map[string]StoredCustomClaim{"role": {Value: "student", Source: "saml:uni-b"}}
+
+	wrote, valueChanged := mergeCustomClaims(stored, map[string]any{}, []string{"role"}, "saml:uni-a")
+
+	assert.False(t, wrote)
+	assert.False(t, valueChanged)
+	assert.Equal(t, StoredCustomClaim{Value: "student", Source: "saml:uni-b"}, stored["role"])
+}
+
 func TestCustomClaimConnectionSource(t *testing.T) {
 	assert.Equal(t, "saml:https://idp.example.com/metadata", customClaimConnectionSource("https://idp.example.com/metadata", true))
 	assert.Equal(t, "third_party:custom_myprovider", customClaimConnectionSource("custom_myprovider", false))

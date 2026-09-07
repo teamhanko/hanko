@@ -157,75 +157,107 @@ func customClaimConnectionSource(providerID string, isSaml bool) string {
 	return "third_party:" + providerID
 }
 
-// applyCustomClaims resolves userData.CustomClaimSource against the tenant's declared
-// definitions and merges the result into the user's persisted custom claims. Returns whether
-// anything actually changed, so callers can decide whether to surface a webhook event.
+// customClaimValueEqual compares a freshly resolved claim value against an already-stored one.
+// Both are compared via their JSON representation rather than Go's == - resolvedValues holds
+// []string for a string_list claim (coerceCustomClaim's output), while a stored value of the
+// same list, once round-tripped through json.Unmarshal into an `any`, comes back as
+// []interface{}; those have different dynamic types, so == would either report a spurious
+// "changed" (different types with same content) or panic (two values of the same uncomparable
+// slice type) - comparing marshaled JSON sidesteps both.
+func customClaimValueEqual(a, b any) bool {
+	aJSON, aErr := json.Marshal(a)
+	bJSON, bErr := json.Marshal(b)
+	if aErr != nil || bErr != nil {
+		return false
+	}
+	return string(aJSON) == string(bJSON)
+}
+
+// mergeCustomClaims applies resolvedValues onto stored in place, per applyCustomClaims's
+// refresh semantics. Split out from applyCustomClaims so this decision logic is testable
+// without a DB.
 //
-// Refresh semantics: a claim this connection manages is always overwritten with its freshly
-// resolved value - last-one-wins, any source, same as the write half of
-// User.SyncFromProviderProfile. A claim this connection manages but found no value for is
-// cleared only if the currently stored value's source is this same connection: the one
-// connection that owns a claim losing its own assertion is a real signal (e.g. a student
-// graduating), but an unrelated connection's momentary silence about a claim it never set
-// must never wipe it - only the connection that actually set a value gets to take it away.
+// managed (from ResolveCustomClaims) is every claim name this connection maps, whether or not
+// it resolved a value this time - it's what tells apart "mapped but the IdP sent nothing this
+// login" (may need clearing) from "this connection doesn't map this claim at all" (never
+// touched, no matter what's stored). A managed claim missing from resolvedValues is a clear
+// candidate; anything not in managed is invisible to this call entirely.
 //
-// Unlike ResolveCustomClaims (which never fails - bad claim *data* is tolerated by design),
-// persistence errors here propagate, consistent with how this file already treats every
-// other write in the same transaction (e.g. User.SyncFromProviderProfile's Update below).
-// applyCustomClaims returns the updated *models.UserCustomClaims record when a write
-// happened, or nil when nothing changed - callers must assign this back onto the in-memory
-// User.CustomClaims themselves (e.g. before building a webhook payload from that User), since
-// this function only touches the database and has no reference to the caller's User struct.
-func applyCustomClaims(tx *pop.Connection, p persistence.Persister, cfg *config.TenantConfig, userData *UserData, source string, userID uuid.UUID, tenantID uuid.UUID) (record *models.UserCustomClaims, err error) {
-	if userData.CustomClaimSource == nil {
-		return nil, nil
-	}
-
-	resolvedValues, managed := ResolveCustomClaims(cfg.CustomClaims.Definitions, userData.CustomClaimSource)
-	if len(managed) == 0 {
-		return nil, nil
-	}
-
-	persister := p.GetUserCustomClaimsPersisterWithConnection(tx)
-	record, err = persister.Get(userID, tenantID)
-	if err != nil {
-		return nil, fmt.Errorf("could not get user custom claims: %w", err)
-	}
-
-	stored := make(map[string]StoredCustomClaim)
-	if record.Claims.Valid && record.Claims.String != "" {
-		if err := json.Unmarshal([]byte(record.Claims.String), &stored); err != nil {
-			return nil, fmt.Errorf("could not unmarshal existing custom claims: %w", err)
-		}
-	}
-
-	changed := false
+// wrote reports whether stored was mutated at all, including a source-only handoff (another
+// connection re-asserting a value this claim already had) - that must still persist so
+// ownership stays correct for future clears. valueChanged reports whether a claim's value
+// itself appeared, disappeared, or changed - false for a source-only handoff.
+func mergeCustomClaims(stored map[string]StoredCustomClaim, resolvedValues map[string]any, managed []string, source string) (wrote bool, valueChanged bool) {
 	for _, claimName := range managed {
 		if value, ok := resolvedValues[claimName]; ok {
+			existing, exists := stored[claimName]
+			sameValue := exists && customClaimValueEqual(existing.Value, value)
+			if exists && sameValue && existing.Source == source {
+				continue
+			}
 			stored[claimName] = StoredCustomClaim{Value: value, Source: source}
-			changed = true
+			wrote = true
+			if !sameValue {
+				valueChanged = true
+			}
 			continue
 		}
 
 		if existing, exists := stored[claimName]; exists && existing.Source == source {
 			delete(stored, claimName)
-			changed = true
+			wrote = true
+			valueChanged = true
+		}
+	}
+	return wrote, valueChanged
+}
+
+// applyCustomClaims resolves userData.CustomClaimSource and merges it into the user's
+// persisted custom claims. Last-one-wins, any source; a claim found no value for is cleared
+// only if this same connection was its stored source.
+//
+// record is non-nil whenever anything was written - including a source-only handoff (another
+// connection re-asserting a value this claim already had), which still needs persisting so
+// ownership stays correct for future clears. valueChanged is true only when a claim's value
+// itself appeared, disappeared, or changed - gate a user.update webhook on this, not on
+// record != nil, so re-asserting an unchanged value never fires one.
+func applyCustomClaims(tx *pop.Connection, p persistence.Persister, cfg *config.TenantConfig, userData *UserData, source string, userID uuid.UUID, tenantID uuid.UUID) (record *models.UserCustomClaims, valueChanged bool, err error) {
+	if userData.CustomClaimSource == nil {
+		return nil, false, nil
+	}
+
+	resolvedValues, managed := ResolveCustomClaims(cfg.CustomClaims.Definitions, userData.CustomClaimSource)
+	if len(managed) == 0 {
+		return nil, false, nil
+	}
+
+	persister := p.GetUserCustomClaimsPersisterWithConnection(tx)
+	record, err = persister.Get(userID, tenantID)
+	if err != nil {
+		return nil, false, fmt.Errorf("could not get user custom claims: %w", err)
+	}
+
+	stored := make(map[string]StoredCustomClaim)
+	if record.Claims.Valid && record.Claims.String != "" {
+		if err := json.Unmarshal([]byte(record.Claims.String), &stored); err != nil {
+			return nil, false, fmt.Errorf("could not unmarshal existing custom claims: %w", err)
 		}
 	}
 
-	if !changed {
-		return nil, nil
+	wrote, valueChanged := mergeCustomClaims(stored, resolvedValues, managed, source)
+	if !wrote {
+		return nil, false, nil
 	}
 
 	claimsJSON, err := json.Marshal(stored)
 	if err != nil {
-		return nil, fmt.Errorf("could not marshal custom claims: %w", err)
+		return nil, false, fmt.Errorf("could not marshal custom claims: %w", err)
 	}
 	record.Claims = nulls.NewString(string(claimsJSON))
 
 	if err := persister.Update(record); err != nil {
-		return nil, fmt.Errorf("could not update user custom claims: %w", err)
+		return nil, false, fmt.Errorf("could not update user custom claims: %w", err)
 	}
 
-	return record, nil
+	return record, valueChanged, nil
 }
