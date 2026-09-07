@@ -86,8 +86,8 @@ func LinkAccount(tx *pop.Connection, cfg *config.TenantConfig, p persistence.Per
 	// IdP re-asserting the same value) never fires a webhook for what looks like nothing
 	// happening.
 	if customClaimsValueChanged && (result.WebhookEvent == nil || *result.WebhookEvent == "") {
-		userUpdate := events.UserUpdate
-		result.WebhookEvent = &userUpdate
+		customClaimsEvent := events.UserCustomClaims
+		result.WebhookEvent = &customClaimsEvent
 	}
 
 	return result, nil
