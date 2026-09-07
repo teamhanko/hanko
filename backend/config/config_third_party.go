@@ -19,10 +19,10 @@ type ThirdParty struct {
 	// Treat each key here as permanent once you've configured custom_claim_mapping on it: if
 	// this provider maps to any tenant-defined custom claim (see custom_claims.definitions),
 	// renaming the key changes the provider's internal identity, and any custom claims
-	// already set by users who signed in through it become orphaned - still stored, but no
-	// longer recognized as belonging to this connection, so it can no longer update or clear
-	// them on its own (an admin can still fix individual users via the custom claims Admin
-	// API). Prefer adding a new entry over renaming an existing one if this applies to you.
+	// already set by users who signed in through it become orphaned - still stored, and still
+	// overwritable the next time that user signs in through the renamed connection, but no
+	// longer clearable by it if it later stops asserting a value. Prefer adding a new entry
+	// over renaming an existing one if this applies to you.
 	CustomProviders CustomThirdPartyProviders `yaml:"custom_providers" json:"custom_providers" koanf:"custom_providers" jsonschema:"title=custom_providers"`
 	// `redirect_url` is the URL the third party provider redirects to with an authorization code. Must consist of the base URL
 	// of your running Hanko backend instance and the `callback` endpoint of the API,

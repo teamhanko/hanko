@@ -87,7 +87,6 @@ func NewAdminRouter(cfg *config.Config, persister persistence.Persister, prometh
 	user.GET("/:id/metadata", metadataHandler.GetMetadata)
 
 	user.GET("/:id/custom_claims", customClaimsHandler.GetCustomClaims)
-	user.PATCH("/:id/custom_claims", customClaimsHandler.PatchCustomClaims)
 
 	email := user.Group("/:user_id/emails", jwkMiddleware, webhookMiddleware)
 	email.GET("", emailHandler.List)

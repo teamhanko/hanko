@@ -2,12 +2,10 @@ package admin
 
 import (
 	"encoding/json"
-	"errors"
 	"fmt"
 
 	"github.com/teamhanko/hanko/backend/v3/persistence/models"
 	"github.com/teamhanko/hanko/backend/v3/thirdparty"
-	"github.com/tidwall/gjson"
 )
 
 // CustomClaims is the Admin API's flat view of a user's custom claims - only the value of
@@ -38,26 +36,4 @@ func NewCustomClaims(model *models.UserCustomClaims) (CustomClaims, error) {
 	}
 
 	return result, nil
-}
-
-// PatchCustomClaimsRequest carries only structural validation - is the body null or a JSON
-// object - since the deeper checks (is a given key actually declared for this tenant, does
-// its value match the declared type) need tenant.Config.CustomClaims.Definitions, which
-// isn't available until the handler has loaded the tenant.
-type PatchCustomClaimsRequest struct {
-	Claims gjson.Result
-}
-
-func (p *PatchCustomClaimsRequest) UnmarshalJSON(data []byte) error {
-	if !gjson.ValidBytes(data) {
-		return errors.New("body is not valid JSON")
-	}
-
-	body := gjson.GetBytes(data, "@this")
-	if body.Raw == "null" || body.IsObject() {
-		p.Claims = body
-		return nil
-	}
-
-	return errors.New("patch custom claims must be null or an object")
 }

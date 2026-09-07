@@ -1826,7 +1826,7 @@
         "custom_providers": {
           "$ref": "#/$defs/CustomThirdPartyProviders",
           "title": "custom_providers",
-          "description": "`custom_providers contains the configurations for custom OAuth/OIDC identity providers.\n\nTreat each key here as permanent once you've configured custom_claim_mapping on it: if\nthis provider maps to any tenant-defined custom claim (see custom_claims.definitions),\nrenaming the key changes the provider's internal identity, and any custom claims\nalready set by users who signed in through it become orphaned - still stored, but no\nlonger recognized as belonging to this connection, so it can no longer update or clear\nthem on its own (an admin can still fix individual users via the custom claims Admin\nAPI). Prefer adding a new entry over renaming an existing one if this applies to you."
+          "description": "`custom_providers contains the configurations for custom OAuth/OIDC identity providers.\n\nTreat each key here as permanent once you've configured custom_claim_mapping on it: if\nthis provider maps to any tenant-defined custom claim (see custom_claims.definitions),\nrenaming the key changes the provider's internal identity, and any custom claims\nalready set by users who signed in through it become orphaned - still stored, and still\noverwritable the next time that user signs in through the renamed connection, but no\nlonger clearable by it if it later stops asserting a value. Prefer adding a new entry\nover renaming an existing one if this applies to you."
         },
         "redirect_url": {
           "type": "string",

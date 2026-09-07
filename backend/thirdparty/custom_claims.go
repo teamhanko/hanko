@@ -148,8 +148,7 @@ type StoredCustomClaim struct {
 // derived from the admin-chosen key under third_party.custom_providers (see that field's
 // doc comment on config.ThirdParty) - if an admin renames that key, claims previously set by
 // that connection become orphaned: still stored, but no longer recognized as "owned" by the
-// connection under its new identity, so it can no longer clear them itself (an admin can
-// still fix this via the Admin API PATCH).
+// connection under its new identity, so it can no longer clear them itself.
 func customClaimConnectionSource(providerID string, isSaml bool) string {
 	if isSaml {
 		return "saml:" + providerID
