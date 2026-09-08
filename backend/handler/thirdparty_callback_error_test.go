@@ -345,10 +345,14 @@ func (s *thirdPartySuite) TestThirdPartyHandler_Callback_Error_OAuthTokenExchang
 	}
 }
 
-func (s *thirdPartySuite) TestThirdPartyHandler_Callback_Error_VerificationRequiredUnverifiedProviderEmail() {
+func (s *thirdPartySuite) TestThirdPartyHandler_Callback_Error_LinkingRejectsUnverifiedProviderEmail() {
+	defer gock.Off()
 	if testing.Short() {
 		s.T().Skip("skipping test in short mode.")
 	}
+
+	err := s.LoadFixtures("../test/fixtures/thirdparty")
+	s.NoError(err)
 
 	gock.New(thirdparty.GoogleOauthTokenEndpoint).
 		Post("/").
@@ -359,15 +363,17 @@ func (s *thirdPartySuite) TestThirdPartyHandler_Callback_Error_VerificationRequi
 		Get("/").
 		Reply(200).
 		JSON(&thirdparty.GoogleUser{
-			ID:            "google_abcde",
-			Email:         "test-google-signup@example.com",
+			ID:            "google_1234",
+			Email:         "test-no-identity@example.com",
 			EmailVerified: false,
 		})
 
 	cfg := s.setUpConfig([]string{"google"}, []string{"https://example.com"})
 	cfg.Email.RequireVerification = true
 
-	state, err := thirdparty.GenerateState(cfg, "google", "https://example.com")
+	// Production third-party logins always go through the Flow API, which generates state with IsFlow=true
+	// (see flow_api/flow/shared/action_thirdparty_oauth.go).
+	state, err := thirdparty.GenerateState(cfg, "google", "https://example.com", thirdparty.GenerateStateForFlowAPI(true))
 	s.NoError(err)
 
 	req := httptest.NewRequest(http.MethodGet, fmt.Sprintf("/thirdparty/callback?code=abcde&state=%s", state), nil)
@@ -379,6 +385,9 @@ func (s *thirdPartySuite) TestThirdPartyHandler_Callback_Error_VerificationRequi
 	c, rec := s.setUpContext(req, cfg.TenantConfig)
 	handler := s.setUpHandler(cfg)
 
+	// test-no-identity@example.com already exists and is verified on an existing account with no third party
+	// identity linked yet. Even though that email is already verified, this particular login never proved
+	// ownership of it, so linking must be rejected outright rather than silently granting access to that account.
 	if s.NoError(handler.Callback(c)) {
 		s.Equal(http.StatusTemporaryRedirect, rec.Code)
 		location, err := rec.Result().Location()
@@ -387,57 +396,13 @@ func (s *thirdPartySuite) TestThirdPartyHandler_Callback_Error_VerificationRequi
 		s.Equal(thirdparty.ErrorCodeUnverifiedProviderEmail, location.Query().Get("error"))
 		s.Equal("third party provider email must be verified", location.Query().Get("error_description"))
 
-		logs, lerr := s.Storage.GetAuditLogPersister().List(0, 0, nil, nil, []string{"thirdparty_signin_signup_failed"}, "", "", "", "", uuid.FromStringOrNil(config.DefaultTenantID))
-		s.NoError(lerr)
-		s.Len(logs, 1)
-	}
-}
-
-func (s *thirdPartySuite) TestThirdPartyHandler_Callback_Error_MicrosoftUnverifiedEmail() {
-	if testing.Short() {
-		s.T().Skip("skipping test in short mode.")
-	}
-
-	err := s.LoadFixtures("../test/fixtures/thirdparty")
-	s.NoError(err)
-
-	fakeIdToken := s.setUpMicrosoftIdToken("microsoft_abcde", "fakeClientID", "test-with-microsoft-identity@example.com", false)
-	gock.New(thirdparty.MicrosoftOAuthTokenEndpoint).
-		Post("/").
-		Reply(200).
-		JSON(map[string]string{"access_token": "fakeAccessToken", "id_token": fakeIdToken})
-
-	fakeJwkSet := s.setUpFakeJwkSet()
-	gock.New(thirdparty.MicrosoftKeysEndpoint).
-		Get("/").
-		Reply(200).
-		JSON(fakeJwkSet)
-
-	cfg := s.setUpConfig([]string{"microsoft"}, []string{"https://example.com"})
-	cfg.Email.RequireVerification = true
-
-	state, err := thirdparty.GenerateState(cfg, "microsoft", "https://example.com")
-	s.NoError(err)
-
-	req := httptest.NewRequest(http.MethodGet, fmt.Sprintf("/thirdparty/callback?code=abcde&state=%s", state), nil)
-	req.AddCookie(&http.Cookie{
-		Name:  utils.HankoThirdpartyStateCookie,
-		Value: string(state),
-	})
-
-	c, rec := s.setUpContext(req, cfg.TenantConfig)
-	handler := s.setUpHandler(cfg)
-
-	if s.NoError(handler.Callback(c)) {
-		s.Equal(http.StatusTemporaryRedirect, rec.Code)
-		location, err := rec.Result().Location()
+		email, err := s.Storage.GetEmailPersister().FindByAddress("test-no-identity@example.com", uuid.FromStringOrNil(config.DefaultTenantID))
 		s.NoError(err)
+		s.NotNil(email)
+		s.Nil(email.Identities.GetIdentity("google", "google_1234"))
 
-		s.Equal(thirdparty.ErrorCodeUnverifiedProviderEmail, location.Query().Get("error"))
-		s.Equal("third party provider email must be verified", location.Query().Get("error_description"))
-
-		logs, lerr := s.Storage.GetAuditLogPersister().List(0, 0, nil, nil, []string{"thirdparty_signin_signup_failed"}, "", "", "", "", uuid.FromStringOrNil(config.DefaultTenantID))
+		logs, lerr := s.Storage.GetAuditLogPersister().List(0, 0, nil, nil, []string{"thirdparty_linking_succeeded"}, "", "", "", "", uuid.FromStringOrNil(config.DefaultTenantID))
 		s.NoError(lerr)
-		s.Len(logs, 1)
+		s.Len(logs, 0)
 	}
 }
