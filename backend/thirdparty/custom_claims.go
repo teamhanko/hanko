@@ -131,9 +131,9 @@ func flattenCustomClaimValue(raw any) (values []string, ok bool) {
 // StoredCustomClaim is the envelope each entry in user_custom_claims.claims is stored as,
 // keyed by claim name. Source is the writing connection's identifier ("saml:<provider_id>",
 // "third_party:<provider_id>" - covering both OIDC and plain OAuth2 custom providers, since
-// CustomThirdPartyProvider isn't necessarily OIDC-conformant), or "admin" for a value set via
-// the Admin API. Tracked so applyCustomClaims only ever lets the connection that set a claim
-// clear it again - see applyCustomClaims's doc comment for why that matters.
+// CustomThirdPartyProvider isn't necessarily OIDC-conformant). Tracked so applyCustomClaims
+// only ever lets the connection that set a claim clear it again - see applyCustomClaims's doc
+// comment for why that matters.
 type StoredCustomClaim struct {
 	Value  any    `json:"value"`
 	Source string `json:"source"`

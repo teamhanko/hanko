@@ -17,8 +17,8 @@ import (
 //
 //	{"matriculation_number": {"value": "12345", "source": "saml:<provider_id>"}}
 //
-// source is the writing connection's identifier ("saml:<provider_id>", "oidc:<provider_id>"),
-// or "admin" for a value set via the Admin API. It stays internal to this table.
+// source is the writing connection's identifier ("saml:<provider_id>",
+// "third_party:<provider_id>"). It stays internal to this table.
 //
 // Claims is nulls.String, not json.RawMessage: this is a has_one association (see
 // User.CustomClaims), and pop's eager-preload for a user with no row here scans a NULL

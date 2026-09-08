@@ -412,7 +412,7 @@
             "boolean",
             "string_list"
           ],
-          "description": "`type` declares how a mapped connection attribute value is coerced before storage.\n\nDeliberately scalar/list-of-scalar only, no nested/object type: SAML attributes are\nstructurally flat (a single value or a list of values, never nested), and matching that\non the OIDC side keeps one claim shape across both connection types. An OIDC provider\nclaim that resolves to a JSON object or an array of objects is treated the same as any\nother coercion failure (logged and skipped, never fails the login) rather than stored\nas-is - see the \"value transformation\" note on CustomClaimMapping for how a nested OIDC\nclaim can still supply one of these flat values via a gjson path.",
+          "description": "`type` declares how a mapped connection attribute value is coerced before storage.\n\nDeliberately scalar/list-of-scalar only, no nested/object type: SAML attributes are\nstructurally flat (a single value or a list of values, never nested), and matching that\non the OIDC side keeps one claim shape across both connection types. An OIDC provider\nclaim that resolves to a JSON object or an array of objects is treated the same as any\nother coercion failure (logged and skipped, never fails the login) rather than stored\nas-is - see CustomClaimMapping's doc comment for how a nested OIDC claim can still supply\none of these flat values via a gjson path.",
           "default": "string"
         },
         "description": {

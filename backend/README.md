@@ -759,13 +759,13 @@ Assume a tenant declared these custom claims, and a user's resolved values look 
 }
 ```
 
-Like metadata, individual values can be accessed with `.User.CustomClaims.Get`, using
-[GJSON Path Syntax](https://github.com/tidwall/gjson/blob/master/SYNTAX.md):
+Like metadata, individual values can be accessed with `.User.CustomClaims`, passing the claim name
+as an argument:
 
 ```yaml
-mat_nr: '{{ .User.CustomClaims.Get "matriculation_number" }}'
-is_staff: '{{ .User.CustomClaims.Get "is_staff" }}'
-affiliation: '{{ .User.CustomClaims.Get "affiliation" }}'
+mat_nr: '{{ .User.CustomClaims "matriculation_number" }}'
+is_staff: '{{ .User.CustomClaims "is_staff" }}'
+affiliation: '{{ .User.CustomClaims "affiliation" }}'
 ```
 
 Or the whole object can be embedded directly, with all value types preserved:
@@ -776,13 +776,10 @@ university: '{{ .User.CustomClaims }}'
 
 > **Note**
 >
-> `.User.CustomClaims` has a single `Get` accessor (unlike `.User.Metadata`'s separate `Public`/`Unsafe`,
-> which exist because metadata has that split - custom claims don't). The same coercion rules
-> documented below apply: a `boolean` custom claim accessed via `.Get` becomes a real boolean in the
-> output, and a JSON array or object round-trips correctly, but a `number` custom claim accessed via
-> `.Get` arrives as a plain string (e.g. `"42"`, not `42`) - there is no automatic numeric coercion,
-> only the boolean and array/object cases below. Use `{{ .User.CustomClaims }}` (the whole object) if
-> you need the number to stay a number.
+> A claim's real type (number, boolean, array) is preserved only when the template value is
+> nothing but a single, bare `.User.CustomClaims` reference like the examples above. Glue it to
+> other text (e.g. `"ID: {{ .User.CustomClaims "id" }}"`) and normal Go template stringification
+> applies instead, so a `number` would come out as text.
 
 
 Example usage in YAML configuration:

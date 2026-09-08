@@ -47,9 +47,8 @@ type CustomClaims struct {
 type CustomClaimDefinitions map[string]CustomClaimDefinition
 
 type CustomClaimDefinition struct {
-	// `name` is copied from the map key in TenantConfig.PostProcess, not configured directly.
-	// Copied verbatim, not normalized - an admin typing an invalid (e.g. uppercase) name gets
-	// a clear rejection from Validate() below rather than a silent rewrite.
+	// `name` is copied verbatim from the map key by CustomClaims.PostProcess (below) - never
+	// configured directly.
 	Name string `yaml:"-" json:"-" koanf:"-" jsonschema:"-"`
 	// `type` declares how a mapped connection attribute value is coerced before storage.
 	//
@@ -58,8 +57,8 @@ type CustomClaimDefinition struct {
 	// on the OIDC side keeps one claim shape across both connection types. An OIDC provider
 	// claim that resolves to a JSON object or an array of objects is treated the same as any
 	// other coercion failure (logged and skipped, never fails the login) rather than stored
-	// as-is - see the "value transformation" note on CustomClaimMapping for how a nested OIDC
-	// claim can still supply one of these flat values via a gjson path.
+	// as-is - see CustomClaimMapping's doc comment for how a nested OIDC claim can still supply
+	// one of these flat values via a gjson path.
 	Type string `yaml:"type" json:"type" koanf:"type" jsonschema:"default=string,enum=string,enum=number,enum=boolean,enum=string_list"`
 	// `description` is a human-readable note about the claim's meaning, for admin UIs/docs.
 	Description string `yaml:"description" json:"description,omitempty" koanf:"description"`
@@ -83,9 +82,8 @@ func (d *CustomClaimDefinition) Validate() error {
 	return nil
 }
 
-// PostProcess copies each map key into CustomClaimDefinition.Name, verbatim - no case
-// normalization. An admin's chosen casing is preserved; Validate() below is what rejects
-// a name that isn't safe for gjson path lookups, not this step.
+// PostProcess copies each map key into CustomClaimDefinition.Name verbatim (see that field's
+// doc comment for why no normalization happens here).
 func (c *CustomClaims) PostProcess() error {
 	for key, definition := range c.Definitions {
 		definition.Name = key
@@ -111,9 +109,10 @@ func (c *CustomClaims) Validate() error {
 
 // ValidateMapping rejects a connection's claim mapping (SAML AttributeMap.Custom, or a
 // custom third-party provider's CustomClaimMapping) if it references a claim name not
-// currently declared here. Called from Config.ValidateCrossConfig (config-side connections)
-// and from handler/saml_provider.go (DB-side SAML providers) - the two places connection
-// mappings are actually saved.
+// currently declared here. Called both when a mapping is saved (Config.ValidateCrossConfig,
+// handler/saml_provider.go) and when the definitions themselves change
+// (handler/tenant.go's validateSamlProviderClaimMappings, revalidating existing DB-backed SAML
+// providers against the new set).
 func (d CustomClaimDefinitions) ValidateMapping(mapping map[string]string) error {
 	for claimName := range mapping {
 		if _, declared := d[claimName]; !declared {
