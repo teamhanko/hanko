@@ -41,6 +41,9 @@ type User struct {
 	GivenName           nulls.String        `db:"given_name" json:"given_name"`
 	FamilyName          nulls.String        `db:"family_name" json:"family_name"`
 	Picture             nulls.String        `db:"picture" json:"picture"`
+	// Organizations is not a pop association - it's populated manually by
+	// UserPersister's Get/List/GetByUsername.
+	Organizations []UserOrganizationRoles `db:"-" json:"-"`
 }
 
 func (user *User) DeleteWebauthnCredential(credentialId string) {

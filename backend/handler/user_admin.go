@@ -48,6 +48,8 @@ func (h *UserHandlerAdmin) Delete(c echo.Context) error {
 
 	err = h.persister.Transaction(func(tx *pop.Connection) error {
 		p := h.persister.GetUserPersisterWithConnection(tx)
+		// Fetched before Delete, since deleting the user cascades away
+		// their organization_memberships/role_bindings rows.
 		user, err := p.Get(userId, tenant.ID)
 		if err != nil {
 			return fmt.Errorf("failed to get user: %w", err)

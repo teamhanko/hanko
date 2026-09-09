@@ -80,6 +80,12 @@ func (p *userPersister) Get(id uuid.UUID, tenantID uuid.UUID) (*models.User, err
 		}
 	}
 
+	organizations, err := listOrganizationsWithRolesByUserIDs(p.db, []uuid.UUID{id}, tenantID)
+	if err != nil {
+		return nil, fmt.Errorf("failed to get organizations: %w", err)
+	}
+	user.Organizations = organizations[id]
+
 	return &user, nil
 }
 
@@ -124,6 +130,12 @@ func (p *userPersister) GetByUsername(username string, tenantID uuid.UUID) (*mod
 	if err != nil {
 		return nil, fmt.Errorf("failed to get user: %w", err)
 	}
+
+	organizations, err := listOrganizationsWithRolesByUserIDs(p.db, []uuid.UUID{user.ID}, tenantID)
+	if err != nil {
+		return nil, fmt.Errorf("failed to get organizations: %w", err)
+	}
+	user.Organizations = organizations[user.ID]
 
 	return &user, nil
 }
@@ -199,6 +211,20 @@ func (p *userPersister) List(page int, perPage int, userIDs []uuid.UUID, email s
 	}
 	if err != nil {
 		return nil, fmt.Errorf("failed to fetch users: %w", err)
+	}
+
+	pageUserIDs := make([]uuid.UUID, len(users))
+	for i := range users {
+		pageUserIDs[i] = users[i].ID
+	}
+
+	organizations, err := listOrganizationsWithRolesByUserIDs(p.db, pageUserIDs, tenantID)
+	if err != nil {
+		return nil, fmt.Errorf("failed to get organizations: %w", err)
+	}
+
+	for i := range users {
+		users[i].Organizations = organizations[users[i].ID]
 	}
 
 	return users, nil
