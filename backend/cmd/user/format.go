@@ -161,7 +161,7 @@ func (entry *ImportOrExportEntry) validate(v *validator.Validate) error {
 	}
 
 	if entry.Password != nil && entry.Password.Password != "" {
-		if !strings.HasPrefix(entry.Password.Password, "$2a$") && !strings.HasPrefix(entry.Password.Password, "$fbscrypt$") {
+		if !strings.HasPrefix(entry.Password.Password, "$2a$") && !strings.HasPrefix(entry.Password.Password, "$2b$") && !strings.HasPrefix(entry.Password.Password, "$fbscrypt$") {
 			return errors.New("password must be in bcrypt or firebase scrypt format")
 		}
 	}
