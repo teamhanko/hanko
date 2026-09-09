@@ -45,6 +45,8 @@ func (p *userPersister) Get(id uuid.UUID, tenantID uuid.UUID) (*models.User, err
 		"Metadata",
 		"Identities",
 		"Identities.SamlIdentity",
+		"OrganizationMemberships.Organization",
+		"RoleBindings.Role",
 	}
 
 	query := p.db.EagerPreload(eagerPreloadFields...).Where("users.tenant_id = ?", tenantID)
@@ -80,12 +82,6 @@ func (p *userPersister) Get(id uuid.UUID, tenantID uuid.UUID) (*models.User, err
 		}
 	}
 
-	organizations, err := listOrganizationsWithRolesByUserIDs(p.db, []uuid.UUID{id}, tenantID)
-	if err != nil {
-		return nil, fmt.Errorf("failed to get organizations: %w", err)
-	}
-	user.Organizations = organizations[id]
-
 	return &user, nil
 }
 
@@ -119,7 +115,9 @@ func (p *userPersister) GetByUsername(username string, tenantID uuid.UUID) (*mod
 		"PasswordCredential",
 		"Username",
 		"OTPSecret",
-		"Metadata").
+		"Metadata",
+		"OrganizationMemberships.Organization",
+		"RoleBindings.Role").
 		LeftJoin("usernames", "usernames.user_id = users.id").
 		Where("usernames.username = (?)", username).
 		Where("users.tenant_id = ?", tenantID)
@@ -130,12 +128,6 @@ func (p *userPersister) GetByUsername(username string, tenantID uuid.UUID) (*mod
 	if err != nil {
 		return nil, fmt.Errorf("failed to get user: %w", err)
 	}
-
-	organizations, err := listOrganizationsWithRolesByUserIDs(p.db, []uuid.UUID{user.ID}, tenantID)
-	if err != nil {
-		return nil, fmt.Errorf("failed to get organizations: %w", err)
-	}
-	user.Organizations = organizations[user.ID]
 
 	return &user, nil
 }
@@ -196,7 +188,9 @@ func (p *userPersister) List(page int, perPage int, userIDs []uuid.UUID, email s
 			"Emails.PrimaryEmail",
 			"WebauthnCredentials",
 			"WebauthnCredentials.Transports",
-			"Username").
+			"Username",
+			"OrganizationMemberships.Organization",
+			"RoleBindings.Role").
 		LeftJoin("emails", "emails.user_id = users.id").
 		LeftJoin("usernames", "usernames.user_id = users.id")
 	query = p.addQueryParamsToSqlQuery(query, userIDs, email, username, tenantID)
@@ -211,20 +205,6 @@ func (p *userPersister) List(page int, perPage int, userIDs []uuid.UUID, email s
 	}
 	if err != nil {
 		return nil, fmt.Errorf("failed to fetch users: %w", err)
-	}
-
-	pageUserIDs := make([]uuid.UUID, len(users))
-	for i := range users {
-		pageUserIDs[i] = users[i].ID
-	}
-
-	organizations, err := listOrganizationsWithRolesByUserIDs(p.db, pageUserIDs, tenantID)
-	if err != nil {
-		return nil, fmt.Errorf("failed to get organizations: %w", err)
-	}
-
-	for i := range users {
-		users[i].Organizations = organizations[users[i].ID]
 	}
 
 	return users, nil

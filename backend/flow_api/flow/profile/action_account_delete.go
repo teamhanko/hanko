@@ -3,7 +3,6 @@ package profile
 import (
 	"fmt"
 
-	"github.com/gofrs/uuid"
 	auditlog "github.com/teamhanko/hanko/backend/v3/audit_log"
 	"github.com/teamhanko/hanko/backend/v3/dto/admin"
 	"github.com/teamhanko/hanko/backend/v3/flow_api/flow/shared"
@@ -41,16 +40,7 @@ func (a AccountDelete) Execute(c flowpilot.ExecutionContext) error {
 		return c.Error(flowpilot.ErrorOperationNotPermitted)
 	}
 
-	// Fetched before Delete, since deleting the user cascades away their
-	// organization_memberships/role_bindings rows.
-	organizations, err := deps.Persister.GetOrganizationMembershipPersisterWithConnection(deps.Tx).
-		ListOrganizationsWithRolesByUserIDs([]uuid.UUID{userModel.ID}, deps.TenantID)
-	if err != nil {
-		return fmt.Errorf("could not get organizations: %w", err)
-	}
-	userModel.Organizations = organizations[userModel.ID]
-
-	err = deps.Persister.GetUserPersisterWithConnection(deps.Tx).Delete(*userModel)
+	err := deps.Persister.GetUserPersisterWithConnection(deps.Tx).Delete(*userModel)
 	if err != nil {
 		return fmt.Errorf("could not delete user: %w", err)
 	}

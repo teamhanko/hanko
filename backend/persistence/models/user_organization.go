@@ -9,10 +9,9 @@ type UserOrganizationRole struct {
 	Name string    `json:"name"`
 }
 
-// UserOrganizationRoles is a query-result shape, not a persisted table - it
-// combines one organization a user belongs to with the roles they hold in
-// it. Produced by
-// OrganizationMembershipPersister.ListOrganizationsWithRolesByUserIDs.
+// UserOrganizationRoles combines one organization a user belongs to with
+// the roles they hold in it - not a persisted table, computed by
+// User.AfterEagerFind from OrganizationMemberships/RoleBindings.
 type UserOrganizationRoles struct {
 	OrganizationID   uuid.UUID              `json:"organization_id"`
 	OrganizationName string                 `json:"organization_name"`

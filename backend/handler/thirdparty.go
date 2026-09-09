@@ -9,7 +9,6 @@ import (
 	"time"
 
 	"github.com/gobuffalo/pop/v6"
-	"github.com/gofrs/uuid"
 	"github.com/labstack/echo/v4"
 	zeroLogger "github.com/rs/zerolog/log"
 	auditlog "github.com/teamhanko/hanko/backend/v3/audit_log"
@@ -198,13 +197,6 @@ func (h *ThirdPartyHandler) Callback(c echo.Context) error {
 	}
 
 	if accountLinkingResult.WebhookEvent != nil {
-		organizations, err := h.persister.GetOrganizationMembershipPersister().
-			ListOrganizationsWithRolesByUserIDs([]uuid.UUID{accountLinkingResult.User.ID}, tenant.ID)
-		if err != nil {
-			return h.redirectError(c, thirdparty.ErrorServer("could not get organizations").WithCause(err), errorRedirect)
-		}
-		accountLinkingResult.User.Organizations = organizations[accountLinkingResult.User.ID]
-
 		err = webhookUtils.TriggerWebhooks(c, h.persister.GetConnection(), tenant.ID, *accountLinkingResult.WebhookEvent, admin.FromUserModel(*accountLinkingResult.User))
 		if err != nil {
 			c.Logger().Warn(err)

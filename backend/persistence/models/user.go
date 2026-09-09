@@ -26,24 +26,61 @@ type ProviderProfile struct {
 
 // User is used by pop to map your users database table to your go code.
 type User struct {
-	ID                  uuid.UUID           `db:"id" json:"id"`
-	TenantID            uuid.UUID           `db:"tenant_id"`
-	WebauthnCredentials WebauthnCredentials `has_many:"webauthn_credentials" json:"webauthn_credentials,omitempty"`
-	Emails              Emails              `has_many:"emails" json:"-"`
-	CreatedAt           time.Time           `db:"created_at" json:"created_at"`
-	UpdatedAt           time.Time           `db:"updated_at" json:"updated_at"`
-	Username            *Username           `has_one:"username" json:"username,omitempty"`
-	OTPSecret           *OTPSecret          `has_one:"otp_secret" json:"-"`
-	PasswordCredential  *PasswordCredential `has_one:"password_credentials" json:"-"`
-	Metadata            *UserMetadata       `has_one:"user_metadata" json:"-"`
-	Identities          Identities          `has_many:"identities" json:"-"`
-	Name                nulls.String        `db:"name" json:"name"`
-	GivenName           nulls.String        `db:"given_name" json:"given_name"`
-	FamilyName          nulls.String        `db:"family_name" json:"family_name"`
-	Picture             nulls.String        `db:"picture" json:"picture"`
-	// Organizations is not a pop association - it's populated manually by
-	// UserPersister's Get/List/GetByUsername.
+	ID                      uuid.UUID               `db:"id" json:"id"`
+	TenantID                uuid.UUID               `db:"tenant_id"`
+	WebauthnCredentials     WebauthnCredentials     `has_many:"webauthn_credentials" json:"webauthn_credentials,omitempty"`
+	Emails                  Emails                  `has_many:"emails" json:"-"`
+	CreatedAt               time.Time               `db:"created_at" json:"created_at"`
+	UpdatedAt               time.Time               `db:"updated_at" json:"updated_at"`
+	Username                *Username               `has_one:"username" json:"username,omitempty"`
+	OTPSecret               *OTPSecret              `has_one:"otp_secret" json:"-"`
+	PasswordCredential      *PasswordCredential     `has_one:"password_credentials" json:"-"`
+	Metadata                *UserMetadata           `has_one:"user_metadata" json:"-"`
+	Identities              Identities              `has_many:"identities" json:"-"`
+	Name                    nulls.String            `db:"name" json:"name"`
+	GivenName               nulls.String            `db:"given_name" json:"given_name"`
+	FamilyName              nulls.String            `db:"family_name" json:"family_name"`
+	Picture                 nulls.String            `db:"picture" json:"picture"`
+	OrganizationMemberships OrganizationMemberships `has_many:"organization_memberships" json:"-"`
+	RoleBindings            RoleBindings            `has_many:"role_bindings" json:"-"`
+	// Organizations is derived from OrganizationMemberships/RoleBindings by
+	// AfterEagerFind below, once pop has finished eager-loading them - not
+	// itself a pop association.
 	Organizations []UserOrganizationRoles `db:"-" json:"-"`
+}
+
+// AfterEagerFind is called automatically by pop once a query's eager-loaded
+// associations (EagerPreload/Eager) have finished loading - this is where
+// OrganizationMemberships/RoleBindings get grouped into Organizations,
+// mirroring GetIdentities() below, just running on pop's own schedule
+// instead of on demand.
+func (user *User) AfterEagerFind(_ *pop.Connection) error {
+	rolesByOrg := make(map[uuid.UUID][]UserOrganizationRole)
+	for _, binding := range user.RoleBindings {
+		if binding.Role == nil {
+			continue
+		}
+		rolesByOrg[binding.OrganizationID] = append(rolesByOrg[binding.OrganizationID], UserOrganizationRole{
+			ID:   binding.Role.ID,
+			Slug: binding.Role.Slug,
+			Name: binding.Role.Name,
+		})
+	}
+
+	organizations := make([]UserOrganizationRoles, 0, len(user.OrganizationMemberships))
+	for _, membership := range user.OrganizationMemberships {
+		if membership.Organization == nil {
+			continue
+		}
+		organizations = append(organizations, UserOrganizationRoles{
+			OrganizationID:   membership.OrganizationID,
+			OrganizationName: membership.Organization.Name,
+			Roles:            rolesByOrg[membership.OrganizationID],
+		})
+	}
+	user.Organizations = organizations
+
+	return nil
 }
 
 func (user *User) DeleteWebauthnCredential(credentialId string) {
