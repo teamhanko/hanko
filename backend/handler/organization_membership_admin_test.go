@@ -144,6 +144,41 @@ func (s *organizationMembershipAdminSuite) TestOrganizationHandlerAdmin_RemoveMe
 	}
 }
 
+// A user belonging to a different tenant must not be addable to an
+// organization via another tenant's admin API - both the organization and
+// the user lookups inside AddMember are tenant-scoped, so a tenant-2 user
+// referenced under tenant 1's path must resolve as not found rather than
+// silently creating a cross-tenant membership.
+func (s *organizationMembershipAdminSuite) TestOrganizationHandlerAdmin_AddMember_DoesNotLeakAcrossTenants() {
+	if testing.Short() {
+		s.T().Skip("skipping test in short mode.")
+	}
+	s.Require().NoError(s.Storage.MigrateUp())
+	defer func() { s.Require().NoError(s.Storage.MigrateDown(-1)) }()
+
+	cfg := test.DefaultConfig
+	cfg.MultiTenancy.Enabled = true
+	err := cfg.PostProcess()
+	s.Require().NoError(err)
+	e := NewAdminRouter(&cfg, s.Storage, nil)
+	defer e.Close()
+
+	err = s.LoadFixtures("../test/fixtures/organization_membership_admin")
+	s.Require().NoError(err)
+
+	// 11111111-...-0003 belongs to tenant 2 - adding it to a tenant-1
+	// organization under tenant 1's path must 404, not succeed.
+	req := httptest.NewRequest(http.MethodPost, fmt.Sprintf(
+		"/00000000-0000-0000-0000-000000000001/organizations/%s/users/11111111-2222-0000-0000-000000000003",
+		membershipTestOrgID,
+	), nil)
+	rec := httptest.NewRecorder()
+
+	e.ServeHTTP(rec, req)
+
+	s.Equal(http.StatusNotFound, rec.Code)
+}
+
 func (s *organizationMembershipAdminSuite) TestOrganizationHandlerAdmin_RemoveMember_CascadesToRoleBindings() {
 	if testing.Short() {
 		s.T().Skip("skipping test in short mode.")

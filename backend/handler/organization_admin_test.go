@@ -241,6 +241,37 @@ func (s *organizationAdminSuite) TestOrganizationHandlerAdmin_Delete() {
 	s.Equal(1, count)
 }
 
+// An organization belonging to a different tenant must never be
+// reachable through another tenant's admin API - Get, Patch, and Delete
+// all resolve through the same tenant-scoped persister lookup, so this
+// covers that shared code path.
+func (s *organizationAdminSuite) TestOrganizationHandlerAdmin_Get_DoesNotLeakAcrossTenants() {
+	if testing.Short() {
+		s.T().Skip("skipping test in short mode.")
+	}
+	s.Require().NoError(s.Storage.MigrateUp())
+	defer func() { s.Require().NoError(s.Storage.MigrateDown(-1)) }()
+
+	cfg := test.DefaultConfig
+	cfg.MultiTenancy.Enabled = true
+	err := cfg.PostProcess()
+	s.Require().NoError(err)
+	e := NewAdminRouter(&cfg, s.Storage, nil)
+	defer e.Close()
+
+	err = s.LoadFixtures("../test/fixtures/organization_admin")
+	s.Require().NoError(err)
+
+	// aaaaaaaa-...-0003 belongs to tenant 2 - fetching it under tenant 1's
+	// path must 404, not leak the organization across tenants.
+	req := httptest.NewRequest(http.MethodGet, "/00000000-0000-0000-0000-000000000001/organizations/aaaaaaaa-0000-0000-0000-000000000003", nil)
+	rec := httptest.NewRecorder()
+
+	e.ServeHTTP(rec, req)
+
+	s.Equal(http.StatusNotFound, rec.Code)
+}
+
 func (s *organizationAdminSuite) TestOrganizationHandlerAdmin_Delete_NotFound() {
 	if testing.Short() {
 		s.T().Skip("skipping test in short mode.")

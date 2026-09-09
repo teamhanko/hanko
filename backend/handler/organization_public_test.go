@@ -2,6 +2,7 @@ package handler
 
 import (
 	"encoding/json"
+	"fmt"
 	"net/http"
 	"net/http/httptest"
 	"strings"
@@ -126,6 +127,55 @@ func (s *organizationPublicSuite) TestOrganizationPublicHandler_CheckRole() {
 			s.Require().NoError(s.Storage.MigrateDown(-1))
 		})
 	}
+}
+
+// An organization belonging to a different tenant must resolve the same
+// way as an organization that doesn't exist at all: has_role false, never
+// an error - so a real organization id from tenant 2 must not leak into
+// tenant 1's role check (nor be treated any differently from a garbage
+// id, which the CheckRole test above already covers). Exercised under
+// real multi-tenant routing, not just single-tenant's fixed default
+// tenant.
+func (s *organizationPublicSuite) TestOrganizationPublicHandler_CheckRole_DoesNotLeakAcrossTenants() {
+	if testing.Short() {
+		s.T().Skip("skipping test in short mode.")
+	}
+	s.Require().NoError(s.Storage.MigrateUp())
+	defer func() { s.Require().NoError(s.Storage.MigrateDown(-1)) }()
+
+	err := s.LoadFixtures("../test/fixtures/organization_public")
+	s.Require().NoError(err)
+
+	err = generateSigningKeyForTenant(s.Storage, uuid.FromStringOrNil(rolePublicTestTenantID))
+	s.Require().NoError(err)
+
+	cfg := test.DefaultConfig
+	cfg.MultiTenancy.Enabled = true
+	err = cfg.PostProcess()
+	s.Require().NoError(err)
+
+	e := NewPublicRouter(&cfg, s.Storage, nil, nil)
+	defer e.Close()
+
+	cookie, err := generateSessionCookie(s.Storage, uuid.FromStringOrNil(rolePublicTestMemberID), uuid.FromStringOrNil(rolePublicTestTenantID))
+	s.Require().NoError(err)
+
+	// 99999999-2222-...-0002 is a real organization, but it belongs to
+	// tenant 2 - the session above, and the request path, are tenant 1's.
+	body := `{"organization_id": "99999999-2222-0000-0000-000000000002", "roles": ["admin"]}`
+	req := httptest.NewRequest(http.MethodPost, fmt.Sprintf("/%s/organizations/roles/check", rolePublicTestTenantID), strings.NewReader(body))
+	req.Header.Set("Content-Type", "application/json")
+	req.AddCookie(cookie)
+	rec := httptest.NewRecorder()
+
+	e.ServeHTTP(rec, req)
+
+	s.Equal(http.StatusOK, rec.Code)
+
+	var got map[string]any
+	err = json.Unmarshal(rec.Body.Bytes(), &got)
+	s.Require().NoError(err)
+	s.Equal(false, got["has_role"])
 }
 
 func (s *organizationPublicSuite) TestOrganizationPublicHandler_CheckRole_Unauthenticated() {

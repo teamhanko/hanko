@@ -275,6 +275,37 @@ func (s *roleAdminSuite) TestRoleHandlerAdmin_Delete_NotFound() {
 	s.Equal(http.StatusNotFound, rec.Code)
 }
 
+// A role belonging to a different tenant must never be reachable through
+// another tenant's admin API - Get, Patch, and Delete all resolve through
+// the same tenant-scoped persister lookup, so this covers that shared
+// code path.
+func (s *roleAdminSuite) TestRoleHandlerAdmin_Get_DoesNotLeakAcrossTenants() {
+	if testing.Short() {
+		s.T().Skip("skipping test in short mode.")
+	}
+	s.Require().NoError(s.Storage.MigrateUp())
+	defer func() { s.Require().NoError(s.Storage.MigrateDown(-1)) }()
+
+	cfg := test.DefaultConfig
+	cfg.MultiTenancy.Enabled = true
+	err := cfg.PostProcess()
+	s.Require().NoError(err)
+	e := NewAdminRouter(&cfg, s.Storage, nil)
+	defer e.Close()
+
+	err = s.LoadFixtures("../test/fixtures/role_admin")
+	s.Require().NoError(err)
+
+	// dddddddd-...-003 belongs to tenant 2 - fetching it under tenant 1's
+	// path must 404, not leak the role across tenants.
+	req := httptest.NewRequest(http.MethodGet, "/00000000-0000-0000-0000-000000000001/roles/dddddddd-0000-0000-0000-000000000003", nil)
+	rec := httptest.NewRecorder()
+
+	e.ServeHTTP(rec, req)
+
+	s.Equal(http.StatusNotFound, rec.Code)
+}
+
 func (s *roleAdminSuite) TestRoleHandlerAdmin_Delete_CascadesToRoleBindings() {
 	if testing.Short() {
 		s.T().Skip("skipping test in short mode.")
