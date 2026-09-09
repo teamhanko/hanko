@@ -98,7 +98,7 @@ func (b *ProviderManager) GetProvider(
 
 	// Parse attribute map from provider
 	var attributeMap samlConfig.AttributeMap
-	if len(provider.AttributeMap) == 0 || bytes.Equal(provider.AttributeMap, []byte("null")) {
+	if len(provider.AttributeMap) > 0 && !bytes.Equal(provider.AttributeMap, []byte("null")) {
 		err = json.Unmarshal(provider.AttributeMap, &attributeMap)
 		if err != nil {
 			return nil, nil, fmt.Errorf("failed to unmarshal attribute map: %w", err)

@@ -6,8 +6,10 @@ import (
 	"log"
 
 	"github.com/kelseyhightower/envconfig"
+	"github.com/knadh/koanf/parsers/json"
 	"github.com/knadh/koanf/parsers/yaml"
 	"github.com/knadh/koanf/providers/file"
+	"github.com/knadh/koanf/providers/rawbytes"
 	"github.com/knadh/koanf/v2"
 )
 
@@ -60,6 +62,9 @@ type TenantConfig struct {
 	SecurityNotifications SecurityNotifications `yaml:"security_notifications" json:"security_notifications" koanf:"security_notifications"`
 	// `cors` configures Cross-Origin Resource Sharing settings for this tenant.
 	Cors Cors `yaml:"cors" json:"cors" koanf:"cors" jsonschema:"title=cors"`
+	// `custom_claims` declares the tenant-wide set of custom claims that SAML/OIDC connections
+	// may map their own attributes/claims onto.
+	CustomClaims CustomClaims `yaml:"custom_claims" json:"custom_claims" koanf:"custom_claims" jsonschema:"title=custom_claims"`
 	// `service` configures general service information.
 	Service Service `yaml:"service" json:"service" koanf:"service" jsonschema:"title=service"`
 	// `session` configures settings for session JWTs and Cookies issued by the API.
@@ -200,6 +205,10 @@ func (c *TenantConfig) Validate(multiTenancy bool) error {
 	if err != nil {
 		return fmt.Errorf("failed to validate email settings: %w", err)
 	}
+	err = c.CustomClaims.Validate()
+	if err != nil {
+		return fmt.Errorf("failed to validate custom_claims settings: %w", err)
+	}
 	return nil
 }
 
@@ -243,6 +252,19 @@ func (c *Config) ValidateCrossConfig() error {
 			return errors.New("at least one key must be defined")
 		}
 	}
+
+	for _, idp := range c.TenantConfig.Saml.IdentityProviders {
+		if err := c.TenantConfig.CustomClaims.Definitions.ValidateMapping(idp.AttributeMap.Custom); err != nil {
+			return fmt.Errorf("invalid custom claim mapping for saml identity provider %q: %w", idp.Name, err)
+		}
+	}
+
+	for key, provider := range c.TenantConfig.ThirdParty.CustomProviders {
+		if err := c.TenantConfig.CustomClaims.Definitions.ValidateMapping(provider.CustomClaimMapping); err != nil {
+			return fmt.Errorf("invalid custom claim mapping for custom third party provider %q: %w", key, err)
+		}
+	}
+
 	return nil
 }
 
@@ -267,7 +289,33 @@ func (c *TenantConfig) PostProcess() error {
 		return fmt.Errorf("failed to post process email settings: %w", err)
 	}
 
+	err = c.CustomClaims.PostProcess()
+	if err != nil {
+		return fmt.Errorf("failed to post process custom_claims settings: %w", err)
+	}
+
 	return nil
+}
+
+// ParseMultitenancyTenantConfig unmarshals a tenant's config JSON, as stored in the `tenants.config`
+// database column under multitenancy, into a TenantConfig and runs its PostProcess step.
+func ParseMultitenancyTenantConfig(raw []byte) (*TenantConfig, error) {
+	tenantConfig := DefaultTenantConfig()
+	k := koanf.New(".")
+
+	if err := k.Load(rawbytes.Provider(raw), json.Parser()); err != nil {
+		return nil, fmt.Errorf("failed to parse tenant config: %w", err)
+	}
+
+	if err := k.Unmarshal("", &tenantConfig); err != nil {
+		return nil, fmt.Errorf("failed to unmarshal tenant config: %w", err)
+	}
+
+	if err := tenantConfig.PostProcess(); err != nil {
+		return nil, fmt.Errorf("failed to post process tenant settings: %w", err)
+	}
+
+	return &tenantConfig, nil
 }
 
 func (c *Config) PostProcess() error {

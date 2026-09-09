@@ -1,0 +1,41 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: webhook-receiver
+  labels:
+    app: webhook-receiver
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: webhook-receiver
+  template:
+    metadata:
+      labels:
+        app: webhook-receiver
+    spec:
+      containers:
+        # Generic echo container - logs every received request (headers + body) to its own
+        # stdout, so `kubectl logs -n hanko deploy/webhook-receiver` shows the raw webhook
+        # payload Hanko sends. Same image/setup as deploy/docker-compose's webhook-receiver;
+        # not a real webhook consumer (it doesn't verify the payload's signed JWT).
+        - name: webhook-receiver
+          image: mendhak/http-https-echo
+          env:
+            - name: HTTP_PORT
+              value: "8090"
+          ports:
+            - containerPort: 8090
+              name: http
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: webhook-receiver
+spec:
+  selector:
+    app: webhook-receiver
+  ports:
+    - port: 8090
+      targetPort: http
+      name: http

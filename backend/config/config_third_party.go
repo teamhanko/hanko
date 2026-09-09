@@ -8,13 +8,21 @@ import (
 	"github.com/fatih/structs"
 	"github.com/gobwas/glob"
 	"github.com/invopop/jsonschema"
-	orderedmap "github.com/pb33f/ordered-map/v2"
+	orderedmap "github.com/wk8/go-ordered-map/v2"
 )
 
 type ThirdParty struct {
 	// `providers` contains the configurations for the available OAuth/OIDC identity providers.
 	Providers ThirdPartyProviders `yaml:"providers" json:"providers" koanf:"providers" jsonschema:"title=providers,uniqueItems=true"`
 	// `custom_providers contains the configurations for custom OAuth/OIDC identity providers.
+	//
+	// Treat each key here as permanent once you've configured custom_claim_mapping on it: if
+	// this provider maps to any tenant-defined custom claim (see custom_claims.definitions),
+	// renaming the key changes the provider's internal identity, and any custom claims
+	// already set by users who signed in through it become orphaned - still stored, and still
+	// overwritable the next time that user signs in through the renamed connection, but no
+	// longer clearable by it if it later stops asserting a value. Prefer adding a new entry
+	// over renaming an existing one if this applies to you.
 	CustomProviders CustomThirdPartyProviders `yaml:"custom_providers" json:"custom_providers" koanf:"custom_providers" jsonschema:"title=custom_providers"`
 	// `redirect_url` is the URL the third party provider redirects to with an authorization code. Must consist of the base URL
 	// of your running Hanko backend instance and the `callback` endpoint of the API,
@@ -248,6 +256,24 @@ type CustomThirdPartyProvider struct {
 	//
 	// Mappings are one-to-one mappings, complex mappings (e.g. mapping concatenations of two claims) are not possible.
 	AttributeMapping map[string]string `yaml:"attribute_mapping" json:"attribute_mapping" koanf:"attribute_mapping"`
+	// `custom_claim_mapping` maps tenant-defined custom claims (key, declared under
+	// custom_claims.definitions) to provider claim names (value) - deliberately separate from
+	// `attribute_mapping` above, which has different semantics (renames a provider claim into
+	// a standard slot and removes the original; this instead resolves a value for a claim the
+	// tenant declared, and leaves the provider's own claims untouched).
+	//
+	// The value may be a plain top-level claim name, or a gjson path
+	// (https://github.com/tidwall/gjson#path-syntax) to reach into a nested provider claim,
+	// e.g. `address.locality` for a claim shaped like `{"address": {"locality": "Hamburg"}}`.
+	// Whatever the path resolves to must still be a single value or a list of values matching
+	// the target custom claim's declared type (string/number/boolean/string_list) - resolving
+	// to a JSON object or a list of objects is treated as a coercion failure like any other
+	// (logged and skipped, never fails the login), not stored as-is. An admin who wants such a
+	// nested provider claim represented as a nested structure in the session JWT can still
+	// declare several flat custom claims (one per leaf field) and recompose them into a nested
+	// shape in session.jwt_template.claims, which already supports arbitrary nested map
+	// literals with templated leaves.
+	CustomClaimMapping map[string]string `yaml:"custom_claim_mapping" json:"custom_claim_mapping" koanf:"custom_claim_mapping"`
 	// URL of the provider's authorization endpoint where the end-user is redirected to authenticate and grant consent for
 	// an application to access their resources.
 	//

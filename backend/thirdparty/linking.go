@@ -40,6 +40,7 @@ func LinkAccount(tx *pop.Connection, cfg *config.TenantConfig, p persistence.Per
 		return nil, ErrorServer("could not get identity").WithCause(err)
 	}
 
+	var result *AccountLinkingResult
 	if identity == nil {
 		var user *models.User
 		if userID != nil {
@@ -52,13 +53,44 @@ func LinkAccount(tx *pop.Connection, cfg *config.TenantConfig, p persistence.Per
 		}
 
 		if user == nil {
-			return signUp(tx, cfg, p, userData, providerID, isSaml, samlDomain, tenantID)
+			result, err = signUp(tx, cfg, p, userData, providerID, isSaml, samlDomain, tenantID)
 		} else {
-			return link(tx, cfg, p, userData, providerID, user, isSaml, samlDomain, userID != nil, tenantID)
+			result, err = link(tx, cfg, p, userData, providerID, user, isSaml, samlDomain, userID != nil, tenantID)
 		}
 	} else {
-		return signIn(tx, cfg, p, userData, identity, tenantID)
+		result, err = signIn(tx, cfg, p, userData, identity, tenantID)
 	}
+	if err != nil {
+		return nil, err
+	}
+
+	// Custom claims: applied after signUp/link/signIn's own branch-specific logic, once
+	// result.User is known, regardless of which branch ran.
+	updatedCustomClaims, customClaimsValueChanged, err := applyCustomClaims(tx, p, cfg, userData, customClaimConnectionSource(providerID, isSaml), result.User.ID, tenantID)
+	if err != nil {
+		return nil, ErrorServer("could not apply custom claims").WithCause(err)
+	}
+	// Callers (e.g. the webhook payload built from result.User right after LinkAccount returns)
+	// would otherwise see whatever CustomClaims was eager-loaded before this write - stale by
+	// exactly one change - since applyCustomClaims only touches the database, it has no way to
+	// update result.User itself. Refreshed on any write, including a source-only handoff, since
+	// that's real DB state too even when customClaimsValueChanged is false.
+	if updatedCustomClaims != nil {
+		result.User.CustomClaims = updatedCustomClaims
+	}
+	// Only fill in a webhook event if the branch above didn't already set a real one - link()
+	// always leaves it nil, and signIn() leaves it at its zero value whenever the provider's
+	// email didn't change (the common case) - see applyCustomClaims's call site discussion for
+	// why this can never overwrite a real event like UserCreate/UserEmailCreate. Gated on
+	// customClaimsValueChanged, not updatedCustomClaims != nil, so a source-only handoff (or an
+	// IdP re-asserting the same value) never fires a webhook for what looks like nothing
+	// happening.
+	if customClaimsValueChanged && (result.WebhookEvent == nil || *result.WebhookEvent == "") {
+		customClaimsEvent := events.UserCustomClaims
+		result.WebhookEvent = &customClaimsEvent
+	}
+
+	return result, nil
 }
 
 func link(tx *pop.Connection, cfg *config.TenantConfig, p persistence.Persister, userData *UserData, providerID string, user *models.User, isSaml bool, samlDomain *string, comesFromProfile bool, tenantID uuid.UUID) (*AccountLinkingResult, error) {

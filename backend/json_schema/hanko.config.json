@@ -82,6 +82,13 @@
         },
         "phone_verified": {
           "type": "string"
+        },
+        "custom": {
+          "additionalProperties": {
+            "type": "string"
+          },
+          "type": "object",
+          "description": "`custom` maps tenant-defined custom claims (key) to IdP attribute names (value),\ni.e. hankoClaimName -\u003e idpAttributeName - same direction as the standard slots\nabove and as ThirdParty.AttributeMapping.\n\nThe value must be the IdP's raw SAML attribute Name (often a urn:oid:... string,\nas used by the fields above) - not a human-friendly FriendlyName. Every key must\nalready be declared in the tenant's custom_claims.definitions."
         }
       },
       "additionalProperties": false,
@@ -244,6 +251,11 @@
           "title": "cors",
           "description": "`cors` configures Cross-Origin Resource Sharing settings for this tenant."
         },
+        "custom_claims": {
+          "$ref": "#/$defs/CustomClaims",
+          "title": "custom_claims",
+          "description": "`custom_claims` declares the tenant-wide set of custom claims that SAML/OIDC connections\nmay map their own attributes/claims onto."
+        },
         "service": {
           "$ref": "#/$defs/Service",
           "title": "service",
@@ -293,6 +305,7 @@
         "secrets",
         "security_notifications",
         "cors",
+        "custom_claims",
         "service",
         "session",
         "third_party",
@@ -389,6 +402,49 @@
         "unsafe_wildcard_origin_allowed"
       ]
     },
+    "CustomClaimDefinition": {
+      "properties": {
+        "type": {
+          "type": "string",
+          "enum": [
+            "string",
+            "number",
+            "boolean",
+            "string_list"
+          ],
+          "description": "`type` declares how a mapped connection attribute value is coerced before storage.\n\nDeliberately scalar/list-of-scalar only, no nested/object type: SAML attributes are\nstructurally flat (a single value or a list of values, never nested), and matching that\non the OIDC side keeps one claim shape across both connection types. An OIDC provider\nclaim that resolves to a JSON object or an array of objects is treated the same as any\nother coercion failure (logged and skipped, never fails the login) rather than stored\nas-is - see CustomClaimMapping's doc comment for how a nested OIDC claim can still supply\none of these flat values via a gjson path.",
+          "default": "string"
+        },
+        "description": {
+          "type": "string",
+          "description": "`description` is a human-readable note about the claim's meaning, for admin UIs/docs."
+        }
+      },
+      "additionalProperties": false,
+      "type": "object",
+      "required": [
+        "type"
+      ]
+    },
+    "CustomClaimDefinitions": {
+      "additionalProperties": {
+        "$ref": "#/$defs/CustomClaimDefinition"
+      },
+      "type": "object",
+      "description": "CustomClaimDefinitions is keyed by the custom claim name."
+    },
+    "CustomClaims": {
+      "properties": {
+        "definitions": {
+          "$ref": "#/$defs/CustomClaimDefinitions",
+          "title": "definitions",
+          "description": "`definitions` declares the tenant-wide set of custom claims that connections may map onto."
+        }
+      },
+      "additionalProperties": false,
+      "type": "object",
+      "description": "CustomClaims configures the tenant-wide set of custom claims that SAML/OIDC connections may map their own attributes/claims onto."
+    },
     "CustomThirdPartyProvider": {
       "if": {
         "properties": {
@@ -459,6 +515,13 @@
           "type": "object",
           "description": "`attribute_mapping` defines a map that associates a set of known standard OIDC conformant end-user claims\n(the key of a map entry) at the Hanko backend to claims retrieved from a third party provider (the value of the\nmap entry). This is primarily necessary if a non-OIDC provider is configured/used in which case it is probable\nthat user data returned from the userinfo endpoint does not already conform to OIDC standard claims.\n\nExample: You configure an OAuth Provider (i.e. non-OIDC) and the provider's configured userinfo endpoint returns\nan end-user's user ID at the provider not under a `sub` key in its JSON response but rather under a `user_id`\nkey. You would then configure an attribute mapping as follows:\n\n```yaml\nattribute_mapping:\n sub: user_id\n```\n\nSee https://openid.net/specs/openid-connect-core-1_0.html#StandardClaims for a list of known standard claims\nthat provider claims can be mapped into. Any other claims received from a provider are not discarded but are\nretained internally in a `custom_claims` claim.\n\nMappings are one-to-one mappings, complex mappings (e.g. mapping concatenations of two claims) are not possible."
         },
+        "custom_claim_mapping": {
+          "additionalProperties": {
+            "type": "string"
+          },
+          "type": "object",
+          "description": "`custom_claim_mapping` maps tenant-defined custom claims (key, declared under\ncustom_claims.definitions) to provider claim names (value) - deliberately separate from\n`attribute_mapping` above, which has different semantics (renames a provider claim into\na standard slot and removes the original; this instead resolves a value for a claim the\ntenant declared, and leaves the provider's own claims untouched).\n\nThe value may be a plain top-level claim name, or a gjson path\n(https://github.com/tidwall/gjson#path-syntax) to reach into a nested provider claim,\ne.g. `address.locality` for a claim shaped like `{\"address\": {\"locality\": \"Hamburg\"}}`.\nWhatever the path resolves to must still be a single value or a list of values matching\nthe target custom claim's declared type (string/number/boolean/string_list) - resolving\nto a JSON object or a list of objects is treated as a coercion failure like any other\n(logged and skipped, never fails the login), not stored as-is. An admin who wants such a\nnested provider claim represented as a nested structure in the session JWT can still\ndeclare several flat custom claims (one per leaf field) and recompose them into a nested\nshape in session.jwt_template.claims, which already supports arbitrary nested map\nliterals with templated leaves."
+        },
         "authorization_endpoint": {
           "type": "string",
           "description": "URL of the provider's authorization endpoint where the end-user is redirected to authenticate and grant consent for\nan application to access their resources.\n\nRequired if `use_discovery` is false or omitted."
@@ -515,6 +578,7 @@
         "acr_values",
         "allow_linking",
         "attribute_mapping",
+        "custom_claim_mapping",
         "authorization_endpoint",
         "issuer",
         "client_id",
@@ -1762,7 +1826,7 @@
         "custom_providers": {
           "$ref": "#/$defs/CustomThirdPartyProviders",
           "title": "custom_providers",
-          "description": "`custom_providers contains the configurations for custom OAuth/OIDC identity providers."
+          "description": "`custom_providers contains the configurations for custom OAuth/OIDC identity providers.\n\nTreat each key here as permanent once you've configured custom_claim_mapping on it: if\nthis provider maps to any tenant-defined custom claim (see custom_claims.definitions),\nrenaming the key changes the provider's internal identity, and any custom claims\nalready set by users who signed in through it become orphaned - still stored, and still\noverwritable the next time that user signs in through the renamed connection, but no\nlonger clearable by it if it later stops asserting a value. Prefer adding a new entry\nover renaming an existing one if this applies to you."
         },
         "redirect_url": {
           "type": "string",
@@ -1997,6 +2061,7 @@
               "user.delete",
               "user.login",
               "user.update",
+              "user.update.custom_claims",
               "user.update.email",
               "user.update.email.create",
               "user.update.email.delete",
@@ -2041,7 +2106,8 @@
               "user.create": "Triggers on: user creation",
               "user.delete": "Triggers on: user deletion",
               "user.login": "Triggers on: user login",
-              "user.update": "Triggers on: user update, email creation, email deletion, change of primary email",
+              "user.update": "Triggers on: user update, email creation, email deletion, change of primary email, change of a custom claim",
+              "user.update.custom_claims": "Triggers on: change of a custom claim",
               "user.update.email": "Triggers on: email creation, email deletion, change of primary email",
               "user.update.email.create": "Triggers on: email creation",
               "user.update.email.delete": "Triggers on: email deletion",

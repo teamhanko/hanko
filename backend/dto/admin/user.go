@@ -4,6 +4,7 @@ import (
 	"time"
 
 	"github.com/gofrs/uuid"
+	zeroLogger "github.com/rs/zerolog/log"
 	"github.com/teamhanko/hanko/backend/v3/dto"
 	"github.com/teamhanko/hanko/backend/v3/persistence/models"
 )
@@ -21,6 +22,7 @@ type User struct {
 	IPAddress           *string                          `json:"ip_address,omitempty"`
 	UserAgent           *string                          `json:"user_agent,omitempty"`
 	Metadata            *Metadata                        `json:"metadata,omitempty"`
+	CustomClaims        CustomClaims                     `json:"custom_claims,omitempty"`
 	GivenName           string                           `json:"given_name,omitempty"`
 	FamilyName          string                           `json:"family_name,omitempty"`
 	Name                string                           `json:"name,omitempty"`
@@ -77,6 +79,20 @@ func FromUserModel(model models.User) User {
 		metadata = NewMetadata(model.Metadata)
 	}
 
+	var customClaims CustomClaims
+	if model.CustomClaims != nil {
+		var err error
+		customClaims, err = NewCustomClaims(model.CustomClaims)
+		if err != nil {
+			// Should never happen - this backend is the only writer of this column, and
+			// always writes valid JSON (thirdparty.applyCustomClaims, the custom claims
+			// Admin API). Fall back to omitting them rather than failing this widely-used
+			// conversion (webhooks, other admin responses) over corrupted data.
+			zeroLogger.Warn().Err(err).Str("component", "dto/admin").Str("user_id", model.ID.String()).
+				Msg("could not build custom claims for user response, omitting them")
+		}
+	}
+
 	return User{
 		ID:                  model.ID,
 		WebauthnCredentials: credentials,
@@ -88,6 +104,7 @@ func FromUserModel(model models.User) User {
 		Identities:          identities,
 		OTP:                 otp,
 		Metadata:            metadata,
+		CustomClaims:        customClaims,
 		GivenName:           model.GivenName.String,
 		FamilyName:          model.FamilyName.String,
 		Name:                model.Name.String,

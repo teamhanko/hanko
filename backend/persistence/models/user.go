@@ -36,6 +36,7 @@ type User struct {
 	OTPSecret           *OTPSecret          `has_one:"otp_secret" json:"-"`
 	PasswordCredential  *PasswordCredential `has_one:"password_credentials" json:"-"`
 	Metadata            *UserMetadata       `has_one:"user_metadata" json:"-"`
+	CustomClaims        *UserCustomClaims   `has_one:"user_custom_claims" json:"-"`
 	Identities          Identities          `has_many:"identities" json:"-"`
 	Name                nulls.String        `db:"name" json:"name"`
 	GivenName           nulls.String        `db:"given_name" json:"given_name"`
