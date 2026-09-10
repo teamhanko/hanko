@@ -14,6 +14,7 @@ import (
 	"github.com/gofrs/uuid"
 	"github.com/stretchr/testify/suite"
 	"github.com/teamhanko/hanko/backend/v3/dto/admin"
+	"github.com/teamhanko/hanko/backend/v3/persistence/models"
 	"github.com/teamhanko/hanko/backend/v3/test"
 )
 
@@ -132,6 +133,52 @@ func (s *metadataAdminSuite) TestMetadataAdminHandler_Get() {
 		})
 	}
 }
+func (s *metadataAdminSuite) TestMetadataAdminHandler_DoesNotLeakAcrossTenants() {
+	if testing.Short() {
+		s.T().Skip("skipping test in short mode.")
+	}
+
+	err := s.LoadFixtures("../test/fixtures/metadata")
+	s.Require().NoError(err)
+
+	cfg := test.DefaultConfig
+	cfg.MultiTenancy.Enabled = true
+	err = cfg.PostProcess()
+	s.Require().NoError(err)
+	e := NewAdminRouter(&cfg, s.Storage, nil)
+
+	tenant1ID := uuid.FromStringOrNil("00000000-0000-0000-0000-000000000001")
+	tenant2UserID := uuid.FromStringOrNil("11111111-1111-1111-1111-111111111111")
+
+	getReq := httptest.NewRequest(
+		http.MethodGet,
+		fmt.Sprintf("/00000000-0000-0000-0000-000000000001/users/%s/metadata", tenant2UserID),
+		nil,
+	)
+	getRec := httptest.NewRecorder()
+	e.ServeHTTP(getRec, getReq)
+	s.Equal(http.StatusNotFound, getRec.Code)
+
+	patchBody := json.RawMessage(`{"public_metadata":{"key":"value"}}`)
+	patchReq := httptest.NewRequest(
+		http.MethodPatch,
+		fmt.Sprintf("/00000000-0000-0000-0000-000000000001/users/%s/metadata", tenant2UserID),
+		bytes.NewReader(patchBody),
+	)
+	patchReq.Header.Set("Content-Type", "application/json")
+	patchRec := httptest.NewRecorder()
+	e.ServeHTTP(patchRec, patchReq)
+	s.Equal(http.StatusNotFound, patchRec.Code)
+
+	// Query for row existence directly (not via GetUserMetadataPersister().Get, which
+	// auto-creates a row on miss and would otherwise mask the very bug this test checks for).
+	exists, err := s.Storage.GetConnection().
+		Where("user_id = ? AND tenant_id = ?", tenant2UserID, tenant1ID).
+		Exists(&models.UserMetadata{})
+	s.Require().NoError(err)
+	s.False(exists, "no metadata row should have been auto-created for the cross-tenant user")
+}
+
 func (s *metadataAdminSuite) TestMetadataAdminHandler_Patch_Errors() {
 	if testing.Short() {
 		s.T().Skip("skipping test in short mode.")

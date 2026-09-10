@@ -182,6 +182,41 @@ func (s *userAdminSuite) TestUserHandlerAdmin_List_MultipleUserIDs() {
 	}
 }
 
+func (s *userAdminSuite) TestUserHandlerAdmin_List_SearchDoesNotLeakAcrossTenants() {
+	if testing.Short() {
+		s.T().Skip("skipping test in short mode.")
+	}
+
+	err := s.LoadFixtures("../test/fixtures/user_admin")
+	s.Require().NoError(err)
+
+	cfg := test.DefaultConfig
+	cfg.MultiTenancy.Enabled = true
+	err = cfg.PostProcess()
+	s.Require().NoError(err)
+	e := NewAdminRouter(&cfg, s.Storage, nil)
+
+	// Tenant 1 fixture data matches "john.doe" on email and "foouser" on username.
+	// Tenant 2's user only matches on username ("foouser") and must never appear here.
+	req := httptest.NewRequest(http.MethodGet, "/00000000-0000-0000-0000-000000000001/users?email=john.doe&username=foouser", nil)
+	rec := httptest.NewRecorder()
+
+	e.ServeHTTP(rec, req)
+
+	if s.Equal(http.StatusOK, rec.Code) {
+		s.Equal("4", rec.Header().Get("X-Total-Count"))
+
+		var got []models.User
+		err := json.Unmarshal(rec.Body.Bytes(), &got)
+		s.Require().NoError(err)
+
+		s.Equal(4, len(got))
+		for _, u := range got {
+			s.NotEqual("11111111-1111-1111-1111-111111111111", u.ID.String(), "tenant 2's user must not leak into tenant 1's search results")
+		}
+	}
+}
+
 func (s *userAdminSuite) TestUserHandlerAdmin_List_InvalidPaginationParam() {
 	e := NewAdminRouter(&test.DefaultConfig, s.Storage, nil)
 

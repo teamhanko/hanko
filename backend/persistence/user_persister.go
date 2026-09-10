@@ -250,7 +250,7 @@ func (p *userPersister) addQueryParamsToSqlQuery(query *pop.Query, userIDs []uui
 	query = query.Where("users.tenant_id = ?", tenantID)
 
 	if email != "" && username != "" {
-		query = query.Where("emails.address LIKE ? OR usernames.username LIKE ?", "%"+email+"%", "%"+username+"%")
+		query = query.Where("(emails.address LIKE ? OR usernames.username LIKE ?)", "%"+email+"%", "%"+username+"%")
 	} else if email != "" {
 		query = query.Where("emails.address LIKE ?", "%"+email+"%")
 	} else if username != "" {
