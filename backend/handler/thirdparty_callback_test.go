@@ -1103,6 +1103,130 @@ func (s *thirdPartySuite) TestThirdPartyHandler_Callback_Link_ExistingAccountNoI
 	}
 }
 
+func (s *thirdPartySuite) TestThirdPartyHandler_Callback_SignUp_WithUnverifiedProviderEmail() {
+	defer gock.Off()
+	if testing.Short() {
+		s.T().Skip("skipping test in short mode.")
+	}
+
+	gock.New(thirdparty.GoogleOauthTokenEndpoint).
+		Post("/").
+		Reply(200).
+		JSON(map[string]string{"access_token": "fakeAccessToken"})
+
+	gock.New(thirdparty.GoogleUserInfoEndpoint).
+		Get("/").
+		Reply(200).
+		JSON(&thirdparty.GoogleUser{
+			ID:            "google_abcde",
+			Email:         "test-google-signup@example.com",
+			EmailVerified: false,
+		})
+
+	cfg := s.setUpConfig([]string{"google"}, []string{"https://example.com"})
+	s.True(cfg.Email.RequireVerification)
+
+	state, err := thirdparty.GenerateState(cfg, "google", "https://example.com")
+	s.NoError(err)
+
+	req := httptest.NewRequest(http.MethodGet, fmt.Sprintf("/thirdparty/callback?code=abcde&state=%s", state), nil)
+	req.AddCookie(&http.Cookie{
+		Name:  utils.HankoThirdpartyStateCookie,
+		Value: string(state),
+	})
+
+	c, rec := s.setUpContext(req, cfg.TenantConfig)
+	handler := s.setUpHandler(cfg)
+
+	// Signing up doesn't grant access to anyone else's account, so an unverified provider email is allowed
+	// through here; ExchangeToken's downstream check (on the freshly-created, unverified Email row) is what
+	// forces the user through email passcode confirmation before the flow can reach StateSuccess.
+	if s.NoError(handler.Callback(c)) {
+		s.Equal(http.StatusTemporaryRedirect, rec.Code)
+
+		s.assertLocationHeaderHasToken(rec)
+		s.assertStateCookieRemoved(rec)
+
+		email, err := s.Storage.GetEmailPersister().FindByAddress("test-google-signup@example.com", uuid.FromStringOrNil(config.DefaultTenantID))
+		s.NoError(err)
+		s.NotNil(email)
+		s.False(email.Verified)
+
+		user, err := s.Storage.GetUserPersister().Get(*email.UserID, uuid.FromStringOrNil(config.DefaultTenantID))
+		s.NoError(err)
+		s.NotNil(user)
+
+		identity := email.Identities.GetIdentity("google", "google_abcde")
+		s.NotNil(identity)
+
+		logs, lerr := s.Storage.GetAuditLogPersister().List(0, 0, nil, nil, []string{"thirdparty_signup_succeeded"}, user.ID.String(), email.Address, "", "", uuid.FromStringOrNil(config.DefaultTenantID))
+		s.NoError(lerr)
+		s.Len(logs, 1)
+	}
+}
+
+func (s *thirdPartySuite) TestThirdPartyHandler_Callback_SignIn_WithUnverifiedProviderEmail() {
+	defer gock.Off()
+	if testing.Short() {
+		s.T().Skip("skipping test in short mode.")
+	}
+
+	err := s.LoadFixtures("../test/fixtures/thirdparty")
+	s.NoError(err)
+
+	fakeIdToken := s.setUpMicrosoftIdToken("microsoft_abcde", "fakeClientID", "test-with-microsoft-identity@example.com", false)
+	gock.New(thirdparty.MicrosoftOAuthTokenEndpoint).
+		Post("/").
+		Reply(200).
+		JSON(map[string]string{"access_token": "fakeAccessToken", "id_token": fakeIdToken})
+
+	fakeJwkSet := s.setUpFakeJwkSet()
+	gock.New(thirdparty.MicrosoftKeysEndpoint).
+		Get("/").
+		Reply(200).
+		JSON(fakeJwkSet)
+
+	cfg := s.setUpConfig([]string{"microsoft"}, []string{"https://example.com"})
+	s.True(cfg.Email.RequireVerification)
+
+	state, err := thirdparty.GenerateState(cfg, "microsoft", "https://example.com")
+	s.NoError(err)
+
+	req := httptest.NewRequest(http.MethodGet, fmt.Sprintf("/thirdparty/callback?code=abcde&state=%s", state), nil)
+	req.AddCookie(&http.Cookie{
+		Name:  utils.HankoThirdpartyStateCookie,
+		Value: string(state),
+	})
+
+	c, rec := s.setUpContext(req, cfg.TenantConfig)
+	handler := s.setUpHandler(cfg)
+
+	// This identity already exists and is signing back in with the same (still-unverified) email, not attaching
+	// itself to a different account, so it isn't the account-takeover-by-linking scenario and is allowed through.
+	if s.NoError(handler.Callback(c)) {
+		s.Equal(http.StatusTemporaryRedirect, rec.Code)
+
+		s.assertLocationHeaderHasToken(rec)
+		s.assertStateCookieRemoved(rec)
+
+		email, err := s.Storage.GetEmailPersister().FindByAddress("test-with-microsoft-identity@example.com", uuid.FromStringOrNil(config.DefaultTenantID))
+		s.NoError(err)
+		s.NotNil(email)
+		s.False(email.Verified)
+
+		user, err := s.Storage.GetUserPersister().Get(*email.UserID, uuid.FromStringOrNil(config.DefaultTenantID))
+		s.NoError(err)
+		s.NotNil(user)
+
+		identity := email.Identities.GetIdentity("microsoft", "microsoft_abcde")
+		s.NotNil(identity)
+
+		logs, lerr := s.Storage.GetAuditLogPersister().List(0, 0, nil, nil, []string{"thirdparty_signin_succeeded"}, user.ID.String(), "", "", "", uuid.FromStringOrNil(config.DefaultTenantID))
+		s.NoError(lerr)
+		s.Len(logs, 1)
+	}
+}
+
 func (s *thirdPartySuite) TestThirdPartyHandler_Callback_Link_GoogleToAccountWithGithubIdentity() {
 	defer gock.Off()
 	if testing.Short() {

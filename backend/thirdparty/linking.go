@@ -20,13 +20,7 @@ type AccountLinkingResult struct {
 	UserCreated  bool
 }
 
-func LinkAccount(tx *pop.Connection, cfg *config.TenantConfig, p persistence.Persister, userData *UserData, providerID string, isSaml bool, samlDomain *string, isFlow bool, userID *uuid.UUID, tenantID uuid.UUID) (*AccountLinkingResult, error) {
-	if !isFlow {
-		if cfg.Email.RequireVerification && !userData.Metadata.EmailVerified {
-			return nil, ErrorUnverifiedProviderEmail("third party provider email must be verified")
-		}
-	}
-
+func LinkAccount(tx *pop.Connection, cfg *config.TenantConfig, p persistence.Persister, userData *UserData, providerID string, isSaml bool, samlDomain *string, userID *uuid.UUID, tenantID uuid.UUID) (*AccountLinkingResult, error) {
 	// Validate userData
 	if userData == nil {
 		return nil, ErrorInvalidRequest("user data must be set")
@@ -53,9 +47,24 @@ func LinkAccount(tx *pop.Connection, cfg *config.TenantConfig, p persistence.Per
 
 		if user == nil {
 			return signUp(tx, cfg, p, userData, providerID, isSaml, samlDomain, tenantID)
-		} else {
-			return link(tx, cfg, p, userData, providerID, user, isSaml, samlDomain, userID != nil, tenantID)
 		}
+
+		// Linking attaches a new identity to an account matched purely by email address. Unlike signUp/signIn,
+		// where an unverified email is caught downstream by ExchangeToken's re-check on the freshly-created
+		// Email row, link() reuses the target account's pre-existing, already-verified Email row, so that
+		// downstream check would otherwise never see that this particular login never proved ownership of it.
+		//
+		// SECURITY: This check prevents account takeover attacks. Without it, an attacker could:
+		// 1. Create an OAuth account at a provider (e.g., Google) with an unverified email matching a victim's email
+		// 2. Initiate OAuth login, which would match the victim's existing account by email address
+		// 3. Link their malicious OAuth identity to the victim's account without proving ownership of the email
+		// 4. Gain full access to the victim's account
+		// By requiring email verification at the provider, we ensure the user proves ownership before linking.
+		if !isSaml && cfg.Email.RequireVerification && !userData.Metadata.EmailVerified {
+			return nil, ErrorUnverifiedProviderEmail("third party provider email must be verified")
+		}
+
+		return link(tx, cfg, p, userData, providerID, user, isSaml, samlDomain, userID != nil, tenantID)
 	} else {
 		return signIn(tx, cfg, p, userData, identity, tenantID)
 	}
