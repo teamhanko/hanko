@@ -10,7 +10,7 @@ require (
 	github.com/coreos/go-oidc/v3 v3.20.0
 	github.com/evanphx/json-patch/v5 v5.9.11
 	github.com/fatih/structs v1.1.0
-	github.com/go-playground/validator/v10 v10.30.3
+	github.com/go-playground/validator/v10 v10.30.4
 	github.com/go-redsync/redsync/v4 v4.17.0
 	github.com/go-sql-driver/mysql v1.10.0
 	github.com/go-testfixtures/testfixtures/v3 v3.19.0
@@ -100,7 +100,7 @@ require (
 	github.com/felixge/httpsnoop v1.0.4 // indirect
 	github.com/fsnotify/fsnotify v1.9.0 // indirect
 	github.com/fxamacker/cbor/v2 v2.6.0 // indirect
-	github.com/gabriel-vasile/mimetype v1.4.13 // indirect
+	github.com/gabriel-vasile/mimetype v1.4.15 // indirect
 	github.com/go-jose/go-jose/v4 v4.1.4 // indirect
 	github.com/go-logr/logr v1.4.2 // indirect
 	github.com/go-logr/stdr v1.2.2 // indirect
@@ -132,7 +132,7 @@ require (
 	github.com/jonboulle/clockwork v0.5.0 // indirect
 	github.com/kballard/go-shellquote v0.0.0-20180428030007-95032a82bc51 // indirect
 	github.com/knadh/koanf/maps v0.1.2 // indirect
-	github.com/leodido/go-urn v1.4.0 // indirect
+	github.com/leodido/go-urn v1.5.0 // indirect
 	github.com/lestrrat-go/blackmagic v1.0.4 // indirect
 	github.com/lestrrat-go/httpcc v1.0.1 // indirect
 	github.com/lestrrat-go/httprc v1.0.6 // indirect
