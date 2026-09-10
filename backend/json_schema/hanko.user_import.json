@@ -63,7 +63,7 @@
       "properties": {
         "user_id": {
           "type": "string",
-          "description": "UserID optional uuid.v4. If not provided a new one will be generated for the user"
+          "description": "UserID optional uuid.v4, unique within the target tenant rather than\nglobally. If it already belongs to a user in this tenant, that existing\nuser is reused (its child records - emails, credentials, etc. - are still\nadded as usual) rather than creating a duplicate."
         },
         "emails": {
           "$ref": "#/$defs/Emails",

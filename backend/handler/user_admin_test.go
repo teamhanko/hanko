@@ -7,10 +7,12 @@ import (
 	"net/http/httptest"
 	"strings"
 	"testing"
+	"time"
 
 	"github.com/gofrs/uuid"
 	"github.com/stretchr/testify/suite"
 	"github.com/teamhanko/hanko/backend/v3/config"
+	"github.com/teamhanko/hanko/backend/v3/dto/admin"
 	"github.com/teamhanko/hanko/backend/v3/persistence/models"
 	"github.com/teamhanko/hanko/backend/v3/test"
 )
@@ -84,6 +86,99 @@ func (s *userAdminSuite) TestUserHandlerAdmin_Delete_InvalidUserId() {
 	e.ServeHTTP(rec, req)
 
 	s.Equal(http.StatusBadRequest, rec.Code)
+}
+
+// TestUserHandlerAdmin_Get_UsesPublicIdNotInternalId is the regression test called out in the
+// plan: :id in the URL must resolve via public_id, and the real internal id must no longer work
+// as a lookup key at all.
+func (s *userAdminSuite) TestUserHandlerAdmin_Get_UsesPublicIdNotInternalId() {
+	if testing.Short() {
+		s.T().Skip("skipping test in short mode.")
+	}
+	err := s.LoadFixtures("../test/fixtures/user_admin_public_id")
+	s.Require().NoError(err)
+
+	e := NewAdminRouter(&test.DefaultConfig, s.Storage, nil)
+
+	internalID := "3c1c8f0a-1111-4a11-8a11-111111111111"
+	publicID := "4d2d9f1b-2222-4b22-8b22-222222222222"
+
+	req := httptest.NewRequest(http.MethodGet, fmt.Sprintf("/users/%s", internalID), nil)
+	rec := httptest.NewRecorder()
+	e.ServeHTTP(rec, req)
+	s.Equal(http.StatusNotFound, rec.Code, "the real internal id must not resolve a user")
+
+	req = httptest.NewRequest(http.MethodGet, fmt.Sprintf("/users/%s", publicID), nil)
+	rec = httptest.NewRecorder()
+	e.ServeHTTP(rec, req)
+	s.Equal(http.StatusOK, rec.Code, "the public_id must resolve the user")
+
+	var user admin.User
+	err = json.Unmarshal(rec.Body.Bytes(), &user)
+	s.Require().NoError(err)
+	s.Equal(publicID, user.ID.String(), "the returned \"id\" must be the public_id, never the internal id")
+}
+
+// TestUserHandlerAdmin_Create_SamePublicIdAcrossTenants exercises the full HTTP path this plan
+// changed (/:tenant_id/users/:id) with multi-tenancy actually enabled, rather than a
+// single-tenant router or a direct persister call. Proves the actual motivating scenario
+// end-to-end: two different tenants can create a user with the same caller-supplied id without
+// collision, each GET resolves only within its own tenant, and the same id in a third tenant's
+// URL 404s.
+func (s *userAdminSuite) TestUserHandlerAdmin_Create_SamePublicIdAcrossTenants() {
+	if testing.Short() {
+		s.T().Skip("skipping test in short mode.")
+	}
+
+	tenantAID, err := uuid.NewV4()
+	s.Require().NoError(err)
+	tenantBID, err := uuid.NewV4()
+	s.Require().NoError(err)
+
+	now := time.Now()
+	tenantPersister := s.Storage.GetTenantPersister()
+	s.Require().NoError(tenantPersister.Create(models.Tenant{ID: tenantAID, Config: json.RawMessage("{}"), CreatedAt: now, UpdatedAt: now}))
+	s.Require().NoError(tenantPersister.Create(models.Tenant{ID: tenantBID, Config: json.RawMessage("{}"), CreatedAt: now, UpdatedAt: now}))
+
+	cfg := test.DefaultConfig
+	cfg.MultiTenancy.Enabled = true
+	s.Require().NoError(cfg.PostProcess())
+
+	e := NewAdminRouter(&cfg, s.Storage, nil)
+
+	sharedID := "98a46ea2-51f6-4e30-bd29-8272de77c8c8"
+	body := fmt.Sprintf(`{"id": "%s", "emails": [{"address": "test@test.com", "is_primary": true}]}`, sharedID)
+
+	// Same caller-supplied id, two different tenants: both creates must succeed.
+	for _, tenantID := range []uuid.UUID{tenantAID, tenantBID} {
+		req := httptest.NewRequest(http.MethodPost, fmt.Sprintf("/%s/users", tenantID), strings.NewReader(body))
+		req.Header.Set("Content-Type", "application/json")
+		rec := httptest.NewRecorder()
+		e.ServeHTTP(rec, req)
+		s.Require().Equal(http.StatusOK, rec.Code, "tenant %s: create with id %s must succeed", tenantID, sharedID)
+	}
+
+	// Each tenant's GET must resolve to its own user, both showing the same public id back.
+	for _, tenantID := range []uuid.UUID{tenantAID, tenantBID} {
+		req := httptest.NewRequest(http.MethodGet, fmt.Sprintf("/%s/users/%s", tenantID, sharedID), nil)
+		rec := httptest.NewRecorder()
+		e.ServeHTTP(rec, req)
+		s.Require().Equal(http.StatusOK, rec.Code, "tenant %s: get by public id must succeed", tenantID)
+
+		var user admin.User
+		s.Require().NoError(json.Unmarshal(rec.Body.Bytes(), &user))
+		s.Equal(sharedID, user.ID.String())
+	}
+
+	// A third, unrelated tenant must not see either user under this id.
+	tenantCID, err := uuid.NewV4()
+	s.Require().NoError(err)
+	s.Require().NoError(tenantPersister.Create(models.Tenant{ID: tenantCID, Config: json.RawMessage("{}"), CreatedAt: now, UpdatedAt: now}))
+
+	req := httptest.NewRequest(http.MethodGet, fmt.Sprintf("/%s/users/%s", tenantCID, sharedID), nil)
+	rec := httptest.NewRecorder()
+	e.ServeHTTP(rec, req)
+	s.Equal(http.StatusNotFound, rec.Code, "an unrelated tenant must not resolve another tenant's user")
 }
 
 func (s *userAdminSuite) TestUserHandlerAdmin_List() {

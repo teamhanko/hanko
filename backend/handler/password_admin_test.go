@@ -325,3 +325,34 @@ func (s *passwordAdminSuite) TestPasswordAdminHandler_Delete() {
 		})
 	}
 }
+
+// TestPasswordAdminHandler_Get_UsesPublicIdNotInternalId proves :user_id resolves via public_id
+// and not the real internal id, for a handler that was fixed but had no dedicated regression
+// test of its own.
+func (s *passwordAdminSuite) TestPasswordAdminHandler_Get_UsesPublicIdNotInternalId() {
+	if testing.Short() {
+		s.T().Skip("skipping test in short mode.")
+	}
+
+	err := s.LoadFixtures("../test/fixtures/password_admin_public_id")
+	s.Require().NoError(err)
+
+	cfg := test.DefaultConfig
+	err = cfg.PostProcess()
+	s.Require().NoError(err)
+
+	e := NewAdminRouter(&cfg, s.Storage, nil)
+
+	internalID := "c04c8f0a-1010-4a11-8a11-101010101010"
+	publicID := "d15d9f1b-2020-4b22-8b22-202020202020"
+
+	req := httptest.NewRequest(http.MethodGet, fmt.Sprintf("/users/%s/password", internalID), nil)
+	rec := httptest.NewRecorder()
+	e.ServeHTTP(rec, req)
+	s.Equal(http.StatusNotFound, rec.Code, "the real internal id must not resolve the user or their password credential")
+
+	req = httptest.NewRequest(http.MethodGet, fmt.Sprintf("/users/%s/password", publicID), nil)
+	rec = httptest.NewRecorder()
+	e.ServeHTTP(rec, req)
+	s.Equal(http.StatusOK, rec.Code, "the public_id must resolve the user and their password credential")
+}

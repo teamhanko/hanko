@@ -100,6 +100,42 @@ func (s *sessionAdminSuite) TestSessionAdminHandler_List() {
 	}
 }
 
+// TestSessionAdminHandler_List_UsesPublicIdNotInternalId proves :user_id resolves via public_id
+// and not the real internal id, for a handler that was fixed but had no dedicated regression
+// test of its own.
+func (s *sessionAdminSuite) TestSessionAdminHandler_List_UsesPublicIdNotInternalId() {
+	if testing.Short() {
+		s.T().Skip("skipping test in short mode.")
+	}
+
+	err := s.LoadFixtures("../test/fixtures/session_admin_public_id")
+	s.Require().NoError(err)
+
+	cfg := test.DefaultConfig
+	err = cfg.PostProcess()
+	s.Require().NoError(err)
+
+	e := NewAdminRouter(&cfg, s.Storage, nil)
+
+	internalID := "f37f9f1b-4040-4b22-8b22-404040404040"
+	publicID := "0448a04a-5050-4a11-8a11-505050505050"
+
+	req := httptest.NewRequest(http.MethodGet, fmt.Sprintf("/users/%s/sessions", internalID), nil)
+	rec := httptest.NewRecorder()
+	e.ServeHTTP(rec, req)
+	s.Equal(http.StatusNotFound, rec.Code, "the real internal id must not resolve the user or their sessions")
+
+	req = httptest.NewRequest(http.MethodGet, fmt.Sprintf("/users/%s/sessions", publicID), nil)
+	rec = httptest.NewRecorder()
+	e.ServeHTTP(rec, req)
+	s.Require().Equal(http.StatusOK, rec.Code, "the public_id must resolve the user and their sessions")
+
+	var sessions []admin.ListSessionsRequestDto
+	err = json.Unmarshal(rec.Body.Bytes(), &sessions)
+	s.Require().NoError(err)
+	s.Equal(1, len(sessions))
+}
+
 func (s *sessionAdminSuite) TestSessionAdminHandler_Delete() {
 	if testing.Short() {
 		s.T().Skip("skipping test in short mode.")

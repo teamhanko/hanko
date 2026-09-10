@@ -145,3 +145,34 @@ func (s *otpAdminSuite) TestOtpAdminHandler_Delete() {
 		})
 	}
 }
+
+// TestOtpAdminHandler_Get_UsesPublicIdNotInternalId proves :user_id resolves via public_id and
+// not the real internal id, for a handler that was fixed but had no dedicated regression test of
+// its own.
+func (s *otpAdminSuite) TestOtpAdminHandler_Get_UsesPublicIdNotInternalId() {
+	if testing.Short() {
+		s.T().Skip("skipping test in short mode.")
+	}
+
+	err := s.LoadFixtures("../test/fixtures/otp_admin_public_id")
+	s.Require().NoError(err)
+
+	cfg := test.DefaultConfig
+	err = cfg.PostProcess()
+	s.Require().NoError(err)
+
+	e := NewAdminRouter(&cfg, s.Storage, nil)
+
+	internalID := "266aa04a-7070-4a11-8a11-707070707070"
+	publicID := "377bb04a-8080-4b22-8b22-808080808080"
+
+	req := httptest.NewRequest(http.MethodGet, fmt.Sprintf("/users/%s/otp", internalID), nil)
+	rec := httptest.NewRecorder()
+	e.ServeHTTP(rec, req)
+	s.Equal(http.StatusNotFound, rec.Code, "the real internal id must not resolve the user or their otp secret")
+
+	req = httptest.NewRequest(http.MethodGet, fmt.Sprintf("/users/%s/otp", publicID), nil)
+	rec = httptest.NewRecorder()
+	e.ServeHTTP(rec, req)
+	s.Equal(http.StatusOK, rec.Code, "the public_id must resolve the user and their otp secret")
+}

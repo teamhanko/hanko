@@ -1,0 +1,7 @@
+add_column("users", "public_id", "uuid", {"null": true})
+
+sql("UPDATE users SET public_id = id WHERE public_id IS NULL;")
+
+change_column("users", "public_id", "uuid", {"null": false})
+
+add_index("users", ["tenant_id", "public_id"], {"unique": true})

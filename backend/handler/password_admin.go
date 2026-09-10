@@ -48,7 +48,7 @@ func (h *passwordAdminHandler) Get(ctx echo.Context) error {
 		return fmt.Errorf(parseUserUuidFailureMessage, err)
 	}
 
-	user, err := h.persister.GetUserPersister().Get(userID, tenant.ID)
+	user, err := h.persister.GetUserPersister().GetByPublicID(userID, tenant.ID)
 	if err != nil {
 		return err
 	}
@@ -57,7 +57,7 @@ func (h *passwordAdminHandler) Get(ctx echo.Context) error {
 		return echo.NewHTTPError(http.StatusNotFound)
 	}
 
-	credential, err := h.persister.GetPasswordCredentialPersister().GetByUserID(userID, tenant.ID)
+	credential, err := h.persister.GetPasswordCredentialPersister().GetByUserID(user.ID, tenant.ID)
 	if err != nil {
 		return err
 	}
@@ -92,7 +92,7 @@ func (h *passwordAdminHandler) Create(ctx echo.Context) error {
 		return fmt.Errorf(parseUserUuidFailureMessage, err)
 	}
 
-	user, err := h.persister.GetUserPersister().Get(userID, tenant.ID)
+	user, err := h.persister.GetUserPersister().GetByPublicID(userID, tenant.ID)
 	if err != nil {
 		return err
 	}
@@ -101,7 +101,7 @@ func (h *passwordAdminHandler) Create(ctx echo.Context) error {
 		return echo.NewHTTPError(http.StatusNotFound)
 	}
 
-	existingCredential, err := h.persister.GetPasswordCredentialPersister().GetByUserID(userID, tenant.ID)
+	existingCredential, err := h.persister.GetPasswordCredentialPersister().GetByUserID(user.ID, tenant.ID)
 	if err != nil {
 		return err
 	}
@@ -110,12 +110,12 @@ func (h *passwordAdminHandler) Create(ctx echo.Context) error {
 		return echo.NewHTTPError(http.StatusConflict)
 	}
 
-	err = h.passwordService.CreatePassword(h.persister.GetConnection(), userID, createDto.Password, tenant.ID)
+	err = h.passwordService.CreatePassword(h.persister.GetConnection(), user.ID, createDto.Password, tenant.ID)
 	if err != nil {
 		return err
 	}
 
-	credential, err := h.persister.GetPasswordCredentialPersister().GetByUserID(userID, tenant.ID)
+	credential, err := h.persister.GetPasswordCredentialPersister().GetByUserID(user.ID, tenant.ID)
 	if err != nil {
 		return err
 	}
@@ -146,7 +146,7 @@ func (h *passwordAdminHandler) Update(ctx echo.Context) error {
 		return fmt.Errorf(parseUserUuidFailureMessage, err)
 	}
 
-	user, err := h.persister.GetUserPersister().Get(userID, tenant.ID)
+	user, err := h.persister.GetUserPersister().GetByPublicID(userID, tenant.ID)
 	if err != nil {
 		return err
 	}
@@ -155,7 +155,7 @@ func (h *passwordAdminHandler) Update(ctx echo.Context) error {
 		return echo.NewHTTPError(http.StatusNotFound)
 	}
 
-	credential, err := h.persister.GetPasswordCredentialPersister().GetByUserID(userID, tenant.ID)
+	credential, err := h.persister.GetPasswordCredentialPersister().GetByUserID(user.ID, tenant.ID)
 	if err != nil {
 		return err
 	}
@@ -169,7 +169,7 @@ func (h *passwordAdminHandler) Update(ctx echo.Context) error {
 		return err
 	}
 
-	credential, err = h.persister.GetPasswordCredentialPersister().GetByUserID(userID, tenant.ID)
+	credential, err = h.persister.GetPasswordCredentialPersister().GetByUserID(user.ID, tenant.ID)
 	if err != nil {
 		return err
 	}
@@ -200,7 +200,7 @@ func (h *passwordAdminHandler) Delete(ctx echo.Context) error {
 		return fmt.Errorf(parseUserUuidFailureMessage, err)
 	}
 
-	user, err := h.persister.GetUserPersister().Get(userID, tenant.ID)
+	user, err := h.persister.GetUserPersister().GetByPublicID(userID, tenant.ID)
 	if err != nil {
 		return err
 	}
@@ -209,7 +209,7 @@ func (h *passwordAdminHandler) Delete(ctx echo.Context) error {
 		return echo.NewHTTPError(http.StatusNotFound)
 	}
 
-	credential, err := h.persister.GetPasswordCredentialPersister().GetByUserID(userID, tenant.ID)
+	credential, err := h.persister.GetPasswordCredentialPersister().GetByUserID(user.ID, tenant.ID)
 	if err != nil {
 		return err
 	}
