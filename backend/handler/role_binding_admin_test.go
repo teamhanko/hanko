@@ -227,3 +227,51 @@ func (s *roleBindingAdminSuite) TestRoleBindingHandlerAdmin_Delete() {
 		})
 	}
 }
+
+// A tenant-2 role reference, by slug or id, must resolve as not found when
+// deleting a binding under tenant 1's path, not delete anything.
+func (s *roleBindingAdminSuite) TestRoleBindingHandlerAdmin_Delete_DoesNotLeakAcrossTenants() {
+	if testing.Short() {
+		s.T().Skip("skipping test in short mode.")
+	}
+
+	const tenant2RoleID = "66666666-7777-0000-0000-000000000003"
+
+	tests := []struct {
+		name    string
+		roleRef string
+	}{
+		{name: "referenced by slug", roleRef: "tenant-2-role"},
+		{name: "referenced by id", roleRef: tenant2RoleID},
+	}
+
+	for _, currentTest := range tests {
+		s.Run(currentTest.name, func() {
+			s.Require().NoError(s.Storage.MigrateUp())
+
+			cfg := test.DefaultConfig
+			cfg.MultiTenancy.Enabled = true
+			err := cfg.PostProcess()
+			s.Require().NoError(err)
+			e := NewAdminRouter(&cfg, s.Storage, nil)
+
+			err = s.LoadFixtures("../test/fixtures/role_binding_admin")
+			s.Require().NoError(err)
+
+			req := httptest.NewRequest(http.MethodDelete, fmt.Sprintf(
+				"/00000000-0000-0000-0000-000000000001/organizations/%s/users/%s/roles/%s",
+				roleBindingTestOrgID, roleBindingTestMemberID, currentTest.roleRef,
+			), nil)
+			rec := httptest.NewRecorder()
+
+			e.ServeHTTP(rec, req)
+
+			s.Equal(http.StatusNotFound, rec.Code)
+
+			err = e.Close()
+			s.Require().NoError(err)
+
+			s.Require().NoError(s.Storage.MigrateDown(-1))
+		})
+	}
+}

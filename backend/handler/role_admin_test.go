@@ -340,3 +340,41 @@ func (s *roleAdminSuite) TestRoleHandlerAdmin_Delete_CascadesToRoleBindings() {
 	s.Require().NoError(err)
 	s.Nil(binding)
 }
+
+// Deleting a role must cascade to its role_bindings rows whether the
+// deployment runs in single- or multi-tenant mode.
+func (s *roleAdminSuite) TestRoleHandlerAdmin_Delete_CascadesToRoleBindings_MultiTenantRouting() {
+	if testing.Short() {
+		s.T().Skip("skipping test in short mode.")
+	}
+	s.Require().NoError(s.Storage.MigrateUp())
+	defer func() { s.Require().NoError(s.Storage.MigrateDown(-1)) }()
+
+	cfg := test.DefaultConfig
+	cfg.MultiTenancy.Enabled = true
+	err := cfg.PostProcess()
+	s.Require().NoError(err)
+	e := NewAdminRouter(&cfg, s.Storage, nil)
+	defer e.Close()
+
+	err = s.LoadFixtures("../test/fixtures/role_admin")
+	s.Require().NoError(err)
+
+	// dddddddd-...-002 ("member") has a role_binding in the fixture set.
+	req := httptest.NewRequest(http.MethodDelete, "/00000000-0000-0000-0000-000000000001/roles/dddddddd-0000-0000-0000-000000000002", nil)
+	rec := httptest.NewRecorder()
+
+	e.ServeHTTP(rec, req)
+
+	s.Equal(http.StatusNoContent, rec.Code)
+
+	// The binding is gone - deleting the role cascaded to it.
+	binding, err := s.Storage.GetRoleBindingPersister().Get(
+		uuid.FromStringOrNil("bbbbbbbb-0000-0000-0000-000000000001"),
+		uuid.FromStringOrNil("dddddddd-0000-0000-0000-000000000002"),
+		uuid.FromStringOrNil("cccccccc-0000-0000-0000-000000000001"),
+		uuid.FromStringOrNil(config.DefaultTenantID),
+	)
+	s.Require().NoError(err)
+	s.Nil(binding)
+}

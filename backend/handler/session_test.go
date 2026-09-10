@@ -283,6 +283,48 @@ func (s *sessionSuite) TestSessionHandler_ValidateSession_Organizations() {
 	}
 }
 
+func (s *sessionSuite) TestSessionHandler_ValidateSession_Organizations_MultiTenantRouting() {
+	if testing.Short() {
+		s.T().Skip("skipping test in short mode.")
+	}
+
+	err := s.LoadFixtures("../test/fixtures/sessions")
+	s.Require().NoError(err)
+
+	testTenantID := uuid.FromStringOrNil("00000000-0000-0000-0000-000000000001")
+
+	cfg := test.DefaultConfig
+	cfg.MultiTenancy.Enabled = true
+	err = cfg.PostProcess()
+	s.Require().NoError(err)
+	cfg.Session.IdleTimeout = "0s"
+
+	err = generateSigningKeyForTenant(s.Storage, testTenantID)
+	s.Require().NoError(err)
+
+	cookie, _ := s.createSessionWithCookie(uuid.FromStringOrNil("ec4ef049-5b88-4321-a173-21b0eff06a04"), testTenantID, &cfg, nil)
+
+	e := NewPublicRouter(&cfg, s.Storage, nil, nil)
+
+	req := httptest.NewRequest(http.MethodGet, "/00000000-0000-0000-0000-000000000001/sessions/validate", nil)
+	req.AddCookie(cookie)
+	rec := httptest.NewRecorder()
+
+	e.ServeHTTP(rec, req)
+
+	s.Equal(http.StatusOK, rec.Code)
+
+	var response dto.ValidateSessionResponse
+	err = json.Unmarshal(rec.Body.Bytes(), &response)
+	s.Require().NoError(err)
+
+	s.True(response.IsValid)
+	s.Require().Len(response.Organizations, 1)
+	s.Equal(uuid.FromStringOrNil("bebebebe-0000-0000-0000-000000000001"), response.Organizations[0].ID)
+	s.Equal("Session Test Org", response.Organizations[0].Name)
+	s.Equal([]string{"admin"}, response.Organizations[0].Roles)
+}
+
 func (s *sessionSuite) TestSessionHandler_ValidateSessionFromBody_Organizations() {
 	if testing.Short() {
 		s.T().Skip("skipping test in short mode.")

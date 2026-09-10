@@ -563,6 +563,66 @@ func (s *userAdminSuite) TestUserHandlerAdmin_List_IncludesOrganizationsPerUser(
 	s.Require().False(present, "organizations should be omitted for a user with no memberships")
 }
 
+// GET /users/{id} and GET /users must include a user's organizations
+// whether the deployment runs in single- or multi-tenant mode.
+func (s *userAdminSuite) TestUserHandlerAdmin_IncludesOrganizations_MultiTenantRouting() {
+	if testing.Short() {
+		s.T().Skip("skipping test in short mode.")
+	}
+	s.Require().NoError(s.Storage.MigrateUp())
+	defer func() { s.Require().NoError(s.Storage.MigrateDown(-1)) }()
+
+	cfg := test.DefaultConfig
+	cfg.MultiTenancy.Enabled = true
+	err := cfg.PostProcess()
+	s.Require().NoError(err)
+	e := NewAdminRouter(&cfg, s.Storage, nil)
+	defer e.Close()
+
+	err = s.LoadFixtures("../test/fixtures/user_admin")
+	s.Require().NoError(err)
+
+	const orgID = "cafecafe-0000-0000-0000-000000000001"
+	const memberID = "b5dd5267-b462-48be-b70d-bcd6f1bbe7a5"
+
+	tenantID := uuid.FromStringOrNil(config.DefaultTenantID)
+	membershipID, err := uuid.NewV4()
+	s.Require().NoError(err)
+	err = s.Storage.GetOrganizationMembershipPersister().Create(models.OrganizationMembership{
+		ID:             membershipID,
+		TenantID:       tenantID,
+		UserID:         uuid.FromStringOrNil(memberID),
+		OrganizationID: uuid.FromStringOrNil(orgID),
+		CreatedAt:      time.Now(),
+	})
+	s.Require().NoError(err)
+
+	getReq := httptest.NewRequest(http.MethodGet, "/00000000-0000-0000-0000-000000000001/users/"+memberID, nil)
+	getRec := httptest.NewRecorder()
+	e.ServeHTTP(getRec, getReq)
+	s.Require().Equal(http.StatusOK, getRec.Code)
+
+	var getBody map[string]any
+	s.Require().NoError(json.Unmarshal(getRec.Body.Bytes(), &getBody))
+	getOrgs, ok := getBody["organizations"].([]any)
+	s.Require().True(ok, "Get response missing organizations")
+	s.Require().Len(getOrgs, 1)
+	s.Equal(orgID, getOrgs[0].(map[string]any)["id"])
+
+	listReq := httptest.NewRequest(http.MethodGet, "/00000000-0000-0000-0000-000000000001/users?user_id="+memberID, nil)
+	listRec := httptest.NewRecorder()
+	e.ServeHTTP(listRec, listReq)
+	s.Require().Equal(http.StatusOK, listRec.Code)
+
+	var listBody []map[string]any
+	s.Require().NoError(json.Unmarshal(listRec.Body.Bytes(), &listBody))
+	s.Require().Len(listBody, 1)
+	listOrgs, ok := listBody[0]["organizations"].([]any)
+	s.Require().True(ok, "List response missing organizations")
+	s.Require().Len(listOrgs, 1)
+	s.Equal(orgID, listOrgs[0].(map[string]any)["id"])
+}
+
 func (s *userAdminSuite) TestUserHandlerAdmin_Patch_Success() {
 	if testing.Short() {
 		s.T().Skip("skipping test in short mode.")
