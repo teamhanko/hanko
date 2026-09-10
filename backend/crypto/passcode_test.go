@@ -51,3 +51,15 @@ func TestAlphanumericPasscodeGenerator_Generate_Different_Codes(t *testing.T) {
 
 	assert.NotEqual(t, passcode1, passcode2)
 }
+
+func TestStaticPasscodeGenerator_Generate(t *testing.T) {
+	pg := NewStaticPasscodeGenerator()
+	passcode1, err := pg.Generate()
+
+	assert.NoError(t, err)
+	assert.NotEmpty(t, passcode1)
+	assert.Equal(t, 6, len(passcode1))
+
+	passcode2, err := pg.Generate()
+	assert.Equal(t, passcode1, passcode2)
+}
