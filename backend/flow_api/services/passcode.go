@@ -116,6 +116,8 @@ func (s *passcode) SendPasscode(tx *pop.Connection, p SendPasscodeParams) (*Send
 	switch p.Cfg.Email.PasscodeCharset {
 	case config.PasscodeCharsetAlphanumeric:
 		passcodeGenerator = crypto.NewAlphanumericPasscodeGenerator()
+	case config.PasscodeCharsetStatic:
+		passcodeGenerator = crypto.NewStaticPasscodeGenerator()
 	}
 	code, err := passcodeGenerator.Generate()
 	if err != nil {
