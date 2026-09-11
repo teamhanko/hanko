@@ -2,6 +2,7 @@
 FROM --platform=$BUILDPLATFORM golang:1.26 AS builder
 
 ARG TARGETARCH
+ARG HANKO_VERSION=dev
 
 WORKDIR /workspace
 COPY go.mod go.mod
@@ -35,7 +36,7 @@ COPY flow_api flow_api/
 COPY flowpilot flowpilot/
 
 # Build
-RUN go generate ./...
+RUN HANKO_VERSION="$HANKO_VERSION" go generate ./... && go test ./build_info
 RUN CGO_ENABLED=0 GOOS=linux GOARCH="$TARGETARCH" go build -a -o hanko main.go
 
 # Use distroless as minimal base image to package hanko binary
