@@ -19,6 +19,17 @@ func getDefaultSessionManager(storage persistence.Persister) session.Manager {
 	return sessionManager
 }
 
+// generateSigningKeyForTenant mirrors what handler/tenant.go's Create
+// does for a real tenant - needed because fixture-inserted tenants skip it.
+func generateSigningKeyForTenant(storage persistence.Persister, tenantID uuid.UUID) error {
+	manager, err := local_db.NewDefaultManager(test.DefaultConfig.SecretKeys, storage.GetJwkPersister())
+	if err != nil {
+		return err
+	}
+	_, err = manager.GenerateKey(tenantID)
+	return err
+}
+
 func generateSessionCookie(storage persistence.Persister, userId uuid.UUID, tenantID uuid.UUID) (*http.Cookie, error) {
 	manager := getDefaultSessionManager(storage)
 	token, rawToken, err := manager.GenerateJWT(dto.UserJWT{

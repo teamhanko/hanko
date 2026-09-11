@@ -215,6 +215,204 @@ func (s *sessionSuite) TestSessionHandler_ValidateSessionFromBody_IdleExpiresAt(
 	}
 }
 
+func (s *sessionSuite) TestSessionHandler_ValidateSession_Organizations() {
+	if testing.Short() {
+		s.T().Skip("skipping test in short mode.")
+	}
+
+	err := s.LoadFixtures("../test/fixtures/sessions")
+	s.Require().NoError(err)
+
+	testTenantID := uuid.FromStringOrNil("00000000-0000-0000-0000-000000000001")
+
+	tests := []struct {
+		name              string
+		userID            string
+		expectedOrgID     string
+		expectedOrgName   string
+		expectedRoleSlugs []string
+	}{
+		{
+			name:              "member with a role binding",
+			userID:            "ec4ef049-5b88-4321-a173-21b0eff06a04",
+			expectedOrgID:     "bebebebe-0000-0000-0000-000000000001",
+			expectedOrgName:   "Session Test Org",
+			expectedRoleSlugs: []string{"admin"},
+		},
+		{
+			name:   "user with no organization memberships",
+			userID: "38bf5a00-d7ea-40a5-a5de-48722c148925",
+		},
+	}
+
+	for _, currentTest := range tests {
+		s.Run(currentTest.name, func() {
+			cfg := s.setupConfig("0s")
+
+			err = local_db.SyncSecretKeys(cfg, s.Storage)
+			s.Require().NoError(err)
+
+			cookie, _ := s.createSessionWithCookie(uuid.FromStringOrNil(currentTest.userID), testTenantID, cfg, nil)
+
+			e := NewPublicRouter(cfg, s.Storage, nil, nil)
+
+			req := httptest.NewRequest(http.MethodGet, "/sessions/validate", nil)
+			req.AddCookie(cookie)
+			rec := httptest.NewRecorder()
+
+			e.ServeHTTP(rec, req)
+
+			s.Equal(http.StatusOK, rec.Code)
+
+			var response dto.ValidateSessionResponse
+			err := json.Unmarshal(rec.Body.Bytes(), &response)
+			s.Require().NoError(err)
+
+			s.True(response.IsValid)
+
+			if currentTest.expectedOrgID == "" {
+				s.Empty(response.Organizations)
+				return
+			}
+
+			s.Require().Len(response.Organizations, 1)
+			s.Equal(uuid.FromStringOrNil(currentTest.expectedOrgID), response.Organizations[0].ID)
+			s.Equal(currentTest.expectedOrgName, response.Organizations[0].Name)
+			s.Equal(currentTest.expectedRoleSlugs, response.Organizations[0].Roles)
+		})
+	}
+}
+
+func (s *sessionSuite) TestSessionHandler_ValidateSession_Organizations_MultiTenantRouting() {
+	if testing.Short() {
+		s.T().Skip("skipping test in short mode.")
+	}
+
+	err := s.LoadFixtures("../test/fixtures/sessions")
+	s.Require().NoError(err)
+
+	testTenantID := uuid.FromStringOrNil("00000000-0000-0000-0000-000000000001")
+
+	cfg := test.DefaultConfig
+	cfg.MultiTenancy.Enabled = true
+	err = cfg.PostProcess()
+	s.Require().NoError(err)
+	cfg.Session.IdleTimeout = "0s"
+
+	err = generateSigningKeyForTenant(s.Storage, testTenantID)
+	s.Require().NoError(err)
+
+	cookie, _ := s.createSessionWithCookie(uuid.FromStringOrNil("ec4ef049-5b88-4321-a173-21b0eff06a04"), testTenantID, &cfg, nil)
+
+	e := NewPublicRouter(&cfg, s.Storage, nil, nil)
+
+	req := httptest.NewRequest(http.MethodGet, "/00000000-0000-0000-0000-000000000001/sessions/validate", nil)
+	req.AddCookie(cookie)
+	rec := httptest.NewRecorder()
+
+	e.ServeHTTP(rec, req)
+
+	s.Equal(http.StatusOK, rec.Code)
+
+	var response dto.ValidateSessionResponse
+	err = json.Unmarshal(rec.Body.Bytes(), &response)
+	s.Require().NoError(err)
+
+	s.True(response.IsValid)
+	s.Require().Len(response.Organizations, 1)
+	s.Equal(uuid.FromStringOrNil("bebebebe-0000-0000-0000-000000000001"), response.Organizations[0].ID)
+	s.Equal("Session Test Org", response.Organizations[0].Name)
+	s.Equal([]string{"admin"}, response.Organizations[0].Roles)
+}
+
+func (s *sessionSuite) TestSessionHandler_ValidateSessionFromBody_Organizations() {
+	if testing.Short() {
+		s.T().Skip("skipping test in short mode.")
+	}
+
+	err := s.LoadFixtures("../test/fixtures/sessions")
+	s.Require().NoError(err)
+
+	testUserID := uuid.FromStringOrNil("ec4ef049-5b88-4321-a173-21b0eff06a04")
+	testTenantID := uuid.FromStringOrNil("00000000-0000-0000-0000-000000000001")
+
+	cfg := s.setupConfig("0s")
+
+	err = local_db.SyncSecretKeys(cfg, s.Storage)
+	s.Require().NoError(err)
+
+	token, _ := s.createSessionWithToken(testUserID, testTenantID, cfg, nil)
+
+	e := NewPublicRouter(cfg, s.Storage, nil, nil)
+
+	requestBody := dto.ValidateSessionRequest{SessionToken: token}
+	bodyJson, err := json.Marshal(requestBody)
+	s.Require().NoError(err)
+
+	req := httptest.NewRequest(http.MethodPost, "/sessions/validate", bytes.NewReader(bodyJson))
+	req.Header.Set("Content-Type", "application/json")
+	rec := httptest.NewRecorder()
+
+	e.ServeHTTP(rec, req)
+
+	s.Equal(http.StatusOK, rec.Code)
+
+	var response dto.ValidateSessionResponse
+	err = json.Unmarshal(rec.Body.Bytes(), &response)
+	s.Require().NoError(err)
+
+	s.True(response.IsValid)
+	s.Require().Len(response.Organizations, 1)
+	s.Equal(uuid.FromStringOrNil("bebebebe-0000-0000-0000-000000000001"), response.Organizations[0].ID)
+	s.Equal("Session Test Org", response.Organizations[0].Name)
+	s.Equal([]string{"admin"}, response.Organizations[0].Roles)
+}
+
+func (s *sessionSuite) TestSessionHandler_ValidateSession_Organizations_RevokedMembershipTakesEffectImmediately() {
+	if testing.Short() {
+		s.T().Skip("skipping test in short mode.")
+	}
+
+	err := s.LoadFixtures("../test/fixtures/sessions")
+	s.Require().NoError(err)
+
+	testUserID := uuid.FromStringOrNil("ec4ef049-5b88-4321-a173-21b0eff06a04")
+	testTenantID := uuid.FromStringOrNil("00000000-0000-0000-0000-000000000001")
+
+	cfg := s.setupConfig("0s")
+	err = local_db.SyncSecretKeys(cfg, s.Storage)
+	s.Require().NoError(err)
+
+	cookie, _ := s.createSessionWithCookie(testUserID, testTenantID, cfg, nil)
+	e := NewPublicRouter(cfg, s.Storage, nil, nil)
+
+	req := httptest.NewRequest(http.MethodGet, "/sessions/validate", nil)
+	req.AddCookie(cookie)
+	rec := httptest.NewRecorder()
+	e.ServeHTTP(rec, req)
+
+	var before dto.ValidateSessionResponse
+	s.Require().NoError(json.Unmarshal(rec.Body.Bytes(), &before))
+	s.Require().Len(before.Organizations, 1)
+
+	// Revoke the membership - without reissuing the session token.
+	membership, err := s.Storage.GetOrganizationMembershipPersister().Get(
+		testUserID, uuid.FromStringOrNil("bebebebe-0000-0000-0000-000000000001"), testTenantID)
+	s.Require().NoError(err)
+	s.Require().NotNil(membership)
+	err = s.Storage.GetOrganizationMembershipPersister().Delete(*membership)
+	s.Require().NoError(err)
+
+	req2 := httptest.NewRequest(http.MethodGet, "/sessions/validate", nil)
+	req2.AddCookie(cookie)
+	rec2 := httptest.NewRecorder()
+	e.ServeHTTP(rec2, req2)
+
+	var after dto.ValidateSessionResponse
+	s.Require().NoError(json.Unmarshal(rec2.Body.Bytes(), &after))
+	s.Empty(after.Organizations, "revoking a membership should take effect on the very next validation call, without reissuing the session token")
+}
+
 func (s *sessionSuite) setupConfig(idleTimeout string) *config.Config {
 	cfg := test.DefaultConfig
 	err := cfg.PostProcess()

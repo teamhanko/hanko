@@ -5,6 +5,7 @@ import (
 	"net/http"
 	"time"
 
+	"github.com/gofrs/uuid"
 	echojwt "github.com/labstack/echo-jwt/v4"
 	"github.com/labstack/echo/v4"
 	"github.com/teamhanko/hanko/backend/v3/context"
@@ -98,12 +99,18 @@ func (h *SessionHandler) ValidateSession(c echo.Context) error {
 				idleExpiresAt = &expiresAt
 			}
 
+			organizations, err := h.getOrganizations(claims.Subject, tenant.ID)
+			if err != nil {
+				return fmt.Errorf("failed to get organizations: %w", err)
+			}
+
 			return c.JSON(http.StatusOK, dto.ValidateSessionResponse{
 				IsValid:        true,
 				Claims:         claims,
 				ExpirationTime: &claims.Expiration,
 				UserID:         &claims.Subject,
 				IdleExpiresAt:  idleExpiresAt,
+				Organizations:  organizations,
 			})
 		}
 	}
@@ -191,11 +198,55 @@ func (h *SessionHandler) ValidateSessionFromBody(c echo.Context) error {
 		idleExpiresAt = &expiresAt
 	}
 
+	organizations, err := h.getOrganizations(claims.Subject, tenant.ID)
+	if err != nil {
+		return fmt.Errorf("failed to get organizations: %w", err)
+	}
+
 	return c.JSON(http.StatusOK, dto.ValidateSessionResponse{
 		IsValid:        true,
 		Claims:         claims,
 		ExpirationTime: &claims.Expiration,
 		UserID:         &claims.Subject,
 		IdleExpiresAt:  idleExpiresAt,
+		Organizations:  organizations,
 	})
+}
+
+// getOrganizations returns userID's organizations and role slugs,
+// computed fresh from the database on every call so a role or membership
+// change takes effect immediately, without reissuing the session token.
+func (h *SessionHandler) getOrganizations(userID uuid.UUID, tenantID uuid.UUID) ([]dto.ValidateSessionOrganization, error) {
+	memberships, err := h.persister.GetOrganizationMembershipPersister().ListByUser(userID, tenantID)
+	if err != nil {
+		return nil, fmt.Errorf("failed to get organization memberships: %w", err)
+	}
+
+	bindings, err := h.persister.GetRoleBindingPersister().ListByUser(userID, tenantID)
+	if err != nil {
+		return nil, fmt.Errorf("failed to get role bindings: %w", err)
+	}
+
+	roleSlugsByOrganization := make(map[uuid.UUID][]string)
+	for _, binding := range bindings {
+		if binding.Role == nil {
+			continue
+		}
+		roleSlugsByOrganization[binding.OrganizationID] = append(roleSlugsByOrganization[binding.OrganizationID], binding.Role.Slug)
+	}
+
+	organizations := make([]dto.ValidateSessionOrganization, 0, len(memberships))
+	for _, membership := range memberships {
+		if membership.Organization == nil {
+			continue
+		}
+
+		organizations = append(organizations, dto.ValidateSessionOrganization{
+			ID:    membership.Organization.ID,
+			Name:  membership.Organization.Name,
+			Roles: roleSlugsByOrganization[membership.OrganizationID],
+		})
+	}
+
+	return organizations, nil
 }

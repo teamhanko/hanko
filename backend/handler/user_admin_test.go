@@ -7,6 +7,7 @@ import (
 	"net/http/httptest"
 	"strings"
 	"testing"
+	"time"
 
 	"github.com/gofrs/uuid"
 	"github.com/stretchr/testify/suite"
@@ -325,6 +326,301 @@ func (s *userAdminSuite) TestUserHandlerAdmin_Create() {
 			s.Require().NoError(s.Storage.MigrateDown(-1))
 		})
 	}
+}
+
+func (s *userAdminSuite) TestUserHandlerAdmin_Create_WithOrganizations() {
+	if testing.Short() {
+		s.T().Skip("skipping test in short mode.")
+	}
+
+	const existingOrgID = "cafecafe-0000-0000-0000-000000000001"
+	const existingRoleID = "cafecafe-0000-0000-0000-000000000002" // slug "admin"
+
+	tests := []struct {
+		name               string
+		body               string
+		expectedStatusCode int
+	}{
+		{
+			name:               "membership only, no roles",
+			body:               `{"emails": [{"address": "org1@test.com", "is_primary": true}], "organizations": [{"id": "` + existingOrgID + `"}]}`,
+			expectedStatusCode: http.StatusOK,
+		},
+		{
+			name:               "membership with role by slug",
+			body:               `{"emails": [{"address": "org2@test.com", "is_primary": true}], "organizations": [{"id": "` + existingOrgID + `", "roles": ["admin"]}]}`,
+			expectedStatusCode: http.StatusOK,
+		},
+		{
+			name:               "membership with role by id",
+			body:               `{"emails": [{"address": "org3@test.com", "is_primary": true}], "organizations": [{"id": "` + existingOrgID + `", "roles": ["` + existingRoleID + `"]}]}`,
+			expectedStatusCode: http.StatusOK,
+		},
+		{
+			name:               "unrecognized organization",
+			body:               `{"emails": [{"address": "org4@test.com", "is_primary": true}], "organizations": [{"id": "00000000-0000-0000-0000-000000000099"}]}`,
+			expectedStatusCode: http.StatusBadRequest,
+		},
+		{
+			name:               "unrecognized role",
+			body:               `{"emails": [{"address": "org5@test.com", "is_primary": true}], "organizations": [{"id": "` + existingOrgID + `", "roles": ["does-not-exist"]}]}`,
+			expectedStatusCode: http.StatusBadRequest,
+		},
+		{
+			// cafecafe-...-0003 is a real organization, but it belongs to
+			// tenant 2 - referenced under tenant 1 it must be rejected the
+			// same way a nonexistent id is, not resolved across tenants.
+			name:               "organization exists but belongs to a different tenant",
+			body:               `{"emails": [{"address": "org6@test.com", "is_primary": true}], "organizations": [{"id": "cafecafe-0000-0000-0000-000000000003"}]}`,
+			expectedStatusCode: http.StatusBadRequest,
+		},
+	}
+
+	for _, currentTest := range tests {
+		s.Run(currentTest.name, func() {
+			s.Require().NoError(s.Storage.MigrateUp())
+			cfg := test.DefaultConfig
+			err := cfg.PostProcess()
+			s.Require().NoError(err)
+			e := NewAdminRouter(&cfg, s.Storage, nil)
+
+			err = s.LoadFixtures("../test/fixtures/user_admin")
+			s.Require().NoError(err)
+
+			req := httptest.NewRequest(http.MethodPost, "/users", strings.NewReader(currentTest.body))
+			req.Header.Set("Content-Type", "application/json")
+			rec := httptest.NewRecorder()
+
+			e.ServeHTTP(rec, req)
+
+			s.Equal(currentTest.expectedStatusCode, rec.Code)
+
+			err = e.Close()
+			s.Require().NoError(err)
+
+			s.Require().NoError(s.Storage.MigrateDown(-1))
+		})
+	}
+}
+
+func (s *userAdminSuite) TestUserHandlerAdmin_Create_WithOrganizations_PersistsMembershipAndRoleBinding() {
+	if testing.Short() {
+		s.T().Skip("skipping test in short mode.")
+	}
+	s.Require().NoError(s.Storage.MigrateUp())
+	defer func() { s.Require().NoError(s.Storage.MigrateDown(-1)) }()
+
+	cfg := test.DefaultConfig
+	err := cfg.PostProcess()
+	s.Require().NoError(err)
+	e := NewAdminRouter(&cfg, s.Storage, nil)
+	defer e.Close()
+
+	err = s.LoadFixtures("../test/fixtures/user_admin")
+	s.Require().NoError(err)
+
+	const orgID = "cafecafe-0000-0000-0000-000000000001"
+	const roleID = "cafecafe-0000-0000-0000-000000000002"
+
+	body := `{"emails": [{"address": "orgpersist@test.com", "is_primary": true}], "organizations": [{"id": "` + orgID + `", "roles": ["admin"]}]}`
+	req := httptest.NewRequest(http.MethodPost, "/users", strings.NewReader(body))
+	req.Header.Set("Content-Type", "application/json")
+	rec := httptest.NewRecorder()
+
+	e.ServeHTTP(rec, req)
+	s.Require().Equal(http.StatusOK, rec.Code)
+
+	var got map[string]any
+	err = json.Unmarshal(rec.Body.Bytes(), &got)
+	s.Require().NoError(err)
+	userID := uuid.FromStringOrNil(got["id"].(string))
+	s.Require().False(userID.IsNil())
+
+	tenantID := uuid.FromStringOrNil(config.DefaultTenantID)
+
+	membership, err := s.Storage.GetOrganizationMembershipPersister().Get(userID, uuid.FromStringOrNil(orgID), tenantID)
+	s.Require().NoError(err)
+	s.NotNil(membership)
+
+	binding, err := s.Storage.GetRoleBindingPersister().Get(userID, uuid.FromStringOrNil(roleID), uuid.FromStringOrNil(orgID), tenantID)
+	s.Require().NoError(err)
+	s.NotNil(binding)
+
+	// The create response itself must already reflect the membership/role
+	// binding just persisted, not just the database.
+	organizations, ok := got["organizations"].([]any)
+	s.Require().True(ok, "response missing organizations")
+	s.Require().Len(organizations, 1)
+	org := organizations[0].(map[string]any)
+	s.Equal(orgID, org["id"])
+	roles := org["roles"].([]any)
+	s.Require().Len(roles, 1)
+	s.Equal("admin", roles[0].(map[string]any)["slug"])
+}
+
+func (s *userAdminSuite) TestUserHandlerAdmin_Get_IncludesOrganizations() {
+	if testing.Short() {
+		s.T().Skip("skipping test in short mode.")
+	}
+	s.Require().NoError(s.Storage.MigrateUp())
+	defer func() { s.Require().NoError(s.Storage.MigrateDown(-1)) }()
+
+	e := NewAdminRouter(&test.DefaultConfig, s.Storage, nil)
+	defer e.Close()
+
+	err := s.LoadFixtures("../test/fixtures/user_admin")
+	s.Require().NoError(err)
+
+	const orgID = "cafecafe-0000-0000-0000-000000000001"
+	const memberID = "b5dd5267-b462-48be-b70d-bcd6f1bbe7a5"
+	const otherID = "38bf5a00-d7ea-40a5-a5de-48722c148925"
+
+	tenantID := uuid.FromStringOrNil(config.DefaultTenantID)
+	membershipID, err := uuid.NewV4()
+	s.Require().NoError(err)
+	err = s.Storage.GetOrganizationMembershipPersister().Create(models.OrganizationMembership{
+		ID:             membershipID,
+		TenantID:       tenantID,
+		UserID:         uuid.FromStringOrNil(memberID),
+		OrganizationID: uuid.FromStringOrNil(orgID),
+		CreatedAt:      time.Now(),
+	})
+	s.Require().NoError(err)
+
+	req := httptest.NewRequest(http.MethodGet, "/users/"+memberID, nil)
+	rec := httptest.NewRecorder()
+	e.ServeHTTP(rec, req)
+	s.Require().Equal(http.StatusOK, rec.Code)
+
+	var got map[string]any
+	s.Require().NoError(json.Unmarshal(rec.Body.Bytes(), &got))
+	organizations, ok := got["organizations"].([]any)
+	s.Require().True(ok, "response missing organizations")
+	s.Require().Len(organizations, 1)
+	s.Equal(orgID, organizations[0].(map[string]any)["id"])
+
+	// A user with no memberships must omit the field entirely, not return
+	// an empty array.
+	req2 := httptest.NewRequest(http.MethodGet, "/users/"+otherID, nil)
+	rec2 := httptest.NewRecorder()
+	e.ServeHTTP(rec2, req2)
+	s.Require().Equal(http.StatusOK, rec2.Code)
+
+	var got2 map[string]any
+	s.Require().NoError(json.Unmarshal(rec2.Body.Bytes(), &got2))
+	_, present := got2["organizations"]
+	s.Require().False(present, "organizations should be omitted for a user with no memberships")
+}
+
+func (s *userAdminSuite) TestUserHandlerAdmin_List_IncludesOrganizationsPerUser() {
+	if testing.Short() {
+		s.T().Skip("skipping test in short mode.")
+	}
+	s.Require().NoError(s.Storage.MigrateUp())
+	defer func() { s.Require().NoError(s.Storage.MigrateDown(-1)) }()
+
+	e := NewAdminRouter(&test.DefaultConfig, s.Storage, nil)
+	defer e.Close()
+
+	err := s.LoadFixtures("../test/fixtures/user_admin")
+	s.Require().NoError(err)
+
+	const orgID = "cafecafe-0000-0000-0000-000000000001"
+	const memberID = "b5dd5267-b462-48be-b70d-bcd6f1bbe7a5"
+	const otherID = "38bf5a00-d7ea-40a5-a5de-48722c148925"
+
+	tenantID := uuid.FromStringOrNil(config.DefaultTenantID)
+	membershipID, err := uuid.NewV4()
+	s.Require().NoError(err)
+	err = s.Storage.GetOrganizationMembershipPersister().Create(models.OrganizationMembership{
+		ID:             membershipID,
+		TenantID:       tenantID,
+		UserID:         uuid.FromStringOrNil(memberID),
+		OrganizationID: uuid.FromStringOrNil(orgID),
+		CreatedAt:      time.Now(),
+	})
+	s.Require().NoError(err)
+
+	req := httptest.NewRequest(http.MethodGet, "/users?user_id="+memberID+","+otherID, nil)
+	rec := httptest.NewRecorder()
+	e.ServeHTTP(rec, req)
+	s.Require().Equal(http.StatusOK, rec.Code)
+
+	var got []map[string]any
+	s.Require().NoError(json.Unmarshal(rec.Body.Bytes(), &got))
+	s.Require().Len(got, 2)
+
+	byID := map[string]map[string]any{}
+	for _, u := range got {
+		byID[u["id"].(string)] = u
+	}
+
+	memberOrgs, ok := byID[memberID]["organizations"].([]any)
+	s.Require().True(ok, "member's response missing organizations")
+	s.Require().Len(memberOrgs, 1)
+
+	_, present := byID[otherID]["organizations"]
+	s.Require().False(present, "organizations should be omitted for a user with no memberships")
+}
+
+// GET /users/{id} and GET /users must include a user's organizations
+// whether the deployment runs in single- or multi-tenant mode.
+func (s *userAdminSuite) TestUserHandlerAdmin_IncludesOrganizations_MultiTenantRouting() {
+	if testing.Short() {
+		s.T().Skip("skipping test in short mode.")
+	}
+	s.Require().NoError(s.Storage.MigrateUp())
+	defer func() { s.Require().NoError(s.Storage.MigrateDown(-1)) }()
+
+	cfg := test.DefaultConfig
+	cfg.MultiTenancy.Enabled = true
+	err := cfg.PostProcess()
+	s.Require().NoError(err)
+	e := NewAdminRouter(&cfg, s.Storage, nil)
+	defer e.Close()
+
+	err = s.LoadFixtures("../test/fixtures/user_admin")
+	s.Require().NoError(err)
+
+	const orgID = "cafecafe-0000-0000-0000-000000000001"
+	const memberID = "b5dd5267-b462-48be-b70d-bcd6f1bbe7a5"
+
+	tenantID := uuid.FromStringOrNil(config.DefaultTenantID)
+	membershipID, err := uuid.NewV4()
+	s.Require().NoError(err)
+	err = s.Storage.GetOrganizationMembershipPersister().Create(models.OrganizationMembership{
+		ID:             membershipID,
+		TenantID:       tenantID,
+		UserID:         uuid.FromStringOrNil(memberID),
+		OrganizationID: uuid.FromStringOrNil(orgID),
+		CreatedAt:      time.Now(),
+	})
+	s.Require().NoError(err)
+
+	getReq := httptest.NewRequest(http.MethodGet, "/00000000-0000-0000-0000-000000000001/users/"+memberID, nil)
+	getRec := httptest.NewRecorder()
+	e.ServeHTTP(getRec, getReq)
+	s.Require().Equal(http.StatusOK, getRec.Code)
+
+	var getBody map[string]any
+	s.Require().NoError(json.Unmarshal(getRec.Body.Bytes(), &getBody))
+	getOrgs, ok := getBody["organizations"].([]any)
+	s.Require().True(ok, "Get response missing organizations")
+	s.Require().Len(getOrgs, 1)
+	s.Equal(orgID, getOrgs[0].(map[string]any)["id"])
+
+	listReq := httptest.NewRequest(http.MethodGet, "/00000000-0000-0000-0000-000000000001/users?user_id="+memberID, nil)
+	listRec := httptest.NewRecorder()
+	e.ServeHTTP(listRec, listReq)
+	s.Require().Equal(http.StatusOK, listRec.Code)
+
+	var listBody []map[string]any
+	s.Require().NoError(json.Unmarshal(listRec.Body.Bytes(), &listBody))
+	s.Require().Len(listBody, 1)
+	listOrgs, ok := listBody[0]["organizations"].([]any)
+	s.Require().True(ok, "List response missing organizations")
+	s.Require().Len(listOrgs, 1)
+	s.Equal(orgID, listOrgs[0].(map[string]any)["id"])
 }
 
 func (s *userAdminSuite) TestUserHandlerAdmin_Patch_Success() {

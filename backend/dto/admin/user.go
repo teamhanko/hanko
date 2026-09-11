@@ -25,6 +25,37 @@ type User struct {
 	FamilyName          string                           `json:"family_name,omitempty"`
 	Name                string                           `json:"name,omitempty"`
 	Picture             string                           `json:"picture,omitempty"`
+	Organizations       []UserOrganization               `json:"organizations,omitempty"`
+}
+
+// UserOrganization is an organization a user belongs to, along with the
+// roles they hold in it.
+type UserOrganization struct {
+	ID    uuid.UUID  `json:"id"`
+	Name  string     `json:"name"`
+	Roles []UserRole `json:"roles"`
+}
+
+type UserRole struct {
+	ID   uuid.UUID `json:"id"`
+	Slug string    `json:"slug"`
+	Name string    `json:"name"`
+}
+
+func fromUserOrganizationRoles(rows []models.UserOrganizationRoles) []UserOrganization {
+	organizations := make([]UserOrganization, len(rows))
+	for i, row := range rows {
+		roles := make([]UserRole, len(row.Roles))
+		for j, role := range row.Roles {
+			roles[j] = UserRole{ID: role.ID, Slug: role.Slug, Name: role.Name}
+		}
+		organizations[i] = UserOrganization{
+			ID:    row.OrganizationID,
+			Name:  row.OrganizationName,
+			Roles: roles,
+		}
+	}
+	return organizations
 }
 
 func (u *User) SetIPAddress(ip string) {
@@ -35,7 +66,7 @@ func (u *User) SetUserAgent(agent string) {
 	u.UserAgent = &agent
 }
 
-// FromUserModel Converts the DB model to a DTO object
+// FromUserModel converts the DB model to a DTO object.
 func FromUserModel(model models.User) User {
 	credentials := make([]dto.WebauthnCredentialResponse, len(model.WebauthnCredentials))
 	for i := range model.WebauthnCredentials {
@@ -92,12 +123,21 @@ func FromUserModel(model models.User) User {
 		FamilyName:          model.FamilyName.String,
 		Name:                model.Name.String,
 		Picture:             model.Picture.String,
+		Organizations:       fromUserOrganizationRoles(model.Organizations),
 	}
 }
 
 type CreateUser struct {
-	ID        uuid.UUID     `json:"id"`
-	Emails    []CreateEmail `json:"emails" validate:"unique=Address,dive"`
-	Username  *string       `json:"username"`
-	CreatedAt time.Time     `json:"created_at"`
+	ID            uuid.UUID                `json:"id"`
+	Emails        []CreateEmail            `json:"emails" validate:"unique=Address,dive"`
+	Username      *string                  `json:"username"`
+	CreatedAt     time.Time                `json:"created_at"`
+	Organizations []CreateUserOrganization `json:"organizations,omitempty" validate:"dive"`
+}
+
+// CreateUserOrganization.Roles entries may reference a role by either its
+// id or its slug - resolved via RolePersister.GetByIDOrSlug.
+type CreateUserOrganization struct {
+	ID    uuid.UUID `json:"id" validate:"required"`
+	Roles []string  `json:"roles,omitempty"`
 }

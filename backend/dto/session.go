@@ -180,6 +180,17 @@ type ValidateSessionResponse struct {
 	UserID *uuid.UUID `json:"user_id,omitempty"`
 	// IdleExpiresAt indicates when the session will expire due to inactivity, assuming no further activity occurs before this time
 	IdleExpiresAt *time.Time `json:"idle_expires_at,omitempty"`
+	// Organizations is computed fresh from the database on every call, not
+	// embedded in or read from the JWT claims, so a role or membership
+	// change takes effect immediately rather than only after the session
+	// token is reissued. Omitted if the user belongs to no organizations.
+	Organizations []ValidateSessionOrganization `json:"organizations,omitempty"`
+}
+
+type ValidateSessionOrganization struct {
+	ID    uuid.UUID `json:"id"`
+	Name  string    `json:"name"`
+	Roles []string  `json:"roles"`
 }
 
 type ValidateSessionRequest struct {
