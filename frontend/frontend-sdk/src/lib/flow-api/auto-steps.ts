@@ -3,6 +3,11 @@ import { WebauthnSupport } from "../WebauthnSupport";
 import WebauthnManager from "./WebauthnManager";
 import { CredentialCreationOptionsJSON } from "@github/webauthn-json";
 import { clearStoredCodeVerifier, getStoredCodeVerifier } from "../Pkce";
+import { RequestTimeoutError } from "../Errors";
+
+// Generic flow error code, translated by hanko-elements as "A technical error
+// has occurred. Please try again later."
+const TECHNICAL_ERROR_CODE = "technical_error";
 
 // Helper function to handle WebAuthn credential creation and error handling
 // eslint-disable-next-line require-jsdoc
@@ -28,6 +33,10 @@ async function handleCredentialCreation(
     // the login_passkey step.
     if (error instanceof DOMException && error.name === "InvalidStateError") {
       nextState.error = { code: errorCode, message: errorMessage };
+    } else if (error instanceof RequestTimeoutError) {
+      // The authenticator never answered. Returning without an error would drop
+      // the user back on the passkey step with no explanation for the restart.
+      nextState.error = { code: TECHNICAL_ERROR_CODE, message: error.message };
     } else if (state.error) {
       nextState.error = state.error;
     }
@@ -117,7 +126,7 @@ export const autoSteps: AutoSteps = {
       const errorCode =
         error === "access_denied"
           ? "third_party_access_denied"
-          : "technical_error";
+          : TECHNICAL_ERROR_CODE;
       const message = searchParams.get("error_description");
 
       updateUrl(["error", "error_description"]);
