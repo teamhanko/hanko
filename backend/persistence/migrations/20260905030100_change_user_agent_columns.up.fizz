@@ -1,0 +1,2 @@
+change_column("sessions", "user_agent", "text", {"null": true})
+change_column("audit_logs", "meta_user_agent", "text", {})
