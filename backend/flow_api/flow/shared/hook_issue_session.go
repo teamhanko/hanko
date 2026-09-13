@@ -12,6 +12,7 @@ import (
 	"github.com/teamhanko/hanko/backend/v3/flowpilot"
 	"github.com/teamhanko/hanko/backend/v3/persistence/models"
 	"github.com/teamhanko/hanko/backend/v3/session"
+	hankoUtils "github.com/teamhanko/hanko/backend/v3/utils"
 	"github.com/teamhanko/hanko/backend/v3/webhooks/events"
 	"github.com/teamhanko/hanko/backend/v3/webhooks/utils"
 )
@@ -107,7 +108,7 @@ func (h IssueSession) Execute(c flowpilot.HookExecutionContext) error {
 	}
 
 	if deps.Cfg.Session.AcquireUserAgent {
-		sessionModel.UserAgent = nulls.NewString(deps.HttpContext.Request().UserAgent())
+		sessionModel.UserAgent = nulls.NewString(hankoUtils.TruncateString(deps.HttpContext.Request().UserAgent(), 255))
 	}
 
 	err = deps.Persister.GetSessionPersisterWithConnection(deps.Tx).Create(sessionModel)

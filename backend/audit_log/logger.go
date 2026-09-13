@@ -127,7 +127,7 @@ func (l *logger) logToConsole(auditLog models.AuditLog) {
 func (l *logger) getRequestMeta(c echo.Context) models.RequestMeta {
 	return models.RequestMeta{
 		HttpRequestId: c.Response().Header().Get(echo.HeaderXRequestID),
-		UserAgent:     c.Request().UserAgent(),
+		UserAgent:     utils.TruncateString(c.Request().UserAgent(), 255),
 		SourceIp:      c.RealIP(),
 	}
 }
