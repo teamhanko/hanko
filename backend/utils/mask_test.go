@@ -78,3 +78,16 @@ func TestMaskUsername(t *testing.T) {
 		})
 	}
 }
+
+func TestTruncateString(t *testing.T) {
+	assert.Equal(t, "hello", TruncateString("hello", 10))
+	assert.Equal(t, "hello", TruncateString("hello", 5))
+	assert.Equal(t, "hell", TruncateString("hello", 4))
+	
+	longStr := ""
+	for i := 0; i < 300; i++ {
+		longStr += "a"
+	}
+	truncated := TruncateString(longStr, 255)
+	assert.Equal(t, 255, len(truncated))
+}
