@@ -4,6 +4,7 @@ import { Cookie } from "../Cookie";
 import { SessionStorage } from "../SessionStorage";
 import { CookieAttributes } from "js-cookie";
 import { HankoOptions } from "../../Hanko";
+import { getCurrentHref } from "../Navigation";
 
 export type SessionTokenLocation = "cookie" | "sessionStorage";
 
@@ -235,7 +236,7 @@ class HttpClient {
     if (jwt) {
       const https = new RegExp("^https://");
       const secure =
-        !!this.api.match(https) && !!window.location.href.match(https);
+        !!this.api.match(https) && !!getCurrentHref().match(https);
 
       const expires =
         retention === "session"
