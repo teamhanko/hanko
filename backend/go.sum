@@ -126,8 +126,8 @@ github.com/go-redsync/redsync/v4 v4.17.0 h1:FFJ+uxZs44y4Sq10//IFKic9T94AYl+u3Sog
 github.com/go-redsync/redsync/v4 v4.17.0/go.mod h1:CKVA6qwT07S/916i+Yd9h1/8YFQhCCpPYTQhvvYytJo=
 github.com/go-sql-driver/mysql v1.6.0/go.mod h1:DCzpHaOWr8IXmIStZouvnhqoel9Qv2LBy8hT2VhHyBg=
 github.com/go-sql-driver/mysql v1.8.1/go.mod h1:wEBSXgmK//2ZFJyE+qWnIsVGmvmEKlqwuVSjsCm7DZg=
-github.com/go-sql-driver/mysql v1.10.0 h1:Q+1LV8DkHJvSYAdR83XzuhDaTykuDx0l6fkXxoWCWfw=
-github.com/go-sql-driver/mysql v1.10.0/go.mod h1:M+cqaI7+xxXGG9swrdeUIoPG3Y3KCkF0pZej+SK+nWk=
+github.com/go-sql-driver/mysql v1.10.1 h1:arlSnNLq6a5yxGxV7qg9lF4j0C+KwD6NbQyKr9QL6ME=
+github.com/go-sql-driver/mysql v1.10.1/go.mod h1:M+cqaI7+xxXGG9swrdeUIoPG3Y3KCkF0pZej+SK+nWk=
 github.com/go-testfixtures/testfixtures/v3 v3.19.0 h1:/Y0bars250zggm+1A2PvwaJQsJel7/tS4D/Hhwt66Bc=
 github.com/go-testfixtures/testfixtures/v3 v3.19.0/go.mod h1:4/hVAuX2As0/ej3fLuAd+IvoCXV7/h2cj5nInI11uxM=
 github.com/go-viper/mapstructure/v2 v2.4.0 h1:EBsztssimR/CONLSZZ04E8qAkxNYq4Qp9LvH92wZUgs=
@@ -156,8 +156,8 @@ github.com/gobuffalo/plush/v4 v4.1.22 h1:bPQr5PsiTg54UGMsfvnIAvFmUfxzD/ri+wbpu7P
 github.com/gobuffalo/plush/v4 v4.1.22/go.mod h1:WiKHJx3qBvfaDVlrv8zT7NCd3dEMaVR/fVxW4wqV17M=
 github.com/gobuffalo/plush/v5 v5.0.4 h1:GgKm+EqqV8QEn1K49b26OKCW7DMJEpw5EIHvy48FHpM=
 github.com/gobuffalo/plush/v5 v5.0.4/go.mod h1:C08u/VEqzzPBXFF/yqs40P/5Cvc/zlZsMzhCxXyWJmU=
-github.com/gobuffalo/pop/v6 v6.3.0 h1:2pDe4WPBtWvIZxIuKDcZHHIHD2bBdhqkPM6tNaQebIA=
-github.com/gobuffalo/pop/v6 v6.3.0/go.mod h1:FBCNE7UkvauOv0NgKxq32VOrQ8IpfVnK35zxOq28qzk=
+github.com/gobuffalo/pop/v6 v6.4.0 h1:jpePYrwNS81C99NQTea2aS2LXtZ5ygiYUH/MUmJnObQ=
+github.com/gobuffalo/pop/v6 v6.4.0/go.mod h1:UeDEfFW2flB0mT9CG/G1A2c3qgfOHHIGSbp02HmP3NM=
 github.com/gobuffalo/tags/v3 v3.1.4 h1:X/ydLLPhgXV4h04Hp2xlbI2oc5MDaa7eub6zw8oHjsM=
 github.com/gobuffalo/tags/v3 v3.1.4/go.mod h1:ArRNo3ErlHO8BtdA0REaZxijuWnWzF6PUXngmMXd2I0=
 github.com/gobuffalo/validate/v3 v3.3.3 h1:o7wkIGSvZBYBd6ChQoLxkz2y1pfmhbI4jNJYh6PuNJ4=
