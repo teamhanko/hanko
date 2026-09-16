@@ -33,8 +33,8 @@ type Saml struct {
 	// A double asterisk (`**`) acts as a "super"-wildcard/match-all.
 	//
 	// See [here](https://pkg.go.dev/github.com/gobwas/glob#Compile) for more on globbinh.
-	AllowedRedirectURLS   []string             `yaml:"allowed_redirect_urls" json:"allowed_redirect_urls" koanf:"allowed_redirect_urls" split_words:"true"`
-	AllowedRedirectURLMap map[string]glob.Glob `yaml:"-" json:"-" koanf:"-" jsonschema:"-"`
+	AllowedRedirectURLS   []string                 `yaml:"allowed_redirect_urls" json:"allowed_redirect_urls" koanf:"allowed_redirect_urls" split_words:"true"`
+	AllowedRedirectURLMap map[string]*glob.Pattern `yaml:"-" json:"-" koanf:"-" jsonschema:"-"`
 
 	// `options` allows setting optional features for service provider operations.
 	Options Options `yaml:"options" json:"options" koanf:"options" jsonschema:"title=options"`
@@ -101,7 +101,7 @@ type AttributeMap struct {
 func (s *Saml) PostProcess() error {
 	s.Endpoint = strings.TrimSuffix(s.Endpoint, "/")
 
-	s.AllowedRedirectURLMap = make(map[string]glob.Glob)
+	s.AllowedRedirectURLMap = make(map[string]*glob.Pattern)
 	urls := append(s.AllowedRedirectURLS, s.DefaultRedirectUrl)
 	for _, redirectUrl := range urls {
 		globbedUrl, err := glob.Compile(redirectUrl, '.', '/')
