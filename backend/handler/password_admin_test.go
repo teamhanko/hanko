@@ -327,8 +327,7 @@ func (s *passwordAdminSuite) TestPasswordAdminHandler_Delete() {
 }
 
 // TestPasswordAdminHandler_Get_UsesPublicIdNotInternalId proves :user_id resolves via public_id
-// and not the real internal id, for a handler that was fixed but had no dedicated regression
-// test of its own.
+// and not the real internal id.
 func (s *passwordAdminSuite) TestPasswordAdminHandler_Get_UsesPublicIdNotInternalId() {
 	if testing.Short() {
 		s.T().Skip("skipping test in short mode.")

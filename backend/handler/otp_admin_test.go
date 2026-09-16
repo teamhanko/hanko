@@ -147,8 +147,7 @@ func (s *otpAdminSuite) TestOtpAdminHandler_Delete() {
 }
 
 // TestOtpAdminHandler_Get_UsesPublicIdNotInternalId proves :user_id resolves via public_id and
-// not the real internal id, for a handler that was fixed but had no dedicated regression test of
-// its own.
+// not the real internal id.
 func (s *otpAdminSuite) TestOtpAdminHandler_Get_UsesPublicIdNotInternalId() {
 	if testing.Short() {
 		s.T().Skip("skipping test in short mode.")

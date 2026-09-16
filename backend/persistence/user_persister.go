@@ -55,8 +55,8 @@ func (p *userPersister) Get(id uuid.UUID, tenantID uuid.UUID) (*models.User, err
 }
 
 // GetByPublicID resolves a user by their tenant-scoped public identifier (the only
-// identifier ever exposed via the API/JWT) in a single query, returning the same
-// eager-loaded shape as Get regardless of which identifier was used to look the user up.
+// identifier ever exposed via the API/JWT), returning the same eager-loaded shape as
+// Get regardless of which identifier was used to look the user up.
 func (p *userPersister) GetByPublicID(publicID uuid.UUID, tenantID uuid.UUID) (*models.User, error) {
 	query := p.db.EagerPreload(userEagerPreloadFields...).
 		Where("users.tenant_id = ?", tenantID).

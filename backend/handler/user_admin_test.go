@@ -88,9 +88,8 @@ func (s *userAdminSuite) TestUserHandlerAdmin_Delete_InvalidUserId() {
 	s.Equal(http.StatusBadRequest, rec.Code)
 }
 
-// TestUserHandlerAdmin_Get_UsesPublicIdNotInternalId is the regression test called out in the
-// plan: :id in the URL must resolve via public_id, and the real internal id must no longer work
-// as a lookup key at all.
+// TestUserHandlerAdmin_Get_UsesPublicIdNotInternalId proves :id in the URL resolves via
+// public_id, and the real internal id no longer works as a lookup key at all.
 func (s *userAdminSuite) TestUserHandlerAdmin_Get_UsesPublicIdNotInternalId() {
 	if testing.Short() {
 		s.T().Skip("skipping test in short mode.")
@@ -119,12 +118,11 @@ func (s *userAdminSuite) TestUserHandlerAdmin_Get_UsesPublicIdNotInternalId() {
 	s.Equal(publicID, user.ID.String(), "the returned \"id\" must be the public_id, never the internal id")
 }
 
-// TestUserHandlerAdmin_Create_SamePublicIdAcrossTenants exercises the full HTTP path this plan
-// changed (/:tenant_id/users/:id) with multi-tenancy actually enabled, rather than a
-// single-tenant router or a direct persister call. Proves the actual motivating scenario
-// end-to-end: two different tenants can create a user with the same caller-supplied id without
-// collision, each GET resolves only within its own tenant, and the same id in a third tenant's
-// URL 404s.
+// TestUserHandlerAdmin_Create_SamePublicIdAcrossTenants exercises the full HTTP path
+// (/:tenant_id/users/:id) with multi-tenancy actually enabled, rather than a single-tenant
+// router or a direct persister call. Proves the motivating scenario end-to-end: two different
+// tenants can create a user with the same caller-supplied id without collision, each GET
+// resolves only within its own tenant, and the same id in a third tenant's URL 404s.
 func (s *userAdminSuite) TestUserHandlerAdmin_Create_SamePublicIdAcrossTenants() {
 	if testing.Short() {
 		s.T().Skip("skipping test in short mode.")

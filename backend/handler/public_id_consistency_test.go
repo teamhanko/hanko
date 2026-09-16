@@ -24,10 +24,10 @@ type publicIdConsistencySuite struct {
 	test.Suite
 }
 
-// TestPublicIdConsistency verifies the cross-surface consistency the plan requires: the session
-// JWT's sub claim, /me, and POST /sessions/validate must all agree on a single identifier for a
-// given user - and that identifier must be public_id, never the internal id. (Admin API coverage
-// for this lives separately in TestUserHandlerAdmin_Get_UsesPublicIdNotInternalId.)
+// TestPublicIdConsistency verifies cross-surface consistency: the session JWT's sub claim, /me,
+// and POST /sessions/validate must all agree on a single identifier for a given user - and that
+// identifier must be public_id, never the internal id. (Admin API coverage for this lives
+// separately in TestUserHandlerAdmin_Get_UsesPublicIdNotInternalId.)
 func (s *publicIdConsistencySuite) TestPublicIdConsistency() {
 	if testing.Short() {
 		s.T().Skip("skipping test in short mode.")

@@ -860,9 +860,9 @@ const metadataExceedingLimit = `{
   }
 }`
 
-// TestMetadataAdminHandler_UsesPublicIdNotInternalId is the regression test for the bug found in
-// review: GetMetadata/PatchMetadata were never migrated to public_id lookups, unlike every
-// sibling handler mounted under the same /users/:id route group.
+// TestMetadataAdminHandler_UsesPublicIdNotInternalId asserts that GetMetadata resolves the
+// :user_id path parameter via public_id, not the real internal id, matching every other
+// handler mounted under the same /users/:id route group.
 func (s *metadataAdminSuite) TestMetadataAdminHandler_UsesPublicIdNotInternalId() {
 	if testing.Short() {
 		s.T().Skip("skipping test in short mode.")

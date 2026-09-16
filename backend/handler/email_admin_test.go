@@ -245,12 +245,12 @@ func (s *emailAdminSuite) TestEmailAdminHandler_Create() {
 	}
 }
 
-// TestEmailAdminHandler_Create_EmailLimitUsesResolvedInternalId is the regression test for the
-// email-limit bypass found in review: the limit check counted emails by the raw path variable
-// (public_id) instead of the resolved internal user id, so it always read 0 and never tripped for
-// any user whose public_id differs from their internal id. A limit of 0 (as in the existing
-// "should reject" test case above) can't distinguish buggy from fixed behavior, since 0 >= 0 is
-// true either way - this needs a non-zero limit and a user who already has an email.
+// TestEmailAdminHandler_Create_EmailLimitUsesResolvedInternalId asserts that the email-count
+// limit check counts emails by the resolved internal user id, not the raw :user_id path
+// variable (public_id) - for a user whose public_id differs from their internal id, counting
+// by the path variable would always read 0 and never trip the limit. A limit of 0 (as in the
+// existing "should reject" test case above) can't distinguish that from correct behavior, since
+// 0 >= 0 is true either way - this needs a non-zero limit and a user who already has an email.
 func (s *emailAdminSuite) TestEmailAdminHandler_Create_EmailLimitUsesResolvedInternalId() {
 	if testing.Short() {
 		s.T().Skip("skipping test in short mode.")
@@ -570,10 +570,8 @@ func (s *emailAdminSuite) TestEmailAdminHandler_SetPrimaryEmail() {
 	}
 }
 
-// TestEmailAdminHandler_List_UsesPublicIdNotInternalId closes the one gap flagged in review:
-// List is the only email_admin.go handler that didn't already pre-fetch the user before this
-// change, so it's the one most worth a dedicated regression test proving :user_id resolves via
-// public_id and not the real internal id.
+// TestEmailAdminHandler_List_UsesPublicIdNotInternalId asserts that List resolves the
+// :user_id path parameter via public_id, not the real internal id.
 func (s *emailAdminSuite) TestEmailAdminHandler_List_UsesPublicIdNotInternalId() {
 	if testing.Short() {
 		s.T().Skip("skipping test in short mode.")

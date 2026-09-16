@@ -171,11 +171,11 @@ func (s *webauthnCredentialAdminSuite) TestWebauthnCredentialAdminHandler_Get() 
 	}
 }
 
-// TestWebauthnCredentialAdminHandler_Get_OwnershipCheckUsesPublicId is the regression test for
-// the bug called out in the plan: the ownership check (credential.UserId != userID) compared the
-// raw path variable directly against the credential's real internal FK. Once :user_id means
-// public_id, that comparison must use the resolved user.ID instead, or a credential would never
-// be found for any user whose public_id differs from their internal id.
+// TestWebauthnCredentialAdminHandler_Get_OwnershipCheckUsesPublicId proves the ownership check
+// (credential.UserId != userID) compares against the resolved internal user.ID, not the raw
+// :user_id path variable (public_id) - since :user_id means public_id, comparing it directly
+// against the credential's internal FK would mean a credential is never found for any user
+// whose public_id differs from their internal id.
 func (s *webauthnCredentialAdminSuite) TestWebauthnCredentialAdminHandler_Get_OwnershipCheckUsesPublicId() {
 	if testing.Short() {
 		s.T().Skip("skipping test in short mode.")

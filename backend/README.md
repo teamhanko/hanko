@@ -577,9 +577,10 @@ Unsafe metadata can be set and modified through the Public API and the Admin API
 
 ### User import
 You can import an existing user pool into Hanko using json in the following format. `user_id`, if provided, only
-needs to be unique within the target tenant, not globally - if it already belongs to a user in that tenant, that
-user is reused rather than a duplicate being created, so the same file can be imported into multiple tenants (e.g.
-production and a staging/test tenant) without collision.
+needs to be unique within the target tenant, not globally - the same file can be imported into multiple tenants
+(e.g. production and a staging/test tenant) without collision. If `user_id` already belongs to a user in the
+target tenant, the entire import is aborted (the whole file is imported in one transaction) and nothing is
+committed, instead of reusing or overwriting that user.
 ```json
 [
   {

@@ -19,10 +19,9 @@ type userPersisterSuite struct {
 	test.Suite
 }
 
-// TestPublicIdUniqueness is the migration/schema-level test the plan calls for: (tenant_id,
-// public_id) uniqueness is enforced, but the same public_id may be reused across different
-// tenants - the actual core deliverable of this whole change - and NULL public_id values never
-// collide with each other, even within the same tenant.
+// TestPublicIdUniqueness is a migration/schema-level test: (tenant_id, public_id) uniqueness is
+// enforced, but the same public_id may be reused across different tenants, and NULL public_id
+// values never collide with each other, even within the same tenant.
 func (s *userPersisterSuite) TestPublicIdUniqueness() {
 	if testing.Short() {
 		s.T().Skip("skipping test in short mode.")
@@ -55,7 +54,7 @@ func (s *userPersisterSuite) TestPublicIdUniqueness() {
 		}
 	}
 
-	// Same public_id, different tenants: must succeed - this is the actual point of the change.
+	// Same public_id, different tenants: must succeed - a public_id is unique per tenant, not globally.
 	s.NoError(userPersister.Create(newUser(tenantAID, &sharedPublicID)))
 	s.NoError(userPersister.Create(newUser(tenantBID, &sharedPublicID)))
 
