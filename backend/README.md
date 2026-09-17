@@ -22,6 +22,7 @@ easily integrated into any web app with as little as two lines of code.
     - [Custom OAuth/OIDC providers](#custom-oauthoidc-providers)
     - [Account linking](#account-linking)
   - [User metadata](#user-metadata)
+  - [Custom claims](#custom-claims)
   - [User import](#user-import)
   - [Webhooks](#webhooks)
   - [Session JWT templates](#session-jwt-templates)
@@ -482,6 +483,69 @@ accounts associated with the same address. It is therefore recommended to make s
 also enable `emails.require_verification` in your configuration to ensure that only verified third party provider
 addresses may be used.
 
+### Custom claims
+
+A tenant can declare its own set of custom claims and have SAML or OIDC/custom OAuth connections map their own
+attributes/claims onto them. This is distinct from the fixed-slot attribute mapping every connection type already
+has - a SAML identity provider's standard `attribute_map` fields, or a third-party provider's `attribute_mapping` -
+which renames a provider attribute/claim into one of Hanko's fixed standard slots (`sub`, `email`, ...). Custom
+claims are tenant-defined, not fixed, and none of them are added to the session JWT automatically (see
+[Session JWT templates](#session-jwt-templates) for how to opt one in).
+
+#### Declaring custom claims
+
+Custom claims are declared under the `custom_claims.definitions`
+[option](https://github.com/teamhanko/hanko/wiki/config-properties-custom_claims), keyed by claim name:
+
+```yaml
+custom_claims:
+  definitions:
+    matriculation_number:
+      type: string
+      description: University matriculation number
+    is_staff:
+      type: boolean
+    affiliation:
+      type: string_list
+```
+
+A tenant may declare at most 50 custom claims. A claim name must match `^[A-Za-z][A-Za-z0-9_]{0,63}$` and must not be
+one of the claim keys Hanko always adds to the JWT itself (`sub`, `iat`, `exp`, `aud`, `iss`, `email`, `username`,
+`session_id`). `type` is one of `string`, `number`, `boolean`, or `string_list` - deliberately scalar/list-of-scalar
+only, no nested/object type, since SAML attributes are structurally flat and this keeps one claim shape across both
+connection types.
+
+#### Mapping custom claims
+
+A SAML identity provider or a [custom OAuth/OIDC provider](#custom-oauthoidc-providers) can map its own
+attributes/claims onto declared custom claims. A mapping that references a claim name not currently declared under
+`custom_claims.definitions` is rejected - this is checked both when the mapping itself is saved and whenever the set
+of declared claims changes (e.g. removing a definition that a connection still maps). A mapped value that doesn't
+coerce to its claim's declared type (e.g. a provider claim that resolves to a JSON object for a claim declared as
+`string`) is logged and skipped rather than failing the login.
+
+##### SAML
+
+`saml.identity_providers[].attribute_map.custom` maps a SAML identity provider's attributes onto declared custom
+claims (`claim name -> SAML attribute name`).
+
+##### Social connections
+
+`third_party.custom_providers.<id>.custom_claim_mapping` maps a
+[custom OAuth/OIDC provider's](#custom-oauthoidc-providers) claims onto declared custom claims
+(`claim name -> provider claim`; the value may also be a [gjson path](https://github.com/tidwall/gjson#path-syntax)
+to reach into a nested provider claim).
+
+#### Resolving custom claims
+
+Resolved custom claim values are stored per user, one row per tenant. Whichever connection a user most recently
+authenticated with wins for any claim it maps (last-one-wins); if that connection no longer asserts a value for a
+claim it maps, the claim is cleared, but only if the same connection was the one that last set it - a connection can
+never clear a claim it doesn't own. Resolved values are readable via the read-only
+[`GET /users/:id/custom_claims`](#start-the-admin-api) Admin API endpoint (which claim, not which connection, set
+it) and, once explicitly opted in, via `session.jwt_template.claims` - see
+[Accessing custom claims](#accessing-custom-claims).
+
 ### User metadata
 
 Hanko allows for defining arbitrary user metadata. Metadata can be categorized into
@@ -639,21 +703,22 @@ To decode the webhook you can use the JWKs created in [Configure JSON Web Key Se
 
 Hanko sends webhooks for the following event types:
 
-| Event                       | Triggers on                                                                                        |
-|-----------------------------|----------------------------------------------------------------------------------------------------|
-| user                        | user creation, user deletion, user update, email creation, email deletion, change of primary email |
-| user.create                 | user creation                                                                                      |
-| user.delete                 | user deletion                                                                                      |
-| user.login                  | user login                                                                                         |
-| user.update                 | user update, email creation, email deletion, change of primary email                               |
-| user.update.email           | email creation, email deletion, change of primary email                                            |
-| user.update.email.create    | email creation                                                                                     |
-| user.update.email.delete    | email deletion                                                                                     |
-| user.update.email.primary   | change of primary email                                                                            |
-| user.update.username.create | username creation                                                                                  |
-| user.update.username.delete | username deletion                                                                                  |
-| user.update.username.update | change of username                                                                                 |
-| email.send                  | an email was sent or should be sent                                                                |
+| Event                       | Triggers on                                                                                                             |
+|-----------------------------|-------------------------------------------------------------------------------------------------------------------------|
+| user                        | user creation, user deletion, user update, email creation, email deletion, change of primary email, custom claim change |
+| user.create                 | user creation                                                                                                           |
+| user.delete                 | user deletion                                                                                                           |
+| user.login                  | user login                                                                                                              |
+| user.update                 | user update, email creation, email deletion, change of primary email, custom claim change                               |
+| user.update.email           | email creation, email deletion, change of primary email                                                                 |
+| user.update.email.create    | email creation                                                                                                          |
+| user.update.email.delete    | email deletion                                                                                                          |
+| user.update.email.primary   | change of primary email                                                                                                 |
+| user.update.username.create | username creation                                                                                                       |
+| user.update.username.delete | username deletion                                                                                                       |
+| user.update.username.update | change of username                                                                                                      |
+| user.update.custom_claims   | custom claim creation, update, or clearing                                                                              |
+| email.send                  | an email was sent or should be sent                                                                                     |
 
 As you can see, events can have subevents. You are able to filter which events you want to receive by either selecting
 a parent event when you want to receive all subevents or selecting specific subevents.

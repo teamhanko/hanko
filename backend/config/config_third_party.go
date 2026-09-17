@@ -251,8 +251,7 @@ type CustomThirdPartyProvider struct {
 	// ```
 	//
 	// See https://openid.net/specs/openid-connect-core-1_0.html#StandardClaims for a list of known standard claims
-	// that provider claims can be mapped into. Any other claims received from a provider are not discarded but are
-	// retained internally in a `custom_claims` claim.
+	// that provider claims can be mapped into.
 	//
 	// Mappings are one-to-one mappings, complex mappings (e.g. mapping concatenations of two claims) are not possible.
 	AttributeMapping map[string]string `yaml:"attribute_mapping" json:"attribute_mapping" koanf:"attribute_mapping"`
