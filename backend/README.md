@@ -536,6 +536,12 @@ claims (`claim name -> SAML attribute name`).
 (`claim name -> provider claim`; the value may also be a [gjson path](https://github.com/tidwall/gjson#path-syntax)
 to reach into a nested provider claim).
 
+If a provider claim is itself a nested object, there's no way to declare a custom claim that captures it as-is (see
+[Declaring custom claims](#declaring-custom-claims) for why). Instead, declare one flat claim per leaf field you
+need, each with its own gjson path into that object, and recompose them into a nested shape in
+`session.jwt_template.claims` - which does support arbitrary nested map literals with templated leaves. Be mindful
+of the 50-claim cap when doing this for several such objects, since each leaf field counts as its own claim.
+
 #### Resolving custom claims
 
 Resolved custom claim values are stored per user, one row per tenant. Whichever connection a user most recently
