@@ -55,7 +55,7 @@ func (h *SessionAdminHandler) Generate(ctx echo.Context) error {
 		return echo.NewHTTPError(http.StatusBadRequest, "failed to parse userId as uuid").SetInternal(err)
 	}
 
-	user, err := h.persister.GetUserPersister().Get(userID, tenant.ID)
+	user, err := h.persister.GetUserPersister().GetByPublicID(userID, tenant.ID)
 	if err != nil {
 		return err
 	}
@@ -69,7 +69,7 @@ func (h *SessionAdminHandler) Generate(ctx echo.Context) error {
 		return fmt.Errorf("failed to generate JWT: %w", err)
 	}
 
-	activeSessions, err := h.persister.GetSessionPersister().ListActive(userID, tenant.ID)
+	activeSessions, err := h.persister.GetSessionPersister().ListActive(user.ID, tenant.ID)
 	if err != nil {
 		return fmt.Errorf("failed to list active sessions: %w", err)
 	}
@@ -95,7 +95,7 @@ func (h *SessionAdminHandler) Generate(ctx echo.Context) error {
 	sessionModel := models.Session{
 		ID:        uuid.FromStringOrNil(sessionID.(string)),
 		TenantID:  tenant.ID,
-		UserID:    userID,
+		UserID:    user.ID,
 		CreatedAt: rawToken.IssuedAt(),
 		UpdatedAt: rawToken.IssuedAt(),
 		ExpiresAt: &expirationTime,
@@ -148,7 +148,7 @@ func (h *SessionAdminHandler) List(ctx echo.Context) error {
 		return fmt.Errorf(parseUserUuidFailureMessage, err)
 	}
 
-	user, err := h.persister.GetUserPersister().Get(userID, tenant.ID)
+	user, err := h.persister.GetUserPersister().GetByPublicID(userID, tenant.ID)
 	if err != nil {
 		return err
 	}
@@ -157,7 +157,7 @@ func (h *SessionAdminHandler) List(ctx echo.Context) error {
 		return echo.NewHTTPError(http.StatusNotFound)
 	}
 
-	sessions, err := h.persister.GetSessionPersister().ListActive(userID, tenant.ID)
+	sessions, err := h.persister.GetSessionPersister().ListActive(user.ID, tenant.ID)
 	if err != nil {
 		return err
 	}
@@ -181,7 +181,7 @@ func (h *SessionAdminHandler) Delete(ctx echo.Context) error {
 		return fmt.Errorf(parseUserUuidFailureMessage, err)
 	}
 
-	user, err := h.persister.GetUserPersister().Get(userID, tenant.ID)
+	user, err := h.persister.GetUserPersister().GetByPublicID(userID, tenant.ID)
 	if err != nil {
 		return err
 	}
@@ -202,7 +202,7 @@ func (h *SessionAdminHandler) Delete(ctx echo.Context) error {
 
 	if sessionModel == nil {
 		return echo.NewHTTPError(http.StatusNotFound)
-	} else if sessionModel.UserID != userID {
+	} else if sessionModel.UserID != user.ID {
 		return echo.NewHTTPError(http.StatusNotFound).SetInternal(errors.New("session does not belong to user"))
 	}
 

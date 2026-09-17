@@ -78,7 +78,7 @@ func FromUserModel(model models.User) User {
 	}
 
 	return User{
-		ID:                  model.ID,
+		ID:                  model.GetPublicID(),
 		WebauthnCredentials: credentials,
 		Emails:              emails,
 		Username:            username,
@@ -96,6 +96,8 @@ func FromUserModel(model models.User) User {
 }
 
 type CreateUser struct {
+	// ID, if supplied, sets the user's tenant-scoped public_id, not the internal
+	// primary key - the internal id is always server-generated regardless.
 	ID        uuid.UUID     `json:"id"`
 	Emails    []CreateEmail `json:"emails" validate:"unique=Address,dive"`
 	Username  *string       `json:"username"`
