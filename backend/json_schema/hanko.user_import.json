@@ -63,7 +63,7 @@
       "properties": {
         "user_id": {
           "type": "string",
-          "description": "UserID optional uuid.v4, unique within the target tenant rather than\nglobally. If it already belongs to a user in this tenant, that existing\nuser is reused (its child records - emails, credentials, etc. - are still\nadded as usual) rather than creating a duplicate."
+          "description": "UserID optional uuid.v4, unique within the target tenant rather than\nglobally. If it already belongs to a user in this tenant, the entire\nimport is aborted (the whole file is imported in one transaction) and\nnothing is committed, instead of reusing or overwriting that user."
         },
         "emails": {
           "$ref": "#/$defs/Emails",
