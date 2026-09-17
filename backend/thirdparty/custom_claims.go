@@ -15,14 +15,17 @@ import (
 )
 
 // ResolveCustomClaims coerces mapped provider attributes into the tenant's declared claim
-// types. managed is every claim name this connection is responsible for - every key in
-// src.Mapping that's also currently declared in defs - whether or not a value was actually
-// resolved this time. Callers (applyCustomClaims) use managed to decide which claims this
+// types. managed is every currently-declared claim this connection maps that's either resolved
+// this round or found genuinely absent from the provider's data - not one whose value failed to
+// coerce (see below). Callers (applyCustomClaims) use managed to decide which claims this
 // connection may clear on absence.
 //
 // Never fails: an undeclared claim name, a missing attribute, or a value that doesn't coerce
 // to the declared type are all logged and skipped, not returned as an error - a malformed or
-// unmapped attribute must never fail a login.
+// unmapped attribute must never fail a login. A coercion failure specifically is also excluded
+// from managed, not just values: a provider sending a malformed value (e.g. a mapping pointing
+// at the wrong shape) is evidence of a problem, not evidence the claim no longer applies, so it
+// must never clear a previously-resolved good value the way a genuinely absent attribute does.
 func ResolveCustomClaims(defs config.CustomClaimDefinitions, src *CustomClaimSource) (values map[string]any, managed []string) {
 	if src == nil {
 		return nil, nil
@@ -40,10 +43,10 @@ func ResolveCustomClaims(defs config.CustomClaimDefinitions, src *CustomClaimSou
 				Msg("skipping custom claim mapping: not declared in custom_claims.definitions")
 			continue
 		}
-		managed = append(managed, claimName)
 
 		raw, present := src.Attributes[attributeName]
 		if !present || raw == nil {
+			managed = append(managed, claimName)
 			continue
 		}
 
@@ -54,9 +57,10 @@ func ResolveCustomClaims(defs config.CustomClaimDefinitions, src *CustomClaimSou
 				Str("operation", "resolve_custom_claims").
 				Str("claim", claimName).
 				Str("type", definition.Type).
-				Msg("skipping custom claim: value could not be coerced to the declared type")
+				Msg("skipping custom claim: value could not be coerced to the declared type, leaving any existing stored value untouched")
 			continue
 		}
+		managed = append(managed, claimName)
 		values[claimName] = value
 	}
 
@@ -176,11 +180,13 @@ func customClaimValueEqual(a, b any) bool {
 // refresh semantics. Split out from applyCustomClaims so this decision logic is testable
 // without a DB.
 //
-// managed (from ResolveCustomClaims) is every claim name this connection maps, whether or not
-// it resolved a value this time - it's what tells apart "mapped but the IdP sent nothing this
-// login" (may need clearing) from "this connection doesn't map this claim at all" (never
-// touched, no matter what's stored). A managed claim missing from resolvedValues is a clear
-// candidate; anything not in managed is invisible to this call entirely.
+// managed (from ResolveCustomClaims) is every claim name this connection maps that's either
+// resolved this round or found genuinely absent - not one whose value failed to coerce. It's
+// what tells apart "mapped but the IdP sent nothing this login" (a clear candidate) from both
+// "this connection doesn't map this claim at all" and "mapped, but this round's value didn't
+// coerce" (both invisible to this call entirely, since neither is evidence the claim no longer
+// applies). A managed claim missing from resolvedValues is therefore always the genuine-absence
+// case.
 //
 // wrote reports whether stored was mutated at all, including a source-only handoff (another
 // connection re-asserting a value this claim already had) - that must still persist so

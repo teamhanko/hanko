@@ -85,6 +85,20 @@ func TestMergeCustomClaims_NonOwnerSilence_LeavesClaimIntact(t *testing.T) {
 	assert.Equal(t, StoredCustomClaim{Value: "student", Source: "saml:uni-b"}, stored["role"])
 }
 
+func TestMergeCustomClaims_OwnerNotManaged_LeavesClaimIntact(t *testing.T) {
+	// Simulates a coercion failure: ResolveCustomClaims excludes a claim from managed when its
+	// mapped attribute failed to coerce this round (a malformed value is evidence of a mapping
+	// problem, not evidence the claim no longer applies) - so even the owning connection must
+	// not be able to clear it this way.
+	stored := map[string]StoredCustomClaim{"role": {Value: "student", Source: "saml:uni-a"}}
+
+	wrote, valueChanged := mergeCustomClaims(stored, map[string]any{}, []string{}, "saml:uni-a")
+
+	assert.False(t, wrote)
+	assert.False(t, valueChanged)
+	assert.Equal(t, StoredCustomClaim{Value: "student", Source: "saml:uni-a"}, stored["role"])
+}
+
 func TestCustomClaimConnectionSource(t *testing.T) {
 	assert.Equal(t, "saml:https://idp.example.com/metadata", customClaimConnectionSource("https://idp.example.com/metadata", true))
 	assert.Equal(t, "third_party:custom_myprovider", customClaimConnectionSource("custom_myprovider", false))
@@ -174,7 +188,7 @@ func TestResolveCustomClaims_UncoercibleValue(t *testing.T) {
 	values, managed := ResolveCustomClaims(customClaimDefs(), src)
 
 	assert.Empty(t, values, "coercion failure omits the claim, never fails the resolution")
-	assert.Equal(t, []string{"age"}, managed)
+	assert.Empty(t, managed, "coercion failure is not managed either, so it can't clear an existing good value")
 }
 
 func TestResolveCustomClaims_ObjectShapedValueRejected(t *testing.T) {
@@ -188,7 +202,7 @@ func TestResolveCustomClaims_ObjectShapedValueRejected(t *testing.T) {
 	values, managed := ResolveCustomClaims(customClaimDefs(), src)
 
 	assert.Empty(t, values, "a JSON object must never be stringified into a claim value")
-	assert.Equal(t, []string{"matriculation_number"}, managed)
+	assert.Empty(t, managed, "coercion failure is not managed either, so it can't clear an existing good value")
 }
 
 func TestResolveCustomClaims_ListContainingObjectRejected(t *testing.T) {
@@ -199,9 +213,10 @@ func TestResolveCustomClaims_ListContainingObjectRejected(t *testing.T) {
 		},
 	}
 
-	values, _ := ResolveCustomClaims(customClaimDefs(), src)
+	values, managed := ResolveCustomClaims(customClaimDefs(), src)
 
 	assert.Empty(t, values)
+	assert.Empty(t, managed, "coercion failure is not managed either, so it can't clear an existing good value")
 }
 
 func TestResolveCustomClaims_UndeclaredClaimSkippedNotManaged(t *testing.T) {
