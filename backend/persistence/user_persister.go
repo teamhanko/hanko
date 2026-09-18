@@ -45,6 +45,8 @@ var userEagerPreloadFields = []string{
 	"Metadata",
 	"Identities",
 	"Identities.SamlIdentity",
+	"OrganizationMemberships.Organization",
+	"RoleBindings.Role",
 }
 
 func (p *userPersister) Get(id uuid.UUID, tenantID uuid.UUID) (*models.User, error) {
@@ -134,7 +136,9 @@ func (p *userPersister) GetByUsername(username string, tenantID uuid.UUID) (*mod
 		"PasswordCredential",
 		"Username",
 		"OTPSecret",
-		"Metadata").
+		"Metadata",
+		"OrganizationMemberships.Organization",
+		"RoleBindings.Role").
 		LeftJoin("usernames", "usernames.user_id = users.id").
 		Where("usernames.username = (?)", username).
 		Where("users.tenant_id = ?", tenantID)
@@ -205,7 +209,9 @@ func (p *userPersister) List(page int, perPage int, userIDs []uuid.UUID, email s
 			"Emails.PrimaryEmail",
 			"WebauthnCredentials",
 			"WebauthnCredentials.Transports",
-			"Username").
+			"Username",
+			"OrganizationMemberships.Organization",
+			"RoleBindings.Role").
 		LeftJoin("emails", "emails.user_id = users.id").
 		LeftJoin("usernames", "usernames.user_id = users.id")
 	query = p.addQueryParamsToSqlQuery(query, userIDs, email, username, tenantID)

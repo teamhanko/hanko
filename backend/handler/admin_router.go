@@ -112,6 +112,36 @@ func NewAdminRouter(cfg *config.Config, persister persistence.Persister, prometh
 	otp.GET("", otpHandler.Get)
 	otp.DELETE("", otpHandler.Delete)
 
+	organizationHandler := NewOrganizationHandlerAdmin(persister)
+
+	organizations := tenantGroup.Group("/organizations")
+	organizations.POST("", organizationHandler.Create)
+	organizations.GET("", organizationHandler.List)
+	organizations.GET("/:id", organizationHandler.Get)
+	organizations.PATCH("/:id", organizationHandler.Patch)
+	organizations.DELETE("/:id", organizationHandler.Delete)
+
+	roleBindingHandler := NewRoleBindingHandlerAdmin(persister)
+
+	orgMembers := organizations.Group("/:org_id/users")
+	orgMembers.GET("", organizationHandler.ListMembers)
+	orgMembers.POST("/:user_id", organizationHandler.AddMember)
+	orgMembers.DELETE("/:user_id", organizationHandler.RemoveMember)
+
+	orgRoles := orgMembers.Group("/:user_id/roles")
+	orgRoles.POST("", roleBindingHandler.Create)
+	orgRoles.GET("", roleBindingHandler.List)
+	orgRoles.DELETE("/:role_ref", roleBindingHandler.Delete)
+
+	roleHandler := NewRoleHandlerAdmin(persister)
+
+	roles := tenantGroup.Group("/roles")
+	roles.POST("", roleHandler.Create)
+	roles.GET("", roleHandler.List)
+	roles.GET("/:id", roleHandler.Get)
+	roles.PATCH("/:id", roleHandler.Patch)
+	roles.DELETE("/:id", roleHandler.Delete)
+
 	auditLogHandler := NewAuditLogHandler(persister)
 
 	auditLogs := tenantGroup.Group("/audit_logs")

@@ -1,0 +1,17 @@
+create_table("role_bindings", {"timestamps": false}) {
+	t.Column("id", "uuid", {primary: true})
+	t.Column("tenant_id", "uuid", {"null": false})
+	t.Column("user_id", "uuid", {"null": false})
+	t.Column("role_id", "uuid", {"null": false})
+	t.Column("organization_id", "uuid", {"null": false})
+	t.Column("created_at", "timestamp", {})
+
+	t.Index(["user_id", "role_id", "organization_id"], {"unique": true})
+	t.Index(["tenant_id", "id"], {"unique": true})
+	t.ForeignKey("tenant_id", {"tenants": ["id"]}, {"on_delete": "cascade", "on_update": "cascade"})
+}
+
+sql("ALTER TABLE role_bindings ADD CONSTRAINT role_bindings_tenant_user_fkey FOREIGN KEY (tenant_id, user_id) REFERENCES users(tenant_id, id) ON DELETE CASCADE ON UPDATE CASCADE;")
+sql("ALTER TABLE role_bindings ADD CONSTRAINT role_bindings_tenant_org_fkey FOREIGN KEY (tenant_id, organization_id) REFERENCES organizations(tenant_id, id) ON DELETE CASCADE ON UPDATE CASCADE;")
+sql("ALTER TABLE role_bindings ADD CONSTRAINT role_bindings_tenant_role_fkey FOREIGN KEY (tenant_id, role_id) REFERENCES roles(tenant_id, id) ON DELETE CASCADE ON UPDATE CASCADE;")
+sql("ALTER TABLE role_bindings ADD CONSTRAINT role_bindings_membership_fkey FOREIGN KEY (user_id, organization_id) REFERENCES organization_memberships(user_id, organization_id) ON DELETE CASCADE;")
