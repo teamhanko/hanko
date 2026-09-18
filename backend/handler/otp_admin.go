@@ -41,7 +41,7 @@ func (h *otpAdminHandler) Get(ctx echo.Context) error {
 		return fmt.Errorf(parseUserUuidFailureMessage, err)
 	}
 
-	userModel, err := h.persister.GetUserPersister().Get(userID, tenant.ID)
+	userModel, err := h.persister.GetUserPersister().GetByPublicID(userID, tenant.ID)
 	if err != nil {
 		return err
 	}
@@ -72,7 +72,7 @@ func (h *otpAdminHandler) Delete(ctx echo.Context) error {
 		return fmt.Errorf(parseUserUuidFailureMessage, err)
 	}
 
-	userModel, err := h.persister.GetUserPersister().Get(userID, tenant.ID)
+	userModel, err := h.persister.GetUserPersister().GetByPublicID(userID, tenant.ID)
 	if err != nil {
 		return err
 	}
