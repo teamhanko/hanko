@@ -18,7 +18,7 @@ require (
 	github.com/gobuffalo/nulls v0.4.2
 	github.com/gobuffalo/pop/v6 v6.4.0
 	github.com/gobuffalo/validate/v3 v3.3.3
-	github.com/gobwas/glob v0.2.3
+	github.com/gobwas/glob v1.0.0
 	github.com/gofrs/uuid v4.4.0+incompatible
 	github.com/gomodule/redigo v1.9.3
 	github.com/google/uuid v1.6.0

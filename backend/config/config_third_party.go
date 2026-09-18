@@ -52,8 +52,8 @@ type ThirdParty struct {
 	// See [here](https://pkg.go.dev/github.com/gobwas/glob#Compile) for more on globbing.
 	//
 	// Must not be empty if any of the [`providers`](#providers) are `enabled`. URLs in the list must not have a trailing slash.
-	AllowedRedirectURLS   []string             `yaml:"allowed_redirect_urls" json:"allowed_redirect_urls" koanf:"allowed_redirect_urls" split_words:"true" jsonschema:"minItems=1"`
-	AllowedRedirectURLMap map[string]glob.Glob `jsonschema:"-" yaml:"-" json:"-" koanf:"-"`
+	AllowedRedirectURLS   []string                 `yaml:"allowed_redirect_urls" json:"allowed_redirect_urls" koanf:"allowed_redirect_urls" split_words:"true" jsonschema:"minItems=1"`
+	AllowedRedirectURLMap map[string]*glob.Pattern `jsonschema:"-" yaml:"-" json:"-" koanf:"-"`
 }
 
 func (t *ThirdParty) Validate() error {
@@ -158,7 +158,7 @@ func (t ThirdParty) JSONSchemaNoCustomProviderEnabled() *jsonschema.Schema {
 }
 
 func (t *ThirdParty) PostProcess() error {
-	t.AllowedRedirectURLMap = make(map[string]glob.Glob)
+	t.AllowedRedirectURLMap = make(map[string]*glob.Pattern)
 	urls := append(t.AllowedRedirectURLS, t.ErrorRedirectURL)
 	for _, redirectUrl := range urls {
 		g, err := glob.Compile(redirectUrl, '.', '/')
