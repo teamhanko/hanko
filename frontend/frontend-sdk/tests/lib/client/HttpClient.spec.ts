@@ -5,6 +5,12 @@ import {
 } from "../../../src/lib/client/HttpClient";
 import { RequestTimeoutError, TechnicalError } from "../../../src";
 import { fakeTimerNow } from "../../setup";
+import * as Navigation from "../../../src/lib/Navigation";
+
+jest.mock("../../../src/lib/Navigation", () => ({
+  ...jest.requireActual("../../../src/lib/Navigation"),
+  getCurrentHref: jest.fn(),
+}));
 
 const jwt = "test-token";
 let httpClient: HttpClient;
@@ -163,7 +169,6 @@ describe("httpClient.processResponseHeadersOnLogin()", () => {
   describe("when the x-auth-token is available in the response header", () => {
     const jwt = "test-jwt";
     const expirationSeconds = 7;
-    const realLocation = window.location;
 
     beforeEach(() => {
       Object.defineProperty(global, "XMLHttpRequest", {
@@ -188,12 +193,6 @@ describe("httpClient.processResponseHeadersOnLogin()", () => {
         configurable: true,
         writable: true,
       });
-
-      delete window.location;
-    });
-
-    afterEach(() => {
-      window.location = realLocation;
     });
 
     it.each`
@@ -214,10 +213,9 @@ describe("httpClient.processResponseHeadersOnLogin()", () => {
         const xhr = new XMLHttpRequest();
         const response = new Response(xhr);
 
-        // @ts-ignore
-        window.location = {
-          href: `${protocolClient}://test.app`,
-        };
+        (Navigation.getCurrentHref as jest.Mock).mockReturnValue(
+          `${protocolClient}://test.app`,
+        );
 
         jest.spyOn(response.xhr, "getResponseHeader");
         jest.spyOn(client.cookie, "setAuthCookie");
