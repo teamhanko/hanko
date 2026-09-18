@@ -1,0 +1,108 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: keycloak
+  labels:
+    app: keycloak
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: keycloak
+  template:
+    metadata:
+      labels:
+        app: keycloak
+    spec:
+      # Creates the "keycloak" database on the shared postgres instance, once. Runs on every
+      # pod start (not just once, unlike a Job) - the guarded SQL is idempotent, and an
+      # initContainer avoids a separate Job object's pod-template immutability fighting
+      # `skaffold run`/`kubectl apply` on redeploy.
+      initContainers:
+        - name: keycloak-db-init
+          image: postgres:12-alpine
+          env:
+            - name: PGPASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: db-config
+                  key: password
+          command: ["sh", "-c"]
+          args:
+            - |
+              psql -h postgres.default -U hanko -d hanko -tc "SELECT 1 FROM pg_database WHERE datname = 'keycloak'" | grep -q 1 || \
+              psql -h postgres.default -U hanko -d hanko -c "CREATE DATABASE keycloak"
+      containers:
+        - name: keycloak
+          image: quay.io/keycloak/keycloak:26.0
+          # --import-realm loads every *-realm.json file found in the mounted import dir on
+          # startup - same fixtures as deploy/docker-compose's Keycloak, no manual setup needed.
+          args: ["start-dev", "--import-realm"]
+          env:
+            - name: KEYCLOAK_ADMIN
+              value: admin
+            - name: KEYCLOAK_ADMIN_PASSWORD
+              value: admin
+            - name: KC_DB
+              value: postgres
+            - name: KC_DB_URL
+              value: jdbc:postgresql://postgres.default:5432/keycloak
+            - name: KC_DB_USERNAME
+              valueFrom:
+                secretKeyRef:
+                  name: db-config
+                  key: username
+            - name: KC_DB_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: db-config
+                  key: password
+            # Pins the hostname Keycloak advertises in metadata/redirects (SSO URL, issuer,
+            # etc.) to the browser-reachable address, regardless of which Host header a given
+            # request arrived with - same reasoning as the docker-compose Keycloak setup's
+            # KC_HOSTNAME. Hanko's own server-to-server calls (SAML metadata fetch, OIDC token/
+            # userinfo) go straight to the "keycloak" in-cluster Service instead, configured
+            # per-connection when wiring up a SAML/OIDC connection through the console.
+            - name: KC_HOSTNAME
+              value: https://keycloak.hanko.test
+            # This cluster's ingress (Traefik) terminates TLS and forwards plain HTTP to the
+            # Service - without this, Keycloak may not correctly recognize the original
+            # https:// scheme from X-Forwarded-* headers. Unverified against a real run yet;
+            # if browser redirects come back http:// instead of https://, start here.
+            - name: KC_PROXY_HEADERS
+              value: xforwarded
+          ports:
+            - containerPort: 8080
+              name: http
+          volumeMounts:
+            - name: realm-import-uni-a
+              mountPath: /opt/keycloak/data/import/uni-a-realm.json
+              subPath: uni-a-realm.json
+            - name: realm-import-uni-b
+              mountPath: /opt/keycloak/data/import/uni-b-realm.json
+              subPath: uni-b-realm.json
+            - name: realm-import-acme-corp
+              mountPath: /opt/keycloak/data/import/acme-corp-realm.json
+              subPath: acme-corp-realm.json
+      volumes:
+        - name: realm-import-uni-a
+          configMap:
+            name: keycloak-realm-import-uni-a
+        - name: realm-import-uni-b
+          configMap:
+            name: keycloak-realm-import-uni-b
+        - name: realm-import-acme-corp
+          configMap:
+            name: keycloak-realm-import-acme-corp
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: keycloak
+spec:
+  selector:
+    app: keycloak
+  ports:
+    - port: 8080
+      targetPort: http
+      name: http

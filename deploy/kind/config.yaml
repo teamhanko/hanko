@@ -1,0 +1,36 @@
+database:
+  host: postgres.default
+  port: 5432
+  dialect: postgres
+  database: hanko_multitenant
+audit_log:
+  mask: false
+  storage:
+    enabled: true
+  console_output:
+    enabled: false
+debug: false
+flow_locker:
+  enabled: true
+  store: in_memory
+  TTL: 30s
+log:
+  log_health_and_metrics: false
+multi_tenancy:
+  enabled: true
+server:
+  public:
+    address: ":8000"
+  admin:
+    address: ":8001"
+  management:
+    address: ":8002"
+default_email_delivery:
+  enabled: true
+  from_address: "no-reply@stg.hankocloud.com"
+  FromName: "Hanko"
+  smtp:
+    host: "mailpit.mailpit.svc.cluster.local"
+    port: "1025"
+    username: ""
+    password: ""

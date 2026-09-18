@@ -16,10 +16,12 @@ import (
 	"github.com/teamhanko/hanko/backend/v3/config"
 	"github.com/teamhanko/hanko/backend/v3/context"
 	"github.com/teamhanko/hanko/backend/v3/dto"
+	"github.com/teamhanko/hanko/backend/v3/dto/admin"
 	"github.com/teamhanko/hanko/backend/v3/persistence/models"
 	"github.com/teamhanko/hanko/backend/v3/saml"
 	"github.com/teamhanko/hanko/backend/v3/thirdparty"
 	"github.com/teamhanko/hanko/backend/v3/utils"
+	webhookUtils "github.com/teamhanko/hanko/backend/v3/webhooks/utils"
 )
 
 type Handler struct {
@@ -401,6 +403,13 @@ func (handler *Handler) linkAccount(c echo.Context, redirectTo *url.URL, isFlow 
 
 	if err != nil {
 		return nil, err
+	}
+
+	if accountLinkingResult.WebhookEvent != nil {
+		err = webhookUtils.TriggerWebhooks(c, handler.samlService.Persister().GetConnection(), tenant.ID, *accountLinkingResult.WebhookEvent, admin.FromUserModel(*accountLinkingResult.User))
+		if err != nil {
+			c.Logger().Warn(err)
+		}
 	}
 
 	return redirectTo, nil

@@ -1,0 +1,187 @@
+database:
+  user: hanko
+  password: hanko
+  host: postgresd
+  port: 5432
+  dialect: postgres
+email_delivery:
+  smtp:
+    host: "mailslurper"
+    port: "2500"
+  from_address: noreply@hanko.io
+secrets:
+  keys:
+    - abcedfghijklmnopqrstuvwxyz
+service:
+  name: Hanko Authentication Service
+# Fires on user.update (including when a login changes a user's custom claims) so its
+# payload can be inspected manually: docker compose logs webhook-receiver. The payload
+# isn't HMAC-signed with a shared secret - it's {"token": "<JWT>", "event": "..."}, where
+# the JWT (signed with secrets.keys above) carries the actual event data; decode it
+# (no need to verify the signature for this manual check) to see custom_claims inside.
+webhooks:
+  enabled: true
+  hooks:
+    - callback: "http://webhook-receiver:8090/hook"
+      events:
+        - "user.update"
+webauthn:
+  relying_party:
+    origins:
+      - "http://localhost:8888"
+session:
+  cookie:
+    secure: false # is needed for safari, because safari does not store secure cookies on localhost
+  jwt_template:
+    claims:
+      matriculation_number: '{{ .User.CustomClaims.Get "matriculation_number" }}'
+      affiliation: '{{ .User.CustomClaims.Get "affiliation" }}'
+      account_status: '{{ .User.CustomClaims.Get "account_status" }}'
+      email_verified: '{{ .User.CustomClaims.Get "email_verified" }}'
+      employee_id: '{{ .User.CustomClaims.Get "employee_id" }}'
+      home_organization: '{{ .User.CustomClaims.Get "home_organization" }}'
+# MFA configuration with multi-user device trust support
+mfa:
+  enabled: true
+  optional: true
+  acquire_on_login: false
+  acquire_on_registration: true
+  device_trust_policy: "prompt"
+  device_trust_duration: "720h"
+  device_trust_cookie_name: "hanko-device-token"
+  device_trust_max_users_per_device: 20
+  totp:
+    enabled: true
+  security_keys:
+    enabled: false
+server:
+  public:
+    cors:
+      allow_origins:
+        - "http://localhost:8888"
+custom_claims:
+  definitions:
+    matriculation_number:
+      type: string
+      description: DFN-AAI matriculation number
+    affiliation:
+      type: string_list
+    # Deliberate coercion-failure demo: schacUserStatus's value is a URN string like
+    # "urn:schac:userStatus:de:aai.dfn.de:idmStatus:active", not "true"/"false", so this
+    # claim always fails strconv.ParseBool and gets silently omitted with a log.Warn -
+    # showing that a malformed/mistyped attribute mapping never fails a login.
+    account_status:
+      type: boolean
+      description: intentionally never populates - see comment
+    # From the custom OIDC provider (acme-corp) below - both are genuinely typed JSON
+    # values in the ID token, not string-coerced, exercising the OIDC fill site with real
+    # boolean/number values rather than the SAML-only string/string_list types above.
+    email_verified:
+      type: boolean
+      description: OIDC standard email_verified claim
+    employee_id:
+      type: number
+      description: custom numeric claim from the acme-corp OIDC provider
+    # schacHomeOrganization - both uni-a and uni-b map this to their own real, distinct
+    # domain value. Unlike matriculation_number/affiliation (which exercise the absence/
+    # clear side of refresh semantics via uni-b), this claim exercises the *overwrite*
+    # side: both connections always provide a real value, so logging in via either one
+    # unconditionally overwrites it (last-one-wins, no source-ownership check on write -
+    # that check only applies when a managed claim comes back absent).
+    home_organization:
+      type: string
+      description: schacHomeOrganization - overwritten by whichever IdP was used last
+saml:
+  enabled: true
+  endpoint_url: "http://localhost:8000"
+  audience_uri: "http://localhost:8000"
+  default_redirect_url: "http://localhost:8888"
+  allowed_redirect_urls:
+    - "http://localhost:8888"
+  identity_providers:
+    - enabled: true
+      name: uni-a
+      domain: uni-a.example.com
+      metadata_url: "http://keycloak:8080/realms/uni-a/protocol/saml/descriptor"
+      attribute_map:
+        email: "urn:oid:1.2.840.113549.1.9.1"
+        custom:
+          # schacPersonalUniqueCode (SCHAC 1.5.0+) - the real DFN-AAI/eduGAIN attribute for
+          # a matriculation number. Its value is a structured URN
+          # (urn:schac:personalUniqueCode:...), not a bare number - custom claims are
+          # renamed but not reformatted, so this claim's stored value is the whole URN.
+          matriculation_number: "urn:oid:1.3.6.1.4.1.25178.1.2.14"
+          # eduPersonScopedAffiliation, not the plain eduPersonAffiliation - values are
+          # "role@domain" (e.g. "student@uni-a.example.com"), not a bare role string. Kept
+          # as-is, same reasoning as matriculation_number above.
+          affiliation: "urn:oid:1.3.6.1.4.1.5923.1.1.1.9"
+          account_status: "urn:oid:1.3.6.1.4.1.25178.1.2.19"
+          home_organization: "urn:oid:1.3.6.1.4.1.25178.1.2.9"
+    # uni-b declares matriculation_number/affiliation as managed claims (so hanko looks
+    # for them here too), but its Keycloak client has no mapper emitting either attribute
+    # - they'll always be absent from this connection's assertion. That's what proves the
+    # source-scoped clear logic: an unrelated connection (uni-b) reporting a managed claim
+    # as absent must NOT clear a value uni-a already set - only uni-a's own absence should.
+    - enabled: true
+      name: uni-b
+      domain: uni-b.example.com
+      metadata_url: "http://keycloak:8080/realms/uni-b/protocol/saml/descriptor"
+      attribute_map:
+        email: "urn:oid:1.2.840.113549.1.9.1"
+        custom:
+          matriculation_number: "urn:oid:1.3.6.1.4.1.25178.1.2.14"
+          affiliation: "urn:oid:1.3.6.1.4.1.5923.1.1.1.9"
+          home_organization: "urn:oid:1.3.6.1.4.1.25178.1.2.9"
+third_party:
+  redirect_url: "http://localhost:8000/thirdparty/callback"
+  error_redirect_url: "http://localhost:8888/error"
+  allowed_redirect_urls:
+    - "http://localhost:8888"
+  custom_providers:
+    acme_corp:
+      enabled: true
+      display_name: "Acme Corp (Keycloak OIDC)"
+      # Allows linking to an existing user matched by email. Off by default for custom
+      # OIDC/OAuth2 providers (unlike configured SAML federation partners) since they're
+      # treated as less inherently trusted; explicitly enabled here so the walkthrough can
+      # link alice's acme-corp identity to the same user her SAML logins created.
+      allow_linking: true
+      # use_discovery is off deliberately: Keycloak's discovery document always advertises
+      # the browser-facing issuer (KC_HOSTNAME, http://localhost:9000), which hanko's own
+      # container can't reach (that's "localhost" from inside the container, not the host)
+      # - go-oidc's discovery client requires the fetch URL and the document's issuer to
+      # match exactly, so auto-discovery can't span both hostnames the way the SAML metadata
+      # fetch could. Endpoints are given explicitly instead: issuer/authorization_endpoint
+      # stay browser-facing (localhost:9000, used for the redirect and to validate the
+      # token's iss claim), token/userinfo endpoints use the Docker-network hostname since
+      # hanko calls those itself, server-to-server.
+      issuer: "http://localhost:9000/realms/acme-corp"
+      use_discovery: false
+      authorization_endpoint: "http://localhost:9000/realms/acme-corp/protocol/openid-connect/auth"
+      token_endpoint: "http://keycloak:8080/realms/acme-corp/protocol/openid-connect/token"
+      userinfo_endpoint: "http://keycloak:8080/realms/acme-corp/protocol/openid-connect/userinfo"
+      client_id: "hanko-oidc-test"
+      secret: "uruksY2BFjRVqxLRhYihQXJG6hrJ6Aa2"
+      scopes:
+        - openid
+        - profile
+        - email
+      custom_claim_mapping:
+        email_verified: "email_verified"
+        employee_id: "employee_id"
+security_notifications:
+  notifications:
+    email_create:
+      enabled: true
+    email_delete:
+      enabled: true
+    password_update:
+      enabled: true
+    passkey_create:
+      enabled: true
+    primary_email_update:
+      enabled: true
+    mfa_create:
+      enabled: true
+    mfa_delete:
+      enabled: true

@@ -1,0 +1,74 @@
+# Override file for manually testing SAML/OIDC/custom-claims against a local Keycloak
+# instance (it works as both a SAML 2.0 IdP and a full OIDC provider). Merges on top of
+# quickstart.yaml, so it doesn't touch that file (or config.yaml) at all:
+#
+#   docker compose -f quickstart.yaml -f quickstart.keycloak.yaml up -d
+#
+# Adds keycloak + keycloak-db-init, and points hanko/hanko-migrate at config-keycloak.yaml
+# (a full copy of config.yaml plus whatever saml/third_party/custom_claims additions this
+# Keycloak instance is currently configured to exercise) instead of the default config.yaml.
+services:
+  # Generic echo container - logs every received request (headers + body) to its own
+  # stdout, so `docker compose logs webhook-receiver` shows the raw webhook payload Hanko
+  # sends. Used only to verify the user.update webhook actually fires with custom_claims
+  # in it; not a real webhook consumer (it doesn't verify the payload's signed JWT).
+  webhook-receiver:
+    image: mendhak/http-https-echo
+    environment:
+      - HTTP_PORT=8090
+    networks:
+      - intranet
+  hanko-migrate:
+    volumes:
+      - type: bind
+        source: ./config-keycloak.yaml
+        target: /etc/config/config.yaml
+  hanko:
+    volumes:
+      - type: bind
+        source: ./config-keycloak.yaml
+        target: /etc/config/config.yaml
+  keycloak-db-init:
+    # Creates the "keycloak" database on the shared postgresd instance, once.
+    # Avoids touching postgresd's init scripts unconditionally for everyone else.
+    image: postgres:12-alpine
+    depends_on:
+      postgresd:
+        condition: service_healthy
+    environment:
+      - PGPASSWORD=hanko
+    entrypoint: ["sh", "-c"]
+    command:
+      - psql -h postgresd -U hanko -d hanko -tc "SELECT 1 FROM pg_database WHERE datname = 'keycloak'" | grep -q 1 || psql -h postgresd -U hanko -d hanko -c "CREATE DATABASE keycloak"
+    networks:
+      - intranet
+  keycloak:
+    image: quay.io/keycloak/keycloak:26.0
+    depends_on:
+      keycloak-db-init:
+        condition: service_completed_successfully
+    # --import-realm loads every *-realm.json file found in the mounted import
+    # dir on startup, so a realm exported once and committed there is available
+    # to every dev without redoing the manual setup in the admin console.
+    command: start-dev --import-realm
+    environment:
+      - KEYCLOAK_ADMIN=admin
+      - KEYCLOAK_ADMIN_PASSWORD=admin
+      - KC_DB=postgres
+      - KC_DB_URL=jdbc:postgresql://postgresd:5432/keycloak
+      - KC_DB_USERNAME=hanko
+      - KC_DB_PASSWORD=hanko
+      # Pins the hostname Keycloak advertises in metadata/redirects (SSO URL, issuer, etc.)
+      # to the browser-reachable address, regardless of which Host header a given request
+      # arrived with - without this, start-dev derives it per-request, so Hanko's internal
+      # metadata fetch (via the "keycloak" Docker-network hostname) leaks that unreachable
+      # hostname into browser-facing SAML redirects.
+      - KC_HOSTNAME=http://localhost:9000
+    ports:
+      - '9000:8080' # admin console + SAML/OIDC endpoints
+    volumes:
+      - type: bind
+        source: ./keycloak-import
+        target: /opt/keycloak/data/import
+    networks:
+      - intranet

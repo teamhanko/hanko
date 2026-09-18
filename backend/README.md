@@ -22,6 +22,7 @@ easily integrated into any web app with as little as two lines of code.
     - [Custom OAuth/OIDC providers](#custom-oauthoidc-providers)
     - [Account linking](#account-linking)
   - [User metadata](#user-metadata)
+  - [Custom claims](#custom-claims)
   - [User import](#user-import)
   - [Webhooks](#webhooks)
   - [Session JWT templates](#session-jwt-templates)
@@ -482,6 +483,78 @@ accounts associated with the same address. It is therefore recommended to make s
 also enable `emails.require_verification` in your configuration to ensure that only verified third party provider
 addresses may be used.
 
+### Custom claims
+
+A tenant can declare its own set of custom claims and have SAML or OIDC/custom OAuth connections map their own
+attributes/claims onto them. This is distinct from the fixed-slot attribute mapping every connection type already
+has - a SAML identity provider's standard `attribute_map` fields, or a third-party provider's `attribute_mapping` -
+which renames a provider attribute/claim into one of Hanko's fixed standard slots (`sub`, `email`, ...). Custom
+claims are tenant-defined, not fixed, and none of them are added to the session JWT automatically (see
+[Session JWT templates](#session-jwt-templates) for how to opt one in).
+
+#### Declaring custom claims
+
+Custom claims are declared under the `custom_claims.definitions`
+[option](https://github.com/teamhanko/hanko/wiki/config-properties-custom_claims), keyed by claim name:
+
+```yaml
+custom_claims:
+  definitions:
+    matriculation_number:
+      type: string
+      description: University matriculation number
+    is_staff:
+      type: boolean
+    affiliation:
+      type: string_list
+```
+
+A tenant may declare at most 50 custom claims. A claim name must match `^[A-Za-z][A-Za-z0-9_]{0,63}$` and must not be
+one of the claim keys Hanko always adds to the JWT itself (`sub`, `iat`, `exp`, `aud`, `iss`, `email`, `username`,
+`session_id`). `type` is one of `string`, `number`, `boolean`, or `string_list` - deliberately scalar/list-of-scalar
+only, no nested/object type, since SAML attributes are structurally flat and this keeps one claim shape across both
+connection types.
+
+#### Mapping custom claims
+
+A SAML identity provider or a [custom OAuth/OIDC provider](#custom-oauthoidc-providers) can map its own
+attributes/claims onto declared custom claims. A mapping that references a claim name not currently declared under
+`custom_claims.definitions` is rejected - this is checked both when the mapping itself is saved and whenever the set
+of declared claims changes (e.g. removing a definition that a connection still maps). A mapped value that doesn't
+coerce to its claim's declared type (e.g. a provider claim that resolves to a JSON object for a claim declared as
+`string`) is logged and skipped rather than failing the login.
+
+##### SAML
+
+`saml.identity_providers[].attribute_map.custom` maps a SAML identity provider's attributes onto declared custom
+claims (`claim name -> SAML attribute name`).
+
+##### Social connections
+
+`third_party.custom_providers.<id>.custom_claim_mapping` maps a
+[custom OAuth/OIDC provider's](#custom-oauthoidc-providers) claims onto declared custom claims
+(`claim name -> provider claim`; the value may also be a [gjson path](https://github.com/tidwall/gjson#path-syntax)
+to reach into a nested provider claim).
+
+If a provider claim is itself a nested object, there's no way to declare a custom claim that captures it as-is (see
+[Declaring custom claims](#declaring-custom-claims) for why). Instead, declare one flat claim per leaf field you
+need, each with its own gjson path into that object, and recompose them into a nested shape in
+`session.jwt_template.claims` - which does support arbitrary nested map literals with templated leaves. Be mindful
+of the 50-claim cap when doing this for several such objects, since each leaf field counts as its own claim.
+
+#### Resolving custom claims
+
+Resolved custom claim values are stored per user, one row per tenant. Whichever connection a user most recently
+authenticated with wins for any claim it maps (last-one-wins); if that connection no longer asserts a value for a
+claim it maps, the claim is cleared, but only if the same connection was the one that last set it - a connection can
+never clear a claim it doesn't own. This resolution is connection-type agnostic: a claim mapped by both a SAML
+connection and a custom OIDC/OAuth provider is governed by the exact same last-one-wins/source-scoped-clear rule
+across both - whichever connection, of either type, the user most recently authenticated through owns the claim,
+with no separate precedence between connection types. Resolved values are readable via the read-only
+[`GET /users/:id/custom_claims`](#start-the-admin-api) Admin API endpoint (which claim, not which connection, set
+it) and, once explicitly opted in, via `session.jwt_template.claims` - see
+[Accessing custom claims](#accessing-custom-claims).
+
 ### User metadata
 
 Hanko allows for defining arbitrary user metadata. Metadata can be categorized into
@@ -643,21 +716,22 @@ To decode the webhook you can use the JWKs created in [Configure JSON Web Key Se
 
 Hanko sends webhooks for the following event types:
 
-| Event                       | Triggers on                                                                                        |
-|-----------------------------|----------------------------------------------------------------------------------------------------|
-| user                        | user creation, user deletion, user update, email creation, email deletion, change of primary email |
-| user.create                 | user creation                                                                                      |
-| user.delete                 | user deletion                                                                                      |
-| user.login                  | user login                                                                                         |
-| user.update                 | user update, email creation, email deletion, change of primary email                               |
-| user.update.email           | email creation, email deletion, change of primary email                                            |
-| user.update.email.create    | email creation                                                                                     |
-| user.update.email.delete    | email deletion                                                                                     |
-| user.update.email.primary   | change of primary email                                                                            |
-| user.update.username.create | username creation                                                                                  |
-| user.update.username.delete | username deletion                                                                                  |
-| user.update.username.update | change of username                                                                                 |
-| email.send                  | an email was sent or should be sent                                                                |
+| Event                       | Triggers on                                                                                                             |
+|-----------------------------|-------------------------------------------------------------------------------------------------------------------------|
+| user                        | user creation, user deletion, user update, email creation, email deletion, change of primary email, custom claim change |
+| user.create                 | user creation                                                                                                           |
+| user.delete                 | user deletion                                                                                                           |
+| user.login                  | user login                                                                                                              |
+| user.update                 | user update, email creation, email deletion, change of primary email, custom claim change                               |
+| user.update.email           | email creation, email deletion, change of primary email                                                                 |
+| user.update.email.create    | email creation                                                                                                          |
+| user.update.email.delete    | email deletion                                                                                                          |
+| user.update.email.primary   | change of primary email                                                                                                 |
+| user.update.username.create | username creation                                                                                                       |
+| user.update.username.delete | username deletion                                                                                                       |
+| user.update.username.update | change of username                                                                                                      |
+| user.update.custom_claims   | custom claim creation, update, or clearing                                                                              |
+| email.send                  | an email was sent or should be sent                                                                                     |
 
 As you can see, events can have subevents. You are able to filter which events you want to receive by either selecting
 a parent event when you want to receive all subevents or selecting specific subevents.
@@ -697,6 +771,11 @@ The template has access to user data via the `.User` field, which includes:
 - `.User.Metadata`: The user's public and unsafe metadata (optional)
     - `.User.Metadata.Public`: The user's public metadata (object)
     - `.User.Metadata.Unsafe`: The user's unsafe metadata (object)
+- `.User.CustomClaims`: The user's tenant-defined custom claims (optional, see
+  [Accessing custom claims](#accessing-custom-claims) below) - not to be confused with the
+  "custom claims" you define via `session.jwt_template.claims` itself, which is this whole
+  feature; `.User.CustomClaims` is one specific, optional data source you can pull *into* a
+  jwt_template claim, sourced from SAML/OIDC connections via `custom_claims.definitions`.
 
 #### Accessing user metadata
 
@@ -739,6 +818,46 @@ favorite_genres: '{{ .User.Metadata.Public "favorite_games.#.genre" }}'
 are function calls internally and the given path argument must be a string, so it must be double quoted.
 If you use use double quotes for your entire claim template then the path argument must be escaped, i.e.:
 `"{{ .User.Metadata.Public \"display_name\" }}"`
+
+#### Accessing custom claims
+
+A tenant can declare custom claims under `custom_claims.definitions`, and have SAML or OIDC
+connections map their own attributes onto them - see the `custom` field of a SAML identity
+provider's `attribute_map`, or `custom_claim_mapping` on a custom OIDC provider, for how a
+connection populates them. Nothing is included in the session JWT automatically; as with
+metadata, you opt a claim in explicitly via `session.jwt_template.claims`.
+
+Assume a tenant declared these custom claims, and a user's resolved values look like this:
+
+```json
+{
+    "matriculation_number": "12345",
+    "is_staff": true,
+    "affiliation": ["student", "staff"]
+}
+```
+
+Like metadata, individual values can be accessed with `.User.CustomClaims`, passing the claim name
+as an argument:
+
+```yaml
+mat_nr: '{{ .User.CustomClaims "matriculation_number" }}'
+is_staff: '{{ .User.CustomClaims "is_staff" }}'
+affiliation: '{{ .User.CustomClaims "affiliation" }}'
+```
+
+Or the whole object can be embedded directly, with all value types preserved:
+
+```yaml
+university: '{{ .User.CustomClaims }}'
+```
+
+> **Note**
+>
+> A claim's real type (number, boolean, array) is preserved only when the template value is
+> nothing but a single, bare `.User.CustomClaims` reference like the examples above. Glue it to
+> other text (e.g. `"ID: {{ .User.CustomClaims "id" }}"`) and normal Go template stringification
+> applies instead, so a `number` would come out as text.
 
 
 Example usage in YAML configuration:
