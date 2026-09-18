@@ -70,6 +70,10 @@ func ErrorUnverifiedProviderEmail(desc string) *ThirdPartyError {
 	return &ThirdPartyError{Code: ErrorCodeUnverifiedProviderEmail, Description: desc}
 }
 
+func ErrorMissingProviderEmail(desc string) *ThirdPartyError {
+	return &ThirdPartyError{Code: ErrorCodeMissingProviderEmail, Description: desc}
+}
+
 func ErrorMaxNumberOfAddresses(desc string) *ThirdPartyError {
 	return &ThirdPartyError{Code: ErrorCodeMaxNumberOfAddresses, Description: desc}
 }
@@ -84,6 +88,7 @@ const (
 	ErrorCodeUserConflict            = "user_conflict"
 	ErrorCodeMultipleAccounts        = "multiple_accounts"
 	ErrorCodeUnverifiedProviderEmail = "unverified_email"
+	ErrorCodeMissingProviderEmail    = "missing_email"
 	ErrorCodeMaxNumberOfAddresses    = "email_maxnum"
 	ErrorCodeSignUpDisabled          = "signup_disabled"
 )
