@@ -547,7 +547,10 @@ of the 50-claim cap when doing this for several such objects, since each leaf fi
 Resolved custom claim values are stored per user, one row per tenant. Whichever connection a user most recently
 authenticated with wins for any claim it maps (last-one-wins); if that connection no longer asserts a value for a
 claim it maps, the claim is cleared, but only if the same connection was the one that last set it - a connection can
-never clear a claim it doesn't own. Resolved values are readable via the read-only
+never clear a claim it doesn't own. This resolution is connection-type agnostic: a claim mapped by both a SAML
+connection and a custom OIDC/OAuth provider is governed by the exact same last-one-wins/source-scoped-clear rule
+across both - whichever connection, of either type, the user most recently authenticated through owns the claim,
+with no separate precedence between connection types. Resolved values are readable via the read-only
 [`GET /users/:id/custom_claims`](#start-the-admin-api) Admin API endpoint (which claim, not which connection, set
 it) and, once explicitly opted in, via `session.jwt_template.claims` - see
 [Accessing custom claims](#accessing-custom-claims).
