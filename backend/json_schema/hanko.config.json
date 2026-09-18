@@ -513,7 +513,7 @@
             "type": "string"
           },
           "type": "object",
-          "description": "`attribute_mapping` defines a map that associates a set of known standard OIDC conformant end-user claims\n(the key of a map entry) at the Hanko backend to claims retrieved from a third party provider (the value of the\nmap entry). This is primarily necessary if a non-OIDC provider is configured/used in which case it is probable\nthat user data returned from the userinfo endpoint does not already conform to OIDC standard claims.\n\nExample: You configure an OAuth Provider (i.e. non-OIDC) and the provider's configured userinfo endpoint returns\nan end-user's user ID at the provider not under a `sub` key in its JSON response but rather under a `user_id`\nkey. You would then configure an attribute mapping as follows:\n\n```yaml\nattribute_mapping:\n sub: user_id\n```\n\nSee https://openid.net/specs/openid-connect-core-1_0.html#StandardClaims for a list of known standard claims\nthat provider claims can be mapped into. Any other claims received from a provider are not discarded but are\nretained internally in a `custom_claims` claim.\n\nMappings are one-to-one mappings, complex mappings (e.g. mapping concatenations of two claims) are not possible."
+          "description": "`attribute_mapping` defines a map that associates a set of known standard OIDC conformant end-user claims\n(the key of a map entry) at the Hanko backend to claims retrieved from a third party provider (the value of the\nmap entry). This is primarily necessary if a non-OIDC provider is configured/used in which case it is probable\nthat user data returned from the userinfo endpoint does not already conform to OIDC standard claims.\n\nExample: You configure an OAuth Provider (i.e. non-OIDC) and the provider's configured userinfo endpoint returns\nan end-user's user ID at the provider not under a `sub` key in its JSON response but rather under a `user_id`\nkey. You would then configure an attribute mapping as follows:\n\n```yaml\nattribute_mapping:\n sub: user_id\n```\n\nSee https://openid.net/specs/openid-connect-core-1_0.html#StandardClaims for a list of known standard claims\nthat provider claims can be mapped into.\n\nMappings are one-to-one mappings, complex mappings (e.g. mapping concatenations of two claims) are not possible."
         },
         "custom_claim_mapping": {
           "additionalProperties": {
@@ -707,9 +707,10 @@
           "type": "string",
           "enum": [
             "numeric",
-            "alphanumeric"
+            "alphanumeric",
+            "static"
           ],
-          "description": "`passcode_charset` specifies the characters that can be used in passcodes.\nE.g. `numeric` allows only numbers, `alphanumeric` allows both numbers and letters.",
+          "description": "`passcode_charset` specifies the characters that can be used in passcodes.\n`passcode_charset` specifies the characters that can be used in passcodes.\nE.g. `numeric` allows only numbers, `alphanumeric` allows both numbers and letters. `static` returns always the same passcode 123456, it SHOULD ONLY BE USED FOR DEVELOPMENT/DEBUG/TESTING PURPOSES.",
           "default": "numeric"
         },
         "require_verification": {

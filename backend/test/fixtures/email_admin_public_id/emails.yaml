@@ -1,0 +1,7 @@
+- id: bf3f9f1b-9999-4b22-8b22-999999999999
+  user_id: 9e1e8f0a-7777-4a11-8a11-777777777777
+  tenant_id: 00000000-0000-0000-0000-000000000001
+  address: divergent-id-user@example.com
+  verified: true
+  created_at: 2020-12-31 23:59:59
+  updated_at: 2020-12-31 23:59:59

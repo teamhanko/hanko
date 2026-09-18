@@ -121,7 +121,7 @@ func (u UserJWT) WithCustomClaims(claims json.RawMessage) UserJWT {
 
 func UserJWTFromUserModel(userModel *models.User) UserJWT {
 	userJWT := UserJWT{
-		UserID: userModel.ID.String(),
+		UserID: userModel.GetPublicID().String(),
 	}
 
 	if primaryEmail := userModel.Emails.GetPrimary(); primaryEmail != nil {
