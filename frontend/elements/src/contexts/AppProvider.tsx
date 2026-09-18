@@ -17,6 +17,7 @@ import {
   HankoError,
   TechnicalError,
   State,
+  StateName,
   FlowName,
   FlowError,
   LastLogin,
@@ -55,6 +56,20 @@ export type ComponentName =
   | "registration"
   | "profile"
   | "events";
+
+const AUTHENTICATION_COMPONENTS: ComponentName[] = [
+  "auth",
+  "login",
+  "registration",
+];
+
+const INACTIVE_AUTHENTICATION_STATES: StateName[] = [
+  "account_deleted",
+  "error",
+  "login_init",
+  "registration_init",
+  "success",
+];
 
 export type HankoAuthMode = "registration" | "login";
 
@@ -149,6 +164,7 @@ const AppProvider = ({
 
   // TODO: check if necessary, see also TODO below
   const hasInitializedRef = useRef(false);
+  const authenticationFlowInProgressRef = useRef(false);
   const [isReadyToInit, setIsReadyToInit] = useState(false);
 
   const componentFlowNameMap = useMemo<Record<ComponentName, FlowName>>(
@@ -219,6 +235,11 @@ const AppProvider = ({
         if (!isOwnFlow(state)) {
           return;
         }
+
+        authenticationFlowInProgressRef.current =
+          AUTHENTICATION_COMPONENTS.includes(componentName) &&
+          !INACTIVE_AUTHENTICATION_STATES.includes(state.name);
+
         if (
           ![
             "onboarding_verify_passkey_attestation",
@@ -309,6 +330,7 @@ const AppProvider = ({
   );
 
   const flowInit = useCallback(async (flowName: FlowName) => {
+    authenticationFlowInProgressRef.current = false;
     setUIState((prev) => ({ ...prev, isDisabled: true }));
     const lastLoginEncoded = localStorage.getItem(storageKeyLastLogin);
     if (lastLoginEncoded) {
@@ -408,9 +430,13 @@ const AppProvider = ({
     const cb = () => {
       init(componentName);
     };
-    if (["auth", "login", "registration"].includes(componentName)) {
+    if (AUTHENTICATION_COMPONENTS.includes(componentName)) {
       const cleanUserLoggedOut = hanko.onUserLoggedOut(cb);
-      const cleanSessionExpired = hanko.onSessionExpired(cb);
+      const cleanSessionExpired = hanko.onSessionExpired(() => {
+        if (!authenticationFlowInProgressRef.current) {
+          cb();
+        }
+      });
       const cleanUserDeleted = hanko.onUserDeleted(cb);
       return () => {
         cleanUserLoggedOut();

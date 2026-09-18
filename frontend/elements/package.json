@@ -103,7 +103,8 @@
     "lint": "eslint 'src/**/*.ts?(x)'",
     "format": "pretty-quick --staged",
     "build": "npx webpack --mode=production",
-    "build:dev": "npx webpack --mode=development --config webpack.config.dev.cjs"
+    "build:dev": "npx webpack --mode=development --config webpack.config.dev.cjs",
+    "test": "jest --coverage"
   },
   "description": "The <hanko-auth> element offers a complete user interface that will bring a modern login and registration experience to your users.",
   "repository": "github:teamhanko/hanko",
@@ -120,6 +121,7 @@
   ],
   "homepage": "https://hanko.io",
   "devDependencies": {
+    "@types/jest": "30.0.0",
     "@typescript-eslint/eslint-plugin": "^5.54.0",
     "@typescript-eslint/parser": "^5.62.0",
     "css-loader": "^7.1.5",
@@ -130,6 +132,8 @@
     "eslint-plugin-prettier": "^5.5.6",
     "eslint-plugin-promise": "^6.1.1",
     "sass": "^1.102.0",
+    "jest": "30.3.0",
+    "jest-environment-jsdom": "29.7.0",
     "sass-loader": "^16.0.7",
     "source-map-loader": "^4.0.1",
     "style-loader": "^3.3.2",
