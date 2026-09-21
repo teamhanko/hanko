@@ -30,12 +30,6 @@ func (e *CustomClaimsLimitExceededError) Unwrap() error {
 	return e.ValidationErrors
 }
 
-// IsCustomClaimsLimitExceededError checks if the error is a CustomClaimsLimitExceededError
-func IsCustomClaimsLimitExceededError(err error) bool {
-	var customClaimsLimitExceededError *CustomClaimsLimitExceededError
-	ok := errors.As(err, &customClaimsLimitExceededError)
-	return ok
-}
 
 type UserCustomClaimsPersister interface {
 	Get(userID uuid.UUID, tenantID uuid.UUID) (*models.UserCustomClaims, error)

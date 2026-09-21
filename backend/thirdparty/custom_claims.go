@@ -188,9 +188,9 @@ func customClaimValueEqual(a, b any) bool {
 // applies). A managed claim missing from resolvedValues is therefore always the genuine-absence
 // case.
 //
-// wrote reports whether stored was mutated at all, including a source-only handoff (another
+// `wrote` reports whether `stored` was mutated at all, including a source-only handoff (another
 // connection re-asserting a value this claim already had) - that must still persist so
-// ownership stays correct for future clears. valueChanged reports whether a claim's value
+// ownership stays correct for future clears. `valueChanged` reports whether a claim's value
 // itself appeared, disappeared, or changed - false for a source-only handoff.
 func mergeCustomClaims(stored map[string]StoredCustomClaim, resolvedValues map[string]any, managed []string, source string) (wrote bool, valueChanged bool) {
 	for _, claimName := range managed {
@@ -221,9 +221,9 @@ func mergeCustomClaims(stored map[string]StoredCustomClaim, resolvedValues map[s
 // persisted custom claims. Last-one-wins, any source; a claim found no value for is cleared
 // only if this same connection was its stored source.
 //
-// record is non-nil whenever anything was written - including a source-only handoff (another
+// `record` is non-nil whenever anything was written - including a source-only handoff (another
 // connection re-asserting a value this claim already had), which still needs persisting so
-// ownership stays correct for future clears. valueChanged is true only when a claim's value
+// ownership stays correct for future clears. `valueChanged` is true only when a claim's value
 // itself appeared, disappeared, or changed - gate a user.update webhook on this, not on
 // record != nil, so re-asserting an unchanged value never fires one.
 func applyCustomClaims(tx *pop.Connection, p persistence.Persister, cfg *config.TenantConfig, userData *UserData, source string, userID uuid.UUID, tenantID uuid.UUID) (record *models.UserCustomClaims, valueChanged bool, err error) {

@@ -34,12 +34,12 @@ session:
     secure: false # is needed for safari, because safari does not store secure cookies on localhost
   jwt_template:
     claims:
-      matriculation_number: '{{ .User.CustomClaims.Get "matriculation_number" }}'
-      affiliation: '{{ .User.CustomClaims.Get "affiliation" }}'
-      account_status: '{{ .User.CustomClaims.Get "account_status" }}'
-      email_verified: '{{ .User.CustomClaims.Get "email_verified" }}'
-      employee_id: '{{ .User.CustomClaims.Get "employee_id" }}'
-      home_organization: '{{ .User.CustomClaims.Get "home_organization" }}'
+      matriculation_number: '{{ .User.CustomClaims "matriculation_number" }}'
+      affiliation: '{{ .User.CustomClaims "affiliation" }}'
+      account_status: '{{ .User.CustomClaims "account_status" }}'
+      email_verified: '{{ .User.CustomClaims "email_verified" }}'
+      employee_id: '{{ .User.CustomClaims "employee_id" }}'
+      home_organization: '{{ .User.CustomClaims "home_organization" }}'
 # MFA configuration with multi-user device trust support
 mfa:
   enabled: true

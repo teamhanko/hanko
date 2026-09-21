@@ -34,7 +34,7 @@ type UserCustomClaims struct {
 }
 
 func (c *UserCustomClaims) Validate(_ *pop.Connection) (*validate.Errors, error) {
-	claimsMax := 3000
+	claimsMax := 10000
 
 	return validate.Validate(
 		&validators.UUIDIsPresent{Name: "ID", Field: c.ID},

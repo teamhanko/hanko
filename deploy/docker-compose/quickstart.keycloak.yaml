@@ -24,6 +24,11 @@ services:
         source: ./config-keycloak.yaml
         target: /etc/config/config.yaml
   hanko:
+    depends_on:
+      keycloak: 
+        condition: service_healthy
+      hanko-migrate:
+        condition: service_completed_successfully
     volumes:
       - type: bind
         source: ./config-keycloak.yaml
@@ -50,7 +55,7 @@ services:
     # --import-realm loads every *-realm.json file found in the mounted import
     # dir on startup, so a realm exported once and committed there is available
     # to every dev without redoing the manual setup in the admin console.
-    command: start-dev --import-realm
+    command: start-dev --import-realm --health-enabled=true
     environment:
       - KEYCLOAK_ADMIN=admin
       - KEYCLOAK_ADMIN_PASSWORD=admin
@@ -70,5 +75,10 @@ services:
       - type: bind
         source: ./keycloak-import
         target: /opt/keycloak/data/import
+    healthcheck:
+        test: [ 'CMD-SHELL', '[ -f /tmp/HealthCheck.java ] || echo "public class HealthCheck { public static void main(String[] args) throws java.lang.Throwable { System.exit(java.net.HttpURLConnection.HTTP_OK == ((java.net.HttpURLConnection)new java.net.URL(args[0]).openConnection()).getResponseCode() ? 0 : 1); } }" > /tmp/HealthCheck.java && java /tmp/HealthCheck.java http://localhost:9000/health/ready' ]
+        interval: 5s
+        timeout: 5s
+        retries: 30
     networks:
       - intranet
