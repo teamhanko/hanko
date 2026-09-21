@@ -27,6 +27,7 @@ type ProviderProfile struct {
 // User is used by pop to map your users database table to your go code.
 type User struct {
 	ID                  uuid.UUID           `db:"id" json:"id"`
+	PublicID            *uuid.UUID          `db:"public_id" json:"public_id,omitempty"`
 	TenantID            uuid.UUID           `db:"tenant_id"`
 	WebauthnCredentials WebauthnCredentials `has_many:"webauthn_credentials" json:"webauthn_credentials,omitempty"`
 	Emails              Emails              `has_many:"emails" json:"-"`
@@ -60,14 +61,29 @@ func (user *User) GetIdentities() Identities {
 	return identities
 }
 
+// NewUser generates an internal id and, independently, a public_id - deliberately not a copy of
+// the internal id - so every freshly created user exercises the public_id/id distinction the same
+// way an import/admin-create with an explicit id would. Only pre-existing rows backfilled by the
+// public_id migration have public_id == id.
 func NewUser(tenantID uuid.UUID) User {
 	id, _ := uuid.NewV4()
+	pubID, _ := uuid.NewV4()
 	return User{
 		ID:        id,
+		PublicID:  &pubID,
 		TenantID:  tenantID,
 		CreatedAt: time.Now(),
 		UpdatedAt: time.Now(),
 	}
+}
+
+// GetPublicID returns the tenant-scoped identifier every API surface exposes, falling back to
+// the internal id only for the pathological case where PublicID somehow isn't set.
+func (user *User) GetPublicID() uuid.UUID {
+	if user.PublicID != nil {
+		return *user.PublicID
+	}
+	return user.ID
 }
 
 func (user *User) GetUsername() *string {
