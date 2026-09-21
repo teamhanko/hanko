@@ -9,7 +9,6 @@ import (
 	"github.com/teamhanko/hanko/backend/v3/context"
 	"github.com/teamhanko/hanko/backend/v3/dto/admin"
 	"github.com/teamhanko/hanko/backend/v3/persistence"
-	"github.com/teamhanko/hanko/backend/v3/persistence/models"
 )
 
 type UserCustomClaimsAdminHandler struct {
@@ -31,15 +30,15 @@ func (h *UserCustomClaimsAdminHandler) GetCustomClaims(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusBadRequest, "invalid user id")
 	}
 
-	userExists, err := h.persister.GetConnection().Where("id = ?", userID).Exists(&models.User{ID: userID})
+	user, err := h.persister.GetUserPersister().GetByPublicID(userID, tenant.ID)
 	if err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, "could not fetch user").SetInternal(err)
 	}
-	if !userExists {
-		return echo.NewHTTPError(http.StatusNotFound, "user not found").SetInternal(err)
+	if user == nil {
+		return echo.NewHTTPError(http.StatusNotFound, "user not found")
 	}
 
-	customClaimsModel, err := h.persister.GetUserCustomClaimsPersister().Get(userID, tenant.ID)
+	customClaimsModel, err := h.persister.GetUserCustomClaimsPersister().Get(user.ID, tenant.ID)
 	if err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, "could not fetch custom claims").SetInternal(err)
 	}

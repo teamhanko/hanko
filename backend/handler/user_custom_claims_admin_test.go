@@ -7,9 +7,11 @@ import (
 	"net/http/httptest"
 	"testing"
 
+	"github.com/gofrs/uuid"
 	"github.com/stretchr/testify/suite"
 	"github.com/teamhanko/hanko/backend/v3/config"
 	"github.com/teamhanko/hanko/backend/v3/dto/admin"
+	"github.com/teamhanko/hanko/backend/v3/persistence/models"
 	"github.com/teamhanko/hanko/backend/v3/test"
 )
 
@@ -94,4 +96,43 @@ func (s *userCustomClaimsAdminSuite) TestGetCustomClaims() {
 			}
 		})
 	}
+}
+
+// TestGetCustomClaims_DoesNotLeakAcrossTenants guards against the handler resolving a user by
+// public_id without also scoping to the requesting tenant - a user with the given public_id in
+// a different tenant must resolve as not found, not as that other tenant's user.
+func (s *userCustomClaimsAdminSuite) TestGetCustomClaims_DoesNotLeakAcrossTenants() {
+	if testing.Short() {
+		s.T().Skip("skipping test in short mode.")
+	}
+
+	err := s.LoadFixtures("../test/fixtures/custom_claims")
+	s.Require().NoError(err)
+
+	cfg := customClaimsTestConfig()
+	cfg.MultiTenancy.Enabled = true
+	err = cfg.PostProcess()
+	s.Require().NoError(err)
+	e := NewAdminRouter(&cfg, s.Storage, nil)
+
+	tenant1ID := uuid.FromStringOrNil("00000000-0000-0000-0000-000000000001")
+	tenant2UserID := uuid.FromStringOrNil("11111111-1111-1111-1111-111111111111")
+
+	req := httptest.NewRequest(
+		http.MethodGet,
+		fmt.Sprintf("/00000000-0000-0000-0000-000000000001/users/%s/custom_claims", tenant2UserID),
+		nil,
+	)
+	rec := httptest.NewRecorder()
+	e.ServeHTTP(rec, req)
+
+	s.Equal(http.StatusNotFound, rec.Code)
+
+	// Query for row existence directly (not via GetUserCustomClaimsPersister().Get, which
+	// auto-creates a row on miss and would otherwise mask the very bug this test checks for).
+	exists, err := s.Storage.GetConnection().
+		Where("user_id = ? AND tenant_id = ?", tenant2UserID, tenant1ID).
+		Exists(&models.UserCustomClaims{})
+	s.Require().NoError(err)
+	s.False(exists, "no custom claims row should have been auto-created for the cross-tenant user")
 }
