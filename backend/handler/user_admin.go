@@ -50,7 +50,7 @@ func (h *UserHandlerAdmin) Delete(c echo.Context) error {
 
 	err = h.persister.Transaction(func(tx *pop.Connection) error {
 		p := h.persister.GetUserPersisterWithConnection(tx)
-		user, err := p.Get(userId, tenant.ID)
+		user, err := p.GetByPublicID(userId, tenant.ID)
 		if err != nil {
 			return fmt.Errorf("failed to get user: %w", err)
 		}
@@ -166,7 +166,7 @@ func (h *UserHandlerAdmin) Get(c echo.Context) error {
 	}
 
 	p := h.persister.GetUserPersister()
-	user, err := p.Get(userId, tenant.ID)
+	user, err := p.GetByPublicID(userId, tenant.ID)
 	if err != nil {
 		return fmt.Errorf("failed to get user: %w", err)
 	}
@@ -197,13 +197,21 @@ func (h *UserHandlerAdmin) Create(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusBadRequest, "at least one of [Emails, Username] must be set")
 	}
 
-	// if no userID is provided, create a new one
-	if body.ID.IsNil() {
-		userId, err := uuid.NewV4()
+	// The internal id is always freshly generated, regardless of what the caller
+	// supplied - body.ID (if present) sets the tenant-scoped public_id instead.
+	userInternalID, err := uuid.NewV4()
+	if err != nil {
+		return fmt.Errorf("failed to create new internal user id: %w", err)
+	}
+
+	// public_id is independently generated when not supplied, not a copy of the
+	// internal id - see the comment on models.NewUser for why.
+	publicID := body.ID
+	if publicID.IsNil() {
+		publicID, err = uuid.NewV4()
 		if err != nil {
-			return fmt.Errorf("failed to create new userId: %w", err)
+			return fmt.Errorf("failed to create new public user id: %w", err)
 		}
-		body.ID = userId
 	}
 
 	// check that only one email is marked as primary
@@ -222,7 +230,8 @@ func (h *UserHandlerAdmin) Create(c echo.Context) error {
 
 	err = h.persister.GetConnection().Transaction(func(tx *pop.Connection) error {
 		u := models.User{
-			ID:        body.ID,
+			ID:        userInternalID,
+			PublicID:  &publicID,
 			TenantID:  tenant.ID,
 			CreatedAt: body.CreatedAt,
 		}
@@ -231,14 +240,14 @@ func (h *UserHandlerAdmin) Create(c echo.Context) error {
 		if err != nil {
 			if pgErr, ok := errors.AsType[*pgconn.PgError](err); ok {
 				if pgErr.Code == "23505" {
-					return echo.NewHTTPError(http.StatusConflict, fmt.Errorf("failed to create user with id '%v': %w", u.ID, fmt.Errorf("user already exists")))
+					return echo.NewHTTPError(http.StatusConflict, fmt.Errorf("failed to create user with id '%v': %w", publicID, fmt.Errorf("user already exists")))
 				}
 			} else if mysqlErr, ok2 := errors.AsType[*mysql.MySQLError](err); ok2 {
 				if mysqlErr.Number == 1062 {
-					return echo.NewHTTPError(http.StatusConflict, fmt.Errorf("failed to create user with id '%v': %w", u.ID, fmt.Errorf("user already exists")))
+					return echo.NewHTTPError(http.StatusConflict, fmt.Errorf("failed to create user with id '%v': %w", publicID, fmt.Errorf("user already exists")))
 				}
 			}
-			return fmt.Errorf("failed to create user with id '%v': %w", u.ID, err)
+			return fmt.Errorf("failed to create user with id '%v': %w", publicID, err)
 		}
 
 		now := time.Now()
@@ -258,14 +267,14 @@ func (h *UserHandlerAdmin) Create(c echo.Context) error {
 			if err != nil {
 				if pgErr, ok := errors.AsType[*pgconn.PgError](err); ok {
 					if pgErr.Code == "23505" {
-						return echo.NewHTTPError(http.StatusConflict, fmt.Errorf("failed to create email '%s' for user '%v': %w", mail.Address, u.ID, fmt.Errorf("email already exists")))
+						return echo.NewHTTPError(http.StatusConflict, fmt.Errorf("failed to create email '%s' for user '%v': %w", mail.Address, publicID, fmt.Errorf("email already exists")))
 					}
 				} else if mysqlErr, ok2 := errors.AsType[*mysql.MySQLError](err); ok2 {
 					if mysqlErr.Number == 1062 {
-						return echo.NewHTTPError(http.StatusConflict, fmt.Errorf("failed to create email '%s' for user '%v': %w", mail.Address, u.ID, fmt.Errorf("email already exists")))
+						return echo.NewHTTPError(http.StatusConflict, fmt.Errorf("failed to create email '%s' for user '%v': %w", mail.Address, publicID, fmt.Errorf("email already exists")))
 					}
 				}
-				return fmt.Errorf("failed to create email '%s' for user '%v': %w", mail.Address, u.ID, err)
+				return fmt.Errorf("failed to create email '%s' for user '%v': %w", mail.Address, publicID, err)
 			}
 
 			if email.IsPrimary {
@@ -276,7 +285,7 @@ func (h *UserHandlerAdmin) Create(c echo.Context) error {
 				}
 				err := tx.Create(&primary)
 				if err != nil {
-					return fmt.Errorf("failed to set email '%s' as primary for user '%v': %w", mail.Address, u.ID, err)
+					return fmt.Errorf("failed to set email '%s' as primary for user '%v': %w", mail.Address, publicID, err)
 				}
 			}
 		}
@@ -287,14 +296,14 @@ func (h *UserHandlerAdmin) Create(c echo.Context) error {
 			if err != nil {
 				if pgErr, ok := errors.AsType[*pgconn.PgError](err); ok {
 					if pgErr.Code == "23505" {
-						return echo.NewHTTPError(http.StatusConflict, fmt.Errorf("failed to create username '%s' for user '%v': %w", username.Username, u.ID, fmt.Errorf("username already exists")))
+						return echo.NewHTTPError(http.StatusConflict, fmt.Errorf("failed to create username '%s' for user '%v': %w", username.Username, publicID, fmt.Errorf("username already exists")))
 					}
 				} else if mysqlErr, ok2 := errors.AsType[*mysql.MySQLError](err); ok2 {
 					if mysqlErr.Number == 1062 {
-						return echo.NewHTTPError(http.StatusConflict, fmt.Errorf("failed to create username '%s' for user '%v': %w", username.Username, u.ID, fmt.Errorf("username already exists")))
+						return echo.NewHTTPError(http.StatusConflict, fmt.Errorf("failed to create username '%s' for user '%v': %w", username.Username, publicID, fmt.Errorf("username already exists")))
 					}
 				}
-				return fmt.Errorf("failed to create email '%s' for user '%v': %w", username.Username, u.ID, err)
+				return fmt.Errorf("failed to create username '%s' for user '%v': %w", username.Username, publicID, err)
 			}
 		}
 		return nil
@@ -307,7 +316,7 @@ func (h *UserHandlerAdmin) Create(c echo.Context) error {
 	}
 
 	p := h.persister.GetUserPersister()
-	user, err := p.Get(body.ID, tenant.ID)
+	user, err := p.Get(userInternalID, tenant.ID)
 	if err != nil {
 		return fmt.Errorf("failed to get user: %w", err)
 	}
@@ -424,7 +433,7 @@ func (h *UserHandlerAdmin) Patch(c echo.Context) error {
 		userPersister := h.persister.GetUserPersisterWithConnection(tx)
 		usernamePersister := h.persister.GetUsernamePersisterWithConnection(tx)
 
-		user, err := userPersister.Get(userId, tenant.ID)
+		user, err := userPersister.GetByPublicID(userId, tenant.ID)
 		if err != nil {
 			return fmt.Errorf("failed to get user: %w", err)
 		}
@@ -511,7 +520,7 @@ func (h *UserHandlerAdmin) Patch(c echo.Context) error {
 		return err
 	}
 
-	user, err := h.persister.GetUserPersister().Get(userId, tenant.ID)
+	user, err := h.persister.GetUserPersister().GetByPublicID(userId, tenant.ID)
 	if err != nil {
 		return fmt.Errorf("failed to get user: %w", err)
 	}
