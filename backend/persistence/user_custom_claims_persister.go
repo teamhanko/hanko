@@ -30,7 +30,6 @@ func (e *CustomClaimsLimitExceededError) Unwrap() error {
 	return e.ValidationErrors
 }
 
-
 type UserCustomClaimsPersister interface {
 	Get(userID uuid.UUID, tenantID uuid.UUID) (*models.UserCustomClaims, error)
 	Update(customClaims *models.UserCustomClaims) error

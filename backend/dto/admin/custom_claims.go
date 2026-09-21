@@ -17,7 +17,7 @@ type CustomClaims map[string]any
 // {claimName: value} view. Returns nil (leading to 204 No Content, mirroring metadata) if
 // the user has no custom claims at all.
 func NewCustomClaims(model *models.UserCustomClaims) (CustomClaims, error) {
-	if customClaims == nil || !model.Claims.Valid || model.Claims.String == "" {
+	if model == nil || !model.Claims.Valid || model.Claims.String == "" {
 		return nil, nil
 	}
 
