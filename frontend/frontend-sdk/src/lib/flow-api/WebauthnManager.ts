@@ -6,6 +6,7 @@ import {
   create,
   get,
 } from "@github/webauthn-json";
+import { RequestTimeoutError } from "../Errors";
 
 /**
  * Manages WebAuthn credential operations as a singleton, ensuring only one active request at a time.
@@ -76,17 +77,44 @@ class WebauthnManager {
   /**
    * Creates a new WebAuthn credential using the provided options.
    * Aborts any previous request before starting a new one.
+   *
+   * The ceremony is bounded by the `timeout` given in the creation options
+   * Some authenticators
+   * leave `navigator.credentials.create()` pending indefinitely and do not
+   * honor the WebAuthn `timeout` themselves, which would keep the caller
+   * waiting forever; enforcing the deadline here turns that into a regular
+   * rejection the caller can recover from.
    * @param {CredentialCreationOptionsJSON} options - The options for credential creation
    * @returns {Promise<PublicKeyCredentialWithAttestationJSON>} A promise resolving to the created credential
    * @throws {DOMException} If the WebAuthn request fails (e.g., aborted, not allowed)
+   * @throws {RequestTimeoutError} If the ceremony does not complete before the deadline
    */
   public async createWebauthnCredential(
     options: CredentialCreationOptionsJSON,
   ): Promise<PublicKeyCredentialWithAttestationJSON> {
-    return await create({
-      ...options,
-      signal: this.createAbortSignal(),
-    });
+    const signal = this.createAbortSignal();
+    // createAbortSignal() has just installed a fresh controller; hold on to it
+    // so the deadline below aborts this ceremony rather than a later one.
+    const controller = this.abortController;
+    // A real Hanko backend always sends a non-zero `publicKey.timeout` (its own
+    // configured default, or go-webauthn's internal fallback), so this deadline
+    // mirrors the value the server asked for.
+    const timeout = options.publicKey.timeout;
+    let deadline: ReturnType<typeof setTimeout>;
+
+    try {
+      return await Promise.race([
+        create({ ...options, signal }),
+        new Promise<never>((_resolve, reject) => {
+          deadline = setTimeout(() => {
+            controller.abort();
+            reject(new RequestTimeoutError());
+          }, timeout);
+        }),
+      ]);
+    } finally {
+      clearTimeout(deadline);
+    }
   }
 }
 

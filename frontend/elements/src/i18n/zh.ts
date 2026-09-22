@@ -180,6 +180,7 @@ export const zh: Translation = {
   },
   flowErrors: {
     technical_error: "发生技术错误。请稍后再试。",
+    request_timeout: "请求已超时。请重试。",
     flow_expired_error: "会话已过期，请点击按钮重新启动。",
     value_invalid_error: "输入的值无效。",
     otp_code_invalid: "提供的OTP码不正确。",
