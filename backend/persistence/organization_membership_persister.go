@@ -69,10 +69,13 @@ func (p *organizationMembershipPersister) Delete(membership models.OrganizationM
 	return nil
 }
 
+// ListByOrganization eager-loads the User association so callers can render
+// each member's public_id without a Get() call per membership.
 func (p *organizationMembershipPersister) ListByOrganization(organizationID uuid.UUID, page int, perPage int, tenantID uuid.UUID) ([]models.OrganizationMembership, error) {
 	memberships := []models.OrganizationMembership{}
 
 	err := p.db.
+		EagerPreload("User").
 		Where("tenant_id = ?", tenantID).
 		Where("organization_id = ?", organizationID).
 		Order("created_at desc").

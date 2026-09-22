@@ -244,7 +244,7 @@ func (h *OrganizationHandlerAdmin) AddMember(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusBadRequest, "failed to parse organizationId as uuid").SetInternal(err)
 	}
 
-	userId, err := uuid.FromString(c.Param("user_id"))
+	publicUserId, err := uuid.FromString(c.Param("user_id"))
 	if err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, "failed to parse userId as uuid").SetInternal(err)
 	}
@@ -257,7 +257,7 @@ func (h *OrganizationHandlerAdmin) AddMember(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusNotFound, "organization not found")
 	}
 
-	user, err := h.persister.GetUserPersister().Get(userId, tenant.ID)
+	user, err := h.persister.GetUserPersister().GetByPublicID(publicUserId, tenant.ID)
 	if err != nil {
 		return fmt.Errorf("failed to get user: %w", err)
 	}
@@ -273,9 +273,10 @@ func (h *OrganizationHandlerAdmin) AddMember(c echo.Context) error {
 	membership := models.OrganizationMembership{
 		ID:             id,
 		TenantID:       tenant.ID,
-		UserID:         userId,
+		UserID:         user.ID,
 		OrganizationID: organizationId,
 		CreatedAt:      time.Now(),
+		User:           user,
 	}
 
 	err = h.persister.GetOrganizationMembershipPersister().Create(membership)
@@ -309,7 +310,7 @@ func (h *OrganizationHandlerAdmin) RemoveMember(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusBadRequest, "failed to parse organizationId as uuid").SetInternal(err)
 	}
 
-	userId, err := uuid.FromString(c.Param("user_id"))
+	publicUserId, err := uuid.FromString(c.Param("user_id"))
 	if err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, "failed to parse userId as uuid").SetInternal(err)
 	}
@@ -322,8 +323,16 @@ func (h *OrganizationHandlerAdmin) RemoveMember(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusNotFound, "organization not found")
 	}
 
+	user, err := h.persister.GetUserPersister().GetByPublicID(publicUserId, tenant.ID)
+	if err != nil {
+		return fmt.Errorf("failed to get user: %w", err)
+	}
+	if user == nil {
+		return echo.NewHTTPError(http.StatusNotFound, "user not found")
+	}
+
 	p := h.persister.GetOrganizationMembershipPersister()
-	membership, err := p.Get(userId, organizationId, tenant.ID)
+	membership, err := p.Get(user.ID, organizationId, tenant.ID)
 	if err != nil {
 		return fmt.Errorf("failed to get organization membership: %w", err)
 	}

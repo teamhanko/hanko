@@ -93,8 +93,10 @@ func (p *roleBindingPersister) ListByUserAndOrganization(userID uuid.UUID, organ
 	return bindings, nil
 }
 
-// ListSlugsByUserGroupedByOrganization joins role_bindings to roles once,
-// filtered by user and tenant only (no organization_id filter), then
+// ListByUser returns every role binding userID holds, across every
+// organization, with the Role association eager-loaded - one query for
+// the bindings plus one batched query for the distinct roles, rather than
+// a role lookup per binding.
 func (p *roleBindingPersister) ListByUser(userID uuid.UUID, tenantID uuid.UUID) ([]models.RoleBinding, error) {
 	bindings := []models.RoleBinding{}
 

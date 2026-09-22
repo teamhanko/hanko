@@ -213,16 +213,24 @@ func (h *SessionHandler) ValidateSessionFromBody(c echo.Context) error {
 	})
 }
 
-// getOrganizations returns userID's organizations and role slugs,
+// getOrganizations returns publicUserID's organizations and role slugs,
 // computed fresh from the database on every call so a role or membership
 // change takes effect immediately, without reissuing the session token.
-func (h *SessionHandler) getOrganizations(userID uuid.UUID, tenantID uuid.UUID) ([]dto.ValidateSessionOrganization, error) {
-	memberships, err := h.persister.GetOrganizationMembershipPersister().ListByUser(userID, tenantID)
+func (h *SessionHandler) getOrganizations(publicUserID uuid.UUID, tenantID uuid.UUID) ([]dto.ValidateSessionOrganization, error) {
+	user, err := h.persister.GetUserPersister().GetByPublicID(publicUserID, tenantID)
+	if err != nil {
+		return nil, fmt.Errorf("failed to resolve user: %w", err)
+	}
+	if user == nil {
+		return nil, nil
+	}
+
+	memberships, err := h.persister.GetOrganizationMembershipPersister().ListByUser(user.ID, tenantID)
 	if err != nil {
 		return nil, fmt.Errorf("failed to get organization memberships: %w", err)
 	}
 
-	bindings, err := h.persister.GetRoleBindingPersister().ListByUser(userID, tenantID)
+	bindings, err := h.persister.GetRoleBindingPersister().ListByUser(user.ID, tenantID)
 	if err != nil {
 		return nil, fmt.Errorf("failed to get role bindings: %w", err)
 	}

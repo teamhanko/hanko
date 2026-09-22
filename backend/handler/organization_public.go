@@ -37,7 +37,7 @@ func (h *OrganizationPublicHandler) CheckRole(c echo.Context) error {
 	if !ok {
 		return errors.New("failed to cast session object")
 	}
-	userId := uuid.FromStringOrNil(sessionToken.Subject())
+	publicUserId := uuid.FromStringOrNil(sessionToken.Subject())
 
 	var body dto.RoleCheckRequest
 	if err := (&echo.DefaultBinder{}).BindBody(c, &body); err != nil {
@@ -47,6 +47,15 @@ func (h *OrganizationPublicHandler) CheckRole(c echo.Context) error {
 	if err := c.Validate(body); err != nil {
 		return dto.ToHttpError(err)
 	}
+
+	user, err := h.persister.GetUserPersister().GetByPublicID(publicUserId, tenant.ID)
+	if err != nil {
+		return fmt.Errorf("failed to resolve user: %w", err)
+	}
+	if user == nil {
+		return c.JSON(http.StatusOK, dto.RoleCheckResponse{HasRole: false})
+	}
+	userId := user.ID
 
 	membership, err := h.persister.GetOrganizationMembershipPersister().Get(userId, body.OrganizationID, tenant.ID)
 	if err != nil {

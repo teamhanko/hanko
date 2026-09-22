@@ -17,6 +17,7 @@ type OrganizationMembership struct {
 	UserID         uuid.UUID     `json:"user_id" db:"user_id"`
 	OrganizationID uuid.UUID     `json:"organization_id" db:"organization_id"`
 	Organization   *Organization `json:"organization,omitempty" belongs_to:"organization"`
+	User           *User         `json:"-" belongs_to:"user"`
 	CreatedAt      time.Time     `json:"created_at" db:"created_at"`
 }
 

@@ -42,7 +42,7 @@ func (h *RoleBindingHandlerAdmin) Create(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusBadRequest, "failed to parse organizationId as uuid").SetInternal(err)
 	}
 
-	userId, err := uuid.FromString(c.Param("user_id"))
+	publicUserId, err := uuid.FromString(c.Param("user_id"))
 	if err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, "failed to parse userId as uuid").SetInternal(err)
 	}
@@ -56,7 +56,15 @@ func (h *RoleBindingHandlerAdmin) Create(c echo.Context) error {
 		return dto.ToHttpError(err)
 	}
 
-	membership, err := h.persister.GetOrganizationMembershipPersister().Get(userId, organizationId, tenant.ID)
+	user, err := h.persister.GetUserPersister().GetByPublicID(publicUserId, tenant.ID)
+	if err != nil {
+		return fmt.Errorf("failed to get user: %w", err)
+	}
+	if user == nil {
+		return echo.NewHTTPError(http.StatusNotFound, "user not found")
+	}
+
+	membership, err := h.persister.GetOrganizationMembershipPersister().Get(user.ID, organizationId, tenant.ID)
 	if err != nil {
 		return fmt.Errorf("failed to get organization membership: %w", err)
 	}
@@ -80,7 +88,7 @@ func (h *RoleBindingHandlerAdmin) Create(c echo.Context) error {
 	binding := models.RoleBinding{
 		ID:             id,
 		TenantID:       tenant.ID,
-		UserID:         userId,
+		UserID:         user.ID,
 		RoleID:         role.ID,
 		OrganizationID: organizationId,
 		CreatedAt:      time.Now(),
@@ -114,12 +122,28 @@ func (h *RoleBindingHandlerAdmin) List(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusBadRequest, "failed to parse organizationId as uuid").SetInternal(err)
 	}
 
-	userId, err := uuid.FromString(c.Param("user_id"))
+	publicUserId, err := uuid.FromString(c.Param("user_id"))
 	if err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, "failed to parse userId as uuid").SetInternal(err)
 	}
 
-	bindings, err := h.persister.GetRoleBindingPersister().ListByUserAndOrganization(userId, organizationId, tenant.ID)
+	organization, err := h.persister.GetOrganizationPersister().Get(organizationId, tenant.ID)
+	if err != nil {
+		return fmt.Errorf("failed to get organization: %w", err)
+	}
+	if organization == nil {
+		return echo.NewHTTPError(http.StatusNotFound, "organization not found")
+	}
+
+	user, err := h.persister.GetUserPersister().GetByPublicID(publicUserId, tenant.ID)
+	if err != nil {
+		return fmt.Errorf("failed to get user: %w", err)
+	}
+	if user == nil {
+		return echo.NewHTTPError(http.StatusNotFound, "user not found")
+	}
+
+	bindings, err := h.persister.GetRoleBindingPersister().ListByUserAndOrganization(user.ID, organizationId, tenant.ID)
 	if err != nil {
 		return fmt.Errorf("failed to get list of role bindings: %w", err)
 	}
@@ -150,7 +174,7 @@ func (h *RoleBindingHandlerAdmin) Delete(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusBadRequest, "failed to parse organizationId as uuid").SetInternal(err)
 	}
 
-	userId, err := uuid.FromString(c.Param("user_id"))
+	publicUserId, err := uuid.FromString(c.Param("user_id"))
 	if err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, "failed to parse userId as uuid").SetInternal(err)
 	}
@@ -165,8 +189,16 @@ func (h *RoleBindingHandlerAdmin) Delete(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusNotFound, "role not found")
 	}
 
+	user, err := h.persister.GetUserPersister().GetByPublicID(publicUserId, tenant.ID)
+	if err != nil {
+		return fmt.Errorf("failed to get user: %w", err)
+	}
+	if user == nil {
+		return echo.NewHTTPError(http.StatusNotFound, "role binding not found")
+	}
+
 	p := h.persister.GetRoleBindingPersister()
-	binding, err := p.Get(userId, role.ID, organizationId, tenant.ID)
+	binding, err := p.Get(user.ID, role.ID, organizationId, tenant.ID)
 	if err != nil {
 		return fmt.Errorf("failed to get role binding: %w", err)
 	}

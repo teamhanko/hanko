@@ -17,8 +17,13 @@ type OrganizationMember struct {
 
 // FromOrganizationMembershipModel converts the DB model to a DTO object
 func FromOrganizationMembershipModel(model models.OrganizationMembership) OrganizationMember {
+	userID := model.UserID
+	if model.User != nil {
+		userID = model.User.GetPublicID()
+	}
+
 	return OrganizationMember{
-		UserID:    model.UserID,
+		UserID:    userID,
 		CreatedAt: model.CreatedAt,
 	}
 }
