@@ -194,6 +194,7 @@ export const ptBR: Translation = {
   flowErrors: {
     technical_error:
       "Ocorreu um erro técnico. Por favor, tente novamente mais tarde.",
+    request_timeout: "A solicitação expirou. Tente novamente.",
     flow_expired_error:
       "A sessão expirou, por favor, clique no botão para reiniciar.",
     value_invalid_error: "O valor inserido é inválido.",

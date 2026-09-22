@@ -8,11 +8,6 @@ import {
 } from "@github/webauthn-json";
 import { RequestTimeoutError } from "../Errors";
 
-// Applied when the creation options carry no usable `timeout`. Mirrors the
-// Hanko API's own `webauthn.timeouts.registration` default, so the deadline
-// enforced here matches the one the server would have asked for.
-const DEFAULT_CREATION_TIMEOUT_MS = 600000;
-
 /**
  * Manages WebAuthn credential operations as a singleton, ensuring only one active request at a time.
  * Uses an internal AbortController to cancel previous requests when a new one is initiated.
@@ -84,7 +79,7 @@ class WebauthnManager {
    * Aborts any previous request before starting a new one.
    *
    * The ceremony is bounded by the `timeout` given in the creation options
-   * (falling back to {@link DEFAULT_CREATION_TIMEOUT_MS}). Some authenticators
+   * Some authenticators
    * leave `navigator.credentials.create()` pending indefinitely and do not
    * honor the WebAuthn `timeout` themselves, which would keep the caller
    * waiting forever; enforcing the deadline here turns that into a regular
@@ -101,12 +96,10 @@ class WebauthnManager {
     // createAbortSignal() has just installed a fresh controller; hold on to it
     // so the deadline below aborts this ceremony rather than a later one.
     const controller = this.abortController;
-    // A missing or zero `timeout` is not a request to end the ceremony at once
-    // - the WebAuthn timeout is a hint that clients clamp anyway - so fall back
-    // to the default instead of aborting before the user can even respond.
-    const requestedTimeout = options.publicKey?.timeout;
-    const timeout =
-      requestedTimeout > 0 ? requestedTimeout : DEFAULT_CREATION_TIMEOUT_MS;
+    // A real Hanko backend always sends a non-zero `publicKey.timeout` (its own
+    // configured default, or go-webauthn's internal fallback), so this deadline
+    // mirrors the value the server asked for.
+    const timeout = options.publicKey.timeout;
     let deadline: ReturnType<typeof setTimeout>;
 
     try {
