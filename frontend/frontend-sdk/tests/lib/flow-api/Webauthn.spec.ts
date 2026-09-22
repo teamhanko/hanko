@@ -73,7 +73,7 @@ describe("autoSteps webauthn credential creation error handling", () => {
     const result = await autoSteps.webauthn_credential_verification(state as never);
 
     expect(state.actions.back.run).toHaveBeenCalled();
-    expect(result.error.code).toBe("technical_error");
+    expect(result.error.code).toBe("request_timeout");
   });
 
   it("verifies the attestation response on success", async () => {

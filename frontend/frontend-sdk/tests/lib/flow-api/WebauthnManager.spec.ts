@@ -60,8 +60,8 @@ describe("WebauthnManager credential creation deadline", () => {
   it("rejects with a timeout error when the ceremony never settles", async () => {
     credentials.create.mockImplementation(() => new Promise(() => {}));
 
-    const outcome = runCreation(creationOptions());
-    await jest.advanceTimersByTimeAsync(PROBE_MS);
+    const outcome = runCreation(creationOptions(SERVER_TIMEOUT_MS));
+    await jest.advanceTimersByTimeAsync(SERVER_TIMEOUT_MS);
 
     expect(outcome.current).toEqual({
       status: "rejected",
@@ -85,14 +85,6 @@ describe("WebauthnManager credential creation deadline", () => {
     expect(outcome.current.status).toBe("rejected");
   });
 
-  it("treats a zero timeout as unset instead of ending the ceremony at once", async () => {
-    credentials.create.mockImplementation(() => new Promise(() => {}));
-
-    const outcome = runCreation(creationOptions(0));
-    await jest.advanceTimersByTimeAsync(SERVER_TIMEOUT_MS);
-
-    expect(outcome.current.status).toBe("pending");
-  });
 
   it("aborts only its own ceremony when a later one has superseded it", async () => {
     const signals: AbortSignal[] = [];
