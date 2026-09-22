@@ -11,14 +11,14 @@ require (
 	github.com/evanphx/json-patch/v5 v5.9.11
 	github.com/fatih/structs v1.1.0
 	github.com/go-playground/validator/v10 v10.30.4
-	github.com/go-redsync/redsync/v4 v4.17.0
+	github.com/go-redsync/redsync/v4 v4.18.0
 	github.com/go-sql-driver/mysql v1.10.1
 	github.com/go-testfixtures/testfixtures/v3 v3.19.0
 	github.com/go-webauthn/webauthn v0.10.2
 	github.com/gobuffalo/nulls v0.4.2
-	github.com/gobuffalo/pop/v6 v6.4.0
+	github.com/gobuffalo/pop/v6 v6.4.1
 	github.com/gobuffalo/validate/v3 v3.3.3
-	github.com/gobwas/glob v0.2.3
+	github.com/gobwas/glob v1.0.0
 	github.com/gofrs/uuid v4.4.0+incompatible
 	github.com/gomodule/redigo v1.9.3
 	github.com/google/uuid v1.6.0

@@ -363,7 +363,7 @@ func (handler *Handler) linkAccount(c echo.Context, redirectTo *url.URL, isFlow 
 		userData := saml.ExtractUserData(assertionInfo, providerConfig, samlProvider.AudienceURI)
 		identityProviderIssuer := assertionInfo.Assertions[0].Issuer
 		samlDomain := providerConfig.Domain
-		linkResult, errTx := thirdparty.LinkAccount(tx, &tenant.Config, handler.samlService.Persister(), userData, identityProviderIssuer.Value, true, &samlDomain, isFlow, nil, tenant.ID)
+		linkResult, errTx := thirdparty.LinkAccount(tx, &tenant.Config, handler.samlService.Persister(), userData, identityProviderIssuer.Value, true, &samlDomain, nil, tenant.ID)
 		if errTx != nil {
 			return errTx
 		}
@@ -371,6 +371,9 @@ func (handler *Handler) linkAccount(c echo.Context, redirectTo *url.URL, isFlow 
 		accountLinkingResult = linkResult
 
 		emailModel := linkResult.User.Emails.GetEmailByAddress(userData.Metadata.Email)
+		if emailModel == nil {
+			return thirdparty.ErrorMissingProviderEmail("could not determine an email address from the SAML assertion")
+		}
 		identityModel := emailModel.Identities.GetIdentity(identityProviderIssuer.Value, userData.Metadata.Subject)
 
 		token, errTx := models.NewToken(
