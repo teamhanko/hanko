@@ -23,9 +23,14 @@ func NewFlowLocker(cfg config.FlowLocker) (FlowLocker, error) {
 
 	switch cfg.Store {
 	case config.FLOW_LOCKER_STORE_REDIS:
+		address, database, err := cfg.Redis.DialAddress()
+		if err != nil {
+			return nil, err
+		}
 		return NewRedisLocker(RedisLockerConfig{
-			Address:  cfg.Redis.Address,
+			Address:  address,
 			Password: cfg.Redis.Password,
+			Database: database,
 			Expiry:   cfg.TTL,
 		}), nil
 	case config.FLOW_LOCKER_STORE_IN_MEMORY:
