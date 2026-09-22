@@ -369,6 +369,9 @@ func (handler *Handler) linkAccount(c echo.Context, redirectTo *url.URL, isFlow 
 		accountLinkingResult = linkResult
 
 		emailModel := linkResult.User.Emails.GetEmailByAddress(userData.Metadata.Email)
+		if emailModel == nil {
+			return thirdparty.ErrorMissingProviderEmail("could not determine an email address from the SAML assertion")
+		}
 		identityModel := emailModel.Identities.GetIdentity(identityProviderIssuer.Value, userData.Metadata.Subject)
 
 		token, errTx := models.NewToken(
