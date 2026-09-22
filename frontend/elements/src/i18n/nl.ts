@@ -188,6 +188,7 @@ export const nl: Translation = {
   },
   flowErrors: {
     technical_error: "Er is een technische fout opgetreden. Probeer het later opnieuw.",
+    request_timeout: "De aanvraag is verlopen. Probeer het opnieuw.",
     flow_expired_error:
       "De sessie is verlopen, klik op de knop om opnieuw te starten.",
     value_invalid_error: "De ingevoerde waarde is ongeldig.",

@@ -8,6 +8,9 @@ import { RequestTimeoutError } from "../Errors";
 // Generic flow error code, translated by hanko-elements as "A technical error
 // has occurred. Please try again later."
 const TECHNICAL_ERROR_CODE = "technical_error";
+// Dedicated flow error code for a WebAuthn ceremony that timed out, translated
+// by hanko-elements as a request-timeout message rather than a generic one.
+const REQUEST_TIMEOUT_ERROR_CODE = "request_timeout";
 
 // Helper function to handle WebAuthn credential creation and error handling
 // eslint-disable-next-line require-jsdoc
@@ -36,7 +39,10 @@ async function handleCredentialCreation(
     } else if (error instanceof RequestTimeoutError) {
       // The authenticator never answered. Returning without an error would drop
       // the user back on the passkey step with no explanation for the restart.
-      nextState.error = { code: TECHNICAL_ERROR_CODE, message: error.message };
+      nextState.error = {
+        code: REQUEST_TIMEOUT_ERROR_CODE,
+        message: error.message,
+      };
     } else if (state.error) {
       nextState.error = state.error;
     }
