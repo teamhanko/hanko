@@ -43,6 +43,7 @@ var userEagerPreloadFields = []string{
 	"PasswordCredential",
 	"OTPSecret",
 	"Metadata",
+	"CustomClaims",
 	"Identities",
 	"Identities.SamlIdentity",
 }
@@ -134,7 +135,8 @@ func (p *userPersister) GetByUsername(username string, tenantID uuid.UUID) (*mod
 		"PasswordCredential",
 		"Username",
 		"OTPSecret",
-		"Metadata").
+		"Metadata",
+		"CustomClaims").
 		LeftJoin("usernames", "usernames.user_id = users.id").
 		Where("usernames.username = (?)", username).
 		Where("users.tenant_id = ?", tenantID)

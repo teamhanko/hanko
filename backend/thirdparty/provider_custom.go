@@ -2,12 +2,15 @@ package thirdparty
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 	"strings"
 
 	"github.com/coreos/go-oidc/v3/oidc"
 	"github.com/mitchellh/mapstructure"
+	zeroLogger "github.com/rs/zerolog/log"
 	"github.com/teamhanko/hanko/backend/v3/config"
+	"github.com/tidwall/gjson"
 	"golang.org/x/oauth2"
 )
 
@@ -88,10 +91,15 @@ func (p customProvider) GetUserData(ctx context.Context, token *oauth2.Token) (*
 		return nil, fmt.Errorf("could not get user data: %s", err)
 	}
 
+	// Resolve CustomClaimMapping against the raw claims before AttributeMapping below
+	// renames any of them - the two mapping mechanisms must read from the same untouched
+	// source, or a claim AttributeMapping already consumed would be gone by the time
+	// custom-claim resolution looks for it (see CustomClaimMapping's doc comment).
+	customClaimSource := buildCustomClaimSource(p.config.CustomClaimMapping, userInfoClaims)
+
 	if p.config.AttributeMapping != nil {
 		for hankoClaim, providerClaim := range p.config.AttributeMapping {
 			userInfoClaims[hankoClaim] = userInfoClaims[providerClaim]
-			delete(userInfoClaims, providerClaim)
 		}
 	}
 
@@ -102,8 +110,42 @@ func (p customProvider) GetUserData(ctx context.Context, token *oauth2.Token) (*
 	}
 
 	return &UserData{
-		Metadata: &claims,
+		Metadata:          &claims,
+		CustomClaimSource: customClaimSource,
 	}, nil
+}
+
+// buildCustomClaimSource resolves each CustomClaimMapping value - a plain top-level claim
+// name or a gjson path (https://github.com/tidwall/gjson#path-syntax) - against the raw,
+// pre-AttributeMapping OIDC claims. Attributes is keyed by the same path string used in
+// mapping, since that's simpler than re-keying by hanko claim name and ResolveCustomClaims
+// only ever looks a value up via mapping's value anyway.
+func buildCustomClaimSource(mapping map[string]string, rawClaims map[string]interface{}) *CustomClaimSource {
+	if len(mapping) == 0 {
+		return nil
+	}
+
+	rawClaimsJSON, err := json.Marshal(rawClaims)
+	if err != nil {
+		zeroLogger.Warn().
+			Err(err).
+			Str("component", "thirdparty").
+			Str("operation", "build_custom_claim_source").
+			Msg("could not marshal raw OIDC claims for custom claim resolution")
+		return nil
+	}
+
+	attributes := make(map[string]any, len(mapping))
+	for _, path := range mapping {
+		if result := gjson.GetBytes(rawClaimsJSON, path); result.Exists() {
+			attributes[path] = result.Value()
+		}
+	}
+
+	return &CustomClaimSource{
+		Mapping:    mapping,
+		Attributes: attributes,
+	}
 }
 
 func (p customProvider) ID() string {

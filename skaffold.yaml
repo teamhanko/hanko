@@ -4,30 +4,39 @@ metadata:
   name: hanko-tenant
 build:
   artifacts:
-  - image: ghcr.io/teamhanko/hanko
-    context: backend
-    docker:
-      dockerfile: Dockerfile
-  - image: ghcr.io/teamhanko/hanko/quickstart
-    context: quickstart
-    docker:
-      dockerfile: Dockerfile
-  - image: ghcr.io/teamhanko/hanko/elements
-    context: frontend
-    docker:
-      dockerfile: Dockerfile
+    - image: ghcr.io/teamhanko/hanko
+      context: backend
+      docker:
+        dockerfile: Dockerfile
 deploy:
   kustomize:
     paths:
-    - deploy/k8s/overlays/quickstart
+      - deploy/kind
 profiles:
-- name: quickstart
-  deploy:
-    kustomize:
-      paths:
-      - deploy/k8s/overlays/quickstart
-- name: thirdparty-x-domain
-  deploy:
-    kustomize:
-      paths:
-        - deploy/k8s/overlays/thirdparty-x-domain
+  - name: kind
+    activation:
+      - kubeContext: kind-kind
+  # Opt-in: `skaffold run -p kind-keycloak` adds a Keycloak instance (SAML + OIDC test IdP,
+  # same realm/client/user fixtures as deploy/docker-compose's Keycloak setup) alongside the
+  # base kind deployment. Not activated automatically - most kind-cluster work doesn't need it.
+  - name: kind-keycloak
+    deploy:
+      kustomize:
+        paths:
+          - deploy/kind
+          - deploy/kind/keycloak
+        buildArgs:
+          # deploy/kind/keycloak reuses deploy/docker-compose/keycloak-import's realm fixtures
+          # directly (outside this kustomization's own root) instead of duplicating them.
+          - --load-restrictor=LoadRestrictionsNone
+  # Opt-in: `skaffold run -p kind-webhooks` adds a generic request-echo receiver
+  # (http://webhook-receiver.hanko.svc.cluster.local:8090/hook) alongside the base kind
+  # deployment, for manually inspecting webhook payloads fired by a tenant configured through
+  # the console's Settings > Webhooks page. Same image as deploy/docker-compose's
+  # webhook-receiver. Not activated automatically - most kind-cluster work doesn't need it.
+  - name: kind-webhooks
+    deploy:
+      kustomize:
+        paths:
+          - deploy/kind
+          - deploy/kind/webhook-receiver
