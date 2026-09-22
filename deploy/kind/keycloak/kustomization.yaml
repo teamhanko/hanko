@@ -1,0 +1,26 @@
+# Opt-in addition to the base deploy/kind deployment - see the "kind-keycloak" skaffold
+# profile. Not referenced by deploy/kind/kustomization.yaml.
+namespace: hanko
+resources:
+  - keycloak.yaml
+  - keycloak-ingress.yaml
+# Reuses deploy/docker-compose/keycloak-import's realm/client/user fixtures directly, rather
+# than duplicating them - requires the "kind-keycloak" skaffold profile's
+# --load-restrictor=LoadRestrictionsNone buildArg, since kustomize otherwise refuses to read
+# files outside this kustomization's own root.
+#
+# One ConfigMap per realm file, not one with all three: kubectl apply's
+# last-applied-configuration annotation duplicates the whole object, and the three files
+# together (~240KB) blow past the 256KB metadata.annotations limit in a single ConfigMap.
+configMapGenerator:
+  - name: keycloak-realm-import-uni-a
+    files:
+      - ../../docker-compose/keycloak-import/uni-a-realm.json
+  - name: keycloak-realm-import-uni-b
+    files:
+      - ../../docker-compose/keycloak-import/uni-b-realm.json
+  - name: keycloak-realm-import-acme-corp
+    files:
+      - ../../docker-compose/keycloak-import/acme-corp-realm.json
+generatorOptions:
+  disableNameSuffixHash: true

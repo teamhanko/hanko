@@ -69,6 +69,7 @@ func NewAdminRouter(cfg *config.Config, persister persistence.Persister, prometh
 
 	userHandler := NewUserHandlerAdmin(persister)
 	metadataHandler := NewMetadataAdminHandler(persister)
+	customClaimsHandler := NewUserCustomClaimsAdminHandler(persister)
 	emailHandler := NewEmailAdminHandler(persister)
 	webauthnCredentialHandler := NewWebauthnCredentialAdminHandler(persister)
 	passwordCredentialHandler := NewPasswordAdminHandler(persister)
@@ -84,6 +85,8 @@ func NewAdminRouter(cfg *config.Config, persister persistence.Persister, prometh
 
 	user.PATCH("/:id/metadata", metadataHandler.PatchMetadata)
 	user.GET("/:id/metadata", metadataHandler.GetMetadata)
+
+	user.GET("/:id/custom_claims", customClaimsHandler.GetCustomClaims)
 
 	email := user.Group("/:user_id/emails", jwkMiddleware, webhookMiddleware)
 	email.GET("", emailHandler.List)

@@ -1,0 +1,34 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: hanko
+  namespace: hanko
+  annotations:
+    cert-manager.io/cluster-issuer: "letsencrypt-prod"
+spec:
+  # This cluster's ingress controller is Traefik (see the console-provisioned per-tenant
+  # ingresses), not nginx - without this, Traefik doesn't treat this Ingress as its own and the
+  # host never resolves to a route.
+  ingressClassName: traefik
+  tls:
+  - hosts:
+    - app.hanko.test
+    secretName: hanko-tls
+  rules:
+  - host: app.hanko.test
+    http:
+      paths:
+        - path: /
+          pathType: Prefix
+          backend:
+            service: # in production, this should be routed to the proxy
+              name: hanko-public
+              port:
+                name: http-public
+        - path: /admin
+          pathType: Prefix
+          backend:
+            service: # in production, this should be routed to the proxy
+              name: hanko-admin
+              port:
+                name: http-admin

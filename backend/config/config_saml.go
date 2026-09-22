@@ -33,8 +33,8 @@ type Saml struct {
 	// A double asterisk (`**`) acts as a "super"-wildcard/match-all.
 	//
 	// See [here](https://pkg.go.dev/github.com/gobwas/glob#Compile) for more on globbinh.
-	AllowedRedirectURLS   []string             `yaml:"allowed_redirect_urls" json:"allowed_redirect_urls" koanf:"allowed_redirect_urls" split_words:"true"`
-	AllowedRedirectURLMap map[string]glob.Glob `yaml:"-" json:"-" koanf:"-" jsonschema:"-"`
+	AllowedRedirectURLS   []string                 `yaml:"allowed_redirect_urls" json:"allowed_redirect_urls" koanf:"allowed_redirect_urls" split_words:"true"`
+	AllowedRedirectURLMap map[string]*glob.Pattern `yaml:"-" json:"-" koanf:"-" jsonschema:"-"`
 
 	// `options` allows setting optional features for service provider operations.
 	Options Options `yaml:"options" json:"options" koanf:"options" jsonschema:"title=options"`
@@ -96,12 +96,20 @@ type AttributeMap struct {
 	EmailVerified     string `yaml:"email_verified" json:"email_verified,omitempty" koanf:"email_verified"`
 	Phone             string `yaml:"phone" json:"phone,omitempty" koanf:"phone"`
 	PhoneVerified     string `yaml:"phone_verified" json:"phone_verified,omitempty" koanf:"phone_verified"`
+	// `custom` maps tenant-defined custom claims (key) to IdP attribute names (value),
+	// i.e. hankoClaimName -> idpAttributeName - same direction as the standard slots
+	// above and as ThirdParty.AttributeMapping.
+	//
+	// The value must be the IdP's raw SAML attribute Name (often a urn:oid:... string,
+	// as used by the fields above) - not a human-friendly FriendlyName. Every key must
+	// already be declared in the tenant's custom_claims.definitions.
+	Custom map[string]string `yaml:"custom" json:"custom,omitempty" koanf:"custom"`
 }
 
 func (s *Saml) PostProcess() error {
 	s.Endpoint = strings.TrimSuffix(s.Endpoint, "/")
 
-	s.AllowedRedirectURLMap = make(map[string]glob.Glob)
+	s.AllowedRedirectURLMap = make(map[string]*glob.Pattern)
 	urls := append(s.AllowedRedirectURLS, s.DefaultRedirectUrl)
 	for _, redirectUrl := range urls {
 		globbedUrl, err := glob.Compile(redirectUrl, '.', '/')

@@ -1,9 +1,14 @@
 import { autoSteps } from "../../../src/lib/flow-api/auto-steps";
 import * as Pkce from "../../../src/lib/Pkce";
+import * as Navigation from "../../../src/lib/Navigation";
 
 jest.mock("../../../src/lib/Pkce", () => ({
   getStoredCodeVerifier: jest.fn(),
   clearStoredCodeVerifier: jest.fn(),
+}));
+
+jest.mock("../../../src/lib/Navigation", () => ({
+  redirectTo: jest.fn(),
 }));
 
 // eslint-disable-next-line require-jsdoc
@@ -28,29 +33,16 @@ function createState(overrides: any = {}) {
 }
 
 describe("autoSteps.thirdparty", () => {
-  const realLocation = window.location;
-
   beforeEach(() => {
     jest.clearAllMocks();
 
-    // @ts-ignore
-    delete window.location;
-    // @ts-ignore
-    window.location = {
-      search: "",
-      pathname: "/callback",
-      assign: jest.fn(),
-    };
+    window.history.pushState({}, "", "/callback");
 
     jest.spyOn(history, "replaceState").mockImplementation(() => {});
   });
 
-  afterEach(() => {
-    window.location = realLocation;
-  });
-
   it("exchanges the token when hanko_token is present", async () => {
-    window.location.search = "?hanko_token=abc123";
+    window.history.pushState({}, "", "/callback?hanko_token=abc123");
     (Pkce.getStoredCodeVerifier as jest.Mock).mockReturnValue("verifier-value");
     const state = createState();
 
@@ -63,11 +55,11 @@ describe("autoSteps.thirdparty", () => {
     expect(Pkce.clearStoredCodeVerifier).toHaveBeenCalled();
     expect(history.replaceState).toHaveBeenCalledWith(null, null, "/callback");
     expect(result).toEqual({ name: "success" });
-    expect(window.location.assign).not.toHaveBeenCalled();
+    expect(Navigation.redirectTo).not.toHaveBeenCalled();
   });
 
   it("falls back to undefined code_verifier when none is stored", async () => {
-    window.location.search = "?hanko_token=abc123";
+    window.history.pushState({}, "", "/callback?hanko_token=abc123");
     (Pkce.getStoredCodeVerifier as jest.Mock).mockReturnValue(null);
     const state = createState();
 
@@ -80,8 +72,11 @@ describe("autoSteps.thirdparty", () => {
   });
 
   it("maps an access_denied error query param to third_party_access_denied", async () => {
-    window.location.search =
-      "?error=access_denied&error_description=user%20cancelled";
+    window.history.pushState(
+      {},
+      "",
+      "/callback?error=access_denied&error_description=user%20cancelled",
+    );
     const state = createState();
 
     const result = await autoSteps.thirdparty(state as any);
@@ -94,11 +89,15 @@ describe("autoSteps.thirdparty", () => {
       message: "user cancelled",
     });
     expect(result.dispatchAfterStateChangeEvent).toHaveBeenCalled();
-    expect(window.location.assign).not.toHaveBeenCalled();
+    expect(Navigation.redirectTo).not.toHaveBeenCalled();
   });
 
   it("maps any other error query param to technical_error", async () => {
-    window.location.search = "?error=server_error&error_description=boom";
+    window.history.pushState(
+      {},
+      "",
+      "/callback?error=server_error&error_description=boom",
+    );
     const state = createState();
 
     const result = await autoSteps.thirdparty(state as any);
@@ -125,7 +124,7 @@ describe("autoSteps.thirdparty", () => {
       message: "something went wrong",
     });
     expect(result.dispatchAfterStateChangeEvent).toHaveBeenCalled();
-    expect(window.location.assign).not.toHaveBeenCalled();
+    expect(Navigation.redirectTo).not.toHaveBeenCalled();
   });
 
   it("redirects to the payload's redirect_url when there is no error and state is not cached", async () => {
@@ -134,7 +133,7 @@ describe("autoSteps.thirdparty", () => {
     const result = await autoSteps.thirdparty(state as any);
 
     expect(state.saveToLocalStorage).toHaveBeenCalled();
-    expect(window.location.assign).toHaveBeenCalledWith(
+    expect(Navigation.redirectTo).toHaveBeenCalledWith(
       "https://example.com/redirect",
     );
     expect(result).toBe(state);
@@ -147,6 +146,6 @@ describe("autoSteps.thirdparty", () => {
 
     expect(state.actions.back.run).toHaveBeenCalledWith();
     expect(state.saveToLocalStorage).not.toHaveBeenCalled();
-    expect(window.location.assign).not.toHaveBeenCalled();
+    expect(Navigation.redirectTo).not.toHaveBeenCalled();
   });
 });

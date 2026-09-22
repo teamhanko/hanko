@@ -43,6 +43,7 @@ var userEagerPreloadFields = []string{
 	"PasswordCredential",
 	"OTPSecret",
 	"Metadata",
+	"CustomClaims",
 	"Identities",
 	"Identities.SamlIdentity",
 	"OrganizationMemberships.Organization",
@@ -137,6 +138,7 @@ func (p *userPersister) GetByUsername(username string, tenantID uuid.UUID) (*mod
 		"Username",
 		"OTPSecret",
 		"Metadata",
+		"CustomClaims",
 		"OrganizationMemberships.Organization",
 		"RoleBindings.Role").
 		LeftJoin("usernames", "usernames.user_id = users.id").
