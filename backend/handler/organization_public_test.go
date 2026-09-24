@@ -24,12 +24,14 @@ type organizationPublicSuite struct {
 }
 
 const (
-	rolePublicTestTenantID  = "00000000-0000-0000-0000-000000000001"
-	rolePublicTestMemberID  = "99999999-1111-0000-0000-000000000001" // member of org, holds "admin"
-	rolePublicTestOtherID   = "99999999-1111-0000-0000-000000000002" // not a member of anything
-	rolePublicTestOrgID     = "99999999-2222-0000-0000-000000000001"
-	rolePublicTestAdminID   = "99999999-3333-0000-0000-000000000001" // slug "admin", held by member
-	rolePublicTestBillingID = "99999999-3333-0000-0000-000000000002" // slug "billing-manager", held by no one
+	rolePublicTestTenantID         = "00000000-0000-0000-0000-000000000001"
+	rolePublicTestMemberID         = "99999999-1111-0000-0000-000000000001" // member of org, holds "admin"
+	rolePublicTestOtherID          = "99999999-1111-0000-0000-000000000002" // not a member of anything
+	rolePublicTestMemberInternalID = "99999999-6666-0000-0000-000000000001"
+	rolePublicTestOtherInternalID  = "99999999-6666-0000-0000-000000000002"
+	rolePublicTestOrgID            = "99999999-2222-0000-0000-000000000001"
+	rolePublicTestAdminID          = "99999999-3333-0000-0000-000000000001" // slug "admin", held by member
+	rolePublicTestBillingID        = "99999999-3333-0000-0000-000000000002" // slug "billing-manager", held by no one
 )
 
 func (s *organizationPublicSuite) newRouter() (http.Handler, func() error) {
@@ -51,48 +53,56 @@ func (s *organizationPublicSuite) TestOrganizationPublicHandler_CheckRole() {
 	tests := []struct {
 		name            string
 		userID          string
+		internalUserID  string
 		body            string
 		expectedHasRole bool
 	}{
 		{
 			name:            "holds role, referenced by slug",
 			userID:          rolePublicTestMemberID,
+			internalUserID:  rolePublicTestMemberInternalID,
 			body:            `{"organization_id": "` + rolePublicTestOrgID + `", "roles": ["admin"]}`,
 			expectedHasRole: true,
 		},
 		{
 			name:            "holds role, referenced by id",
 			userID:          rolePublicTestMemberID,
+			internalUserID:  rolePublicTestMemberInternalID,
 			body:            `{"organization_id": "` + rolePublicTestOrgID + `", "roles": ["` + rolePublicTestAdminID + `"]}`,
 			expectedHasRole: true,
 		},
 		{
 			name:            "does not hold role",
 			userID:          rolePublicTestMemberID,
+			internalUserID:  rolePublicTestMemberInternalID,
 			body:            `{"organization_id": "` + rolePublicTestOrgID + `", "roles": ["billing-manager"]}`,
 			expectedHasRole: false,
 		},
 		{
 			name:            "OR semantics - holds one of several",
 			userID:          rolePublicTestMemberID,
+			internalUserID:  rolePublicTestMemberInternalID,
 			body:            `{"organization_id": "` + rolePublicTestOrgID + `", "roles": ["billing-manager", "admin"]}`,
 			expectedHasRole: true,
 		},
 		{
 			name:            "not a member of the organization",
 			userID:          rolePublicTestOtherID,
+			internalUserID:  rolePublicTestOtherInternalID,
 			body:            `{"organization_id": "` + rolePublicTestOrgID + `", "roles": ["admin"]}`,
 			expectedHasRole: false,
 		},
 		{
 			name:            "unrecognized organization",
 			userID:          rolePublicTestMemberID,
+			internalUserID:  rolePublicTestMemberInternalID,
 			body:            `{"organization_id": "00000000-0000-0000-0000-000000000099", "roles": ["admin"]}`,
 			expectedHasRole: false,
 		},
 		{
 			name:            "unrecognized role",
 			userID:          rolePublicTestMemberID,
+			internalUserID:  rolePublicTestMemberInternalID,
 			body:            `{"organization_id": "` + rolePublicTestOrgID + `", "roles": ["does-not-exist"]}`,
 			expectedHasRole: false,
 		},
@@ -106,7 +116,10 @@ func (s *organizationPublicSuite) TestOrganizationPublicHandler_CheckRole() {
 			err := s.LoadFixtures("../test/fixtures/organization_public")
 			s.Require().NoError(err)
 
-			cookie, err := generateSessionCookie(s.Storage, uuid.FromStringOrNil(currentTest.userID), uuid.FromStringOrNil(rolePublicTestTenantID))
+			cookie, err := generateSessionWithCookie(s.Storage,
+				uuid.FromStringOrNil(currentTest.internalUserID),
+				uuid.FromStringOrNil(currentTest.userID),
+				uuid.FromStringOrNil(rolePublicTestTenantID), nil)
 			s.Require().NoError(err)
 
 			req := httptest.NewRequest(http.MethodPost, "/organizations/roles/check", strings.NewReader(currentTest.body))
@@ -157,7 +170,10 @@ func (s *organizationPublicSuite) TestOrganizationPublicHandler_CheckRole_DoesNo
 	e := NewPublicRouter(&cfg, s.Storage, nil, nil)
 	defer e.Close()
 
-	cookie, err := generateSessionCookie(s.Storage, uuid.FromStringOrNil(rolePublicTestMemberID), uuid.FromStringOrNil(rolePublicTestTenantID))
+	cookie, err := generateSessionWithCookie(s.Storage,
+		uuid.FromStringOrNil(rolePublicTestMemberInternalID),
+		uuid.FromStringOrNil(rolePublicTestMemberID),
+		uuid.FromStringOrNil(rolePublicTestTenantID), nil)
 	s.Require().NoError(err)
 
 	// 99999999-2222-...-0002 is a real organization, but it belongs to
@@ -223,7 +239,10 @@ func (s *organizationPublicSuite) TestOrganizationPublicHandler_CheckRole_Invali
 			err := s.LoadFixtures("../test/fixtures/organization_public")
 			s.Require().NoError(err)
 
-			cookie, err := generateSessionCookie(s.Storage, uuid.FromStringOrNil(rolePublicTestMemberID), uuid.FromStringOrNil(rolePublicTestTenantID))
+			cookie, err := generateSessionWithCookie(s.Storage,
+				uuid.FromStringOrNil(rolePublicTestMemberInternalID),
+				uuid.FromStringOrNil(rolePublicTestMemberID),
+				uuid.FromStringOrNil(rolePublicTestTenantID), nil)
 			s.Require().NoError(err)
 
 			req := httptest.NewRequest(http.MethodPost, "/organizations/roles/check", strings.NewReader(currentTest.body))

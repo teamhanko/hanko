@@ -25,9 +25,11 @@ type organizationMembershipAdminSuite struct {
 }
 
 const (
-	membershipTestOrgID       = "22222222-3333-0000-0000-000000000001"
-	membershipTestMemberID    = "11111111-2222-0000-0000-000000000001"
-	membershipTestNonMemberID = "11111111-2222-0000-0000-000000000002"
+	membershipTestOrgID             = "22222222-3333-0000-0000-000000000001"
+	membershipTestMemberID          = "11111111-2222-0000-0000-000000000001"
+	membershipTestNonMemberID       = "11111111-2222-0000-0000-000000000002"
+	membershipTestMemberPublicID    = "aaaaaaaa-2222-0000-0000-000000000001"
+	membershipTestNonMemberPublicID = "aaaaaaaa-2222-0000-0000-000000000002"
 )
 
 func (s *organizationMembershipAdminSuite) TestOrganizationHandlerAdmin_AddMember() {
@@ -44,19 +46,19 @@ func (s *organizationMembershipAdminSuite) TestOrganizationHandlerAdmin_AddMembe
 		{
 			name:               "success",
 			orgID:              membershipTestOrgID,
-			userID:             membershipTestNonMemberID,
+			userID:             membershipTestNonMemberPublicID,
 			expectedStatusCode: http.StatusOK,
 		},
 		{
 			name:               "already a member",
 			orgID:              membershipTestOrgID,
-			userID:             membershipTestMemberID,
+			userID:             membershipTestMemberPublicID,
 			expectedStatusCode: http.StatusConflict,
 		},
 		{
 			name:               "unknown organization",
 			orgID:              "00000000-0000-0000-0000-000000000099",
-			userID:             membershipTestNonMemberID,
+			userID:             membershipTestNonMemberPublicID,
 			expectedStatusCode: http.StatusNotFound,
 		},
 		{
@@ -104,19 +106,19 @@ func (s *organizationMembershipAdminSuite) TestOrganizationHandlerAdmin_RemoveMe
 		{
 			name:               "success",
 			orgID:              membershipTestOrgID,
-			userID:             membershipTestMemberID,
+			userID:             membershipTestMemberPublicID,
 			expectedStatusCode: http.StatusNoContent,
 		},
 		{
 			name:               "not a member",
 			orgID:              membershipTestOrgID,
-			userID:             membershipTestNonMemberID,
+			userID:             membershipTestNonMemberPublicID,
 			expectedStatusCode: http.StatusNotFound,
 		},
 		{
 			name:               "unknown organization",
 			orgID:              "00000000-0000-0000-0000-000000000099",
-			userID:             membershipTestMemberID,
+			userID:             membershipTestMemberPublicID,
 			expectedStatusCode: http.StatusNotFound,
 		},
 	}
@@ -222,7 +224,7 @@ func (s *organizationMembershipAdminSuite) TestOrganizationHandlerAdmin_RemoveMe
 	})
 	s.Require().NoError(err)
 
-	req := httptest.NewRequest(http.MethodDelete, fmt.Sprintf("/organizations/%s/users/%s", membershipTestOrgID, membershipTestMemberID), nil)
+	req := httptest.NewRequest(http.MethodDelete, fmt.Sprintf("/organizations/%s/users/%s", membershipTestOrgID, membershipTestMemberPublicID), nil)
 	rec := httptest.NewRecorder()
 
 	e.ServeHTTP(rec, req)
@@ -259,7 +261,7 @@ func (s *organizationMembershipAdminSuite) TestOrganizationHandlerAdmin_ListMemb
 	err = json.Unmarshal(rec.Body.Bytes(), &got)
 	s.Require().NoError(err)
 	s.Len(got, 1)
-	s.Equal(membershipTestMemberID, got[0]["user_id"])
+	s.Equal(membershipTestMemberPublicID, got[0]["user_id"])
 }
 
 func (s *organizationMembershipAdminSuite) TestOrganizationHandlerAdmin_ListMembers_UnknownOrganization() {

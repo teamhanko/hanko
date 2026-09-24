@@ -5,6 +5,7 @@ import (
 	"time"
 
 	"github.com/gofrs/uuid"
+	"github.com/lestrrat-go/jwx/v2/jwt"
 	"github.com/teamhanko/hanko/backend/v3/crypto/jwk/local_db"
 	"github.com/teamhanko/hanko/backend/v3/dto"
 	"github.com/teamhanko/hanko/backend/v3/persistence"
@@ -30,27 +31,50 @@ func generateSigningKeyForTenant(storage persistence.Persister, tenantID uuid.UU
 	return err
 }
 
-func generateSessionCookie(storage persistence.Persister, userId uuid.UUID, tenantID uuid.UUID) (*http.Cookie, error) {
+// generateSessionWithToken builds a session JWT and its backing session row, taking the
+// internal id separately from the public id since the session row's UserID is a real
+// foreign key to users.id, while the JWT subject is the tenant-scoped public_id - the
+// only identifier a real client would ever see.
+func generateSessionWithToken(storage persistence.Persister, internalUserID, publicUserID uuid.UUID, tenantID uuid.UUID, expiresAt *time.Time) (string, uuid.UUID, error) {
 	manager := getDefaultSessionManager(storage)
-	token, rawToken, err := manager.GenerateJWT(dto.UserJWT{
-		UserID: userId.String(),
-	}, tenantID)
-	if err != nil {
-		return nil, err
+	userJWT := dto.UserJWT{
+		UserID: publicUserID.String(),
 	}
-	sessionID, _ := rawToken.Get("session_id")
-	_ = storage.GetSessionPersister().Create(models.Session{
-		ID:        uuid.FromStringOrNil(sessionID.(string)),
-		UserID:    userId,
-		CreatedAt: time.Now(),
-		UpdatedAt: time.Now(),
-		ExpiresAt: nil,
-		LastUsed:  time.Now(),
+
+	var token string
+	var rawToken jwt.Token
+	var err error
+	if expiresAt != nil {
+		token, rawToken, err = manager.GenerateJWT(userJWT, tenantID, session.WithValue(jwt.ExpirationKey, expiresAt))
+	} else {
+		token, rawToken, err = manager.GenerateJWT(userJWT, tenantID)
+	}
+	if err != nil {
+		return "", uuid.Nil, err
+	}
+
+	sessionIDClaim, _ := rawToken.Get("session_id")
+	sessionID := uuid.FromStringOrNil(sessionIDClaim.(string))
+	err = storage.GetSessionPersister().Create(models.Session{
+		ID:        sessionID,
+		UserID:    internalUserID,
+		CreatedAt: time.Now().UTC(),
+		UpdatedAt: time.Now().UTC(),
+		ExpiresAt: expiresAt,
+		LastUsed:  time.Now().UTC(),
 		TenantID:  tenantID,
 	})
-	cookie, err := manager.GenerateCookie(token)
+	if err != nil {
+		return "", uuid.Nil, err
+	}
+
+	return token, sessionID, nil
+}
+
+func generateSessionWithCookie(storage persistence.Persister, internalUserID, publicUserID uuid.UUID, tenantID uuid.UUID, expiresAt *time.Time) (*http.Cookie, error) {
+	token, _, err := generateSessionWithToken(storage, internalUserID, publicUserID, tenantID, expiresAt)
 	if err != nil {
 		return nil, err
 	}
-	return cookie, nil
+	return getDefaultSessionManager(storage).GenerateCookie(token)
 }

@@ -9,13 +9,10 @@ import (
 	"time"
 
 	"github.com/gofrs/uuid"
-	"github.com/lestrrat-go/jwx/v2/jwt"
 	"github.com/stretchr/testify/suite"
 	"github.com/teamhanko/hanko/backend/v3/config"
 	"github.com/teamhanko/hanko/backend/v3/crypto/jwk/local_db"
 	"github.com/teamhanko/hanko/backend/v3/dto"
-	"github.com/teamhanko/hanko/backend/v3/persistence/models"
-	"github.com/teamhanko/hanko/backend/v3/session"
 	"github.com/teamhanko/hanko/backend/v3/test"
 )
 
@@ -36,7 +33,8 @@ func (s *sessionSuite) TestSessionHandler_ValidateSession_IdleExpiresAt() {
 	err := s.LoadFixtures("../test/fixtures/sessions")
 	s.Require().NoError(err)
 
-	testUserID := uuid.FromStringOrNil("ec4ef049-5b88-4321-a173-21b0eff06a04")
+	testUserInternalID := uuid.FromStringOrNil("ec4ef049-5b88-4321-a173-21b0eff06a04")
+	testUserPublicID := uuid.FromStringOrNil("eeeeeeee-0000-0000-0000-000000000001")
 	testTenantID := uuid.FromStringOrNil("00000000-0000-0000-0000-000000000001")
 
 	tests := []struct {
@@ -73,7 +71,8 @@ func (s *sessionSuite) TestSessionHandler_ValidateSession_IdleExpiresAt() {
 			s.Require().NoError(err)
 
 			// Create sess with cookie
-			cookie, _ := s.createSessionWithCookie(testUserID, testTenantID, cfg, currentTest.sessionExpiresAt)
+			cookie, err := generateSessionWithCookie(s.Storage, testUserInternalID, testUserPublicID, testTenantID, currentTest.sessionExpiresAt)
+			s.Require().NoError(err)
 
 			e := NewPublicRouter(cfg, s.Storage, nil, nil)
 
@@ -86,7 +85,7 @@ func (s *sessionSuite) TestSessionHandler_ValidateSession_IdleExpiresAt() {
 			s.Equal(http.StatusOK, rec.Code)
 
 			var response dto.ValidateSessionResponse
-			err := json.Unmarshal(rec.Body.Bytes(), &response)
+			err = json.Unmarshal(rec.Body.Bytes(), &response)
 			s.Require().NoError(err)
 
 			s.True(response.IsValid)
@@ -120,7 +119,8 @@ func (s *sessionSuite) TestSessionHandler_ValidateSessionFromBody_IdleExpiresAt(
 	err := s.LoadFixtures("../test/fixtures/sessions")
 	s.Require().NoError(err)
 
-	testUserID := uuid.FromStringOrNil("ec4ef049-5b88-4321-a173-21b0eff06a04")
+	testUserInternalID := uuid.FromStringOrNil("ec4ef049-5b88-4321-a173-21b0eff06a04")
+	testUserPublicID := uuid.FromStringOrNil("eeeeeeee-0000-0000-0000-000000000001")
 	testTenantID := uuid.FromStringOrNil("00000000-0000-0000-0000-000000000001")
 
 	tests := []struct {
@@ -157,7 +157,8 @@ func (s *sessionSuite) TestSessionHandler_ValidateSessionFromBody_IdleExpiresAt(
 			s.Require().NoError(err)
 
 			// Create session and get token
-			token, sessionID := s.createSessionWithToken(testUserID, testTenantID, cfg, currentTest.sessionExpiresAt)
+			token, sessionID, err := generateSessionWithToken(s.Storage, testUserInternalID, testUserPublicID, testTenantID, currentTest.sessionExpiresAt)
+			s.Require().NoError(err)
 
 			// Get the session before the request to capture original LastUsed
 			sessionBefore, err := s.Storage.GetSessionPersister().Get(sessionID, testTenantID)
@@ -227,21 +228,24 @@ func (s *sessionSuite) TestSessionHandler_ValidateSession_Organizations() {
 
 	tests := []struct {
 		name              string
-		userID            string
+		internalUserID    string
+		publicUserID      string
 		expectedOrgID     string
 		expectedOrgName   string
 		expectedRoleSlugs []string
 	}{
 		{
 			name:              "member with a role binding",
-			userID:            "ec4ef049-5b88-4321-a173-21b0eff06a04",
+			internalUserID:    "ec4ef049-5b88-4321-a173-21b0eff06a04",
+			publicUserID:      "eeeeeeee-0000-0000-0000-000000000001",
 			expectedOrgID:     "bebebebe-0000-0000-0000-000000000001",
 			expectedOrgName:   "Session Test Org",
 			expectedRoleSlugs: []string{"admin"},
 		},
 		{
-			name:   "user with no organization memberships",
-			userID: "38bf5a00-d7ea-40a5-a5de-48722c148925",
+			name:           "user with no organization memberships",
+			internalUserID: "38bf5a00-d7ea-40a5-a5de-48722c148925",
+			publicUserID:   "eeeeeeee-0000-0000-0000-000000000002",
 		},
 	}
 
@@ -252,7 +256,11 @@ func (s *sessionSuite) TestSessionHandler_ValidateSession_Organizations() {
 			err = local_db.SyncSecretKeys(cfg, s.Storage)
 			s.Require().NoError(err)
 
-			cookie, _ := s.createSessionWithCookie(uuid.FromStringOrNil(currentTest.userID), testTenantID, cfg, nil)
+			cookie, err := generateSessionWithCookie(s.Storage,
+				uuid.FromStringOrNil(currentTest.internalUserID),
+				uuid.FromStringOrNil(currentTest.publicUserID),
+				testTenantID, nil)
+			s.Require().NoError(err)
 
 			e := NewPublicRouter(cfg, s.Storage, nil, nil)
 
@@ -265,7 +273,7 @@ func (s *sessionSuite) TestSessionHandler_ValidateSession_Organizations() {
 			s.Equal(http.StatusOK, rec.Code)
 
 			var response dto.ValidateSessionResponse
-			err := json.Unmarshal(rec.Body.Bytes(), &response)
+			err = json.Unmarshal(rec.Body.Bytes(), &response)
 			s.Require().NoError(err)
 
 			s.True(response.IsValid)
@@ -302,7 +310,11 @@ func (s *sessionSuite) TestSessionHandler_ValidateSession_Organizations_MultiTen
 	err = generateSigningKeyForTenant(s.Storage, testTenantID)
 	s.Require().NoError(err)
 
-	cookie, _ := s.createSessionWithCookie(uuid.FromStringOrNil("ec4ef049-5b88-4321-a173-21b0eff06a04"), testTenantID, &cfg, nil)
+	cookie, err := generateSessionWithCookie(s.Storage,
+		uuid.FromStringOrNil("ec4ef049-5b88-4321-a173-21b0eff06a04"),
+		uuid.FromStringOrNil("eeeeeeee-0000-0000-0000-000000000001"),
+		testTenantID, nil)
+	s.Require().NoError(err)
 
 	e := NewPublicRouter(&cfg, s.Storage, nil, nil)
 
@@ -333,7 +345,8 @@ func (s *sessionSuite) TestSessionHandler_ValidateSessionFromBody_Organizations(
 	err := s.LoadFixtures("../test/fixtures/sessions")
 	s.Require().NoError(err)
 
-	testUserID := uuid.FromStringOrNil("ec4ef049-5b88-4321-a173-21b0eff06a04")
+	testUserInternalID := uuid.FromStringOrNil("ec4ef049-5b88-4321-a173-21b0eff06a04")
+	testUserPublicID := uuid.FromStringOrNil("eeeeeeee-0000-0000-0000-000000000001")
 	testTenantID := uuid.FromStringOrNil("00000000-0000-0000-0000-000000000001")
 
 	cfg := s.setupConfig("0s")
@@ -341,7 +354,8 @@ func (s *sessionSuite) TestSessionHandler_ValidateSessionFromBody_Organizations(
 	err = local_db.SyncSecretKeys(cfg, s.Storage)
 	s.Require().NoError(err)
 
-	token, _ := s.createSessionWithToken(testUserID, testTenantID, cfg, nil)
+	token, _, err := generateSessionWithToken(s.Storage, testUserInternalID, testUserPublicID, testTenantID, nil)
+	s.Require().NoError(err)
 
 	e := NewPublicRouter(cfg, s.Storage, nil, nil)
 
@@ -376,14 +390,16 @@ func (s *sessionSuite) TestSessionHandler_ValidateSession_Organizations_RevokedM
 	err := s.LoadFixtures("../test/fixtures/sessions")
 	s.Require().NoError(err)
 
-	testUserID := uuid.FromStringOrNil("ec4ef049-5b88-4321-a173-21b0eff06a04")
+	testUserInternalID := uuid.FromStringOrNil("ec4ef049-5b88-4321-a173-21b0eff06a04")
+	testUserPublicID := uuid.FromStringOrNil("eeeeeeee-0000-0000-0000-000000000001")
 	testTenantID := uuid.FromStringOrNil("00000000-0000-0000-0000-000000000001")
 
 	cfg := s.setupConfig("0s")
 	err = local_db.SyncSecretKeys(cfg, s.Storage)
 	s.Require().NoError(err)
 
-	cookie, _ := s.createSessionWithCookie(testUserID, testTenantID, cfg, nil)
+	cookie, err := generateSessionWithCookie(s.Storage, testUserInternalID, testUserPublicID, testTenantID, nil)
+	s.Require().NoError(err)
 	e := NewPublicRouter(cfg, s.Storage, nil, nil)
 
 	req := httptest.NewRequest(http.MethodGet, "/sessions/validate", nil)
@@ -397,7 +413,7 @@ func (s *sessionSuite) TestSessionHandler_ValidateSession_Organizations_RevokedM
 
 	// Revoke the membership - without reissuing the session token.
 	membership, err := s.Storage.GetOrganizationMembershipPersister().Get(
-		testUserID, uuid.FromStringOrNil("bebebebe-0000-0000-0000-000000000001"), testTenantID)
+		testUserInternalID, uuid.FromStringOrNil("bebebebe-0000-0000-0000-000000000001"), testTenantID)
 	s.Require().NoError(err)
 	s.Require().NotNil(membership)
 	err = s.Storage.GetOrganizationMembershipPersister().Delete(*membership)
@@ -420,81 +436,6 @@ func (s *sessionSuite) setupConfig(idleTimeout string) *config.Config {
 
 	cfg.Session.IdleTimeout = idleTimeout
 	return &cfg
-}
-
-func (s *sessionSuite) createSessionWithCookie(userId uuid.UUID, tenantID uuid.UUID, cfg *config.Config, expiresAt *time.Time) (*http.Cookie, uuid.UUID) {
-	manager := getDefaultSessionManager(s.Storage)
-
-	userJWT := dto.UserJWT{
-		UserID: userId.String(),
-	}
-
-	var token string
-	var rawToken jwt.Token
-	var err error
-
-	if expiresAt != nil {
-		token, rawToken, err = manager.GenerateJWT(userJWT, tenantID, session.WithValue(jwt.ExpirationKey, expiresAt))
-	} else {
-		token, rawToken, err = manager.GenerateJWT(userJWT, tenantID)
-	}
-	s.Require().NoError(err)
-
-	sessionID, _ := rawToken.Get("session_id")
-	sessionUUID := uuid.FromStringOrNil(sessionID.(string))
-
-	session := models.Session{
-		ID:        sessionUUID,
-		TenantID:  tenantID,
-		UserID:    userId,
-		CreatedAt: time.Now().UTC(),
-		UpdatedAt: time.Now().UTC(),
-		ExpiresAt: expiresAt,
-		LastUsed:  time.Now().UTC(),
-	}
-	err = s.Storage.GetSessionPersister().Create(session)
-	s.Require().NoError(err)
-
-	cookie, err := manager.GenerateCookie(token)
-	s.Require().NoError(err)
-
-	return cookie, sessionUUID
-}
-
-func (s *sessionSuite) createSessionWithToken(userId uuid.UUID, tenantID uuid.UUID, cfg *config.Config, expiresAt *time.Time) (string, uuid.UUID) {
-	manager := getDefaultSessionManager(s.Storage)
-
-	userJWT := dto.UserJWT{
-		UserID: userId.String(),
-	}
-
-	var token string
-	var rawToken jwt.Token
-	var err error
-
-	if expiresAt != nil {
-		token, rawToken, err = manager.GenerateJWT(userJWT, tenantID, session.WithValue(jwt.ExpirationKey, expiresAt))
-	} else {
-		token, rawToken, err = manager.GenerateJWT(userJWT, tenantID)
-	}
-	s.Require().NoError(err)
-
-	sessionID, _ := rawToken.Get("session_id")
-	sessionUUID := uuid.FromStringOrNil(sessionID.(string))
-
-	session := models.Session{
-		ID:        sessionUUID,
-		TenantID:  tenantID,
-		UserID:    userId,
-		CreatedAt: time.Now().UTC(),
-		UpdatedAt: time.Now().UTC(),
-		ExpiresAt: expiresAt,
-		LastUsed:  time.Now().UTC(),
-	}
-	err = s.Storage.GetSessionPersister().Create(session)
-	s.Require().NoError(err)
-
-	return token, sessionUUID
 }
 
 func timePtr(t time.Time) *time.Time {
