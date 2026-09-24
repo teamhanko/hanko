@@ -23,6 +23,10 @@ easily integrated into any web app with as little as two lines of code.
     - [Account linking](#account-linking)
   - [User metadata](#user-metadata)
   - [Custom claims](#custom-claims)
+  - [Organizations and roles](#organizations-and-roles)
+    - [Managing organizations and roles](#managing-organizations-and-roles)
+    - [Checking a role from the public API](#checking-a-role-from-the-public-api)
+    - [Surfacing organizations on users and sessions](#surfacing-organizations-on-users-and-sessions)
   - [User import](#user-import)
   - [Webhooks](#webhooks)
   - [Session JWT templates](#session-jwt-templates)
@@ -554,6 +558,61 @@ with no separate precedence between connection types. Resolved values are readab
 [`GET /users/:id/custom_claims`](#start-the-admin-api) Admin API endpoint (which claim, not which connection, set
 it) and, once explicitly opted in, via `session.jwt_template.claims` - see
 [Accessing custom claims](#accessing-custom-claims).
+
+### Organizations and roles
+
+Tenants can group users into **organizations** and grant them **roles** within those organizations. A role is
+tenant-scoped and defined by an immutable `slug` plus a display `name`; a user must already be a member of an
+organization before a role can be bound to them there.
+
+#### Managing organizations and roles
+
+The Admin API exposes full CRUD for organizations and roles, plus membership and role-binding management nested
+under an organization:
+
+- `/organizations` - create, list, get, update, delete organizations
+- `/roles` - create, list, get, update (name only - `slug` is immutable), delete roles
+- `/organizations/{org_id}/users` - list an organization's members, add or remove a member
+- `/organizations/{org_id}/users/{user_id}/roles` - list, bind, or unbind a user's roles within an organization
+
+A role reference, in a request body or a path segment, may be given as either its id or its slug. Deleting an
+organization cascades to its memberships and role bindings; deleting a role cascades to its role bindings; removing
+a user from an organization cascades to their role bindings there. None of these endpoints trigger audit logs or
+webhooks yet.
+
+See the [Admin API reference](https://docs.hanko.io/api-reference/admin/introduction) for exact request/response
+shapes.
+
+#### Checking a role from the public API
+
+`POST /organizations/roles/check` lets a user's own session (not an admin credential) check whether they hold at
+least one of a given set of roles within an organization. An unrecognized organization id and "not a member" both
+resolve to `{"has_role": false}` rather than an error, so a relying party can't use this endpoint to probe which
+organizations exist.
+
+#### Surfacing organizations on users and sessions
+
+`GET /users/{id}` and `GET /users` responses include an `organizations` field listing the organizations a user
+belongs to and the roles they hold in each:
+
+```json
+"organizations": [
+  {
+    "id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+    "name": "Acme Corp",
+    "roles": [
+      { "id": "c9df6eb1-...", "slug": "admin", "name": "Administrator" }
+    ]
+  }
+]
+```
+
+`POST /users` accepts the same shape as an optional `organizations` field on the request body, to add a user to one
+or more organizations - optionally binding roles by id or slug - as part of user creation.
+
+`GET /sessions/validate` and `POST /sessions/validate` include the same `organizations` field, computed fresh from
+the database on every call rather than baked into the session JWT itself - revoking a membership or role binding
+takes effect on the very next validation call, without needing to reissue the session.
 
 ### User metadata
 
