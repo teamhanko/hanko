@@ -33,7 +33,7 @@ func NewRolePersister(db *pop.Connection) RolePersister {
 
 func (p *rolePersister) Get(id uuid.UUID, tenantID uuid.UUID) (*models.Role, error) {
 	role := models.Role{}
-	err := p.db.Where("roles.tenant_id = ?", tenantID).Find(&role, id)
+	err := p.db.Where("tenant_id = ?", tenantID).Find(&role, id)
 	if err != nil && errors.Is(err, sql.ErrNoRows) {
 		return nil, nil
 	}
