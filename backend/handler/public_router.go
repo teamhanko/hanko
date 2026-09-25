@@ -116,5 +116,8 @@ func NewPublicRouter(cfg *config.Config, persister persistence.Persister, promet
 	sessions.GET("/validate", sessionHandler.ValidateSession)
 	sessions.POST("/validate", sessionHandler.ValidateSessionFromBody)
 
+	organizationPublicHandler := NewOrganizationPublicHandler(persister)
+	tenantGroup.POST("/organizations/roles/check", organizationPublicHandler.CheckRole, sessionMiddleware)
+
 	return e
 }
