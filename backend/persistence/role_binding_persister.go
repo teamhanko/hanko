@@ -15,10 +15,6 @@ type RoleBindingPersister interface {
 	Create(binding models.RoleBinding) error
 	Delete(binding models.RoleBinding) error
 	ListByUserAndOrganization(userID uuid.UUID, organizationID uuid.UUID, tenantID uuid.UUID) ([]models.RoleBinding, error)
-	// ListByUser returns every role binding userID holds, across every
-	// organization, with the Role association eager-loaded - one query for
-	// the bindings plus one batched query for the distinct roles, rather
-	// than a role lookup per binding.
 	ListByUser(userID uuid.UUID, tenantID uuid.UUID) ([]models.RoleBinding, error)
 }
 
