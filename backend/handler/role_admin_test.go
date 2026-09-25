@@ -64,6 +64,26 @@ func (s *roleAdminSuite) TestRoleHandlerAdmin_Create() {
 			expectedStatusCode: http.StatusBadRequest,
 		},
 		{
+			name:               "slug with internal whitespace",
+			body:               `{"slug": "billing manager", "name": "Whitespace Slug"}`,
+			expectedStatusCode: http.StatusBadRequest,
+		},
+		{
+			name:               "slug with uppercase letters",
+			body:               `{"slug": "Billing-Manager", "name": "Uppercase Slug"}`,
+			expectedStatusCode: http.StatusBadRequest,
+		},
+		{
+			name:               "slug with a path separator",
+			body:               `{"slug": "billing/manager", "name": "Path Separator Slug"}`,
+			expectedStatusCode: http.StatusBadRequest,
+		},
+		{
+			name:               "slug with a fragment character",
+			body:               `{"slug": "billing#manager", "name": "Fragment Character Slug"}`,
+			expectedStatusCode: http.StatusBadRequest,
+		},
+		{
 			name:               "whitespace-only name",
 			body:               `{"slug": "whitespace-name", "name": "   "}`,
 			expectedStatusCode: http.StatusBadRequest,

@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"net/http"
 	"net/url"
+	"regexp"
 	"strconv"
 	"strings"
 	"time"
@@ -20,6 +21,10 @@ import (
 	"github.com/teamhanko/hanko/backend/v3/persistence"
 	"github.com/teamhanko/hanko/backend/v3/persistence/models"
 )
+
+// roleSlugPattern restricts a slug to characters safe to use unescaped as a
+// path segment, e.g. in DELETE /organizations/{org_id}/users/{user_id}/roles/{role_ref}.
+var roleSlugPattern = regexp.MustCompile(`^[a-z0-9]+(?:-[a-z0-9]+)*$`)
 
 type RoleHandlerAdmin struct {
 	persister persistence.Persister
@@ -50,6 +55,9 @@ func (h *RoleHandlerAdmin) Create(c echo.Context) error {
 	}
 	if len(trimmedSlug) > 255 {
 		return echo.NewHTTPError(http.StatusBadRequest, "slug must be at most 255 characters")
+	}
+	if !roleSlugPattern.MatchString(trimmedSlug) {
+		return echo.NewHTTPError(http.StatusBadRequest, "slug must contain only lowercase letters, numbers, and hyphens")
 	}
 
 	trimmedName := strings.TrimSpace(body.Name)
