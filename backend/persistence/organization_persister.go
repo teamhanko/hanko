@@ -30,7 +30,7 @@ func NewOrganizationPersister(db *pop.Connection) OrganizationPersister {
 
 func (p *organizationPersister) Get(id uuid.UUID, tenantID uuid.UUID) (*models.Organization, error) {
 	organization := models.Organization{}
-	err := p.db.Where("organizations.tenant_id = ?", tenantID).Find(&organization, id)
+	err := p.db.Where("tenant_id = ?", tenantID).Find(&organization, id)
 	if err != nil && errors.Is(err, sql.ErrNoRows) {
 		return nil, nil
 	}
