@@ -22,12 +22,11 @@ func NewRoleBindingHandlerAdmin(persister persistence.Persister) *RoleBindingHan
 	return &RoleBindingHandlerAdmin{persister: persister}
 }
 
-// Create binds a role to a user within an organization. Both org_id and
-// user_id are path segments identifying the membership this binding
-// attaches to (404 if either doesn't resolve to an existing membership);
-// the role reference in the body may be unrecognized (400), per the
-// design doc's "unrecognized organization or role id/slug referenced
-// anywhere -> 400" rule for body-embedded references.
+// Create binds a role to a user within an organization. user_id must
+// resolve to a real user (404 if not); org_id and the membership itself
+// aren't separately verified - a missing membership, whether because the
+// organization doesn't exist or the user just isn't a member of it,
+// resolves to 400, same as an unrecognized role reference in the body.
 func (h *RoleBindingHandlerAdmin) Create(c echo.Context) error {
 	tenant, err := context.GetTenant(c)
 	if err != nil {
