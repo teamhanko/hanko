@@ -33,11 +33,6 @@ func (s *roleBindingPersisterSuite) createMembership(userID uuid.UUID, organizat
 	s.Require().NoError(err)
 }
 
-// A role binding must not be creatable without a matching organization
-// membership already existing - this is what the doc calls "creating a role
-// binding requires a matching organization_memberships row to already exist",
-// backstopped here at the DB level by the composite FK to
-// organization_memberships(user_id, organization_id).
 func (s *roleBindingPersisterSuite) TestCreate_RequiresExistingMembership() {
 	if testing.Short() {
 		s.T().Skip("skipping test in short mode.")
