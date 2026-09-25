@@ -1,7 +1,6 @@
 package handler
 
 import (
-	"errors"
 	"fmt"
 	"net/http"
 	"net/url"
@@ -9,9 +8,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/go-sql-driver/mysql"
 	"github.com/gofrs/uuid"
-	"github.com/jackc/pgx/v5/pgconn"
 	"github.com/labstack/echo/v4"
 	"github.com/teamhanko/hanko/backend/v3/context"
 	"github.com/teamhanko/hanko/backend/v3/dto"
@@ -68,14 +65,8 @@ func (h *OrganizationHandlerAdmin) Create(c echo.Context) error {
 
 	err = h.persister.GetOrganizationPersister().Create(organization)
 	if err != nil {
-		if pgErr, ok := errors.AsType[*pgconn.PgError](err); ok {
-			if pgErr.Code == "23505" {
-				return echo.NewHTTPError(http.StatusConflict, fmt.Errorf("failed to create organization '%s': %w", body.Name, fmt.Errorf("organization already exists")))
-			}
-		} else if mysqlErr, ok2 := errors.AsType[*mysql.MySQLError](err); ok2 {
-			if mysqlErr.Number == 1062 {
-				return echo.NewHTTPError(http.StatusConflict, fmt.Errorf("failed to create organization '%s': %w", body.Name, fmt.Errorf("organization already exists")))
-			}
+		if isUniqueConstraintViolation(err) {
+			return echo.NewHTTPError(http.StatusConflict, fmt.Errorf("failed to create organization '%s': %w", body.Name, fmt.Errorf("organization already exists")))
 		}
 		return fmt.Errorf("failed to create organization: %w", err)
 	}
@@ -196,14 +187,8 @@ func (h *OrganizationHandlerAdmin) Patch(c echo.Context) error {
 
 		err = p.Update(*organization)
 		if err != nil {
-			if pgErr, ok := errors.AsType[*pgconn.PgError](err); ok {
-				if pgErr.Code == "23505" {
-					return echo.NewHTTPError(http.StatusConflict, fmt.Errorf("failed to update organization '%s': %w", organization.Name, fmt.Errorf("organization already exists")))
-				}
-			} else if mysqlErr, ok2 := errors.AsType[*mysql.MySQLError](err); ok2 {
-				if mysqlErr.Number == 1062 {
-					return echo.NewHTTPError(http.StatusConflict, fmt.Errorf("failed to update organization '%s': %w", organization.Name, fmt.Errorf("organization already exists")))
-				}
+			if isUniqueConstraintViolation(err) {
+				return echo.NewHTTPError(http.StatusConflict, fmt.Errorf("failed to update organization '%s': %w", organization.Name, fmt.Errorf("organization already exists")))
 			}
 			return fmt.Errorf("failed to update organization: %w", err)
 		}
@@ -292,14 +277,8 @@ func (h *OrganizationHandlerAdmin) AddMember(c echo.Context) error {
 
 	err = h.persister.GetOrganizationMembershipPersister().Create(membership)
 	if err != nil {
-		if pgErr, ok := errors.AsType[*pgconn.PgError](err); ok {
-			if pgErr.Code == "23505" {
-				return echo.NewHTTPError(http.StatusConflict, "user is already a member of this organization")
-			}
-		} else if mysqlErr, ok2 := errors.AsType[*mysql.MySQLError](err); ok2 {
-			if mysqlErr.Number == 1062 {
-				return echo.NewHTTPError(http.StatusConflict, "user is already a member of this organization")
-			}
+		if isUniqueConstraintViolation(err) {
+			return echo.NewHTTPError(http.StatusConflict, "user is already a member of this organization")
 		}
 		return fmt.Errorf("failed to add organization member: %w", err)
 	}

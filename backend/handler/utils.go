@@ -1,10 +1,25 @@
 package handler
 
 import (
+	"errors"
 	"net/http"
 
+	"github.com/go-sql-driver/mysql"
+	"github.com/jackc/pgx/v5/pgconn"
 	"github.com/labstack/echo/v4"
 )
+
+// isUniqueConstraintViolation reports whether err is a Postgres or MySQL
+// unique-constraint violation - the two supported database drivers.
+func isUniqueConstraintViolation(err error) bool {
+	if pgErr, ok := errors.AsType[*pgconn.PgError](err); ok {
+		return pgErr.Code == "23505"
+	}
+	if mysqlErr, ok := errors.AsType[*mysql.MySQLError](err); ok {
+		return mysqlErr.Number == 1062
+	}
+	return false
+}
 
 func loadDto[I any](ctx echo.Context) (*I, error) {
 	var adminDto I

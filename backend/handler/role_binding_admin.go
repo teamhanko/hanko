@@ -1,14 +1,11 @@
 package handler
 
 import (
-	"errors"
 	"fmt"
 	"net/http"
 	"time"
 
-	"github.com/go-sql-driver/mysql"
 	"github.com/gofrs/uuid"
-	"github.com/jackc/pgx/v5/pgconn"
 	"github.com/labstack/echo/v4"
 	"github.com/teamhanko/hanko/backend/v3/context"
 	"github.com/teamhanko/hanko/backend/v3/dto"
@@ -96,14 +93,8 @@ func (h *RoleBindingHandlerAdmin) Create(c echo.Context) error {
 
 	err = h.persister.GetRoleBindingPersister().Create(binding)
 	if err != nil {
-		if pgErr, ok := errors.AsType[*pgconn.PgError](err); ok {
-			if pgErr.Code == "23505" {
-				return echo.NewHTTPError(http.StatusConflict, "user already holds this role in this organization")
-			}
-		} else if mysqlErr, ok2 := errors.AsType[*mysql.MySQLError](err); ok2 {
-			if mysqlErr.Number == 1062 {
-				return echo.NewHTTPError(http.StatusConflict, "user already holds this role in this organization")
-			}
+		if isUniqueConstraintViolation(err) {
+			return echo.NewHTTPError(http.StatusConflict, "user already holds this role in this organization")
 		}
 		return fmt.Errorf("failed to create role binding: %w", err)
 	}

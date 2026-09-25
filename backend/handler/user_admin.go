@@ -1,7 +1,6 @@
 package handler
 
 import (
-	"errors"
 	"fmt"
 	"net/http"
 	"net/url"
@@ -10,11 +9,9 @@ import (
 	"strings"
 	"time"
 
-	"github.com/go-sql-driver/mysql"
 	"github.com/gobuffalo/nulls"
 	"github.com/gobuffalo/pop/v6"
 	"github.com/gofrs/uuid"
-	"github.com/jackc/pgx/v5/pgconn"
 	"github.com/labstack/echo/v4"
 	"github.com/teamhanko/hanko/backend/v3/context"
 	"github.com/teamhanko/hanko/backend/v3/dto"
@@ -275,14 +272,8 @@ func (h *UserHandlerAdmin) Create(c echo.Context) error {
 
 		err := tx.Create(&u)
 		if err != nil {
-			if pgErr, ok := errors.AsType[*pgconn.PgError](err); ok {
-				if pgErr.Code == "23505" {
-					return echo.NewHTTPError(http.StatusConflict, fmt.Errorf("failed to create user with id '%v': %w", publicID, fmt.Errorf("user already exists")))
-				}
-			} else if mysqlErr, ok2 := errors.AsType[*mysql.MySQLError](err); ok2 {
-				if mysqlErr.Number == 1062 {
-					return echo.NewHTTPError(http.StatusConflict, fmt.Errorf("failed to create user with id '%v': %w", publicID, fmt.Errorf("user already exists")))
-				}
+			if isUniqueConstraintViolation(err) {
+				return echo.NewHTTPError(http.StatusConflict, fmt.Errorf("failed to create user with id '%v': %w", publicID, fmt.Errorf("user already exists")))
 			}
 			return fmt.Errorf("failed to create user with id '%v': %w", publicID, err)
 		}
@@ -302,14 +293,8 @@ func (h *UserHandlerAdmin) Create(c echo.Context) error {
 
 			err := tx.Create(&mail)
 			if err != nil {
-				if pgErr, ok := errors.AsType[*pgconn.PgError](err); ok {
-					if pgErr.Code == "23505" {
-						return echo.NewHTTPError(http.StatusConflict, fmt.Errorf("failed to create email '%s' for user '%v': %w", mail.Address, publicID, fmt.Errorf("email already exists")))
-					}
-				} else if mysqlErr, ok2 := errors.AsType[*mysql.MySQLError](err); ok2 {
-					if mysqlErr.Number == 1062 {
-						return echo.NewHTTPError(http.StatusConflict, fmt.Errorf("failed to create email '%s' for user '%v': %w", mail.Address, publicID, fmt.Errorf("email already exists")))
-					}
+				if isUniqueConstraintViolation(err) {
+					return echo.NewHTTPError(http.StatusConflict, fmt.Errorf("failed to create email '%s' for user '%v': %w", mail.Address, publicID, fmt.Errorf("email already exists")))
 				}
 				return fmt.Errorf("failed to create email '%s' for user '%v': %w", mail.Address, publicID, err)
 			}
@@ -331,14 +316,8 @@ func (h *UserHandlerAdmin) Create(c echo.Context) error {
 			username := models.NewUsername(u.ID, *body.Username, tenant.ID)
 			err = tx.Create(username)
 			if err != nil {
-				if pgErr, ok := errors.AsType[*pgconn.PgError](err); ok {
-					if pgErr.Code == "23505" {
-						return echo.NewHTTPError(http.StatusConflict, fmt.Errorf("failed to create username '%s' for user '%v': %w", username.Username, publicID, fmt.Errorf("username already exists")))
-					}
-				} else if mysqlErr, ok2 := errors.AsType[*mysql.MySQLError](err); ok2 {
-					if mysqlErr.Number == 1062 {
-						return echo.NewHTTPError(http.StatusConflict, fmt.Errorf("failed to create username '%s' for user '%v': %w", username.Username, publicID, fmt.Errorf("username already exists")))
-					}
+				if isUniqueConstraintViolation(err) {
+					return echo.NewHTTPError(http.StatusConflict, fmt.Errorf("failed to create username '%s' for user '%v': %w", username.Username, publicID, fmt.Errorf("username already exists")))
 				}
 				return fmt.Errorf("failed to create username '%s' for user '%v': %w", username.Username, publicID, err)
 			}
