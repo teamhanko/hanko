@@ -44,9 +44,25 @@ func (h *RoleHandlerAdmin) Create(c echo.Context) error {
 		return dto.ToHttpError(err)
 	}
 
+	trimmedSlug := strings.TrimSpace(body.Slug)
+	if trimmedSlug == "" {
+		return echo.NewHTTPError(http.StatusBadRequest, "slug must be a non-empty string")
+	}
+	if len(trimmedSlug) > 255 {
+		return echo.NewHTTPError(http.StatusBadRequest, "slug must be at most 255 characters")
+	}
+
+	trimmedName := strings.TrimSpace(body.Name)
+	if trimmedName == "" {
+		return echo.NewHTTPError(http.StatusBadRequest, "name must be a non-empty string")
+	}
+	if len(trimmedName) > 255 {
+		return echo.NewHTTPError(http.StatusBadRequest, "name must be at most 255 characters")
+	}
+
 	// A slug that parses as a UUID would be permanently unreachable via
 	// RolePersister.GetByIDOrSlug, which always tries UUID-parsing first.
-	if _, err := uuid.FromString(body.Slug); err == nil {
+	if _, err := uuid.FromString(trimmedSlug); err == nil {
 		return echo.NewHTTPError(http.StatusBadRequest, "slug must not be a valid uuid")
 	}
 
@@ -59,8 +75,8 @@ func (h *RoleHandlerAdmin) Create(c echo.Context) error {
 	role := models.Role{
 		ID:        id,
 		TenantID:  tenant.ID,
-		Slug:      body.Slug,
-		Name:      body.Name,
+		Slug:      trimmedSlug,
+		Name:      trimmedName,
 		CreatedAt: now,
 		UpdatedAt: now,
 	}
@@ -174,6 +190,9 @@ func (h *RoleHandlerAdmin) Patch(c echo.Context) error {
 			return echo.NewHTTPError(http.StatusBadRequest, "name must be a non-empty string")
 		}
 		trimmed := strings.TrimSpace(*body.Name.Value)
+		if len(trimmed) > 255 {
+			return echo.NewHTTPError(http.StatusBadRequest, "name must be at most 255 characters")
+		}
 		body.Name.Value = &trimmed
 	}
 

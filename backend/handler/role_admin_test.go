@@ -58,6 +58,26 @@ func (s *roleAdminSuite) TestRoleHandlerAdmin_Create() {
 			body:               `{"slug": "123e4567-e89b-12d3-a456-426614174000", "name": "Sneaky"}`,
 			expectedStatusCode: http.StatusBadRequest,
 		},
+		{
+			name:               "whitespace-only slug",
+			body:               `{"slug": "   ", "name": "Whitespace Slug"}`,
+			expectedStatusCode: http.StatusBadRequest,
+		},
+		{
+			name:               "whitespace-only name",
+			body:               `{"slug": "whitespace-name", "name": "   "}`,
+			expectedStatusCode: http.StatusBadRequest,
+		},
+		{
+			name:               "slug too long",
+			body:               fmt.Sprintf(`{"slug": "%s", "name": "Long Slug"}`, strings.Repeat("a", 256)),
+			expectedStatusCode: http.StatusBadRequest,
+		},
+		{
+			name:               "name too long",
+			body:               fmt.Sprintf(`{"slug": "long-name", "name": "%s"}`, strings.Repeat("a", 256)),
+			expectedStatusCode: http.StatusBadRequest,
+		},
 	}
 
 	for _, currentTest := range tests {
@@ -191,6 +211,12 @@ func (s *roleAdminSuite) TestRoleHandlerAdmin_Patch() {
 			name:               "empty name",
 			roleID:             "dddddddd-0000-0000-0000-000000000001",
 			body:               `{"name": ""}`,
+			expectedStatusCode: http.StatusBadRequest,
+		},
+		{
+			name:               "name too long",
+			roleID:             "dddddddd-0000-0000-0000-000000000001",
+			body:               fmt.Sprintf(`{"name": "%s"}`, strings.Repeat("a", 256)),
 			expectedStatusCode: http.StatusBadRequest,
 		},
 		{
