@@ -35,9 +35,9 @@ var (
 	org1bID  = uuid.FromStringOrNil("33333333-3333-3333-3333-333333333336")
 )
 
-// This is the core tenant-isolation guarantee from the design: a membership
-// row must not be creatable if the user and organization it links belong to
-// different tenants, even though both rows individually exist.
+// A membership row must not be creatable if the user and organization it
+// links belong to different tenants, even though both rows individually
+// exist.
 func (s *organizationMembershipPersisterSuite) TestCreate_RejectsCrossTenantUser() {
 	if testing.Short() {
 		s.T().Skip("skipping test in short mode.")
