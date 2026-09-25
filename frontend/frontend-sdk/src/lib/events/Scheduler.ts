@@ -89,7 +89,12 @@ export class Scheduler {
 
           // Begin periodic checks
           this.intervalID = setInterval(async () => {
-            result = await this.checkSession();
+            try {
+              result = await this.checkSession();
+            } catch (e) {
+              console.log(e);
+              return;
+            }
 
             if (result.is_valid) {
               if (this.sessionExpiresSoon(result.expiration)) {
