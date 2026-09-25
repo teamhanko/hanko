@@ -84,6 +84,13 @@ func (s *organizationMembershipAdminSuite) TestOrganizationHandlerAdmin_AddMembe
 
 			s.Equal(currentTest.expectedStatusCode, rec.Code)
 
+			if rec.Code == http.StatusOK {
+				var got map[string]any
+				err = json.Unmarshal(rec.Body.Bytes(), &got)
+				s.Require().NoError(err)
+				s.Equal(currentTest.userID, got["user_id"])
+			}
+
 			err = e.Close()
 			s.Require().NoError(err)
 
