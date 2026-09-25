@@ -151,27 +151,62 @@ func (s *roleBindingAdminSuite) TestRoleBindingHandlerAdmin_List() {
 	if testing.Short() {
 		s.T().Skip("skipping test in short mode.")
 	}
-	s.Require().NoError(s.Storage.MigrateUp())
-	defer func() { s.Require().NoError(s.Storage.MigrateDown(-1)) }()
 
-	e := NewAdminRouter(&test.DefaultConfig, s.Storage, nil)
-	defer e.Close()
+	tests := []struct {
+		name               string
+		orgID              string
+		userID             string
+		expectedStatusCode int
+	}{
+		{
+			name:               "success",
+			orgID:              roleBindingTestOrgID,
+			userID:             roleBindingTestMemberID,
+			expectedStatusCode: http.StatusOK,
+		},
+		{
+			name:               "unknown organization",
+			orgID:              "00000000-0000-0000-0000-000000000099",
+			userID:             roleBindingTestMemberID,
+			expectedStatusCode: http.StatusNotFound,
+		},
+		{
+			name:               "unknown user",
+			orgID:              roleBindingTestOrgID,
+			userID:             "00000000-0000-0000-0000-000000000099",
+			expectedStatusCode: http.StatusNotFound,
+		},
+	}
 
-	err := s.LoadFixtures("../test/fixtures/role_binding_admin")
-	s.Require().NoError(err)
+	for _, currentTest := range tests {
+		s.Run(currentTest.name, func() {
+			s.Require().NoError(s.Storage.MigrateUp())
+			e := NewAdminRouter(&test.DefaultConfig, s.Storage, nil)
 
-	req := httptest.NewRequest(http.MethodGet, fmt.Sprintf("/organizations/%s/users/%s/roles", roleBindingTestOrgID, roleBindingTestMemberID), nil)
-	rec := httptest.NewRecorder()
+			err := s.LoadFixtures("../test/fixtures/role_binding_admin")
+			s.Require().NoError(err)
 
-	e.ServeHTTP(rec, req)
+			req := httptest.NewRequest(http.MethodGet, fmt.Sprintf("/organizations/%s/users/%s/roles", currentTest.orgID, currentTest.userID), nil)
+			rec := httptest.NewRecorder()
 
-	s.Equal(http.StatusOK, rec.Code)
+			e.ServeHTTP(rec, req)
 
-	var got []map[string]any
-	err = json.Unmarshal(rec.Body.Bytes(), &got)
-	s.Require().NoError(err)
-	s.Len(got, 1)
-	s.Equal(roleBindingTestSlug, got[0]["slug"])
+			s.Equal(currentTest.expectedStatusCode, rec.Code)
+
+			if rec.Code == http.StatusOK {
+				var got []map[string]any
+				err = json.Unmarshal(rec.Body.Bytes(), &got)
+				s.Require().NoError(err)
+				s.Len(got, 1)
+				s.Equal(roleBindingTestSlug, got[0]["slug"])
+			}
+
+			err = e.Close()
+			s.Require().NoError(err)
+
+			s.Require().NoError(s.Storage.MigrateDown(-1))
+		})
+	}
 }
 
 func (s *roleBindingAdminSuite) TestRoleBindingHandlerAdmin_Delete() {
