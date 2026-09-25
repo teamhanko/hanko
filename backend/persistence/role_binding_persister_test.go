@@ -149,10 +149,6 @@ func (s *roleBindingPersisterSuite) TestRoleDelete_CascadesToRoleBindingsAcrossO
 	s.NotNil(membershipB)
 }
 
-// This is the FK that makes "removing a user from an organization cascades to
-// that user's role_bindings for that organization" actually true at the DB
-// level - the least obvious FK in the whole design, and the fastest possible
-// signal if it's ever missing or dropped in a future migration.
 func (s *roleBindingPersisterSuite) TestMembershipDelete_CascadesToRoleBindings() {
 	if testing.Short() {
 		s.T().Skip("skipping test in short mode.")
