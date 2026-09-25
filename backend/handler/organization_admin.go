@@ -44,6 +44,14 @@ func (h *OrganizationHandlerAdmin) Create(c echo.Context) error {
 		return dto.ToHttpError(err)
 	}
 
+	trimmedName := strings.TrimSpace(body.Name)
+	if trimmedName == "" {
+		return echo.NewHTTPError(http.StatusBadRequest, "name must be a non-empty string")
+	}
+	if len(trimmedName) > 255 {
+		return echo.NewHTTPError(http.StatusBadRequest, "name must be at most 255 characters")
+	}
+
 	id, err := uuid.NewV4()
 	if err != nil {
 		return fmt.Errorf("failed to create new organization id: %w", err)
@@ -53,7 +61,7 @@ func (h *OrganizationHandlerAdmin) Create(c echo.Context) error {
 	organization := models.Organization{
 		ID:        id,
 		TenantID:  tenant.ID,
-		Name:      body.Name,
+		Name:      trimmedName,
 		CreatedAt: now,
 		UpdatedAt: now,
 	}
@@ -167,6 +175,9 @@ func (h *OrganizationHandlerAdmin) Patch(c echo.Context) error {
 			return echo.NewHTTPError(http.StatusBadRequest, "name must be a non-empty string")
 		}
 		trimmed := strings.TrimSpace(*body.Name.Value)
+		if len(trimmed) > 255 {
+			return echo.NewHTTPError(http.StatusBadRequest, "name must be at most 255 characters")
+		}
 		body.Name.Value = &trimmed
 	}
 

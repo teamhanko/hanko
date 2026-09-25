@@ -44,6 +44,16 @@ func (s *organizationAdminSuite) TestOrganizationHandlerAdmin_Create() {
 			expectedStatusCode: http.StatusBadRequest,
 		},
 		{
+			name:               "whitespace-only name",
+			body:               `{"name": "   "}`,
+			expectedStatusCode: http.StatusBadRequest,
+		},
+		{
+			name:               "name too long",
+			body:               fmt.Sprintf(`{"name": "%s"}`, strings.Repeat("a", 256)),
+			expectedStatusCode: http.StatusBadRequest,
+		},
+		{
 			name:               "with already existing name",
 			body:               `{"name": "Acme Corp"}`,
 			expectedStatusCode: http.StatusConflict,
@@ -179,6 +189,12 @@ func (s *organizationAdminSuite) TestOrganizationHandlerAdmin_Patch() {
 			name:               "empty name",
 			organizationID:     "aaaaaaaa-0000-0000-0000-000000000001",
 			body:               `{"name": ""}`,
+			expectedStatusCode: http.StatusBadRequest,
+		},
+		{
+			name:               "name too long",
+			organizationID:     "aaaaaaaa-0000-0000-0000-000000000001",
+			body:               fmt.Sprintf(`{"name": "%s"}`, strings.Repeat("a", 256)),
 			expectedStatusCode: http.StatusBadRequest,
 		},
 		{
