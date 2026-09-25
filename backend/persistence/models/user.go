@@ -46,16 +46,16 @@ type User struct {
 	OrganizationMemberships OrganizationMemberships `has_many:"organization_memberships" json:"-"`
 	RoleBindings            RoleBindings            `has_many:"role_bindings" json:"-"`
 	// Organizations is derived from OrganizationMemberships/RoleBindings by
-	// AfterEagerFind below, once pop has finished eager-loading them - not
-	// itself a pop association.
+	// AfterEagerFind, once pop has finished eager-loading them - not itself
+	// a pop association.
 	Organizations []UserOrganizationRoles `db:"-" json:"-"`
 }
 
 // AfterEagerFind is called automatically by pop once a query's eager-loaded
 // associations (EagerPreload/Eager) have finished loading - this is where
 // OrganizationMemberships/RoleBindings get grouped into Organizations,
-// mirroring GetIdentities() below, just running on pop's own schedule
-// instead of on demand.
+// mirroring GetIdentities(), just running on pop's own schedule instead of
+// on demand.
 func (user *User) AfterEagerFind(_ *pop.Connection) error {
 	rolesByOrg := make(map[uuid.UUID][]UserOrganizationRole)
 	for _, binding := range user.RoleBindings {
