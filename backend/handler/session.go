@@ -225,34 +225,17 @@ func (h *SessionHandler) getOrganizations(publicUserID uuid.UUID, tenantID uuid.
 		return nil, nil
 	}
 
-	memberships, err := h.persister.GetOrganizationMembershipPersister().ListByUser(user.ID, tenantID)
-	if err != nil {
-		return nil, fmt.Errorf("failed to get organization memberships: %w", err)
-	}
-
-	bindings, err := h.persister.GetRoleBindingPersister().ListByUser(user.ID, tenantID)
-	if err != nil {
-		return nil, fmt.Errorf("failed to get role bindings: %w", err)
-	}
-
-	roleSlugsByOrganization := make(map[uuid.UUID][]string)
-	for _, binding := range bindings {
-		if binding.Role == nil {
-			continue
-		}
-		roleSlugsByOrganization[binding.OrganizationID] = append(roleSlugsByOrganization[binding.OrganizationID], binding.Role.Slug)
-	}
-
-	organizations := make([]dto.ValidateSessionOrganization, 0, len(memberships))
-	for _, membership := range memberships {
-		if membership.Organization == nil {
-			continue
+	organizations := make([]dto.ValidateSessionOrganization, 0, len(user.Organizations))
+	for _, org := range user.Organizations {
+		roleSlugs := make([]string, 0, len(org.Roles))
+		for _, role := range org.Roles {
+			roleSlugs = append(roleSlugs, role.Slug)
 		}
 
 		organizations = append(organizations, dto.ValidateSessionOrganization{
-			ID:    membership.Organization.ID,
-			Name:  membership.Organization.Name,
-			Roles: roleSlugsByOrganization[membership.OrganizationID],
+			ID:    org.OrganizationID,
+			Name:  org.OrganizationName,
+			Roles: roleSlugs,
 		})
 	}
 
