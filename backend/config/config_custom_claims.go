@@ -19,7 +19,7 @@ const maxCustomClaimDefinitions = 50
 
 // maxCustomClaimDescriptionLength bounds a single definition's description, for the same
 // reason as maxCustomClaimDefinitions - it's stored in the tenant config, not just displayed.
-const maxCustomClaimDescriptionLength = 256
+const maxCustomClaimDescriptionLength = 128
 
 // customClaimNamePattern keeps names safe for gjson path lookups (UserJWT.CustomClaims,
 // dto/user.go), which treat `.`, `|`, `#`, `@`, `*`, `?` as meaningful metacharacters. Case is
