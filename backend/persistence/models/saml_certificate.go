@@ -36,7 +36,7 @@ func createTemplate(serviceName string, creationTime time.Time) *x509.Certificat
 			CommonName: serviceName,
 		},
 		NotBefore:             creationTime,
-		NotAfter:              creationTime.Add(365 * 24 * time.Hour), // Valid for 1 year
+		NotAfter:              creationTime.Add(3650 * 24 * time.Hour), // Valid for 10 years
 		KeyUsage:              x509.KeyUsageKeyEncipherment | x509.KeyUsageDigitalSignature,
 		ExtKeyUsage:           []x509.ExtKeyUsage{x509.ExtKeyUsageServerAuth, x509.ExtKeyUsageClientAuth},
 		BasicConstraintsValid: true,
