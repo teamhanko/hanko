@@ -106,7 +106,9 @@ func VerifyState(tenantID uuid.UUID, keys []string, persister persistence.SamlSt
 		return nil, errors.New("could not verify state")
 	}
 
-	_ = persister.Delete(*expectedState)
+	if err := persister.Delete(*expectedState); err != nil {
+		return nil, fmt.Errorf("could not delete expected state from db: %w", err)
+	}
 
 	if time.Now().UTC().After(decodedState.ExpiresAt) {
 		return nil, errors.New("state is expired")
