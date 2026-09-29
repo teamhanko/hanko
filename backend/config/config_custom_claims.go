@@ -17,6 +17,10 @@ const (
 // to keep session JWTs and the user_custom_claims row from growing unbounded.
 const maxCustomClaimDefinitions = 50
 
+// maxCustomClaimDescriptionLength bounds a single definition's description, for the same
+// reason as maxCustomClaimDefinitions - it's stored in the tenant config, not just displayed.
+const maxCustomClaimDescriptionLength = 128
+
 // customClaimNamePattern keeps names safe for gjson path lookups (UserJWT.CustomClaims,
 // dto/user.go), which treat `.`, `|`, `#`, `@`, `*`, `?` as meaningful metacharacters. Case is
 // not restricted - that's the admin's choice, not ours.
@@ -70,6 +74,9 @@ func (d *CustomClaimDefinition) Validate() error {
 	}
 	if reservedCustomClaimNames[strings.ToLower(d.Name)] {
 		return fmt.Errorf("name %q is reserved", d.Name)
+	}
+	if len(d.Description) > maxCustomClaimDescriptionLength {
+		return fmt.Errorf("description must not exceed %d characters", maxCustomClaimDescriptionLength)
 	}
 
 	switch d.Type {

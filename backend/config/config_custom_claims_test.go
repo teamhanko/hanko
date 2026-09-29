@@ -185,6 +185,28 @@ func TestCustomClaimDefinition_Validate_UnknownType(t *testing.T) {
 	assert.Error(t, err)
 }
 
+func TestCustomClaimDefinition_Validate_DescriptionAtLimit(t *testing.T) {
+	definition := CustomClaimDefinition{
+		Name:        "role",
+		Type:        CustomClaimTypeString,
+		Description: strings.Repeat("a", maxCustomClaimDescriptionLength),
+	}
+
+	assert.NoError(t, definition.Validate())
+}
+
+func TestCustomClaimDefinition_Validate_DescriptionTooLong(t *testing.T) {
+	definition := CustomClaimDefinition{
+		Name:        "role",
+		Type:        CustomClaimTypeString,
+		Description: strings.Repeat("a", maxCustomClaimDescriptionLength+1),
+	}
+
+	err := definition.Validate()
+
+	assert.Error(t, err)
+}
+
 func TestCustomClaims_Validate_TooManyDefinitions(t *testing.T) {
 	definitions := make(CustomClaimDefinitions, maxCustomClaimDefinitions+1)
 	for i := 0; i < maxCustomClaimDefinitions+1; i++ {
