@@ -2,16 +2,13 @@ package handler
 
 import (
 	"encoding/json"
-	"errors"
 	"fmt"
 	"net/http"
 	"net/url"
 	"strconv"
 
-	"github.com/go-sql-driver/mysql"
 	"github.com/gobuffalo/pop/v6"
 	"github.com/gofrs/uuid"
-	"github.com/jackc/pgx/v5/pgconn"
 	koanfJson "github.com/knadh/koanf/parsers/json"
 	"github.com/knadh/koanf/providers/rawbytes"
 	"github.com/knadh/koanf/v2"
@@ -76,14 +73,8 @@ func (h *TenantHandler) Create(c echo.Context) error {
 	return h.persister.Transaction(func(tx *pop.Connection) error {
 		err = h.persister.GetTenantPersisterWithConnection(tx).Create(tenant)
 		if err != nil {
-			if pgErr, ok := errors.AsType[*pgconn.PgError](err); ok {
-				if pgErr.Code == "23505" {
-					return echo.NewHTTPError(http.StatusConflict, fmt.Sprintf("failed to create tenant with id '%v': %s", tenant.ID, "tenant already exists"))
-				}
-			} else if mysqlErr, ok2 := errors.AsType[*mysql.MySQLError](err); ok2 {
-				if mysqlErr.Number == 1062 {
-					return echo.NewHTTPError(http.StatusConflict, fmt.Sprintf("failed to create tenant with id '%v': %s", tenant.ID, "tenant already exists"))
-				}
+			if isUniqueConstraintViolation(err) {
+				return echo.NewHTTPError(http.StatusConflict, fmt.Sprintf("failed to create tenant with id '%v': %s", tenant.ID, "tenant already exists"))
 			}
 			return fmt.Errorf("failed to create tenant: %w", err)
 		}

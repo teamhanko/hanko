@@ -45,13 +45,13 @@ func (s *sessionAdminSuite) TestSessionAdminHandler_List() {
 	}{
 		{
 			name:               "should return a list of sessions with multiple entries",
-			userID:             "ec4ef049-5b88-4321-a173-21b0eff06a04",
+			userID:             "eeeeeeee-0000-0000-0000-000000000001",
 			expectedStatusCode: http.StatusOK,
 			expectedCount:      2,
 		},
 		{
 			name:               "should return a list of sessions with one entry",
-			userID:             "38bf5a00-d7ea-40a5-a5de-48722c148925",
+			userID:             "eeeeeeee-0000-0000-0000-000000000002",
 			expectedStatusCode: http.StatusOK,
 			expectedCount:      1,
 		},
@@ -152,20 +152,23 @@ func (s *sessionAdminSuite) TestSessionAdminHandler_Delete() {
 	tests := []struct {
 		name               string
 		userID             string
+		internalUserID     string
 		sessionID          string
 		expectedStatusCode int
 		expectedCount      int
 	}{
 		{
 			name:               "should delete session for user with multiple sessions",
-			userID:             "ec4ef049-5b88-4321-a173-21b0eff06a04",
+			userID:             "eeeeeeee-0000-0000-0000-000000000001",
+			internalUserID:     "ec4ef049-5b88-4321-a173-21b0eff06a04",
 			sessionID:          "d8d6dc27-fcf9-4a5c-bb50-a7a03067d936",
 			expectedCount:      1,
 			expectedStatusCode: http.StatusNoContent,
 		},
 		{
 			name:               "should delete session for user with one session",
-			userID:             "38bf5a00-d7ea-40a5-a5de-48722c148925",
+			userID:             "eeeeeeee-0000-0000-0000-000000000002",
+			internalUserID:     "38bf5a00-d7ea-40a5-a5de-48722c148925",
 			sessionID:          "108f3789-a795-43bd-a58f-ac8e80a213cd",
 			expectedCount:      0,
 			expectedStatusCode: http.StatusNoContent,
@@ -178,7 +181,7 @@ func (s *sessionAdminSuite) TestSessionAdminHandler_Delete() {
 		},
 		{
 			name:               "should fail if session is not associated to the user",
-			userID:             "38bf5a00-d7ea-40a5-a5de-48722c148925",
+			userID:             "eeeeeeee-0000-0000-0000-000000000002",
 			sessionID:          "74ba812a-923a-43e4-8020-9535dcadc0a8",
 			expectedStatusCode: http.StatusNotFound,
 		},
@@ -218,7 +221,7 @@ func (s *sessionAdminSuite) TestSessionAdminHandler_Delete() {
 			s.Equal(currentTest.expectedStatusCode, rec.Code)
 			if http.StatusNoContent == rec.Code {
 				credentials, err := s.Storage.GetSessionPersister().ListActive(
-					uuid.FromStringOrNil(currentTest.userID),
+					uuid.FromStringOrNil(currentTest.internalUserID),
 					uuid.FromStringOrNil(config.DefaultTenantID),
 				)
 				s.Require().NoError(err)

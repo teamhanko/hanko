@@ -1,0 +1,12 @@
+create_table("roles") {
+	t.Column("id", "uuid", {primary: true})
+	t.Column("tenant_id", "uuid", {"null": false})
+	t.Column("slug", "string", {"null": false})
+	t.Column("name", "string", {"null": false})
+
+	t.Timestamps()
+
+	t.Index(["tenant_id", "slug"], {"unique": true})
+	t.Index(["tenant_id", "id"], {"unique": true})
+	t.ForeignKey("tenant_id", {"tenants": ["id"]}, {"on_delete": "cascade", "on_update": "cascade"})
+}
