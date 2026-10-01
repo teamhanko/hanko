@@ -21,6 +21,7 @@ type RedisLocker struct {
 type RedisLockerConfig struct {
 	Address  string
 	Password string
+	Database int
 	Expiry   time.Duration
 }
 
@@ -32,7 +33,9 @@ func NewRedisLocker(config RedisLockerConfig) *RedisLocker {
 
 	pool := &redis.Pool{
 		Dial: func() (redis.Conn, error) {
-			c, err := redis.Dial("tcp", config.Address, redis.DialPassword(config.Password))
+			c, err := redis.Dial("tcp", config.Address,
+				redis.DialPassword(config.Password),
+				redis.DialDatabase(config.Database))
 			if err != nil {
 				return nil, err
 			}
