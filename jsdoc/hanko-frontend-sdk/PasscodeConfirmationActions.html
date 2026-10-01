@@ -1,0 +1,295 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title> PasscodeConfirmationActions</title>
+
+  <script src="https://cdn.jsdelivr.net/gh/google/code-prettify@master/loader/run_prettify.js"></script>
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+  <script src="./build/entry.js"></script>
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+  <!--[if lt IE 9]>
+    <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+  <![endif]-->
+  <link href="https://fonts.googleapis.com/css?family=Roboto:100,400,700|Inconsolata,700" rel="stylesheet">
+  <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.6.3/css/all.css" integrity="sha384-UHRtZLI+pbxtHCWp1t77Bi1L4ZtiqrqD80Kn4Z8NTSRyMA2Fd33n5dQ8lWUE00s/" crossorigin="anonymous">
+  <link type="text/css" rel="stylesheet" href="https://jmblog.github.io/color-themes-for-google-code-prettify/themes/tomorrow-night.min.css">
+  <link type="text/css" rel="stylesheet" href="styles/app.min.css">
+  <link type="text/css" rel="stylesheet" href="styles/iframe.css">
+  <link type="text/css" rel="stylesheet" href="">
+  <script async defer src="https://buttons.github.io/buttons.js"></script>
+
+  
+</head>
+
+
+
+<body class="layout small-header">
+    <div id="stickyNavbarOverlay"></div>
+    
+
+<div class="top-nav">
+    <div class="inner">
+        <a id="hamburger" role="button" class="navbar-burger" aria-label="menu" aria-expanded="false">
+            <span aria-hidden="true"></span>
+            <span aria-hidden="true"></span>
+            <span aria-hidden="true"></span>
+        </a>
+        <div class="logo">
+            
+            
+        </div>
+        <div class="menu">
+            
+            <div class="navigation">
+                <a
+                    href="index.html"
+                    class="link"
+                >
+                    Documentation
+                </a>
+                
+                
+                
+            </div>
+        </div>
+    </div>
+</div>
+    <div id="main">
+        <div
+            class="sidebar "
+            id="sidebarNav"
+        >
+            
+            <nav>
+                
+                    <h2><a href="index.html">Documentation</a></h2><div class="category"><h3>Classes</h3><ul><li><a href="Hanko.html">Hanko</a></li></ul><h3>Interfaces</h3><ul><li><a href="HankoOptions.html">HankoOptions</a></li></ul><h3>Global</h3><ul><li><a href="global.html#clearStoredCodeVerifier">clearStoredCodeVerifier</a></li><li><a href="global.html#generateCodeVerifier">generateCodeVerifier</a></li><li><a href="global.html#getStoredCodeVerifier">getStoredCodeVerifier</a></li><li><a href="global.html#setStoredCodeVerifier">setStoredCodeVerifier</a></li></ul></div><div class="category"><h2>SDK</h2><h3>Classes / FlowAPI</h3><ul><li><a href="Action.html">Action</a></li><li><a href="State.html">State</a></li></ul><h3>Classes / Advanced</h3><ul><li><a href="Client.html">Client</a></li><li><a href="HttpClient.html">HttpClient</a></li><li><a href="Relay.html">Relay</a></li></ul><h3>Classes / Errors</h3><ul><li><a href="ConflictError.html">ConflictError</a></li><li><a href="EmailAddressAlreadyExistsError.html">EmailAddressAlreadyExistsError</a></li><li><a href="ForbiddenError.html">ForbiddenError</a></li><li><a href="HankoError.html">HankoError</a></li><li><a href="InvalidPasscodeError.html">InvalidPasscodeError</a></li><li><a href="InvalidPasswordError.html">InvalidPasswordError</a></li><li><a href="InvalidWebauthnCredentialError.html">InvalidWebauthnCredentialError</a></li><li><a href="MaxNumOfEmailAddressesReachedError.html">MaxNumOfEmailAddressesReachedError</a></li><li><a href="MaxNumOfPasscodeAttemptsReachedError.html">MaxNumOfPasscodeAttemptsReachedError</a></li><li><a href="NotFoundError.html">NotFoundError</a></li><li><a href="PasscodeExpiredError.html">PasscodeExpiredError</a></li><li><a href="RequestTimeoutError.html">RequestTimeoutError</a></li><li><a href="TechnicalError.html">TechnicalError</a></li><li><a href="ThirdPartyError.html">ThirdPartyError</a></li><li><a href="TooManyRequestsError.html">TooManyRequestsError</a></li><li><a href="UnauthorizedError.html">UnauthorizedError</a></li><li><a href="UserVerificationError.html">UserVerificationError</a></li><li><a href="WebauthnRequestCancelledError.html">WebauthnRequestCancelledError</a></li></ul><h3>Classes / Events</h3><ul><li><a href="Listener.html">Listener</a></li></ul><h3>Classes / Clients</h3><ul><li><a href="SessionClient.html">SessionClient</a></li><li><a href="UserClient.html">UserClient</a></li></ul><h3>Classes / Utilities</h3><ul><li><a href="WebauthnSupport.html">WebauthnSupport</a></li></ul><h3>Interfaces / Flow Actions</h3><ul><li><a href="CredentialOnboardingChooserActions.html">CredentialOnboardingChooserActions</a></li><li><a href="DeviceTrustActions.html">DeviceTrustActions</a></li><li><a href="LoginInitActions.html">LoginInitActions</a></li><li><a href="LoginMethodChooserActions.html">LoginMethodChooserActions</a></li><li><a href="LoginOTPActions.html">LoginOTPActions</a></li><li><a href="LoginPasskeyActions.html">LoginPasskeyActions</a></li><li><a href="LoginPasswordActions.html">LoginPasswordActions</a></li><li><a href="LoginPasswordRecoveryActions.html">LoginPasswordRecoveryActions</a></li><li><a href="LoginSecurityKeyActions.html">LoginSecurityKeyActions</a></li><li><a href="MFAAOTPSecretCreationActions.html">MFAAOTPSecretCreationActions</a></li><li><a href="MFAMethodChooserActions.html">MFAMethodChooserActions</a></li><li><a href="MFASecurityKeyCreationActions.html">MFASecurityKeyCreationActions</a></li><li><a href="OnboardingCreatePasskeyActions.html">OnboardingCreatePasskeyActions</a></li><li><a href="OnboardingEmailActions.html">OnboardingEmailActions</a></li><li><a href="OnboardingUsernameActions.html">OnboardingUsernameActions</a></li><li><a href="OnboardingVerifyPasskeyAttestationActions.html">OnboardingVerifyPasskeyAttestationActions</a></li><li><a href="PasscodeConfirmationActions.html">PasscodeConfirmationActions</a></li><li><a href="PasswordCreationActions.html">PasswordCreationActions</a></li><li><a href="PreflightActions.html">PreflightActions</a></li><li><a href="ProfileInitActions.html">ProfileInitActions</a></li><li><a href="RegistrationInitActions.html">RegistrationInitActions</a></li><li><a href="ThirdPartyActions.html">ThirdPartyActions</a></li></ul><h3>Interfaces / Flow Types</h3><ul><li><a href="Actions.html">Actions</a></li><li><a href="FlowResponse.html">FlowResponse</a></li><li><a href="Payloads.html">Payloads</a></li><li><a href="StateInitConfig.html">StateInitConfig</a></li></ul><h3>Interfaces / Flow Inputs</h3><ul><li><a href="AllowedInputValues.html">AllowedInputValues</a></li><li><a href="ContinueWithLoginIdentifierInputs.html">ContinueWithLoginIdentifierInputs</a></li><li><a href="DisconnectThirdpartyInputs.html">DisconnectThirdpartyInputs</a></li><li><a href="EmailCreateInputs.html">EmailCreateInputs</a></li><li><a href="EmailDeleteInputs.html">EmailDeleteInputs</a></li><li><a href="EmailSetPrimaryInputs.html">EmailSetPrimaryInputs</a></li><li><a href="EmailVerifyInputs.html">EmailVerifyInputs</a></li><li><a href="ExchangeTokenInputs.html">ExchangeTokenInputs</a></li><li><a href="Input.html">Input</a></li><li><a href="OTPCodeInputs.html">OTPCodeInputs</a></li><li><a href="PasskeyCredentialDeleteInputs.html">PasskeyCredentialDeleteInputs</a></li><li><a href="PasskeyCredentialRenameInputs.html">PasskeyCredentialRenameInputs</a></li><li><a href="PasswordInputs.html">PasswordInputs</a></li><li><a href="PasswordRecoveryInputs.html">PasswordRecoveryInputs</a></li><li><a href="PatchMetadataInputs.html">PatchMetadataInputs</a></li><li><a href="RegisterClientCapabilitiesInputs.html">RegisterClientCapabilitiesInputs</a></li><li><a href="RegisterLoginIdentifierInputs.html">RegisterLoginIdentifierInputs</a></li><li><a href="RegisterPasswordInputs.html">RegisterPasswordInputs</a></li><li><a href="RememberMeInputs.html">RememberMeInputs</a></li><li><a href="SecurityKeyDeleteInputs.html">SecurityKeyDeleteInputs</a></li><li><a href="SessionDeleteInputs.html">SessionDeleteInputs</a></li><li><a href="ThirdpartyOauthInputs.html">ThirdpartyOauthInputs</a></li><li><a href="UsernameSetInputs.html">UsernameSetInputs</a></li><li><a href="VerifyPasscodeInputs.html">VerifyPasscodeInputs</a></li><li><a href="WebauthnVerifyAssertionResponseInputs.html">WebauthnVerifyAssertionResponseInputs</a></li><li><a href="WebauthnVerifyAttestationResponseInputs.html">WebauthnVerifyAttestationResponseInputs</a></li></ul><h3>Interfaces / DTO</h3><ul><li><a href="Email.html">Email</a></li><li><a href="Emails.html">Emails</a></li><li><a href="Identity.html">Identity</a></li><li><a href="SessionCheckResponse.html">SessionCheckResponse</a></li></ul><h3>Interfaces / Flow Payloads</h3><ul><li><a href="LastLogin.html">LastLogin</a></li><li><a href="LoginInitPayload.html">LoginInitPayload</a></li><li><a href="LoginPasskeyPayload.html">LoginPasskeyPayload</a></li><li><a href="MFAConfig.html">MFAConfig</a></li><li><a href="MFAOTPSecretCreationPayload.html">MFAOTPSecretCreationPayload</a></li><li><a href="OnboardingVerifyPasskeyAttestationPayload.html">OnboardingVerifyPasskeyAttestationPayload</a></li><li><a href="PasscodeConfirmationPayload.html">PasscodeConfirmationPayload</a></li><li><a href="ProfilePayload.html">ProfilePayload</a></li><li><a href="Session.html">Session</a></li><li><a href="SuccessPayload.html">SuccessPayload</a></li><li><a href="ThirdPartyPayload.html">ThirdPartyPayload</a></li><li><a href="User.html">User</a></li><li><a href="Username.html">Username</a></li><li><a href="WebauthnCredential.html">WebauthnCredential</a></li></ul><h3>Interfaces / Flow Errors</h3><ul><li><a href="FlowError.html">FlowError</a></li></ul><h3>Interfaces / Events</h3><ul><li><a href="SessionDetail.html">SessionDetail</a></li></ul><h3><a href="global.html">Global</a></h3></div>
+                
+            </nav>
+        </div>
+        <div class="core" id="main-content-wrapper">
+            <div class="content">
+                <header class="page-title">
+                    <p>Interface</p>
+                    <h1>PasscodeConfirmationActions</h1>
+                </header>
+                
+
+
+
+
+<section>
+
+<header>
+    
+        <h2>PasscodeConfirmationActions</h2>
+        
+    
+</header>
+
+<article>
+    <div class="container-overview">
+    
+        
+            <div class="description">Actions available in the `passcode_confirmation` state, while confirming a one-time passcode sent to the user.</div>
+        
+
+        
+
+
+    <h5 class="subsection-title">Properties:</h5>
+
+    
+<div class="table-container">
+    <table class="props table">
+        <thead>
+        <tr>
+            
+            <th>Name</th>
+            
+
+            <th>Type</th>
+
+            
+
+            
+
+            <th class="last">Description</th>
+        </tr>
+        </thead>
+
+        <tbody>
+        
+            
+<tr class="deep-level-0">
+    
+        <td class="name"><code>verify_passcode</code></td>
+    
+
+    <td class="type">
+    
+        
+<code class="param-type"><a href="Action.html">Action</a>.&lt;<a href="VerifyPasscodeInputs.html">VerifyPasscodeInputs</a>></code>
+
+
+    
+    </td>
+
+    
+
+    
+
+    <td class="description last">Submits the entered passcode for verification.</td>
+</tr>
+
+        
+            
+<tr class="deep-level-0">
+    
+        <td class="name"><code>resend_passcode</code></td>
+    
+
+    <td class="type">
+    
+        
+<code class="param-type"><a href="Action.html">Action</a>.&lt;null></code>
+
+
+    
+    </td>
+
+    
+
+    
+
+    <td class="description last">Requests the passcode to be sent again.</td>
+</tr>
+
+        
+            
+<tr class="deep-level-0">
+    
+        <td class="name"><code>back</code></td>
+    
+
+    <td class="type">
+    
+        
+<code class="param-type"><a href="Action.html">Action</a>.&lt;null></code>
+
+
+    
+    </td>
+
+    
+
+    
+
+    <td class="description last">Returns to the previous state.</td>
+</tr>
+
+        
+        </tbody>
+    </table>
+</div>
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    
+
+    
+
+    
+
+    
+        <p class="tag-source">
+            <a href="lib_flow-api_types_action.ts.html" class="button">View Source</a>
+            <span>
+                <a href="lib_flow-api_types_action.ts.html">lib/flow-api/types/action.ts</a>, <a href="lib_flow-api_types_action.ts.html#line196">line 196</a>
+            </span>
+        </p>
+    
+</dl>
+
+
+        
+    
+    </div>
+    
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+</article>
+
+</section>
+
+
+
+
+            </div>
+            
+            <footer class="footer">
+                <div class="content has-text-centered">
+                    <p>Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 4.0.5</a></p>
+                    <p class="sidebar-created-by">
+                        <a href="https://github.com/SoftwareBrothers/better-docs" target="_blank">BetterDocs theme</a> provided with <i class="fas fa-heart"></i> by
+                        <a href="http://softwarebrothers.co" target="_blank">SoftwareBrothers - JavaScript Development Agency</a>
+                    </p>
+                </div>
+            </footer>
+            
+        </div>
+        <div id="side-nav" class="side-nav">
+        </div>
+    </div>
+<script src="scripts/app.min.js"></script>
+<script>PR.prettyPrint();</script>
+<script src="scripts/linenumber.js"> </script>
+
+
+</body>
+</html>

@@ -1,0 +1,437 @@
+
+
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title> lib/flow-api/types/payload.ts</title>
+
+  <script src="https://cdn.jsdelivr.net/gh/google/code-prettify@master/loader/run_prettify.js"></script>
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+  <script src="./build/entry.js"></script>
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+  <!--[if lt IE 9]>
+    <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+  <![endif]-->
+  <link href="https://fonts.googleapis.com/css?family=Roboto:100,400,700|Inconsolata,700" rel="stylesheet">
+  <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.6.3/css/all.css" integrity="sha384-UHRtZLI+pbxtHCWp1t77Bi1L4ZtiqrqD80Kn4Z8NTSRyMA2Fd33n5dQ8lWUE00s/" crossorigin="anonymous">
+  <link type="text/css" rel="stylesheet" href="https://jmblog.github.io/color-themes-for-google-code-prettify/themes/tomorrow-night.min.css">
+  <link type="text/css" rel="stylesheet" href="styles/app.min.css">
+  <link type="text/css" rel="stylesheet" href="styles/iframe.css">
+  <link type="text/css" rel="stylesheet" href="">
+  <script async defer src="https://buttons.github.io/buttons.js"></script>
+
+  
+</head>
+
+
+
+<body class="layout small-header">
+    <div id="stickyNavbarOverlay"></div>
+    
+
+<div class="top-nav">
+    <div class="inner">
+        <a id="hamburger" role="button" class="navbar-burger" aria-label="menu" aria-expanded="false">
+            <span aria-hidden="true"></span>
+            <span aria-hidden="true"></span>
+            <span aria-hidden="true"></span>
+        </a>
+        <div class="logo">
+            
+            
+        </div>
+        <div class="menu">
+            
+            <div class="navigation">
+                <a
+                    href="index.html"
+                    class="link"
+                >
+                    Documentation
+                </a>
+                
+                
+                
+            </div>
+        </div>
+    </div>
+</div>
+    <div id="main">
+        <div
+            class="sidebar "
+            id="sidebarNav"
+        >
+            
+            <nav>
+                
+                    <h2><a href="index.html">Documentation</a></h2><div class="category"><h3>Classes</h3><ul><li><a href="Hanko.html">Hanko</a></li></ul><h3>Interfaces</h3><ul><li><a href="HankoOptions.html">HankoOptions</a></li></ul><h3>Global</h3><ul><li><a href="global.html#clearStoredCodeVerifier">clearStoredCodeVerifier</a></li><li><a href="global.html#generateCodeVerifier">generateCodeVerifier</a></li><li><a href="global.html#getStoredCodeVerifier">getStoredCodeVerifier</a></li><li><a href="global.html#setStoredCodeVerifier">setStoredCodeVerifier</a></li></ul></div><div class="category"><h2>SDK</h2><h3>Classes / FlowAPI</h3><ul><li><a href="Action.html">Action</a></li><li><a href="State.html">State</a></li></ul><h3>Classes / Advanced</h3><ul><li><a href="Client.html">Client</a></li><li><a href="HttpClient.html">HttpClient</a></li><li><a href="Relay.html">Relay</a></li></ul><h3>Classes / Errors</h3><ul><li><a href="ConflictError.html">ConflictError</a></li><li><a href="EmailAddressAlreadyExistsError.html">EmailAddressAlreadyExistsError</a></li><li><a href="ForbiddenError.html">ForbiddenError</a></li><li><a href="HankoError.html">HankoError</a></li><li><a href="InvalidPasscodeError.html">InvalidPasscodeError</a></li><li><a href="InvalidPasswordError.html">InvalidPasswordError</a></li><li><a href="InvalidWebauthnCredentialError.html">InvalidWebauthnCredentialError</a></li><li><a href="MaxNumOfEmailAddressesReachedError.html">MaxNumOfEmailAddressesReachedError</a></li><li><a href="MaxNumOfPasscodeAttemptsReachedError.html">MaxNumOfPasscodeAttemptsReachedError</a></li><li><a href="NotFoundError.html">NotFoundError</a></li><li><a href="PasscodeExpiredError.html">PasscodeExpiredError</a></li><li><a href="RequestTimeoutError.html">RequestTimeoutError</a></li><li><a href="TechnicalError.html">TechnicalError</a></li><li><a href="ThirdPartyError.html">ThirdPartyError</a></li><li><a href="TooManyRequestsError.html">TooManyRequestsError</a></li><li><a href="UnauthorizedError.html">UnauthorizedError</a></li><li><a href="UserVerificationError.html">UserVerificationError</a></li><li><a href="WebauthnRequestCancelledError.html">WebauthnRequestCancelledError</a></li></ul><h3>Classes / Events</h3><ul><li><a href="Listener.html">Listener</a></li></ul><h3>Classes / Clients</h3><ul><li><a href="SessionClient.html">SessionClient</a></li><li><a href="UserClient.html">UserClient</a></li></ul><h3>Classes / Utilities</h3><ul><li><a href="WebauthnSupport.html">WebauthnSupport</a></li></ul><h3>Interfaces / Flow Actions</h3><ul><li><a href="CredentialOnboardingChooserActions.html">CredentialOnboardingChooserActions</a></li><li><a href="DeviceTrustActions.html">DeviceTrustActions</a></li><li><a href="LoginInitActions.html">LoginInitActions</a></li><li><a href="LoginMethodChooserActions.html">LoginMethodChooserActions</a></li><li><a href="LoginOTPActions.html">LoginOTPActions</a></li><li><a href="LoginPasskeyActions.html">LoginPasskeyActions</a></li><li><a href="LoginPasswordActions.html">LoginPasswordActions</a></li><li><a href="LoginPasswordRecoveryActions.html">LoginPasswordRecoveryActions</a></li><li><a href="LoginSecurityKeyActions.html">LoginSecurityKeyActions</a></li><li><a href="MFAAOTPSecretCreationActions.html">MFAAOTPSecretCreationActions</a></li><li><a href="MFAMethodChooserActions.html">MFAMethodChooserActions</a></li><li><a href="MFASecurityKeyCreationActions.html">MFASecurityKeyCreationActions</a></li><li><a href="OnboardingCreatePasskeyActions.html">OnboardingCreatePasskeyActions</a></li><li><a href="OnboardingEmailActions.html">OnboardingEmailActions</a></li><li><a href="OnboardingUsernameActions.html">OnboardingUsernameActions</a></li><li><a href="OnboardingVerifyPasskeyAttestationActions.html">OnboardingVerifyPasskeyAttestationActions</a></li><li><a href="PasscodeConfirmationActions.html">PasscodeConfirmationActions</a></li><li><a href="PasswordCreationActions.html">PasswordCreationActions</a></li><li><a href="PreflightActions.html">PreflightActions</a></li><li><a href="ProfileInitActions.html">ProfileInitActions</a></li><li><a href="RegistrationInitActions.html">RegistrationInitActions</a></li><li><a href="ThirdPartyActions.html">ThirdPartyActions</a></li></ul><h3>Interfaces / Flow Types</h3><ul><li><a href="Actions.html">Actions</a></li><li><a href="FlowResponse.html">FlowResponse</a></li><li><a href="Payloads.html">Payloads</a></li><li><a href="StateInitConfig.html">StateInitConfig</a></li></ul><h3>Interfaces / Flow Inputs</h3><ul><li><a href="AllowedInputValues.html">AllowedInputValues</a></li><li><a href="ContinueWithLoginIdentifierInputs.html">ContinueWithLoginIdentifierInputs</a></li><li><a href="DisconnectThirdpartyInputs.html">DisconnectThirdpartyInputs</a></li><li><a href="EmailCreateInputs.html">EmailCreateInputs</a></li><li><a href="EmailDeleteInputs.html">EmailDeleteInputs</a></li><li><a href="EmailSetPrimaryInputs.html">EmailSetPrimaryInputs</a></li><li><a href="EmailVerifyInputs.html">EmailVerifyInputs</a></li><li><a href="ExchangeTokenInputs.html">ExchangeTokenInputs</a></li><li><a href="Input.html">Input</a></li><li><a href="OTPCodeInputs.html">OTPCodeInputs</a></li><li><a href="PasskeyCredentialDeleteInputs.html">PasskeyCredentialDeleteInputs</a></li><li><a href="PasskeyCredentialRenameInputs.html">PasskeyCredentialRenameInputs</a></li><li><a href="PasswordInputs.html">PasswordInputs</a></li><li><a href="PasswordRecoveryInputs.html">PasswordRecoveryInputs</a></li><li><a href="PatchMetadataInputs.html">PatchMetadataInputs</a></li><li><a href="RegisterClientCapabilitiesInputs.html">RegisterClientCapabilitiesInputs</a></li><li><a href="RegisterLoginIdentifierInputs.html">RegisterLoginIdentifierInputs</a></li><li><a href="RegisterPasswordInputs.html">RegisterPasswordInputs</a></li><li><a href="RememberMeInputs.html">RememberMeInputs</a></li><li><a href="SecurityKeyDeleteInputs.html">SecurityKeyDeleteInputs</a></li><li><a href="SessionDeleteInputs.html">SessionDeleteInputs</a></li><li><a href="ThirdpartyOauthInputs.html">ThirdpartyOauthInputs</a></li><li><a href="UsernameSetInputs.html">UsernameSetInputs</a></li><li><a href="VerifyPasscodeInputs.html">VerifyPasscodeInputs</a></li><li><a href="WebauthnVerifyAssertionResponseInputs.html">WebauthnVerifyAssertionResponseInputs</a></li><li><a href="WebauthnVerifyAttestationResponseInputs.html">WebauthnVerifyAttestationResponseInputs</a></li></ul><h3>Interfaces / DTO</h3><ul><li><a href="Email.html">Email</a></li><li><a href="Emails.html">Emails</a></li><li><a href="Identity.html">Identity</a></li><li><a href="SessionCheckResponse.html">SessionCheckResponse</a></li></ul><h3>Interfaces / Flow Payloads</h3><ul><li><a href="LastLogin.html">LastLogin</a></li><li><a href="LoginInitPayload.html">LoginInitPayload</a></li><li><a href="LoginPasskeyPayload.html">LoginPasskeyPayload</a></li><li><a href="MFAConfig.html">MFAConfig</a></li><li><a href="MFAOTPSecretCreationPayload.html">MFAOTPSecretCreationPayload</a></li><li><a href="OnboardingVerifyPasskeyAttestationPayload.html">OnboardingVerifyPasskeyAttestationPayload</a></li><li><a href="PasscodeConfirmationPayload.html">PasscodeConfirmationPayload</a></li><li><a href="ProfilePayload.html">ProfilePayload</a></li><li><a href="Session.html">Session</a></li><li><a href="SuccessPayload.html">SuccessPayload</a></li><li><a href="ThirdPartyPayload.html">ThirdPartyPayload</a></li><li><a href="User.html">User</a></li><li><a href="Username.html">Username</a></li><li><a href="WebauthnCredential.html">WebauthnCredential</a></li></ul><h3>Interfaces / Flow Errors</h3><ul><li><a href="FlowError.html">FlowError</a></li></ul><h3>Interfaces / Events</h3><ul><li><a href="SessionDetail.html">SessionDetail</a></li></ul><h3><a href="global.html">Global</a></h3></div>
+                
+            </nav>
+        </div>
+        <div class="core" id="main-content-wrapper">
+            <div class="content">
+                <header class="page-title">
+                    <p>Source</p>
+                    <h1>lib/flow-api/types/payload.ts</h1>
+                </header>
+                
+
+
+
+    
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>import {
+  CredentialCreationOptionsJSON,
+  CredentialRequestOptionsJSON,
+} from "@github/webauthn-json/src/webauthn-json/basic/json";
+import { Claims } from "../../Dto";
+
+/**
+ * Payload of the `passcode_confirmation` state, describing the passcode that was sent to the user.
+ * @interface
+ * @category SDK
+ * @subcategory Flow Payloads
+ * @property {boolean} passcode_resent - Indicates whether the passcode was just resent.
+ * @property {number} resend_after - The number of seconds to wait before the passcode can be resent again.
+ */
+export interface PasscodeConfirmationPayload {
+  readonly passcode_resent: boolean;
+  readonly resend_after: number;
+}
+
+/**
+ * Payload of the `login_passkey` state, carrying the options needed to perform the WebAuthn assertion ceremony.
+ * @interface
+ * @category SDK
+ * @subcategory Flow Payloads
+ * @property {CredentialRequestOptionsJSON} request_options - The WebAuthn request options to pass to `navigator.credentials.get()`.
+ */
+export interface LoginPasskeyPayload {
+  readonly request_options: CredentialRequestOptionsJSON;
+}
+
+/**
+ * Payload of the `mfa_otp_secret_creation` state, carrying the newly generated TOTP secret.
+ * @interface
+ * @category SDK
+ * @subcategory Flow Payloads
+ * @property {string} otp_secret - The generated TOTP secret.
+ * @property {string} otp_image_source - A data URL of a QR code image encoding the secret, for scanning with an authenticator app.
+ */
+export interface MFAOTPSecretCreationPayload {
+  readonly otp_secret: string;
+  readonly otp_image_source: string;
+}
+
+/**
+ * Payload of states that expect a WebAuthn attestation (registration) ceremony to be performed,
+ * carrying the options needed to create the credential.
+ * @interface
+ * @category SDK
+ * @subcategory Flow Payloads
+ * @property {CredentialCreationOptionsJSON} creation_options - The WebAuthn creation options to pass to `navigator.credentials.create()`.
+ */
+export interface OnboardingVerifyPasskeyAttestationPayload {
+  readonly creation_options: CredentialCreationOptionsJSON;
+}
+
+/**
+ * Payload of the `login_init` state. `request_options` is present when passkey autofill / conditional
+ * mediation should be attempted immediately.
+ * @interface
+ * @category SDK
+ * @subcategory Flow Payloads
+ * @property {CredentialRequestOptionsJSON} [request_options] - The WebAuthn request options for conditional mediation, if applicable.
+ */
+export interface LoginInitPayload {
+  readonly request_options?: CredentialRequestOptionsJSON;
+}
+
+/**
+ * A WebAuthn credential (passkey or security key) registered to a user.
+ * @interface
+ * @category SDK
+ * @subcategory Flow Payloads
+ * @property {string} id - The credential's unique ID.
+ * @property {string} [name] - A user-assigned name for the credential.
+ * @property {string} public_key - The credential's public key.
+ * @property {string} attestation_type - The WebAuthn attestation type used during registration.
+ * @property {string} aaguid - The authenticator's AAGUID.
+ * @property {string} [last_used_at] - Timestamp of the last time the credential was used, if any.
+ * @property {string} created_at - Timestamp of when the credential was created.
+ * @property {string} transports - The transports supported by the authenticator (e.g. `usb`, `internal`).
+ * @property {string} backup_eligible - Whether the credential is eligible for backup (e.g. via a passkey provider).
+ * @property {string} backup_state - The credential's current backup state.
+ */
+export interface WebauthnCredential {
+  readonly id: string;
+  readonly name?: string;
+  readonly public_key: string;
+  readonly attestation_type: string;
+  readonly aaguid: string;
+  readonly last_used_at?: string;
+  readonly created_at: string;
+  readonly transports: string;
+  readonly backup_eligible: string;
+  readonly backup_state: string;
+}
+
+/**
+ * A username assigned to a user.
+ * @interface
+ * @category SDK
+ * @subcategory Flow Payloads
+ * @property {string} id - The username's unique ID.
+ * @property {string} username - The username value.
+ * @property {string} created_at - Timestamp of when the username was created.
+ * @property {string} updated_at - Timestamp of when the username was last updated.
+ */
+export interface Username {
+  id: string;
+  username: string;
+  created_at: string;
+  updated_at: string;
+}
+
+/**
+ * A third-party identity linked to a user, as seen through the flow API.
+ *
+ * Note: a same-named `Identity` interface also exists in `Dto.ts` for the standalone
+ * user-management REST API; it happens to have the same shape today, but the two are declared
+ * independently and are not guaranteed to stay in sync.
+ * @interface
+ * @category SDK
+ * @subcategory Flow Payloads
+ * @property {string} id - The subject ID with the third-party provider.
+ * @property {string} provider - The third-party provider name.
+ * @property {string} [identity_id] - The ID of the identity link itself.
+ */
+// Known docs limitation: this collides by name with `Dto.ts`'s `Identity`. JSDoc has no default
+// file/module scoping, so both land on the same generated Identity.html page as two separate
+// "Properties" tables. See the note there too.
+export interface Identity {
+  readonly id: string;
+  readonly provider: string;
+  readonly identity_id?: string;
+}
+
+/**
+ * An email address belonging to a user, as seen through the flow API.
+ *
+ * Note: a same-named `Email` interface also exists in `Dto.ts` for the standalone
+ * user-management REST API; the two are declared independently and have slightly different shapes.
+ * @interface
+ * @category SDK
+ * @subcategory Flow Payloads
+ * @property {string} id - The UUID of the email address.
+ * @property {string} address - The email address.
+ * @property {boolean} is_verified - Indicates whether the email address is verified.
+ * @property {boolean} is_primary - Indicates it's the primary email address.
+ * @property {Identity[]} [identities] - Third-party identities linked to this email address, if any.
+ */
+// Known docs limitation: this collides by name with `Dto.ts`'s `Email`. JSDoc has no default
+// file/module scoping, so both land on the same generated Email.html page as two separate
+// "Properties" tables. See the note there too.
+export interface Email {
+  readonly id: string;
+  readonly address: string;
+  readonly is_verified: boolean;
+  readonly is_primary: boolean;
+  readonly identities?: Identity[];
+}
+
+/**
+ * A user's multi-factor authentication configuration.
+ * @interface
+ * @category SDK
+ * @subcategory Flow Payloads
+ * @property {boolean} auth_app_set_up - Whether an authenticator app (TOTP) has been set up.
+ * @property {boolean} totp_enabled - Whether TOTP is enabled as a second factor.
+ * @property {boolean} security_keys_enabled - Whether security keys are enabled as a second factor.
+ */
+export interface MFAConfig {
+  readonly auth_app_set_up: boolean;
+  readonly totp_enabled: boolean;
+  readonly security_keys_enabled: boolean;
+}
+
+/**
+ * A user's custom metadata, split into a `public_metadata` portion (readable by any client) and an
+ * `unsafe_metadata` portion (writable by any authenticated client).
+ * @template PublicMetadata - The shape of the public metadata.
+ * @template UnsafeMetadata - The shape of the unsafe metadata.
+ * @category SDK
+ * @subcategory Flow Payloads
+ * @property {PublicMetadata} [public_metadata] - Metadata visible to any client.
+ * @property {UnsafeMetadata} [unsafe_metadata] - Metadata that any authenticated client may write.
+ */
+export type UserMetadata&lt;
+  PublicMetadata extends Record&lt;string, any> = {},
+  UnsafeMetadata extends Record&lt;string, any> = {},
+> = {
+  public_metadata?: PublicMetadata;
+  unsafe_metadata?: UnsafeMetadata;
+};
+
+/**
+ * A user's full profile as returned by the flow API.
+ * @interface
+ * @category SDK
+ * @subcategory Flow Payloads
+ * @property {string} user_id - The user's unique ID.
+ * @property {WebauthnCredential[]} [passkeys] - The user's registered passkeys.
+ * @property {WebauthnCredential[]} [security_keys] - The user's registered security keys.
+ * @property {MFAConfig} [mfa_config] - The user's multi-factor authentication configuration.
+ * @property {Email[]} [emails] - The user's email addresses.
+ * @property {Username} [username] - The user's username, if set.
+ * @property {UserMetadata} [metadata] - The user's custom metadata.
+ * @property {Identity[]} [identities] - Third-party identities linked to the user.
+ * @property {string} created_at - Timestamp of when the user was created.
+ * @property {string} updated_at - Timestamp of when the user was last updated.
+ * @property {string} [name] - The user's full name, if known (e.g. from a third-party provider).
+ * @property {string} [given_name] - The user's given name, if known.
+ * @property {string} [family_name] - The user's family name, if known.
+ * @property {string} [picture] - A URL to the user's profile picture, if known.
+ */
+export interface User {
+  readonly user_id: string;
+  readonly passkeys?: WebauthnCredential[];
+  readonly security_keys?: WebauthnCredential[];
+  readonly mfa_config?: MFAConfig;
+  readonly emails?: Email[];
+  readonly username?: Username;
+  readonly metadata?: UserMetadata;
+  readonly identities?: Identity[];
+  readonly created_at: string;
+  readonly updated_at: string;
+  readonly name?: string;
+  readonly given_name?: string;
+  readonly family_name?: string;
+  readonly picture?: string;
+}
+
+/**
+ * One of a user's active sessions.
+ * @interface
+ * @category SDK
+ * @subcategory Flow Payloads
+ * @property {string} id - The session's unique ID.
+ * @property {string} [user_agent] - The parsed user agent of the client that created the session.
+ * @property {string} [user_agent_raw] - The raw user agent string of the client that created the session.
+ * @property {string} [ip_address] - The IP address the session was created from.
+ * @property {string} created_at - Timestamp of when the session was created.
+ * @property {string} last_used - Timestamp of when the session was last used.
+ * @property {boolean} current - Whether this is the session the current request is authenticated with.
+ */
+export interface Session {
+  readonly id: string;
+  readonly user_agent?: string;
+  readonly user_agent_raw?: string;
+  readonly ip_address?: string;
+  readonly created_at: string;
+  readonly last_used: string;
+  readonly current: boolean;
+}
+
+/**
+ * Payload of the `profile_init` state, the entry point of the account/profile management flow.
+ * @interface
+ * @category SDK
+ * @subcategory Flow Payloads
+ * @property {User} user - The current user's profile.
+ * @property {Session[]} [sessions] - The user's active sessions.
+ */
+export interface ProfilePayload {
+  readonly user: User;
+  readonly sessions?: Session[];
+}
+
+/**
+ * The method used to complete a login.
+ * @category SDK
+ * @subcategory Flow Payloads
+ */
+export type LoginMethod = "password" | "passkey" | "passcode" | "third_party";
+
+/**
+ * The second-factor method used to complete a login, if any.
+ * @category SDK
+ * @subcategory Flow Payloads
+ */
+export type MFAMethod = "totp" | "security_key";
+
+/**
+ * Describes how a user most recently logged in.
+ * @interface
+ * @category SDK
+ * @subcategory Flow Payloads
+ * @property {LoginMethod} login_method - The primary method used to log in.
+ * @property {MFAMethod} [mfa_method] - The second-factor method used, if any.
+ * @property {string} [third_party_provider] - The third-party provider used, if `login_method` is `third_party`.
+ */
+export interface LastLogin {
+  readonly login_method: LoginMethod;
+  readonly mfa_method?: MFAMethod;
+  readonly third_party_provider?: string;
+}
+
+/**
+ * Payload of the terminal `success` state, marking the end of a flow.
+ * @interface
+ * @category SDK
+ * @subcategory Flow Payloads
+ * @property {User} user - The authenticated user.
+ * @property {LastLogin} [last_login] - Details of how the user logged in, if applicable.
+ * @property {Claims} claims - The claims associated with the newly created session.
+ */
+export interface SuccessPayload {
+  readonly user: User;
+  readonly last_login?: LastLogin;
+  readonly claims: Claims;
+}
+
+/**
+ * Payload of the `thirdparty` state, carrying the URL to redirect the user to for the OAuth flow.
+ * @interface
+ * @category SDK
+ * @subcategory Flow Payloads
+ * @property {string} redirect_url - The URL to redirect the browser to in order to start the third-party OAuth flow.
+ */
+export interface ThirdPartyPayload {
+  readonly redirect_url: string;
+}
+</code></pre>
+        </article>
+    </section>
+
+
+
+
+            </div>
+            
+            <footer class="footer">
+                <div class="content has-text-centered">
+                    <p>Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 4.0.5</a></p>
+                    <p class="sidebar-created-by">
+                        <a href="https://github.com/SoftwareBrothers/better-docs" target="_blank">BetterDocs theme</a> provided with <i class="fas fa-heart"></i> by
+                        <a href="http://softwarebrothers.co" target="_blank">SoftwareBrothers - JavaScript Development Agency</a>
+                    </p>
+                </div>
+            </footer>
+            
+        </div>
+        <div id="side-nav" class="side-nav">
+        </div>
+    </div>
+<script src="scripts/app.min.js"></script>
+<script>PR.prettyPrint();</script>
+<script src="scripts/linenumber.js"> </script>
+
+
+</body>
+</html>

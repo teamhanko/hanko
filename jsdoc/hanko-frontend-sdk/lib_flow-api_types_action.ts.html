@@ -1,0 +1,521 @@
+
+
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title> lib/flow-api/types/action.ts</title>
+
+  <script src="https://cdn.jsdelivr.net/gh/google/code-prettify@master/loader/run_prettify.js"></script>
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+  <script src="./build/entry.js"></script>
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+  <!--[if lt IE 9]>
+    <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+  <![endif]-->
+  <link href="https://fonts.googleapis.com/css?family=Roboto:100,400,700|Inconsolata,700" rel="stylesheet">
+  <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.6.3/css/all.css" integrity="sha384-UHRtZLI+pbxtHCWp1t77Bi1L4ZtiqrqD80Kn4Z8NTSRyMA2Fd33n5dQ8lWUE00s/" crossorigin="anonymous">
+  <link type="text/css" rel="stylesheet" href="https://jmblog.github.io/color-themes-for-google-code-prettify/themes/tomorrow-night.min.css">
+  <link type="text/css" rel="stylesheet" href="styles/app.min.css">
+  <link type="text/css" rel="stylesheet" href="styles/iframe.css">
+  <link type="text/css" rel="stylesheet" href="">
+  <script async defer src="https://buttons.github.io/buttons.js"></script>
+
+  
+</head>
+
+
+
+<body class="layout small-header">
+    <div id="stickyNavbarOverlay"></div>
+    
+
+<div class="top-nav">
+    <div class="inner">
+        <a id="hamburger" role="button" class="navbar-burger" aria-label="menu" aria-expanded="false">
+            <span aria-hidden="true"></span>
+            <span aria-hidden="true"></span>
+            <span aria-hidden="true"></span>
+        </a>
+        <div class="logo">
+            
+            
+        </div>
+        <div class="menu">
+            
+            <div class="navigation">
+                <a
+                    href="index.html"
+                    class="link"
+                >
+                    Documentation
+                </a>
+                
+                
+                
+            </div>
+        </div>
+    </div>
+</div>
+    <div id="main">
+        <div
+            class="sidebar "
+            id="sidebarNav"
+        >
+            
+            <nav>
+                
+                    <h2><a href="index.html">Documentation</a></h2><div class="category"><h3>Classes</h3><ul><li><a href="Hanko.html">Hanko</a></li></ul><h3>Interfaces</h3><ul><li><a href="HankoOptions.html">HankoOptions</a></li></ul><h3>Global</h3><ul><li><a href="global.html#clearStoredCodeVerifier">clearStoredCodeVerifier</a></li><li><a href="global.html#generateCodeVerifier">generateCodeVerifier</a></li><li><a href="global.html#getStoredCodeVerifier">getStoredCodeVerifier</a></li><li><a href="global.html#setStoredCodeVerifier">setStoredCodeVerifier</a></li></ul></div><div class="category"><h2>SDK</h2><h3>Classes / FlowAPI</h3><ul><li><a href="Action.html">Action</a></li><li><a href="State.html">State</a></li></ul><h3>Classes / Advanced</h3><ul><li><a href="Client.html">Client</a></li><li><a href="HttpClient.html">HttpClient</a></li><li><a href="Relay.html">Relay</a></li></ul><h3>Classes / Errors</h3><ul><li><a href="ConflictError.html">ConflictError</a></li><li><a href="EmailAddressAlreadyExistsError.html">EmailAddressAlreadyExistsError</a></li><li><a href="ForbiddenError.html">ForbiddenError</a></li><li><a href="HankoError.html">HankoError</a></li><li><a href="InvalidPasscodeError.html">InvalidPasscodeError</a></li><li><a href="InvalidPasswordError.html">InvalidPasswordError</a></li><li><a href="InvalidWebauthnCredentialError.html">InvalidWebauthnCredentialError</a></li><li><a href="MaxNumOfEmailAddressesReachedError.html">MaxNumOfEmailAddressesReachedError</a></li><li><a href="MaxNumOfPasscodeAttemptsReachedError.html">MaxNumOfPasscodeAttemptsReachedError</a></li><li><a href="NotFoundError.html">NotFoundError</a></li><li><a href="PasscodeExpiredError.html">PasscodeExpiredError</a></li><li><a href="RequestTimeoutError.html">RequestTimeoutError</a></li><li><a href="TechnicalError.html">TechnicalError</a></li><li><a href="ThirdPartyError.html">ThirdPartyError</a></li><li><a href="TooManyRequestsError.html">TooManyRequestsError</a></li><li><a href="UnauthorizedError.html">UnauthorizedError</a></li><li><a href="UserVerificationError.html">UserVerificationError</a></li><li><a href="WebauthnRequestCancelledError.html">WebauthnRequestCancelledError</a></li></ul><h3>Classes / Events</h3><ul><li><a href="Listener.html">Listener</a></li></ul><h3>Classes / Clients</h3><ul><li><a href="SessionClient.html">SessionClient</a></li><li><a href="UserClient.html">UserClient</a></li></ul><h3>Classes / Utilities</h3><ul><li><a href="WebauthnSupport.html">WebauthnSupport</a></li></ul><h3>Interfaces / Flow Actions</h3><ul><li><a href="CredentialOnboardingChooserActions.html">CredentialOnboardingChooserActions</a></li><li><a href="DeviceTrustActions.html">DeviceTrustActions</a></li><li><a href="LoginInitActions.html">LoginInitActions</a></li><li><a href="LoginMethodChooserActions.html">LoginMethodChooserActions</a></li><li><a href="LoginOTPActions.html">LoginOTPActions</a></li><li><a href="LoginPasskeyActions.html">LoginPasskeyActions</a></li><li><a href="LoginPasswordActions.html">LoginPasswordActions</a></li><li><a href="LoginPasswordRecoveryActions.html">LoginPasswordRecoveryActions</a></li><li><a href="LoginSecurityKeyActions.html">LoginSecurityKeyActions</a></li><li><a href="MFAAOTPSecretCreationActions.html">MFAAOTPSecretCreationActions</a></li><li><a href="MFAMethodChooserActions.html">MFAMethodChooserActions</a></li><li><a href="MFASecurityKeyCreationActions.html">MFASecurityKeyCreationActions</a></li><li><a href="OnboardingCreatePasskeyActions.html">OnboardingCreatePasskeyActions</a></li><li><a href="OnboardingEmailActions.html">OnboardingEmailActions</a></li><li><a href="OnboardingUsernameActions.html">OnboardingUsernameActions</a></li><li><a href="OnboardingVerifyPasskeyAttestationActions.html">OnboardingVerifyPasskeyAttestationActions</a></li><li><a href="PasscodeConfirmationActions.html">PasscodeConfirmationActions</a></li><li><a href="PasswordCreationActions.html">PasswordCreationActions</a></li><li><a href="PreflightActions.html">PreflightActions</a></li><li><a href="ProfileInitActions.html">ProfileInitActions</a></li><li><a href="RegistrationInitActions.html">RegistrationInitActions</a></li><li><a href="ThirdPartyActions.html">ThirdPartyActions</a></li></ul><h3>Interfaces / Flow Types</h3><ul><li><a href="Actions.html">Actions</a></li><li><a href="FlowResponse.html">FlowResponse</a></li><li><a href="Payloads.html">Payloads</a></li><li><a href="StateInitConfig.html">StateInitConfig</a></li></ul><h3>Interfaces / Flow Inputs</h3><ul><li><a href="AllowedInputValues.html">AllowedInputValues</a></li><li><a href="ContinueWithLoginIdentifierInputs.html">ContinueWithLoginIdentifierInputs</a></li><li><a href="DisconnectThirdpartyInputs.html">DisconnectThirdpartyInputs</a></li><li><a href="EmailCreateInputs.html">EmailCreateInputs</a></li><li><a href="EmailDeleteInputs.html">EmailDeleteInputs</a></li><li><a href="EmailSetPrimaryInputs.html">EmailSetPrimaryInputs</a></li><li><a href="EmailVerifyInputs.html">EmailVerifyInputs</a></li><li><a href="ExchangeTokenInputs.html">ExchangeTokenInputs</a></li><li><a href="Input.html">Input</a></li><li><a href="OTPCodeInputs.html">OTPCodeInputs</a></li><li><a href="PasskeyCredentialDeleteInputs.html">PasskeyCredentialDeleteInputs</a></li><li><a href="PasskeyCredentialRenameInputs.html">PasskeyCredentialRenameInputs</a></li><li><a href="PasswordInputs.html">PasswordInputs</a></li><li><a href="PasswordRecoveryInputs.html">PasswordRecoveryInputs</a></li><li><a href="PatchMetadataInputs.html">PatchMetadataInputs</a></li><li><a href="RegisterClientCapabilitiesInputs.html">RegisterClientCapabilitiesInputs</a></li><li><a href="RegisterLoginIdentifierInputs.html">RegisterLoginIdentifierInputs</a></li><li><a href="RegisterPasswordInputs.html">RegisterPasswordInputs</a></li><li><a href="RememberMeInputs.html">RememberMeInputs</a></li><li><a href="SecurityKeyDeleteInputs.html">SecurityKeyDeleteInputs</a></li><li><a href="SessionDeleteInputs.html">SessionDeleteInputs</a></li><li><a href="ThirdpartyOauthInputs.html">ThirdpartyOauthInputs</a></li><li><a href="UsernameSetInputs.html">UsernameSetInputs</a></li><li><a href="VerifyPasscodeInputs.html">VerifyPasscodeInputs</a></li><li><a href="WebauthnVerifyAssertionResponseInputs.html">WebauthnVerifyAssertionResponseInputs</a></li><li><a href="WebauthnVerifyAttestationResponseInputs.html">WebauthnVerifyAttestationResponseInputs</a></li></ul><h3>Interfaces / DTO</h3><ul><li><a href="Email.html">Email</a></li><li><a href="Emails.html">Emails</a></li><li><a href="Identity.html">Identity</a></li><li><a href="SessionCheckResponse.html">SessionCheckResponse</a></li></ul><h3>Interfaces / Flow Payloads</h3><ul><li><a href="LastLogin.html">LastLogin</a></li><li><a href="LoginInitPayload.html">LoginInitPayload</a></li><li><a href="LoginPasskeyPayload.html">LoginPasskeyPayload</a></li><li><a href="MFAConfig.html">MFAConfig</a></li><li><a href="MFAOTPSecretCreationPayload.html">MFAOTPSecretCreationPayload</a></li><li><a href="OnboardingVerifyPasskeyAttestationPayload.html">OnboardingVerifyPasskeyAttestationPayload</a></li><li><a href="PasscodeConfirmationPayload.html">PasscodeConfirmationPayload</a></li><li><a href="ProfilePayload.html">ProfilePayload</a></li><li><a href="Session.html">Session</a></li><li><a href="SuccessPayload.html">SuccessPayload</a></li><li><a href="ThirdPartyPayload.html">ThirdPartyPayload</a></li><li><a href="User.html">User</a></li><li><a href="Username.html">Username</a></li><li><a href="WebauthnCredential.html">WebauthnCredential</a></li></ul><h3>Interfaces / Flow Errors</h3><ul><li><a href="FlowError.html">FlowError</a></li></ul><h3>Interfaces / Events</h3><ul><li><a href="SessionDetail.html">SessionDetail</a></li></ul><h3><a href="global.html">Global</a></h3></div>
+                
+            </nav>
+        </div>
+        <div class="core" id="main-content-wrapper">
+            <div class="content">
+                <header class="page-title">
+                    <p>Source</p>
+                    <h1>lib/flow-api/types/action.ts</h1>
+                </header>
+                
+
+
+
+    
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>import {
+  ContinueWithLoginIdentifierInputs,
+  EmailCreateInputs,
+  EmailDeleteInputs,
+  EmailSetPrimaryInputs,
+  EmailVerifyInputs,
+  ExchangeTokenInputs,
+  PasskeyCredentialDeleteInputs,
+  PasskeyCredentialRenameInputs,
+  PasswordRecoveryInputs,
+  PasswordInputs,
+  PatchMetadataInputs,
+  RegisterClientCapabilitiesInputs,
+  RegisterLoginIdentifierInputs,
+  RegisterPasswordInputs,
+  ThirdpartyOauthInputs,
+  UsernameSetInputs,
+  VerifyPasscodeInputs,
+  WebauthnVerifyAssertionResponseInputs,
+  WebauthnVerifyAttestationResponseInputs,
+  SessionDeleteInputs,
+  OTPCodeInputs,
+  SecurityKeyDeleteInputs,
+  RememberMeInputs,
+  DisconnectThirdpartyInputs,
+} from "./input";
+
+/**
+ * Represents a single action that can be run from a {@link State}. `action` and `href` identify
+ * the action for the backend, `inputs` describes the input fields the action accepts (see
+ * {@link State#actions} for how these map to a concrete state), and `description` is a
+ * human-readable summary of what running the action does.
+ * @template TInputs - The shape of the inputs this action accepts, or `null` if it accepts none.
+ * @interface
+ * @category SDK
+ * @subcategory Flow Actions
+ * @property {string} action - The unique name of the action within the current flow.
+ * @property {string} href - The URL the action is submitted to when run.
+ * @property {TInputs} inputs - The input fields accepted by the action.
+ * @property {string} description - A human-readable description of the action.
+ */
+export interface Action&lt;TInputs> {
+  action: string;
+  href: string;
+  inputs: TInputs;
+  description: string;
+}
+
+/**
+ * Actions available in the `preflight` state, run once at the start of a flow to register client capabilities.
+ * @interface
+ * @category SDK
+ * @subcategory Flow Actions
+ * @property {Action&lt;RegisterClientCapabilitiesInputs>} register_client_capabilities - Reports client capabilities (e.g. WebAuthn support) to the backend.
+ */
+export interface PreflightActions {
+  readonly register_client_capabilities: Action&lt;RegisterClientCapabilitiesInputs>;
+}
+
+/**
+ * Actions available in the `login_init` state, the entry point of a login flow.
+ * @interface
+ * @category SDK
+ * @subcategory Flow Actions
+ * @property {Action&lt;ContinueWithLoginIdentifierInputs>} [continue_with_login_identifier] - Submits an identifier (e.g. email or username) to continue the login.
+ * @property {Action&lt;null>} [webauthn_generate_request_options] - Requests WebAuthn assertion options to attempt a passkey login.
+ * @property {Action&lt;WebauthnVerifyAssertionResponseInputs>} [webauthn_verify_assertion_response] - Submits the WebAuthn assertion response for verification.
+ * @property {Action&lt;ThirdpartyOauthInputs>} [thirdparty_oauth] - Starts a third-party OAuth login.
+ * @property {Action&lt;RememberMeInputs>} [remember_me] - Sets whether the device should be remembered for future logins.
+ */
+export interface LoginInitActions {
+  readonly continue_with_login_identifier?: Action&lt;ContinueWithLoginIdentifierInputs>;
+  readonly webauthn_generate_request_options?: Action&lt;null>;
+  readonly webauthn_verify_assertion_response?: Action&lt;WebauthnVerifyAssertionResponseInputs>;
+  readonly thirdparty_oauth?: Action&lt;ThirdpartyOauthInputs>;
+  readonly remember_me?: Action&lt;RememberMeInputs>;
+}
+
+/**
+ * Actions available in the `profile_init` state, the user's account/profile management screen.
+ * @interface
+ * @category SDK
+ * @subcategory Flow Actions
+ * @property {Action&lt;null>} [account_delete] - Deletes the current user's account.
+ * @property {Action&lt;null>} [continue_to_otp_secret_creation] - Continues to setting up an authenticator app (TOTP) for MFA.
+ * @property {Action&lt;EmailCreateInputs>} [email_create] - Adds a new email address to the account.
+ * @property {Action&lt;EmailDeleteInputs>} [email_delete] - Removes an email address from the account.
+ * @property {Action&lt;EmailVerifyInputs>} [email_verify] - Requests verification of an unverified email address.
+ * @property {Action&lt;EmailSetPrimaryInputs>} [email_set_primary] - Sets an email address as the primary one.
+ * @property {Action&lt;null>} [otp_secret_delete] - Removes the configured authenticator app (TOTP) secret.
+ * @property {Action&lt;PasswordInputs>} [password_create] - Sets a password for the account.
+ * @property {Action&lt;PasswordInputs>} [password_update] - Updates the account's existing password.
+ * @property {Action&lt;null>} [password_delete] - Removes the account's password.
+ * @property {Action&lt;PatchMetadataInputs>} patch_metadata - Updates the user's public/unsafe metadata.
+ * @property {Action&lt;null>} [security_key_create] - Starts registering a new hardware security key.
+ * @property {Action&lt;SecurityKeyDeleteInputs>} [security_key_delete] - Removes a registered security key.
+ * @property {Action&lt;UsernameSetInputs>} [username_create] - Sets a username for the account.
+ * @property {Action&lt;null>} [username_delete] - Removes the account's username.
+ * @property {Action&lt;UsernameSetInputs>} [username_update] - Updates the account's existing username.
+ * @property {Action&lt;null>} [webauthn_credential_create] - Starts registering a new passkey.
+ * @property {Action&lt;PasskeyCredentialRenameInputs>} [webauthn_credential_rename] - Renames a registered passkey.
+ * @property {Action&lt;PasskeyCredentialDeleteInputs>} [webauthn_credential_delete] - Removes a registered passkey.
+ * @property {Action&lt;WebauthnVerifyAttestationResponseInputs>} [webauthn_verify_attestation_response] - Submits the WebAuthn attestation response to complete a passkey/security key registration.
+ * @property {Action&lt;SessionDeleteInputs>} [session_delete] - Revokes one of the user's active sessions.
+ * @property {Action&lt;ThirdpartyOauthInputs>} [connect_thirdparty_oauth_provider] - Links a third-party OAuth provider to the account.
+ * @property {Action&lt;DisconnectThirdpartyInputs>} [disconnect_thirdparty_oauth_provider] - Unlinks a third-party OAuth provider from the account.
+ */
+export interface ProfileInitActions {
+  readonly account_delete?: Action&lt;null>;
+  readonly continue_to_otp_secret_creation?: Action&lt;null>;
+  readonly email_create?: Action&lt;EmailCreateInputs>;
+  readonly email_delete?: Action&lt;EmailDeleteInputs>;
+  readonly email_verify?: Action&lt;EmailVerifyInputs>;
+  readonly email_set_primary?: Action&lt;EmailSetPrimaryInputs>;
+  readonly otp_secret_delete?: Action&lt;null>;
+  readonly password_create?: Action&lt;PasswordInputs>;
+  readonly password_update?: Action&lt;PasswordInputs>;
+  readonly password_delete?: Action&lt;null>;
+  readonly patch_metadata: Action&lt;PatchMetadataInputs>;
+  readonly security_key_create?: Action&lt;null>;
+  readonly security_key_delete?: Action&lt;SecurityKeyDeleteInputs>;
+  readonly username_create?: Action&lt;UsernameSetInputs>;
+  readonly username_delete?: Action&lt;null>;
+  readonly username_update?: Action&lt;UsernameSetInputs>;
+  readonly webauthn_credential_create?: Action&lt;null>;
+  readonly webauthn_credential_rename?: Action&lt;PasskeyCredentialRenameInputs>;
+  readonly webauthn_credential_delete?: Action&lt;PasskeyCredentialDeleteInputs>;
+  readonly webauthn_verify_attestation_response?: Action&lt;WebauthnVerifyAttestationResponseInputs>;
+  readonly session_delete?: Action&lt;SessionDeleteInputs>;
+  readonly connect_thirdparty_oauth_provider?: Action&lt;ThirdpartyOauthInputs>;
+  readonly disconnect_thirdparty_oauth_provider?: Action&lt;DisconnectThirdpartyInputs>;
+}
+
+/**
+ * Actions available in the `login_method_chooser` state, letting the user pick a login method.
+ * @interface
+ * @category SDK
+ * @subcategory Flow Actions
+ * @property {Action&lt;null>} [continue_to_password_login] - Switches to password-based login.
+ * @property {Action&lt;null>} [continue_to_passcode_confirmation] - Switches to passcode (one-time code) based login.
+ * @property {Action&lt;null>} [webauthn_generate_request_options] - Requests WebAuthn assertion options to attempt a passkey login.
+ * @property {Action&lt;null>} back - Returns to the previous state.
+ */
+export interface LoginMethodChooserActions {
+  readonly continue_to_password_login?: Action&lt;null>;
+  readonly continue_to_passcode_confirmation?: Action&lt;null>;
+  readonly webauthn_generate_request_options?: Action&lt;null>;
+  readonly back: Action&lt;null>;
+}
+
+/**
+ * Actions available in the `login_otp` state, where the user submits a one-time passcode.
+ * @interface
+ * @category SDK
+ * @subcategory Flow Actions
+ * @property {Action&lt;OTPCodeInputs>} otp_code_validate - Submits the entered one-time code for validation.
+ * @property {Action&lt;null>} [continue_to_login_security_key] - Switches to security-key based login.
+ */
+export interface LoginOTPActions {
+  readonly otp_code_validate: Action&lt;OTPCodeInputs>;
+  readonly continue_to_login_security_key?: Action&lt;null>;
+}
+
+/**
+ * Actions available in the `login_password` state.
+ * @interface
+ * @category SDK
+ * @subcategory Flow Actions
+ * @property {Action&lt;PasswordInputs>} password_login - Submits the entered password for login.
+ * @property {Action&lt;null>} [continue_to_passcode_confirmation_recovery] - Starts password recovery via a passcode.
+ * @property {Action&lt;null>} continue_to_login_method_chooser - Returns to the login method chooser.
+ * @property {Action&lt;null>} back - Returns to the previous state.
+ */
+export interface LoginPasswordActions {
+  readonly password_login: Action&lt;PasswordInputs>;
+  readonly continue_to_passcode_confirmation_recovery?: Action&lt;null>;
+  readonly continue_to_login_method_chooser: Action&lt;null>;
+  readonly back: Action&lt;null>;
+}
+
+/**
+ * Actions available in the `login_password_recovery` state.
+ * @interface
+ * @category SDK
+ * @subcategory Flow Actions
+ * @property {Action&lt;PasswordRecoveryInputs>} password_recovery - Submits a new password to complete password recovery.
+ */
+export interface LoginPasswordRecoveryActions {
+  readonly password_recovery: Action&lt;PasswordRecoveryInputs>;
+}
+
+/**
+ * Actions available in the `login_passkey` state, while a passkey login ceremony is in progress.
+ * @interface
+ * @category SDK
+ * @subcategory Flow Actions
+ * @property {Action&lt;WebauthnVerifyAssertionResponseInputs>} webauthn_verify_assertion_response - Submits the WebAuthn assertion response for verification.
+ * @property {Action&lt;null>} back - Returns to the previous state.
+ */
+export interface LoginPasskeyActions {
+  readonly webauthn_verify_assertion_response: Action&lt;WebauthnVerifyAssertionResponseInputs>;
+  readonly back: Action&lt;null>;
+}
+
+/**
+ * Actions available in the `login_security_key` state, while a security-key login ceremony is in progress.
+ * @interface
+ * @category SDK
+ * @subcategory Flow Actions
+ * @property {Action&lt;null>} webauthn_generate_request_options - Requests WebAuthn assertion options for the security key.
+ * @property {Action&lt;null>} [continue_to_login_otp] - Switches to one-time-passcode based login.
+ */
+export interface LoginSecurityKeyActions {
+  readonly webauthn_generate_request_options: Action&lt;null>;
+  readonly continue_to_login_otp?: Action&lt;null>;
+}
+
+/**
+ * Actions available in the `mfa_method_chooser` state, letting the user pick a second factor method.
+ * @interface
+ * @category SDK
+ * @subcategory Flow Actions
+ * @property {Action&lt;null>} [continue_to_otp_secret_creation] - Switches to authenticator app (TOTP) setup.
+ * @property {Action&lt;null>} [continue_to_security_key_creation] - Switches to security key setup.
+ * @property {Action&lt;null>} [skip] - Skips second factor setup, if optional.
+ * @property {Action&lt;null>} [back] - Returns to the previous state.
+ */
+export interface MFAMethodChooserActions {
+  readonly continue_to_otp_secret_creation?: Action&lt;null>;
+  readonly continue_to_security_key_creation?: Action&lt;null>;
+  readonly skip?: Action&lt;null>;
+  readonly back?: Action&lt;null>;
+}
+
+/**
+ * Actions available in the `mfa_otp_secret_creation` state, while setting up an authenticator app (TOTP).
+ * @interface
+ * @category SDK
+ * @subcategory Flow Actions
+ * @property {Action&lt;OTPCodeInputs>} otp_code_verify - Submits a code generated from the authenticator app to confirm setup.
+ * @property {Action&lt;null>} back - Returns to the previous state.
+ */
+export interface MFAAOTPSecretCreationActions {
+  readonly otp_code_verify: Action&lt;OTPCodeInputs>;
+  readonly back: Action&lt;null>;
+}
+
+/**
+ * Actions available in the `mfa_security_key_creation` state, while registering a security key as a second factor.
+ * @interface
+ * @category SDK
+ * @subcategory Flow Actions
+ * @property {Action&lt;null>} webauthn_generate_creation_options - Requests WebAuthn attestation (registration) options for the security key.
+ * @property {Action&lt;null>} back - Returns to the previous state.
+ */
+export interface MFASecurityKeyCreationActions {
+  readonly webauthn_generate_creation_options: Action&lt;null>;
+  readonly back: Action&lt;null>;
+}
+
+/**
+ * Actions available in the `onboarding_create_passkey` state, while registering a passkey during onboarding.
+ * @interface
+ * @category SDK
+ * @subcategory Flow Actions
+ * @property {Action&lt;null>} webauthn_generate_creation_options - Requests WebAuthn attestation (registration) options for the passkey.
+ * @property {Action&lt;null>} [skip] - Skips passkey creation, if optional.
+ * @property {Action&lt;null>} [back] - Returns to the previous state.
+ */
+export interface OnboardingCreatePasskeyActions {
+  readonly webauthn_generate_creation_options: Action&lt;null>;
+  readonly skip?: Action&lt;null>;
+  readonly back?: Action&lt;null>;
+}
+
+/**
+ * Actions available in the `onboarding_verify_passkey_attestation` / `webauthn_credential_verification` states,
+ * while a passkey or security key attestation response is being submitted.
+ * @interface
+ * @category SDK
+ * @subcategory Flow Actions
+ * @property {Action&lt;WebauthnVerifyAttestationResponseInputs>} webauthn_verify_attestation_response - Submits the WebAuthn attestation response for verification.
+ * @property {Action&lt;null>} back - Returns to the previous state.
+ */
+export interface OnboardingVerifyPasskeyAttestationActions {
+  readonly webauthn_verify_attestation_response: Action&lt;WebauthnVerifyAttestationResponseInputs>;
+  readonly back: Action&lt;null>;
+}
+
+/**
+ * Actions available in the `registration_init` state, the entry point of a registration flow.
+ * @interface
+ * @category SDK
+ * @subcategory Flow Actions
+ * @property {Action&lt;RegisterLoginIdentifierInputs>} register_login_identifier - Submits an identifier (e.g. email or username) to start registration.
+ * @property {Action&lt;ThirdpartyOauthInputs>} [thirdparty_oauth] - Starts registration via a third-party OAuth provider.
+ * @property {Action&lt;RememberMeInputs>} [remember_me] - Sets whether the device should be remembered for future logins.
+ */
+export interface RegistrationInitActions {
+  readonly register_login_identifier: Action&lt;RegisterLoginIdentifierInputs>;
+  readonly thirdparty_oauth?: Action&lt;ThirdpartyOauthInputs>;
+  readonly remember_me?: Action&lt;RememberMeInputs>;
+}
+
+/**
+ * Actions available in the `password_creation` state, while setting a password during registration.
+ * @interface
+ * @category SDK
+ * @subcategory Flow Actions
+ * @property {Action&lt;RegisterPasswordInputs>} register_password - Submits the chosen password.
+ * @property {Action&lt;null>} [back] - Returns to the previous state.
+ * @property {Action&lt;null>} [skip] - Skips setting a password, if optional.
+ */
+export interface PasswordCreationActions {
+  readonly register_password: Action&lt;RegisterPasswordInputs>;
+  readonly back?: Action&lt;null>;
+  readonly skip?: Action&lt;null>;
+}
+
+/**
+ * Actions available in the `passcode_confirmation` state, while confirming a one-time passcode sent to the user.
+ * @interface
+ * @category SDK
+ * @subcategory Flow Actions
+ * @property {Action&lt;VerifyPasscodeInputs>} verify_passcode - Submits the entered passcode for verification.
+ * @property {Action&lt;null>} resend_passcode - Requests the passcode to be sent again.
+ * @property {Action&lt;null>} back - Returns to the previous state.
+ */
+export interface PasscodeConfirmationActions {
+  readonly verify_passcode: Action&lt;VerifyPasscodeInputs>;
+  readonly resend_passcode: Action&lt;null>;
+  readonly back: Action&lt;null>;
+}
+
+/**
+ * Actions available in the `onboarding_email` state, while setting an email address during onboarding.
+ * @interface
+ * @category SDK
+ * @subcategory Flow Actions
+ * @property {Action&lt;EmailCreateInputs>} email_address_set - Submits the chosen email address.
+ * @property {Action&lt;null>} skip - Skips setting an email address, if optional.
+ */
+export interface OnboardingEmailActions {
+  readonly email_address_set: Action&lt;EmailCreateInputs>;
+  readonly skip: Action&lt;null>;
+}
+
+/**
+ * Actions available in the `onboarding_username` state, while setting a username during onboarding.
+ * @interface
+ * @category SDK
+ * @subcategory Flow Actions
+ * @property {Action&lt;UsernameSetInputs>} username_create - Submits the chosen username.
+ * @property {Action&lt;null>} skip - Skips setting a username, if optional.
+ */
+export interface OnboardingUsernameActions {
+  readonly username_create: Action&lt;UsernameSetInputs>;
+  readonly skip: Action&lt;null>;
+}
+
+/**
+ * Actions available in the `credential_onboarding_chooser` state, letting the user pick how to onboard a credential.
+ * @interface
+ * @category SDK
+ * @subcategory Flow Actions
+ * @property {Action&lt;null>} continue_to_passkey_registration - Switches to passkey registration.
+ * @property {Action&lt;null>} continue_to_password_registration - Switches to password registration.
+ * @property {Action&lt;null>} skip - Skips credential onboarding, if optional.
+ * @property {Action&lt;null>} back - Returns to the previous state.
+ */
+export interface CredentialOnboardingChooserActions {
+  readonly continue_to_passkey_registration: Action&lt;null>;
+  readonly continue_to_password_registration: Action&lt;null>;
+  readonly skip: Action&lt;null>;
+  readonly back: Action&lt;null>;
+}
+
+/**
+ * Actions available in the `device_trust` state, letting the user decide whether to trust the current device.
+ * @interface
+ * @category SDK
+ * @subcategory Flow Actions
+ * @property {Action&lt;null>} trust_device - Marks the current device as trusted.
+ * @property {Action&lt;null>} skip - Declines to trust the current device.
+ * @property {Action&lt;null>} [back] - Returns to the previous state.
+ */
+export interface DeviceTrustActions {
+  readonly trust_device: Action&lt;null>;
+  readonly skip: Action&lt;null>;
+  readonly back?: Action&lt;null>;
+}
+
+/**
+ * Actions available in the `thirdparty` state, while a third-party OAuth flow is being completed.
+ * @interface
+ * @category SDK
+ * @subcategory Flow Actions
+ * @property {Action&lt;ExchangeTokenInputs>} exchange_token - Exchanges the third-party provider's callback token for a session.
+ * @property {Action&lt;null>} [back] - Returns to the previous state.
+ */
+export interface ThirdPartyActions {
+  readonly exchange_token: Action&lt;ExchangeTokenInputs>;
+  readonly back?: Action&lt;null>;
+}
+</code></pre>
+        </article>
+    </section>
+
+
+
+
+            </div>
+            
+            <footer class="footer">
+                <div class="content has-text-centered">
+                    <p>Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 4.0.5</a></p>
+                    <p class="sidebar-created-by">
+                        <a href="https://github.com/SoftwareBrothers/better-docs" target="_blank">BetterDocs theme</a> provided with <i class="fas fa-heart"></i> by
+                        <a href="http://softwarebrothers.co" target="_blank">SoftwareBrothers - JavaScript Development Agency</a>
+                    </p>
+                </div>
+            </footer>
+            
+        </div>
+        <div id="side-nav" class="side-nav">
+        </div>
+    </div>
+<script src="scripts/app.min.js"></script>
+<script>PR.prettyPrint();</script>
+<script src="scripts/linenumber.js"> </script>
+
+
+</body>
+</html>
