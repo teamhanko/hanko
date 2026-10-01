@@ -27,7 +27,7 @@ type RoleBindings []RoleBinding
 func (b *RoleBinding) Validate(tx *pop.Connection) (*validate.Errors, error) {
 	return validate.Validate(
 		&validators.UUIDIsPresent{Name: "ID", Field: b.ID},
-		&validators.UUIDIsPresent{Name: "TenantID", Field: b.TenantID},
+		&TenantIDIsPresent{Name: "TenantID", Field: b.TenantID},
 		&validators.UUIDIsPresent{Name: "UserID", Field: b.UserID},
 		&validators.UUIDIsPresent{Name: "RoleID", Field: b.RoleID},
 		&validators.UUIDIsPresent{Name: "OrganizationID", Field: b.OrganizationID},

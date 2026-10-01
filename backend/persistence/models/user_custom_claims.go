@@ -39,7 +39,7 @@ func (c *UserCustomClaims) Validate(_ *pop.Connection) (*validate.Errors, error)
 	return validate.Validate(
 		&validators.UUIDIsPresent{Name: "ID", Field: c.ID},
 		&validators.UUIDIsPresent{Name: "UserID", Field: c.UserID},
-		&validators.UUIDIsPresent{Name: "TenantID", Field: c.TenantID},
+		&TenantIDIsPresent{Name: "TenantID", Field: c.TenantID},
 		&validators.TimeIsPresent{Name: "UpdatedAt", Field: c.UpdatedAt},
 		&validators.TimeIsPresent{Name: "CreatedAt", Field: c.CreatedAt},
 		&validators.StringLengthInRange{
