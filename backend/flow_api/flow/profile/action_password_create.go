@@ -5,6 +5,7 @@ import (
 
 	auditlog "github.com/teamhanko/hanko/backend/v3/audit_log"
 	"github.com/teamhanko/hanko/backend/v3/flow_api/flow/shared"
+	"github.com/teamhanko/hanko/backend/v3/flow_api/services"
 	"github.com/teamhanko/hanko/backend/v3/flowpilot"
 	"github.com/teamhanko/hanko/backend/v3/persistence/models"
 )
@@ -38,7 +39,7 @@ func (a PasswordCreate) Initialize(c flowpilot.InitializationContext) {
 	c.AddInputs(flowpilot.StringInput("password").
 		Required(true).
 		MinLength(deps.Cfg.Password.MinLength).
-		MaxLength(72),
+		MaxLength(services.MaxPasswordLength),
 	)
 
 }
