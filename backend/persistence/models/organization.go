@@ -24,7 +24,7 @@ type Organizations []Organization
 func (o *Organization) Validate(tx *pop.Connection) (*validate.Errors, error) {
 	return validate.Validate(
 		&validators.UUIDIsPresent{Name: "ID", Field: o.ID},
-		&validators.UUIDIsPresent{Name: "TenantID", Field: o.TenantID},
+		&TenantIDIsPresent{Name: "TenantID", Field: o.TenantID},
 		&validators.StringIsPresent{Name: "Name", Field: o.Name},
 		&validators.TimeIsPresent{Name: "CreatedAt", Field: o.CreatedAt},
 		&validators.TimeIsPresent{Name: "UpdatedAt", Field: o.UpdatedAt},

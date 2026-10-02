@@ -25,7 +25,7 @@ type Roles []Role
 func (r *Role) Validate(tx *pop.Connection) (*validate.Errors, error) {
 	return validate.Validate(
 		&validators.UUIDIsPresent{Name: "ID", Field: r.ID},
-		&validators.UUIDIsPresent{Name: "TenantID", Field: r.TenantID},
+		&TenantIDIsPresent{Name: "TenantID", Field: r.TenantID},
 		&validators.StringIsPresent{Name: "Slug", Field: r.Slug},
 		&validators.StringIsPresent{Name: "Name", Field: r.Name},
 		&validators.TimeIsPresent{Name: "CreatedAt", Field: r.CreatedAt},
