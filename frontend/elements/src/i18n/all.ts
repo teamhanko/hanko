@@ -9,4 +9,5 @@ import { nl } from "./nl";
 import { pl } from "./pl";
 import { ptBR } from "./pt-BR";
 import { zh } from "./zh";
-export const all: Translations = { bn, de, en, fr, it, ko, nl, pl, ptBR, zh };
+const translations: Translations = { bn, de, en, fr, it, ko, nl, pl, ptBR, zh };
+export { translations as all };
