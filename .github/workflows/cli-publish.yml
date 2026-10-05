@@ -17,6 +17,10 @@ jobs:
       - uses: actions/setup-go@v7
         with:
           go-version: stable
+      - name: Determine version from release tag
+        run: echo "HANKO_VERSION=${TAG#backend/}" >> "$GITHUB_ENV"
+        env:
+          TAG: ${{ github.event.release.tag_name }}
       - uses: goreleaser/goreleaser-action@v7
         with:
           distribution: goreleaser
