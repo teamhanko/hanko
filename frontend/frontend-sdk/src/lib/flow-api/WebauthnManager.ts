@@ -78,7 +78,7 @@ class WebauthnManager {
    * Creates a new WebAuthn credential using the provided options.
    * Aborts any previous request before starting a new one.
    *
-   * The ceremony is bounded by the `timeout` given in the creation options
+   * The ceremony is bounded by the `timeout` given in the creation options.
    * Some authenticators
    * leave `navigator.credentials.create()` pending indefinitely and do not
    * honor the WebAuthn `timeout` themselves, which would keep the caller
