@@ -14,6 +14,23 @@ async function handleCredentialCreation(
   errorCode: string = "webauthn_credential_already_exists",
   errorMessage: string = "Webauthn credential already exists",
 ) {
+  // When the attestation could not be verified, the backend keeps the flow in
+  // this state and attaches the error. Go back and propagate the error instead
+  // of prompting for a new credential again, mirroring the thirdparty step.
+  if (state.error) {
+    const nextState = await state.actions.back.run(null, {
+      dispatchAfterStateChangeEvent: false,
+    });
+
+    nextState.error = {
+      code: state.error.code,
+      message: state.error.message,
+    };
+    nextState.dispatchAfterStateChangeEvent();
+
+    return nextState;
+  }
+
   try {
     const attestationResponse = await manager.createWebauthnCredential(options);
     return await state.actions.webauthn_verify_attestation_response.run({
@@ -25,12 +42,8 @@ async function handleCredentialCreation(
     // registered on the authenticator. Other failures - e.g. NotAllowedError
     // when the user cancels the prompt, or AbortError when a new request
     // supersedes this one - must not be reported as "credential already exists".
-    // Preserve any error the server already set instead, mirroring
-    // the login_passkey step.
     if (error instanceof DOMException && error.name === "InvalidStateError") {
       nextState.error = { code: errorCode, message: errorMessage };
-    } else if (state.error) {
-      nextState.error = state.error;
     }
     return nextState;
   }
