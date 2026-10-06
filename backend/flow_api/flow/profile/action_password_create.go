@@ -35,7 +35,7 @@ func (a PasswordCreate) Initialize(c flowpilot.InitializationContext) {
 		c.SuspendAction()
 	}
 
-	c.AddInputs(flowpilot.StringInput("password").
+	c.AddInputs(flowpilot.PasswordInput("password").
 		Required(true).
 		MinLength(deps.Cfg.Password.MinLength).
 		MaxLength(72),
