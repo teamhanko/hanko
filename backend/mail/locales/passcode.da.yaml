@@ -1,0 +1,38 @@
+login_text:
+  description: "The sign in content of the text email."
+  other: "Indtast følgende engangskode for at bekræfte din identitet:"
+ttl_text:
+  description: "The length how long the passcode is valid."
+  other: "Engangskoden er gyldig i {{ .TTL }} minutter."
+email_subject_login:
+  description: ""
+  other: "{{ .Code }} er din engangskode til {{ .ServiceName }}"
+subject_email_verification:
+  description: ""
+  other: "Brug engangskoden {{ .Code }} til at bekræfte din e-mailadresse"
+subject_login:
+  description: ""
+  other: "Brug engangskoden {{ .Code }} til at logge ind på din konto"
+subject_recovery:
+  description: ""
+  other: "Brug engangskoden {{ .Code }} til at gendanne din konto"
+email_verification_text:
+  description: ""
+  other: "Indtast følgende engangskode for at bekræfte din e-mailadresse:"
+recovery_text:
+  description: "The content of the recovery text email."
+  other: "Indtast følgende engangskode på loginsiden:"
+
+subject_email_login_attempted:
+  description: "Subject for notification about a login attempt."
+  other: "E-mailadressen blev ikke genkendt"
+email_login_attempted_text:
+  description: "Notifies the recipient that either they or someone else attempted to log in to a specific service using an unrecognized email address."
+  other: "Du eller en anden har forsøgt at logge ind på {{ .ServiceName }}, men e-mailadressen blev ikke genkendt. Opret venligst en konto først."
+
+subject_email_registration_attempted:
+  description: "Subject for notification about a registration attempt."
+  other: "E-mailadressen er allerede i brug"
+email_registration_attempted_text:
+  description: "Notifies the recipient that either they or someone else attempted to register for a specific service using an email address that is already in use."
+  other: "Du eller en anden har forsøgt at registrere en e-mailadresse hos {{ .ServiceName }}, men den er allerede registreret. Prøv at logge ind i stedet."
