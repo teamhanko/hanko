@@ -13,11 +13,12 @@ import (
 
 func TestIsValidRedirectTo(t *testing.T) {
 	tests := []struct {
-		name                string
-		requestedRedirect   string
-		allowedRedirectURLs []string
-		errorRedirectURL    string
-		want                bool
+		name                             string
+		requestedRedirect                string
+		allowedRedirectURLs              []string
+		errorRedirectURL                 string
+		unsafeWildcardRedirectURLAllowed bool
+		want                             bool
 	}{
 		// --- existing positive cases ---
 		{
@@ -347,6 +348,48 @@ func TestIsValidRedirectTo(t *testing.T) {
 			want:                false,
 		},
 
+		// --- unsafe wildcard redirect url ---
+		{
+			name:                "Bare super-wildcard rejected when flag disabled",
+			requestedRedirect:   "https://example.com",
+			allowedRedirectURLs: []string{"**"},
+			want:                false,
+		},
+		{
+			name:                             "Bare super-wildcard allowed when flag enabled",
+			requestedRedirect:                "https://example.com",
+			allowedRedirectURLs:              []string{"**"},
+			unsafeWildcardRedirectURLAllowed: true,
+			want:                             true,
+		},
+		{
+			name:                "http scheme super-wildcard rejected when flag disabled",
+			requestedRedirect:   "http://example.com",
+			allowedRedirectURLs: []string{"http://**"},
+			want:                false,
+		},
+		{
+			name:                             "http scheme super-wildcard allowed when flag enabled",
+			requestedRedirect:                "http://example.com",
+			allowedRedirectURLs:              []string{"http://**"},
+			unsafeWildcardRedirectURLAllowed: true,
+			want:                             true,
+		},
+		{
+			name:                             "https scheme super-wildcard allowed when flag enabled",
+			requestedRedirect:                "https://example.com/foo",
+			allowedRedirectURLs:              []string{"https://**"},
+			unsafeWildcardRedirectURLAllowed: true,
+			want:                             true,
+		},
+		{
+			name:                             "Scheme-scoped super-wildcard still enforces scheme",
+			requestedRedirect:                "https://example.com",
+			allowedRedirectURLs:              []string{"http://**"},
+			unsafeWildcardRedirectURLAllowed: true,
+			want:                             false,
+		},
+
 		// --- no matching entry ---
 		{
 			name:                "No allowlist entry matches",
@@ -391,7 +434,8 @@ func TestIsValidRedirectTo(t *testing.T) {
 	for _, testData := range tests {
 		t.Run(testData.name, func(t *testing.T) {
 			cfg := config.ThirdParty{
-				AllowedRedirectURLS: testData.allowedRedirectURLs,
+				AllowedRedirectURLS:              testData.allowedRedirectURLs,
+				UnsafeWildcardRedirectURLAllowed: testData.unsafeWildcardRedirectURLAllowed,
 			}
 
 			if testData.errorRedirectURL != "" {

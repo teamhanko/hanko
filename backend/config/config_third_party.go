@@ -55,13 +55,27 @@ type ThirdParty struct {
 	// Globbing is also supported for paths, e.g. `https://foo.example.com/*` will match `https://foo.example.com/page1`
 	// and `https://foo.example.com/page2`.
 	//
-	// A double asterisk (`**`) acts as a "super"-wildcard/match-all.
+	// A double asterisk (`**`) acts as a "super"-wildcard/match-all, e.g. `https://example.com/**` matches
+	// both `https://example.com/foo` and `https://example.com/foo/bar`.
+	//
+	// For security reasons, a bare `**`, or a `**` with no host after the protocol (`http://**`, `https://**`),
+	// is rejected unless [`unsafe_wildcard_redirect_url_allowed`](#unsafe_wildcard_redirect_url_allowed) is set
+	// to `true`.
 	//
 	// See [here](https://pkg.go.dev/github.com/gobwas/glob#Compile) for more on globbing.
 	//
 	// Must not be empty if any of the [`providers`](#providers) are `enabled`. URLs in the list must not have a trailing slash.
-	AllowedRedirectURLS   []string             `yaml:"allowed_redirect_urls" json:"allowed_redirect_urls" koanf:"allowed_redirect_urls" split_words:"true" jsonschema:"minItems=1"`
-	AllowedRedirectURLMap map[string]glob.Glob `jsonschema:"-" yaml:"-" json:"-" koanf:"-"`
+	AllowedRedirectURLS []string `yaml:"allowed_redirect_urls" json:"allowed_redirect_urls" koanf:"allowed_redirect_urls" split_words:"true" jsonschema:"minItems=1"`
+	// `unsafe_wildcard_redirect_url_allowed` allows `allowed_redirect_urls` entries that are a bare
+	// super-wildcard (`**`), or a super-wildcard with no host after the protocol (`http://**`, `https://**`).
+	// Such an entry allows redirecting to any http(s) URL (of the given scheme, if one is specified) after
+	// third party sign-in.
+	//
+	// This is INSECURE and should only be used for testing purposes, never in production.
+	//
+	// Optional. Default value is `false`.
+	UnsafeWildcardRedirectURLAllowed bool                 `yaml:"unsafe_wildcard_redirect_url_allowed" json:"unsafe_wildcard_redirect_url_allowed" koanf:"unsafe_wildcard_redirect_url_allowed" split_words:"true" jsonschema:"title=unsafe_wildcard_redirect_url_allowed,default=false"`
+	AllowedRedirectURLMap            map[string]glob.Glob `jsonschema:"-" yaml:"-" json:"-" koanf:"-"`
 }
 
 func (t *ThirdParty) Validate() error {
@@ -88,6 +102,15 @@ func (t *ThirdParty) Validate() error {
 		for _, u := range urls {
 			if strings.HasSuffix(u, "/") {
 				return fmt.Errorf("redirect url %s must not have trailing slash", u)
+			}
+		}
+
+		if !t.UnsafeWildcardRedirectURLAllowed {
+			for _, u := range t.AllowedRedirectURLS {
+				switch u {
+				case "**", "http://**", "https://**":
+					return fmt.Errorf("found unsafe wildcard redirect url %q in third_party.allowed_redirect_urls, if this is intentional (e.g. for testing) set third_party.unsafe_wildcard_redirect_url_allowed to true", u)
+				}
 			}
 		}
 	}
