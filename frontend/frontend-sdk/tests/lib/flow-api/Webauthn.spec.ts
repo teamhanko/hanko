@@ -77,4 +77,49 @@ describe("autoSteps webauthn credential creation error handling", () => {
     ).toHaveBeenCalledWith({ public_key: attestation });
     expect(state.actions.back.run).not.toHaveBeenCalled();
   });
+
+  // When the attestation could not be verified, the backend keeps the flow in
+  // the same state and attaches the error. The auto-step must surface it
+  // instead of prompting for a new credential again.
+  describe.each([
+    "onboarding_verify_passkey_attestation",
+    "webauthn_credential_verification",
+  ] as const)("%s with an error from a failed attestation", (stateName) => {
+    const passkeyInvalid = {
+      code: "passkey_invalid",
+      message: "The passkey is invalid",
+    };
+
+    const buildErrorState = () => {
+      const backState = {
+        name: "back_state",
+        error: undefined as unknown,
+        dispatchAfterStateChangeEvent: jest.fn(),
+      };
+      const state = buildState({ error: passkeyInvalid });
+      state.actions.back.run = jest.fn().mockResolvedValue(backState);
+      return { state, backState };
+    };
+
+    it("goes back and propagates the error without a new credential prompt", async () => {
+      const create = jest.fn();
+      jest
+        .spyOn(WebauthnManager, "getInstance")
+        .mockReturnValue({ createWebauthnCredential: create } as never);
+      const { state, backState } = buildErrorState();
+
+      const result = await autoSteps[stateName](state as never);
+
+      expect(create).not.toHaveBeenCalled();
+      expect(
+        state.actions.webauthn_verify_attestation_response.run,
+      ).not.toHaveBeenCalled();
+      expect(state.actions.back.run).toHaveBeenCalledWith(null, {
+        dispatchAfterStateChangeEvent: false,
+      });
+      expect(result).toBe(backState);
+      expect(result.error).toEqual(passkeyInvalid);
+      expect(backState.dispatchAfterStateChangeEvent).toHaveBeenCalled();
+    });
+  });
 });
