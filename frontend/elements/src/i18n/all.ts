@@ -1,5 +1,6 @@
 import { Translations } from "./translations";
 import { bn } from "./bn";
+import { da } from "./da";
 import { de } from "./de";
 import { en } from "./en";
 import { fr } from "./fr";
@@ -9,4 +10,16 @@ import { nl } from "./nl";
 import { pl } from "./pl";
 import { ptBR } from "./pt-BR";
 import { zh } from "./zh";
-export const all: Translations = { bn, de, en, fr, it, ko, nl, pl, ptBR, zh };
+export const all: Translations = {
+  bn,
+  da,
+  de,
+  en,
+  fr,
+  it,
+  ko,
+  nl,
+  pl,
+  ptBR,
+  zh,
+};

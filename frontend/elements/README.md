@@ -500,6 +500,7 @@ Markup:
 Translations are currently available for the following languages:
 
 - "bn" - Bengali
+- "da" - Danish
 - "de" - German
 - "en" - English
 - "fr" - French
@@ -516,6 +517,7 @@ You can import them individually:
 // if you're using CDN.
 
 import { bn } from "@teamhanko/hanko-elements/i18n/bn";
+import { da } from "@teamhanko/hanko-elements/i18n/da";
 import { de } from "@teamhanko/hanko-elements/i18n/de";
 import { en } from "@teamhanko/hanko-elements/i18n/en";
 import { fr } from "@teamhanko/hanko-elements/i18n/fr";
@@ -534,7 +536,7 @@ import { all } from "@teamhanko/hanko-elements/i18n/all";
 After importing, provide the translations through the `register()` function:
 
 ```typescript
-register("https://hanko.yourdomain.com", { translations: { bn, de, en, fr, it, nl, ptBR, zh } });
+register("https://hanko.yourdomain.com", { translations: { bn, da, de, en, fr, it, nl, ptBR, zh } });
 
 // or
 
