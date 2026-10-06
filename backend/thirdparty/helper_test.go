@@ -390,6 +390,43 @@ func TestIsValidRedirectTo(t *testing.T) {
 			want:                             false,
 		},
 
+		// --- bare single-star wildcard: matches only a single-label host, no path, any port.
+		// Unlike "**", matching here does not depend on UnsafeWildcardRedirectURLAllowed - "*"
+		// can never cross the "." glob separator, so it can't match a real multi-label domain.
+		// Validate() still rejects configuring it (see config_third_party_test-equivalent
+		// coverage in handler/tenant_test.go) because a single-label host is still a broader
+		// match than almost any admin intends.
+		{
+			name:                "Single-star wildcard matches bare single-label host",
+			requestedRedirect:   "https://localhost",
+			allowedRedirectURLs: []string{"https://*"},
+			want:                true,
+		},
+		{
+			name:                "Single-star wildcard matches bare single-label host with port",
+			requestedRedirect:   "https://localhost:9999",
+			allowedRedirectURLs: []string{"https://*"},
+			want:                true,
+		},
+		{
+			name:                "Single-star wildcard does not match multi-label domain",
+			requestedRedirect:   "https://example.com",
+			allowedRedirectURLs: []string{"https://*"},
+			want:                false,
+		},
+		{
+			name:                "Single-star wildcard does not match a path",
+			requestedRedirect:   "https://localhost/callback",
+			allowedRedirectURLs: []string{"https://*"},
+			want:                false,
+		},
+		{
+			name:                "Single-star wildcard enforces scheme",
+			requestedRedirect:   "http://localhost",
+			allowedRedirectURLs: []string{"https://*"},
+			want:                false,
+		},
+
 		// --- no matching entry ---
 		{
 			name:                "No allowlist entry matches",

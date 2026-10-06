@@ -135,6 +135,26 @@ func (s *tenantSuite) TestUpdate_ThirdPartyUnsafeWildcardRedirectURL() {
 			expectedStatusCode: http.StatusOK,
 		},
 		{
+			name:               "rejects an http://* redirect url when flag is unset",
+			config:             thirdPartyConfig(`["http://*"]`, "false"),
+			expectedStatusCode: http.StatusBadRequest,
+		},
+		{
+			name:               "rejects an https://* redirect url when flag is unset",
+			config:             thirdPartyConfig(`["https://*"]`, "false"),
+			expectedStatusCode: http.StatusBadRequest,
+		},
+		{
+			name:               "allows an http://* redirect url when flag is enabled",
+			config:             thirdPartyConfig(`["http://*"]`, "true"),
+			expectedStatusCode: http.StatusOK,
+		},
+		{
+			name:               "allows an https://* redirect url when flag is enabled",
+			config:             thirdPartyConfig(`["https://*"]`, "true"),
+			expectedStatusCode: http.StatusOK,
+		},
+		{
 			name:               "allows an ordinary redirect url regardless of the flag",
 			config:             thirdPartyConfig(`["https://example.com/callback"]`, "false"),
 			expectedStatusCode: http.StatusOK,

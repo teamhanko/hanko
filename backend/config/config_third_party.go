@@ -58,18 +58,20 @@ type ThirdParty struct {
 	// A double asterisk (`**`) acts as a "super"-wildcard/match-all, e.g. `https://example.com/**` matches
 	// both `https://example.com/foo` and `https://example.com/foo/bar`.
 	//
-	// For security reasons, a bare `**`, or a `**` with no host after the protocol (`http://**`, `https://**`),
-	// is rejected unless [`unsafe_wildcard_redirect_url_allowed`](#unsafe_wildcard_redirect_url_allowed) is set
-	// to `true`.
+	// For security reasons, a bare `**`, or a `**`/`*` with no host after the protocol (`http://**`,
+	// `https://**`, `http://*`, `https://*`), is rejected unless
+	// [`unsafe_wildcard_redirect_url_allowed`](#unsafe_wildcard_redirect_url_allowed) is set to `true`.
 	//
 	// See [here](https://pkg.go.dev/github.com/gobwas/glob#Compile) for more on globbing.
 	//
 	// Must not be empty if any of the [`providers`](#providers) are `enabled`. URLs in the list must not have a trailing slash.
 	AllowedRedirectURLS []string `yaml:"allowed_redirect_urls" json:"allowed_redirect_urls" koanf:"allowed_redirect_urls" split_words:"true" jsonschema:"minItems=1"`
 	// `unsafe_wildcard_redirect_url_allowed` allows `allowed_redirect_urls` entries that are a bare
-	// super-wildcard (`**`), or a super-wildcard with no host after the protocol (`http://**`, `https://**`).
-	// Such an entry allows redirecting to any http(s) URL (of the given scheme, if one is specified) after
-	// third party sign-in.
+	// super-wildcard (`**`), or a `**`/`*` with no host after the protocol (`http://**`, `https://**`,
+	// `http://*`, `https://*`). A `**` entry allows redirecting to any http(s) URL (of the given scheme,
+	// if one is specified) after third party sign-in; a bare `*` entry allows redirecting to any
+	// single-label hostname of that scheme (e.g. `https://localhost`, `https://some-internal-host`), on
+	// any port and without a path.
 	//
 	// This is INSECURE and should only be used for testing purposes, never in production.
 	//
@@ -108,7 +110,7 @@ func (t *ThirdParty) Validate() error {
 		if !t.UnsafeWildcardRedirectURLAllowed {
 			for _, u := range t.AllowedRedirectURLS {
 				switch u {
-				case "**", "http://**", "https://**":
+				case "**", "http://**", "https://**", "http://*", "https://*":
 					return fmt.Errorf("found unsafe wildcard redirect url %q in third_party.allowed_redirect_urls, if this is intentional (e.g. for testing) set third_party.unsafe_wildcard_redirect_url_allowed to true", u)
 				}
 			}
