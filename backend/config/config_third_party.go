@@ -62,6 +62,11 @@ type ThirdParty struct {
 	// `https://**`, `http://*`, `https://*`), is rejected unless
 	// [`unsafe_wildcard_redirect_url_allowed`](#unsafe_wildcard_redirect_url_allowed) is set to `true`.
 	//
+	// A bare `*` with no protocol at all is always rejected, with no opt-out: every valid redirect URL
+	// contains `://`, a `/`, which a lone `*` can never cross, so such an entry could never match
+	// anything - it would just be a confusing no-op, not a genuine (if insecure) capability like the
+	// patterns above.
+	//
 	// See [here](https://pkg.go.dev/github.com/gobwas/glob#Compile) for more on globbing.
 	//
 	// Must not be empty if any of the [`providers`](#providers) are `enabled`. URLs in the list must not have a trailing slash.
@@ -69,9 +74,11 @@ type ThirdParty struct {
 	// `unsafe_wildcard_redirect_url_allowed` allows `allowed_redirect_urls` entries that are a bare
 	// super-wildcard (`**`), or a `**`/`*` with no host after the protocol (`http://**`, `https://**`,
 	// `http://*`, `https://*`). A `**` entry allows redirecting to any http(s) URL (of the given scheme,
-	// if one is specified) after third party sign-in; a bare `*` entry allows redirecting to any
-	// single-label hostname of that scheme (e.g. `https://localhost`, `https://some-internal-host`), on
-	// any port and without a path.
+	// if one is specified) after third party sign-in; a `*` entry allows redirecting to any single-label
+	// hostname of that scheme (e.g. `https://localhost`, `https://some-internal-host`), on any port and
+	// without a path. A bare `*` with no protocol is a separate case: it is always rejected regardless
+	// of this setting, with no opt-out, because it can never match any redirect target at all (see
+	// [`allowed_redirect_urls`](#allowed_redirect_urls)).
 	//
 	// This is INSECURE and should only be used for testing purposes, never in production.
 	//
@@ -104,6 +111,12 @@ func (t *ThirdParty) Validate() error {
 		for _, u := range urls {
 			if strings.HasSuffix(u, "/") {
 				return fmt.Errorf("redirect url %s must not have trailing slash", u)
+			}
+		}
+
+		for _, u := range t.AllowedRedirectURLS {
+			if u == "*" {
+				return fmt.Errorf("redirect url %q can never match any redirect target and is not a valid allowed_redirect_urls entry", u)
 			}
 		}
 
