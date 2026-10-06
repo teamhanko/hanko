@@ -1,0 +1,227 @@
+import { Translation } from "./translations";
+
+export const da: Translation = {
+  headlines: {
+    error: "Der opstod en fejl",
+    loginEmail: "Log ind eller opret konto",
+    loginEmailNoSignup: "Log ind",
+    loginFinished: "Du er logget ind",
+    loginPasscode: "Indtast engangskode",
+    loginPassword: "Indtast adgangskode",
+    registerAuthenticator: "Opret en adgangsnøgle",
+    registerConfirm: "Opret konto?",
+    registerPassword: "Angiv ny adgangskode",
+    otpSetUp: "Konfigurer godkendelsesapp",
+    profileEmails: "E-mailadresser",
+    profilePassword: "Adgangskode",
+    profilePasskeys: "Adgangsnøgler",
+    isPrimaryEmail: "Primær e-mailadresse",
+    setPrimaryEmail: "Angiv primær e-mailadresse",
+    createEmail: "Indtast en ny e-mailadresse",
+    createUsername: "Indtast et nyt brugernavn",
+    emailVerified: "Bekræftet",
+    emailUnverified: "Ikke bekræftet",
+    emailDelete: "Slet",
+    renamePasskey: "Omdøb adgangsnøgle",
+    deletePasskey: "Slet adgangsnøgle",
+    lastUsedAt: "Sidst brugt",
+    createdAt: "Oprettet",
+    connectedAccounts: "Tilknyttede konti",
+    deleteAccount: "Slet konto",
+    accountNotFound: "Kontoen blev ikke fundet",
+    signIn: "Log ind",
+    signUp: "Opret konto",
+    selectLoginMethod: "Vælg loginmetode",
+    setupLoginMethod: "Konfigurer loginmetode",
+    lastUsed: "Sidst set",
+    ipAddress: "IP-adresse",
+    revokeSession: "Afslut session",
+    profileSessions: "Sessioner",
+    mfaSetUp: "Konfigurer MFA",
+    securityKeySetUp: "Tilføj sikkerhedsnøgle",
+    securityKeyLogin: "Sikkerhedsnøgle",
+    otpLogin: "Godkendelseskode",
+    renameSecurityKey: "Omdøb sikkerhedsnøgle",
+    deleteSecurityKey: "Slet sikkerhedsnøgle",
+    securityKeys: "Sikkerhedsnøgler",
+    authenticatorApp: "Godkendelsesapp",
+    authenticatorAppAlreadySetUp: "Godkendelsesappen er konfigureret",
+    authenticatorAppNotSetUp: "Konfigurer godkendelsesapp",
+    trustDevice: "Har du tillid til denne browser?",
+    deleteIdentity: "Fjern tilknytning",
+  },
+  texts: {
+    enterPasscode: "Indtast engangskoden, der blev sendt til din e-mailadresse.",
+    enterPasscodeNoEmail:
+      "Indtast engangskoden, der blev sendt til din primære e-mailadresse.",
+    setupPasskey:
+      "Log nemt og sikkert ind på din konto med en adgangsnøgle. Bemærk: Dine biometriske data gemmes kun på dine egne enheder og deles aldrig med nogen.",
+    createAccount:
+      'Der findes ingen konto for "{emailAddress}". Vil du oprette en ny konto?',
+    otpEnterVerificationCode:
+      "Indtast engangskoden (OTP) fra din godkendelsesapp nedenfor:",
+    otpScanQRCode:
+      "Scan QR-koden med din godkendelsesapp (f.eks. Google Authenticator eller en anden TOTP-app). Du kan også indtaste den hemmelige OTP-nøgle manuelt i appen.",
+    otpSecretKey: "Hemmelig OTP-nøgle",
+    passwordFormatHint: "Skal være mellem {minLength} og {maxLength} tegn.",
+    securityKeySetUp:
+      "Brug en dedikeret sikkerhedsnøgle via USB, Bluetooth eller NFC eller din mobiltelefon. Tilslut eller aktivér din sikkerhedsnøgle, klik derefter på knappen nedenfor, og følg vejledningen for at fuldføre registreringen.",
+    setPrimaryEmail:
+      "Angiv denne e-mailadresse som den, vi kontakter dig på.",
+    isPrimaryEmail:
+      "Denne e-mailadresse bruges til at kontakte dig, hvis det bliver nødvendigt.",
+    emailVerified: "Denne e-mailadresse er bekræftet.",
+    emailUnverified: "Denne e-mailadresse er ikke bekræftet.",
+    emailDelete:
+      "Hvis du sletter denne e-mailadresse, kan den ikke længere bruges til at logge ind.",
+    renamePasskey: "Giv adgangsnøglen et navn.",
+    deletePasskey: "Slet denne adgangsnøgle fra din konto.",
+    deleteAccount:
+      "Er du sikker på, at du vil slette denne konto? Alle data slettes med det samme og kan ikke gendannes.",
+    noAccountExists: 'Der findes ingen konto for "{emailAddress}".',
+    selectLoginMethodForFutureLogins:
+      "Vælg en af følgende loginmetoder til fremtidige logins.",
+    howDoYouWantToLogin: "Hvordan vil du logge ind?",
+    mfaSetUp:
+      "Beskyt din konto med multifaktorgodkendelse (MFA). MFA tilføjer et ekstra trin til dit login, så din konto forbliver sikker, selv hvis din adgangskode eller e-mailkonto bliver kompromitteret.",
+    securityKeyLogin:
+      "Tilslut eller aktivér din sikkerhedsnøgle, og klik derefter på knappen nedenfor. Når den er klar, kan du bruge den via USB, NFC eller din mobiltelefon. Følg vejledningen for at fuldføre login.",
+    otpLogin:
+      "Åbn din godkendelsesapp for at få engangskoden (OTP). Indtast koden i feltet nedenfor for at fuldføre dit login.",
+    renameSecurityKey: "Giv sikkerhedsnøglen et navn.",
+    deleteSecurityKey: "Slet denne sikkerhedsnøgle fra din konto.",
+    authenticatorAppAlreadySetUp:
+      "Din konto er beskyttet med en godkendelsesapp, der genererer tidsbaserede engangskoder (TOTP) til multifaktorgodkendelse.",
+    authenticatorAppNotSetUp:
+      "Beskyt din konto med en godkendelsesapp, der genererer tidsbaserede engangskoder (TOTP) til multifaktorgodkendelse.",
+    trustDevice:
+      "Hvis du har tillid til denne browser, behøver du ikke at indtaste din engangskode (OTP) eller bruge din sikkerhedsnøgle til multifaktorgodkendelse (MFA), næste gang du logger ind.",
+  },
+  labels: {
+    or: "eller",
+    no: "nej",
+    yes: "ja",
+    email: "E-mail",
+    continue: "Fortsæt",
+    copied: "kopieret",
+    skip: "Spring over",
+    save: "Gem",
+    password: "Adgangskode",
+    passkey: "Adgangsnøgle",
+    passcode: "Engangskode",
+    signInPassword: "Log ind med adgangskode",
+    signInPasscode: "Log ind med engangskode",
+    forgotYourPassword: "Glemt din adgangskode?",
+    back: "Tilbage",
+    signInPasskey: "Log ind med adgangsnøgle",
+    registerAuthenticator: "Opret en adgangsnøgle",
+    signIn: "Log ind",
+    signUp: "Opret konto",
+    sendNewPasscode: "Send ny kode",
+    passwordRetryAfter: "Prøv igen om {passwordRetryAfter}",
+    passcodeResendAfter: "Anmod om en ny kode om {passcodeResendAfter}",
+    unverifiedEmail: "ikke bekræftet",
+    primaryEmail: "primær",
+    setAsPrimaryEmail: "Angiv som primær",
+    verify: "Bekræft",
+    delete: "Slet",
+    newEmailAddress: "Ny e-mailadresse",
+    newPassword: "Ny adgangskode",
+    rename: "Omdøb",
+    newPasskeyName: "Nyt navn til adgangsnøgle",
+    addEmail: "Tilføj e-mail",
+    createPasskey: "Opret en adgangsnøgle",
+    webauthnUnsupported: "Din browser understøtter ikke adgangsnøgler",
+    signInWith: "Fortsæt med {provider}",
+    deleteAccount: "Ja, slet denne konto.",
+    emailOrUsername: "E-mail eller brugernavn",
+    username: "Brugernavn",
+    optional: "valgfrit",
+    dontHaveAnAccount: "Har du ikke en konto?",
+    alreadyHaveAnAccount: "Har du allerede en konto?",
+    changeUsername: "Skift brugernavn",
+    setUsername: "Angiv brugernavn",
+    changePassword: "Skift adgangskode",
+    setPassword: "Angiv adgangskode",
+    revoke: "Afslut",
+    currentSession: "Aktuel session",
+    authenticatorApp: "Godkendelsesapp",
+    securityKey: "Sikkerhedsnøgle",
+    securityKeyUse: "Brug sikkerhedsnøgle",
+    newSecurityKeyName: "Nyt navn til sikkerhedsnøgle",
+    createSecurityKey: "Tilføj en sikkerhedsnøgle",
+    authenticatorAppManage: "Administrer godkendelsesapp",
+    authenticatorAppAdd: "Konfigurer",
+    configured: "konfigureret",
+    useAnotherMethod: "Brug en anden metode",
+    lastUsed: "Sidst brugt",
+    trustDevice: "Hav tillid til denne browser",
+    staySignedIn: "Forbliv logget ind",
+    connectAccount: "Tilknyt konto",
+  },
+  errors: {
+    somethingWentWrong:
+      "Der opstod en teknisk fejl. Prøv venligst igen senere.",
+    requestTimeout: "Anmodningen fik timeout.",
+    invalidPassword: "Forkert e-mail eller adgangskode.",
+    invalidPasscode: "Den angivne engangskode er forkert.",
+    passcodeAttemptsReached:
+      "Engangskoden er indtastet forkert for mange gange. Anmod venligst om en ny kode.",
+    tooManyRequests:
+      "Der er foretaget for mange anmodninger. Vent venligst, før du prøver igen.",
+    unauthorized: "Din session er udløbet. Log venligst ind igen.",
+    invalidWebauthnCredential: "Denne adgangsnøgle kan ikke længere bruges.",
+    passcodeExpired: "Engangskoden er udløbet. Anmod venligst om en ny.",
+    userVerification:
+      "Brugerbekræftelse er påkrævet. Sørg for, at din godkendelsesenhed er beskyttet med en PIN-kode eller biometri.",
+    emailAddressAlreadyExistsError: "E-mailadressen findes allerede.",
+    maxNumOfEmailAddressesReached:
+      "Der kan ikke tilføjes flere e-mailadresser.",
+    thirdPartyAccessDenied:
+      "Adgang nægtet. Anmodningen blev annulleret af brugeren, eller udbyderen har nægtet adgang af andre årsager.",
+    thirdPartyMultipleAccounts:
+      "Kontoen kan ikke identificeres. E-mailadressen bruges af flere konti.",
+    thirdPartyUnverifiedEmail:
+      "E-mailbekræftelse er påkrævet. Bekræft venligst den anvendte e-mailadresse hos din udbyder.",
+    signupDisabled: "Oprettelse af konti er deaktiveret.",
+    handlerNotFoundError:
+      "Det aktuelle trin understøttes ikke af denne version af applikationen. Prøv venligst igen senere, eller kontakt support, hvis problemet fortsætter.",
+  },
+  flowErrors: {
+    technical_error: "Der opstod en teknisk fejl. Prøv venligst igen senere.",
+    flow_expired_error:
+      "Sessionen er udløbet. Klik på knappen for at starte forfra.",
+    value_invalid_error: "Den indtastede værdi er ugyldig.",
+    otp_code_invalid: "Den angivne engangskode (OTP) er forkert.",
+    otp_code_already_used: "Engangskoden (OTP) er allerede brugt.",
+    passcode_invalid: "Den angivne engangskode er forkert.",
+    passkey_invalid: "Denne adgangsnøgle kan ikke længere bruges.",
+    passcode_max_attempts_reached:
+      "Engangskoden er indtastet forkert for mange gange. Anmod venligst om en ny kode.",
+    rate_limit_exceeded:
+      "Der er foretaget for mange anmodninger. Vent venligst, før du prøver igen.",
+    unknown_username_error: "Brugernavnet er ukendt.",
+    unknown_email_error: "E-mailadressen er ukendt.",
+    username_already_exists: "Brugernavnet er allerede i brug.",
+    invalid_username_error:
+      "Brugernavnet må kun indeholde bogstaver, tal og understregninger.",
+    email_already_exists: "E-mailadressen er allerede i brug.",
+    not_found: "Den anmodede ressource blev ikke fundet.",
+    operation_not_permitted_error: "Handlingen er ikke tilladt.",
+    flow_discontinuity_error:
+      "Processen kan ikke fortsætte på grund af brugerindstillinger eller udbyderens konfiguration.",
+    form_data_invalid_error: "De indsendte formulardata indeholder fejl.",
+    unauthorized: "Din session er udløbet. Log venligst ind igen.",
+    value_missing_error: "Værdien mangler.",
+    value_too_long_error: "Værdien er for lang.",
+    value_too_short_error: "Værdien er for kort.",
+    webauthn_credential_invalid_mfa_only:
+      "Disse loginoplysninger kan kun bruges som sikkerhedsnøgle til anden faktor.",
+    webauthn_credential_already_exists:
+      "Anmodningen fik timeout, blev annulleret, eller enheden er allerede registreret. Prøv igen, eller brug en anden enhed.",
+    platform_authenticator_required:
+      "Din konto er konfigureret til at bruge platformsgodkendelse, men din nuværende enhed eller browser understøtter ikke denne funktion. Prøv igen med en kompatibel enhed eller browser.",
+    third_party_access_denied:
+      "Adgang nægtet. Anmodningen blev annulleret af brugeren, eller udbyderen har nægtet adgang af andre årsager.",
+  },
+};
