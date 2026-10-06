@@ -360,6 +360,32 @@ func TestIsValidRedirectTo(t *testing.T) {
 			allowedRedirectURLs: []string{},
 			want:                false,
 		},
+
+		// --- custom URI schemes for native mobile app redirects ---
+		{
+			name:                "Custom scheme allowed when explicitly allowlisted",
+			requestedRedirect:   "com.example.myapp://callback",
+			allowedRedirectURLs: []string{"com.example.myapp://**"},
+			want:                true,
+		},
+		{
+			name:                "Custom scheme exact host match allowed",
+			requestedRedirect:   "com.example.myapp://callback",
+			allowedRedirectURLs: []string{"com.example.myapp://callback"},
+			want:                true,
+		},
+		{
+			name:                "Custom scheme rejected when not allowlisted",
+			requestedRedirect:   "com.example.myapp://callback",
+			allowedRedirectURLs: []string{"https://example.com"},
+			want:                false,
+		},
+		{
+			name:                "Custom scheme rejected when a different custom scheme is allowlisted",
+			requestedRedirect:   "com.evil.app://callback",
+			allowedRedirectURLs: []string{"com.example.myapp://**"},
+			want:                false,
+		},
 	}
 
 	for _, testData := range tests {

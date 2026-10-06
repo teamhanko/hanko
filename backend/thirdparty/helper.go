@@ -38,16 +38,17 @@ func IsAllowedRedirect(config config.ThirdParty, redirectTo string) bool {
 		return false
 	}
 
-	// Only allow normal browser-navigation schemes. This prevents redirects to
-	// dangerous or unexpected schemes such as:
+	// Unlike before, we no longer hard-code the scheme to http/https here.
+	// Native mobile apps (Android, iOS) commonly use a custom URI scheme for
+	// OAuth redirects, e.g.:
 	//
-	//   javascript:alert(1)
-	//   data:text/html,...
-	//   file:///etc/passwd
-	if redirectURL.Scheme != "http" && redirectURL.Scheme != "https" {
-		return false
-	}
-
+	//   com.example.myapp://callback
+	//
+	// and the admin-configured allowlist below is the actual safety boundary:
+	// a redirect is only ever accepted if it matches an explicit, operator-
+	// chosen pattern (including its scheme). Dangerous pseudo-schemes such as
+	// javascript:, data:, and file:/// are still rejected above, because they
+	// have no authority component and so fail the Hostname() == "" check.
 	for allowedRedirectPattern, pattern := range config.AllowedRedirectURLMap {
 		// Keep legacy semantics: the configured allowlist entry is still used
 		// as a glob against the full redirect URL string. This preserves support
@@ -113,6 +114,21 @@ func matchesAllowedRedirectHostBoundary(allowedRedirectPattern string, redirectU
 	// and vice versa. Keeping this strict avoids surprising behavior.
 	if allowedScheme != "" && !strings.EqualFold(allowedScheme, redirectURL.Scheme) {
 		return false
+	}
+
+	// The host-collision defense below exists to stop a browser from being
+	// redirected to an attacker-controlled DNS host that merely starts with
+	// an allowed prefix (e.g. "127.0.0.1**" must not match
+	// "127.0.0.1.evil.com"). That concept doesn't apply to non-HTTP(S)
+	// schemes such as a custom mobile app URI scheme
+	// ("com.example.myapp://callback"): the OS dispatches purely on the
+	// scheme, so there's no network host for an attacker to collide with, and
+	// anything after "scheme://" is just app-specific data. Having already
+	// verified the scheme matches, and with the caller having already glob-
+	// matched the full URL against the configured pattern, no further host
+	// matching is needed.
+	if !strings.EqualFold(redirectURL.Scheme, "http") && !strings.EqualFold(redirectURL.Scheme, "https") {
+		return true
 	}
 
 	actualHost := normalizeHost(redirectURL.Hostname())

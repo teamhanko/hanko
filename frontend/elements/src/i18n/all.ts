@@ -10,7 +10,7 @@ import { nl } from "./nl";
 import { pl } from "./pl";
 import { ptBR } from "./pt-BR";
 import { zh } from "./zh";
-export const all: Translations = {
+const translations: Translations = {
   bn,
   da,
   de,
@@ -23,3 +23,4 @@ export const all: Translations = {
   ptBR,
   zh,
 };
+export { translations as all };
