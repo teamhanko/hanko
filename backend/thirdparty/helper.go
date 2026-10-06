@@ -104,6 +104,14 @@ func IsAllowedRedirect(config config.ThirdParty, redirectTo string) bool {
 // broader legacy pattern compatibility. This helper only adds a safe boundary
 // check around scheme, host, and port.
 func matchesAllowedRedirectHostBoundary(allowedRedirectPattern string, redirectURL *url.URL) bool {
+	// A pattern made only of wildcards (the documented match-all "**") names no
+	// host at all, so there is no trusted host an attacker could collide with:
+	// the operator explicitly allowed every destination. The caller has already
+	// rejected relative, protocol-relative and host-less URLs.
+	if isOnlyWildcards(allowedRedirectPattern) {
+		return true
+	}
+
 	allowedScheme, allowedAuthorityPattern, ok := extractSchemeAndAuthorityPattern(allowedRedirectPattern)
 	if !ok {
 		return false
@@ -290,6 +298,14 @@ func matchesHostPatternSafely(allowedHostPattern string, actualHost string) bool
 		return false
 	}
 
+	// A host pattern made only of wildcards (e.g. the "**" in "https://**")
+	// allows any host. The scheme and port are still checked by the caller.
+	// Without this, the trailing-"**" stripping below reduces it to an empty
+	// pattern, which matches nothing.
+	if isOnlyWildcards(allowedHostPattern) {
+		return true
+	}
+
 	// Fast path: a pattern with no wildcard characters is a plain literal
 	// host and must match exactly. (This is subsumed by the glob.Compile
 	// branch below too, but is kept as a cheap allocation-free fast path for
@@ -365,6 +381,12 @@ func staticPrefixBeforeWildcard(value string) string {
 	}
 
 	return value[:wildcardIndex]
+}
+
+// isOnlyWildcards reports whether a configured pattern consists solely of "*"
+// characters, such as the match-all "**".
+func isOnlyWildcards(pattern string) bool {
+	return pattern != "" && strings.Trim(pattern, "*") == ""
 }
 
 // normalizeHost canonicalizes hostnames for comparison.

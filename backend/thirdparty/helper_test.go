@@ -386,6 +386,44 @@ func TestIsValidRedirectTo(t *testing.T) {
 			allowedRedirectURLs: []string{"com.example.myapp://**"},
 			want:                false,
 		},
+
+		// --- match-all patterns (regression: #2993) ---
+		{
+			name:                "Match-all super glob allows any https URL",
+			requestedRedirect:   "https://app.example.com/auth/callback",
+			allowedRedirectURLs: []string{"**"},
+			want:                true,
+		},
+		{
+			name:                "Match-all super glob allows localhost with port",
+			requestedRedirect:   "http://localhost:3000/callback",
+			allowedRedirectURLs: []string{"**"},
+			want:                true,
+		},
+		{
+			name:                "Match-all super glob still rejects protocol-relative URL",
+			requestedRedirect:   "//evil.com",
+			allowedRedirectURLs: []string{"**"},
+			want:                false,
+		},
+		{
+			name:                "Match-all super glob still rejects javascript: scheme",
+			requestedRedirect:   "javascript:alert(1)",
+			allowedRedirectURLs: []string{"**"},
+			want:                false,
+		},
+		{
+			name:                "Scheme with match-all host allows any host on that scheme",
+			requestedRedirect:   "https://app.example.com/auth/callback",
+			allowedRedirectURLs: []string{"https://**"},
+			want:                true,
+		},
+		{
+			name:                "Scheme with match-all host still enforces the scheme",
+			requestedRedirect:   "http://app.example.com/auth/callback",
+			allowedRedirectURLs: []string{"https://**"},
+			want:                false,
+		},
 	}
 
 	for _, testData := range tests {
