@@ -190,6 +190,7 @@ export const it: Translation = {
   },
   flowErrors: {
     technical_error: "Si è verificato un errore tecnico. Riprova più tardi.",
+    request_timeout: "La richiesta è scaduta. Riprova.",
     flow_expired_error:
       "La sessione è scaduta, clicca sul pulsante per riavviare.",
     value_invalid_error: "Il valore inserito non è valido.",

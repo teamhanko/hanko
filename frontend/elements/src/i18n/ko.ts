@@ -188,6 +188,7 @@ export const ko: Translation = {
   },
   flowErrors: {
     technical_error: "기술적인 오류가 발생했습니다. 나중에 다시 시도해 주세요.",
+    request_timeout: "요청 시간이 초과되었습니다. 다시 시도해 주세요.",
     flow_expired_error:
       "세션이 만료되었습니다. 버튼을 클릭하여 다시 시작해 주세요.",
     value_invalid_error: "입력한 값이 올바르지 않습니다.",

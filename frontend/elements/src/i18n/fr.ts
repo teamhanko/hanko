@@ -196,6 +196,7 @@ export const fr: Translation = {
   flowErrors: {
     technical_error:
       "Une erreur technique s'est produite. Veuillez réessayer ultérieurement.",
+    request_timeout: "La requête a expiré. Veuillez réessayer.",
     flow_expired_error:
       "La session a expiré, veuillez cliquer sur le bouton pour redémarrer.",
     value_invalid_error: "La valeur saisie est invalide.",
