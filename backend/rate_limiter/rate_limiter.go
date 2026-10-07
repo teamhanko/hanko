@@ -21,17 +21,11 @@ import (
 
 func NewRateLimiter(cfg config.RateLimiter, limits config.RateLimits) limiter.Store {
 	if cfg.Store == config.RATE_LIMITER_STORE_REDIS {
-		address, database, err := cfg.Redis.DialAddress()
-		if err != nil {
-			log.Fatal(err)
-		}
 		store, err := redisstore.New(&redisstore.Config{
 			Tokens:   limits.Tokens,
 			Interval: limits.Interval,
 			Dial: func() (redis.Conn, error) {
-				return redis.Dial("tcp", address,
-					redis.DialPassword(cfg.Redis.Password),
-					redis.DialDatabase(database))
+				return redis.DialURL("redis://"+cfg.Redis.Address, redis.DialPassword(cfg.Redis.Password))
 			},
 		})
 		if err != nil {
