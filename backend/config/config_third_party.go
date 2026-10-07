@@ -3,6 +3,7 @@ package config
 import (
 	"errors"
 	"fmt"
+	"regexp"
 	"strings"
 
 	"github.com/fatih/structs"
@@ -10,6 +11,16 @@ import (
 	"github.com/invopop/jsonschema"
 	orderedmap "github.com/wk8/go-ordered-map/v2"
 )
+
+// wildcardOnlyRedirectURLPattern matches an allowed_redirect_urls entry whose host is nothing
+// but asterisks ("*", "**", "***", ...), bare or after "http(s)://". A structural "only
+// asterisks" check is needed because the glob matcher doesn't treat N>=2 asterisks as
+// meaningfully different from "**", so no finite literal enumeration can close this off.
+//
+// Scoped to http(s) only: a custom scheme (e.g. "myapp://", common for mobile OAuth redirects)
+// is matched by scheme alone at runtime, with no host check at all, so it carries none of the
+// DNS/host-spoofing risk this check exists to prevent for http(s).
+var wildcardOnlyRedirectURLPattern = regexp.MustCompile(`^(https?://)?(\*+)$`)
 
 type ThirdParty struct {
 	// `providers` contains the configurations for the available OAuth/OIDC identity providers.
@@ -58,27 +69,27 @@ type ThirdParty struct {
 	// A double asterisk (`**`) acts as a "super"-wildcard/match-all, e.g. `https://example.com/**` matches
 	// both `https://example.com/foo` and `https://example.com/foo/bar`.
 	//
-	// For security reasons, a bare `**`, or a `**`/`*` with no host after the protocol (`http://**`,
-	// `https://**`, `http://*`, `https://*`), is rejected unless
+	// For security reasons, an entry whose host is nothing but asterisks - bare (`**`, `***`, ...) or
+	// after `http(s)://` (`http://*`, `https://**`, ...) - is rejected unless
 	// [`unsafe_wildcard_redirect_url_allowed`](#unsafe_wildcard_redirect_url_allowed) is set to `true`.
 	//
-	// A bare `*` with no protocol at all is always rejected, with no opt-out: every valid redirect URL
-	// contains `://`, a `/`, which a lone `*` can never cross, so such an entry could never match
-	// anything - it would just be a confusing no-op, not a genuine (if insecure) capability like the
-	// patterns above.
+	// The one exception is a bare single `*` with no protocol at all, which is always rejected with no
+	// opt-out: every valid redirect URL contains `://`, a `/`, which a lone `*` can never cross, so such
+	// an entry could never match anything - it would just be a confusing no-op, not a genuine (if
+	// insecure) capability like the patterns above.
 	//
 	// See [here](https://pkg.go.dev/github.com/gobwas/glob#Compile) for more on globbing.
 	//
 	// Must not be empty if any of the [`providers`](#providers) are `enabled`. URLs in the list must not have a trailing slash.
 	AllowedRedirectURLS []string `yaml:"allowed_redirect_urls" json:"allowed_redirect_urls" koanf:"allowed_redirect_urls" split_words:"true" jsonschema:"minItems=1"`
-	// `unsafe_wildcard_redirect_url_allowed` allows `allowed_redirect_urls` entries that are a bare
-	// super-wildcard (`**`), or a `**`/`*` with no host after the protocol (`http://**`, `https://**`,
-	// `http://*`, `https://*`). A `**` entry allows redirecting to any http(s) URL (of the given scheme,
-	// if one is specified) after third party sign-in; a `*` entry allows redirecting to any single-label
-	// hostname of that scheme (e.g. `https://localhost`, `https://some-internal-host`), on any port and
-	// without a path. A bare `*` with no protocol is a separate case: it is always rejected regardless
-	// of this setting, with no opt-out, because it can never match any redirect target at all (see
-	// [`allowed_redirect_urls`](#allowed_redirect_urls)).
+	// `unsafe_wildcard_redirect_url_allowed` allows `allowed_redirect_urls` entries whose host is
+	// nothing but asterisks - bare (`**`, `***`, ...) or after `http(s)://` (`http://*`, `https://**`,
+	// ...). A bare run of asterisks allows redirecting to any http(s) URL (of the given scheme, if one
+	// is specified) after third party sign-in; asterisks after a scheme allow redirecting to any
+	// single-label hostname of that scheme (e.g. `https://localhost`, `https://some-internal-host`), on
+	// any port and without a path. A bare single `*` with no protocol is a separate case: it is always
+	// rejected regardless of this setting, with no opt-out, because it can never match any redirect
+	// target at all (see [`allowed_redirect_urls`](#allowed_redirect_urls)).
 	//
 	// This is INSECURE and should only be used for testing purposes, never in production.
 	//
@@ -115,17 +126,26 @@ func (t *ThirdParty) Validate() error {
 		}
 
 		for _, u := range t.AllowedRedirectURLS {
-			if u == "*" {
+			match := wildcardOnlyRedirectURLPattern.FindStringSubmatch(u)
+			if match == nil {
+				continue
+			}
+
+			scheme := match[1]
+			asterisks := match[2]
+
+			// A bare single "*" has no scheme and no further host part at all, so it can never
+			// match any valid redirect URL (every valid redirect URL contains "://", a "/",
+			// which a lone "*" can never cross). Unlike every other entry this loop can match
+			// (two or more bare asterisks, or any count of asterisks after http(s)://), it is
+			// not a genuine (if insecure) capability unsafe_wildcard_redirect_url_allowed could
+			// reasonably unlock, so it is rejected unconditionally, with no opt-out.
+			if scheme == "" && len(asterisks) == 1 {
 				return fmt.Errorf("redirect url %q can never match any redirect target and is not a valid allowed_redirect_urls entry", u)
 			}
-		}
 
-		if !t.UnsafeWildcardRedirectURLAllowed {
-			for _, u := range t.AllowedRedirectURLS {
-				switch u {
-				case "**", "http://**", "https://**", "http://*", "https://*":
-					return fmt.Errorf("found unsafe wildcard redirect url %q in third_party.allowed_redirect_urls, if this is intentional (e.g. for testing) set third_party.unsafe_wildcard_redirect_url_allowed to true", u)
-				}
+			if !t.UnsafeWildcardRedirectURLAllowed {
+				return fmt.Errorf("found unsafe wildcard redirect url %q in third_party.allowed_redirect_urls, if this is intentional (e.g. for testing) set third_party.unsafe_wildcard_redirect_url_allowed to true", u)
 			}
 		}
 	}

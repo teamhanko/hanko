@@ -165,6 +165,36 @@ func (s *tenantSuite) TestUpdate_ThirdPartyUnsafeWildcardRedirectURL() {
 			expectedStatusCode: http.StatusOK,
 		},
 		{
+			name:               "rejects a bare *** redirect url when flag is unset",
+			config:             thirdPartyConfig(`["***"]`, "false"),
+			expectedStatusCode: http.StatusBadRequest,
+		},
+		{
+			name:               "allows a bare *** redirect url when flag is enabled",
+			config:             thirdPartyConfig(`["***"]`, "true"),
+			expectedStatusCode: http.StatusOK,
+		},
+		{
+			name:               "rejects an http://*** redirect url when flag is unset",
+			config:             thirdPartyConfig(`["http://***"]`, "false"),
+			expectedStatusCode: http.StatusBadRequest,
+		},
+		{
+			name:               "rejects an http://**** redirect url when flag is unset",
+			config:             thirdPartyConfig(`["http://****"]`, "false"),
+			expectedStatusCode: http.StatusBadRequest,
+		},
+		{
+			name:               "allows an http://***** redirect url when flag is enabled",
+			config:             thirdPartyConfig(`["http://*****"]`, "true"),
+			expectedStatusCode: http.StatusOK,
+		},
+		{
+			name:               "allows a wildcarded custom mobile scheme regardless of the flag",
+			config:             thirdPartyConfig(`["myapp://**"]`, "false"),
+			expectedStatusCode: http.StatusOK,
+		},
+		{
 			name:               "allows an ordinary redirect url regardless of the flag",
 			config:             thirdPartyConfig(`["https://example.com/callback"]`, "false"),
 			expectedStatusCode: http.StatusOK,

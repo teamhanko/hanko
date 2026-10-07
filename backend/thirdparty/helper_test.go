@@ -390,6 +390,36 @@ func TestIsValidRedirectTo(t *testing.T) {
 			want:                             false,
 		},
 
+		// --- 3+ asterisks must behave identically to "**" (see isAllAsterisks), not match only
+		// a single-label host or nothing at all.
+		{
+			name:                             "Bare triple-wildcard matches a multi-label domain when flag enabled",
+			requestedRedirect:                "https://a.b.example.com",
+			allowedRedirectURLs:              []string{"***"},
+			unsafeWildcardRedirectURLAllowed: true,
+			want:                             true,
+		},
+		{
+			name:                             "http scheme triple-wildcard matches a multi-label domain when flag enabled",
+			requestedRedirect:                "http://a.b.example.com",
+			allowedRedirectURLs:              []string{"http://***"},
+			unsafeWildcardRedirectURLAllowed: true,
+			want:                             true,
+		},
+		{
+			name:                             "http scheme quadruple-wildcard matches a multi-label domain when flag enabled",
+			requestedRedirect:                "http://a.b.example.com",
+			allowedRedirectURLs:              []string{"http://****"},
+			unsafeWildcardRedirectURLAllowed: true,
+			want:                             true,
+		},
+		{
+			name:                "http scheme triple-wildcard rejected when flag disabled",
+			requestedRedirect:   "http://a.b.example.com",
+			allowedRedirectURLs: []string{"http://***"},
+			want:                false,
+		},
+
 		// --- bare single-star wildcard: matches only a single-label host, no path, any port.
 		// Unlike "**", matching here does not depend on UnsafeWildcardRedirectURLAllowed - "*"
 		// can never cross the "." glob separator, so it can't match a real multi-label domain.
