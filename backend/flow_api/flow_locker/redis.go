@@ -32,7 +32,7 @@ func NewRedisLocker(config RedisLockerConfig) *RedisLocker {
 
 	pool := &redis.Pool{
 		Dial: func() (redis.Conn, error) {
-			c, err := redis.Dial("tcp", config.Address, redis.DialPassword(config.Password))
+			c, err := redis.DialURL("redis://"+config.Address, redis.DialPassword(config.Password))
 			if err != nil {
 				return nil, err
 			}
