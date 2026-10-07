@@ -77,3 +77,145 @@ func (s *tenantSuite) TestUpdate_SamlProviderClaimMapping() {
 		})
 	}
 }
+
+// TestUpdate_ThirdPartyUnsafeWildcardRedirectURL is the only test that exercises
+// ThirdParty.Validate's unsafe-wildcard check directly: thirdparty/helper_test.go covers the
+// runtime IsAllowedRedirect matching logic, not Validate, so this is where the config-rejection
+// behavior itself is proven, via the actual tenant config update endpoint.
+func (s *tenantSuite) TestUpdate_ThirdPartyUnsafeWildcardRedirectURL() {
+	if testing.Short() {
+		s.T().Skip("skipping test in short mode.")
+	}
+
+	const tenantID = "00000000-0000-0000-0000-000000000001"
+
+	thirdPartyConfig := func(allowedRedirectURLs, unsafeWildcardRedirectURLAllowed string) string {
+		return fmt.Sprintf(`{"config":{"third_party":{
+			"providers":{"google":{"enabled":true,"client_id":"client-id","secret":"secret"}},
+			"redirect_url":"https://example.com/thirdparty/callback",
+			"error_redirect_url":"https://example.com/error",
+			"allowed_redirect_urls":%s,
+			"unsafe_wildcard_redirect_url_allowed":%s
+		}}}`, allowedRedirectURLs, unsafeWildcardRedirectURLAllowed)
+	}
+
+	tests := []struct {
+		name               string
+		config             string
+		expectedStatusCode int
+	}{
+		{
+			name:               "rejects a bare ** redirect url when flag is unset",
+			config:             thirdPartyConfig(`["**"]`, "false"),
+			expectedStatusCode: http.StatusBadRequest,
+		},
+		{
+			name:               "rejects an http://** redirect url when flag is unset",
+			config:             thirdPartyConfig(`["http://**"]`, "false"),
+			expectedStatusCode: http.StatusBadRequest,
+		},
+		{
+			name:               "rejects an https://** redirect url when flag is unset",
+			config:             thirdPartyConfig(`["https://**"]`, "false"),
+			expectedStatusCode: http.StatusBadRequest,
+		},
+		{
+			name:               "allows a bare ** redirect url when flag is enabled",
+			config:             thirdPartyConfig(`["**"]`, "true"),
+			expectedStatusCode: http.StatusOK,
+		},
+		{
+			name:               "allows an http://** redirect url when flag is enabled",
+			config:             thirdPartyConfig(`["http://**"]`, "true"),
+			expectedStatusCode: http.StatusOK,
+		},
+		{
+			name:               "allows an https://** redirect url when flag is enabled",
+			config:             thirdPartyConfig(`["https://**"]`, "true"),
+			expectedStatusCode: http.StatusOK,
+		},
+		{
+			name:               "rejects a bare * redirect url when flag is unset",
+			config:             thirdPartyConfig(`["*"]`, "false"),
+			expectedStatusCode: http.StatusBadRequest,
+		},
+		{
+			name:               "rejects a bare * redirect url even when flag is enabled",
+			config:             thirdPartyConfig(`["*"]`, "true"),
+			expectedStatusCode: http.StatusBadRequest,
+		},
+		{
+			name:               "rejects an http://* redirect url when flag is unset",
+			config:             thirdPartyConfig(`["http://*"]`, "false"),
+			expectedStatusCode: http.StatusBadRequest,
+		},
+		{
+			name:               "rejects an https://* redirect url when flag is unset",
+			config:             thirdPartyConfig(`["https://*"]`, "false"),
+			expectedStatusCode: http.StatusBadRequest,
+		},
+		{
+			name:               "allows an http://* redirect url when flag is enabled",
+			config:             thirdPartyConfig(`["http://*"]`, "true"),
+			expectedStatusCode: http.StatusOK,
+		},
+		{
+			name:               "allows an https://* redirect url when flag is enabled",
+			config:             thirdPartyConfig(`["https://*"]`, "true"),
+			expectedStatusCode: http.StatusOK,
+		},
+		{
+			name:               "rejects a bare *** redirect url when flag is unset",
+			config:             thirdPartyConfig(`["***"]`, "false"),
+			expectedStatusCode: http.StatusBadRequest,
+		},
+		{
+			name:               "allows a bare *** redirect url when flag is enabled",
+			config:             thirdPartyConfig(`["***"]`, "true"),
+			expectedStatusCode: http.StatusOK,
+		},
+		{
+			name:               "rejects an http://*** redirect url when flag is unset",
+			config:             thirdPartyConfig(`["http://***"]`, "false"),
+			expectedStatusCode: http.StatusBadRequest,
+		},
+		{
+			name:               "rejects an http://**** redirect url when flag is unset",
+			config:             thirdPartyConfig(`["http://****"]`, "false"),
+			expectedStatusCode: http.StatusBadRequest,
+		},
+		{
+			name:               "allows an http://***** redirect url when flag is enabled",
+			config:             thirdPartyConfig(`["http://*****"]`, "true"),
+			expectedStatusCode: http.StatusOK,
+		},
+		{
+			name:               "allows a wildcarded custom mobile scheme regardless of the flag",
+			config:             thirdPartyConfig(`["myapp://**"]`, "false"),
+			expectedStatusCode: http.StatusOK,
+		},
+		{
+			name:               "allows an ordinary redirect url regardless of the flag",
+			config:             thirdPartyConfig(`["https://example.com/callback"]`, "false"),
+			expectedStatusCode: http.StatusOK,
+		},
+	}
+
+	for _, currentTest := range tests {
+		s.Run(currentTest.name, func() {
+			err := s.LoadFixtures("../test/fixtures/thirdparty")
+			s.Require().NoError(err)
+
+			cfg := tenantTestConfig()
+			e := NewManagementRouter(&cfg, s.Storage)
+
+			req := httptest.NewRequest(http.MethodPut, fmt.Sprintf("/tenants/%s", tenantID), strings.NewReader(currentTest.config))
+			req.Header.Set("Content-Type", "application/json")
+			rec := httptest.NewRecorder()
+
+			e.ServeHTTP(rec, req)
+
+			s.Require().Equal(currentTest.expectedStatusCode, rec.Code, rec.Body.String())
+		})
+	}
+}

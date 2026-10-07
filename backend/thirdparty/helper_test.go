@@ -13,11 +13,12 @@ import (
 
 func TestIsValidRedirectTo(t *testing.T) {
 	tests := []struct {
-		name                string
-		requestedRedirect   string
-		allowedRedirectURLs []string
-		errorRedirectURL    string
-		want                bool
+		name                             string
+		requestedRedirect                string
+		allowedRedirectURLs              []string
+		errorRedirectURL                 string
+		unsafeWildcardRedirectURLAllowed bool
+		want                             bool
 	}{
 		// --- existing positive cases ---
 		{
@@ -347,6 +348,115 @@ func TestIsValidRedirectTo(t *testing.T) {
 			want:                false,
 		},
 
+		// --- unsafe wildcard redirect url ---
+		{
+			name:                "Bare super-wildcard rejected when flag disabled",
+			requestedRedirect:   "https://example.com",
+			allowedRedirectURLs: []string{"**"},
+			want:                false,
+		},
+		{
+			name:                             "Bare super-wildcard allowed when flag enabled",
+			requestedRedirect:                "https://example.com",
+			allowedRedirectURLs:              []string{"**"},
+			unsafeWildcardRedirectURLAllowed: true,
+			want:                             true,
+		},
+		{
+			name:                "http scheme super-wildcard rejected when flag disabled",
+			requestedRedirect:   "http://example.com",
+			allowedRedirectURLs: []string{"http://**"},
+			want:                false,
+		},
+		{
+			name:                             "http scheme super-wildcard allowed when flag enabled",
+			requestedRedirect:                "http://example.com",
+			allowedRedirectURLs:              []string{"http://**"},
+			unsafeWildcardRedirectURLAllowed: true,
+			want:                             true,
+		},
+		{
+			name:                             "https scheme super-wildcard allowed when flag enabled",
+			requestedRedirect:                "https://example.com/foo",
+			allowedRedirectURLs:              []string{"https://**"},
+			unsafeWildcardRedirectURLAllowed: true,
+			want:                             true,
+		},
+		{
+			name:                             "Scheme-scoped super-wildcard still enforces scheme",
+			requestedRedirect:                "https://example.com",
+			allowedRedirectURLs:              []string{"http://**"},
+			unsafeWildcardRedirectURLAllowed: true,
+			want:                             false,
+		},
+
+		// --- 3+ asterisks must behave identically to "**" (see isAllAsterisks), not match only
+		// a single-label host or nothing at all.
+		{
+			name:                             "Bare triple-wildcard matches a multi-label domain when flag enabled",
+			requestedRedirect:                "https://a.b.example.com",
+			allowedRedirectURLs:              []string{"***"},
+			unsafeWildcardRedirectURLAllowed: true,
+			want:                             true,
+		},
+		{
+			name:                             "http scheme triple-wildcard matches a multi-label domain when flag enabled",
+			requestedRedirect:                "http://a.b.example.com",
+			allowedRedirectURLs:              []string{"http://***"},
+			unsafeWildcardRedirectURLAllowed: true,
+			want:                             true,
+		},
+		{
+			name:                             "http scheme quadruple-wildcard matches a multi-label domain when flag enabled",
+			requestedRedirect:                "http://a.b.example.com",
+			allowedRedirectURLs:              []string{"http://****"},
+			unsafeWildcardRedirectURLAllowed: true,
+			want:                             true,
+		},
+		{
+			name:                "http scheme triple-wildcard rejected when flag disabled",
+			requestedRedirect:   "http://a.b.example.com",
+			allowedRedirectURLs: []string{"http://***"},
+			want:                false,
+		},
+
+		// --- bare single-star wildcard: matches only a single-label host, no path, any port.
+		// Unlike "**", matching here does not depend on UnsafeWildcardRedirectURLAllowed - "*"
+		// can never cross the "." glob separator, so it can't match a real multi-label domain.
+		// Validate() still rejects configuring it (see config_third_party_test-equivalent
+		// coverage in handler/tenant_test.go) because a single-label host is still a broader
+		// match than almost any admin intends.
+		{
+			name:                "Single-star wildcard matches bare single-label host",
+			requestedRedirect:   "https://localhost",
+			allowedRedirectURLs: []string{"https://*"},
+			want:                true,
+		},
+		{
+			name:                "Single-star wildcard matches bare single-label host with port",
+			requestedRedirect:   "https://localhost:9999",
+			allowedRedirectURLs: []string{"https://*"},
+			want:                true,
+		},
+		{
+			name:                "Single-star wildcard does not match multi-label domain",
+			requestedRedirect:   "https://example.com",
+			allowedRedirectURLs: []string{"https://*"},
+			want:                false,
+		},
+		{
+			name:                "Single-star wildcard does not match a path",
+			requestedRedirect:   "https://localhost/callback",
+			allowedRedirectURLs: []string{"https://*"},
+			want:                false,
+		},
+		{
+			name:                "Single-star wildcard enforces scheme",
+			requestedRedirect:   "http://localhost",
+			allowedRedirectURLs: []string{"https://*"},
+			want:                false,
+		},
+
 		// --- no matching entry ---
 		{
 			name:                "No allowlist entry matches",
@@ -391,7 +501,8 @@ func TestIsValidRedirectTo(t *testing.T) {
 	for _, testData := range tests {
 		t.Run(testData.name, func(t *testing.T) {
 			cfg := config.ThirdParty{
-				AllowedRedirectURLS: testData.allowedRedirectURLs,
+				AllowedRedirectURLS:              testData.allowedRedirectURLs,
+				UnsafeWildcardRedirectURLAllowed: testData.unsafeWildcardRedirectURLAllowed,
 			}
 
 			if testData.errorRedirectURL != "" {
