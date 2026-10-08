@@ -15,6 +15,7 @@ func NewCreateAllCommand() *cobra.Command {
 	var (
 		configFile string
 		dryRun     bool
+		checkOnly  bool
 	)
 
 	cmd := &cobra.Command{
@@ -31,12 +32,21 @@ func NewCreateAllCommand() *cobra.Command {
 			if err != nil {
 				log.Fatal(err)
 			}
-			dbPersister := persistence.New(dbConnection)
 
 			affected, err := findTenantsMissingCertificate(dbConnection)
 			if err != nil {
 				log.Fatalf("failed to find affected tenants: %s", err)
 			}
+
+			if checkOnly {
+				fmt.Printf("%d tenant(s) missing a SAML certificate\n", len(affected))
+				for _, tenantID := range affected {
+					fmt.Printf("  %s\n", tenantID)
+				}
+				return
+			}
+
+			dbPersister := persistence.New(dbConnection)
 
 			if dryRun {
 				fmt.Println("DRY RUN - no data will be written")
@@ -67,6 +77,7 @@ func NewCreateAllCommand() *cobra.Command {
 
 	cmd.Flags().StringVar(&configFile, "config", config.DefaultConfigFilePath, "config file")
 	cmd.Flags().BoolVar(&dryRun, "dry-run", false, "report what would be created without writing anything")
+	cmd.Flags().BoolVar(&checkOnly, "check-only", false, "report how many tenants are missing a certificate and exit; no writes")
 
 	return cmd
 }
