@@ -62,6 +62,19 @@ func TestNewSamlCertificate_InvalidOptions(t *testing.T) {
 	}
 }
 
+func TestRenew_GeneratesNewSerial(t *testing.T) {
+	cert, err := NewSamlCertificate("test")
+	require.NoError(t, err)
+	serial := parseCert(t, cert.CertData).SerialNumber
+
+	_, err = cert.Renew("test")
+	require.NoError(t, err)
+
+	renewed := parseCert(t, cert.CertData).SerialNumber
+	assert.NotEqual(t, serial, renewed)
+	assert.Equal(t, 1, renewed.Sign(), "serial must be positive")
+}
+
 func TestRenew_KeepsKeyByDefault(t *testing.T) {
 	cert, err := NewSamlCertificate("test")
 	require.NoError(t, err)

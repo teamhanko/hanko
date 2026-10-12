@@ -10,7 +10,6 @@ import (
 	"github.com/gobuffalo/validate/v3/validators"
 	"github.com/teamhanko/hanko/backend/v3/crypto"
 	"github.com/teamhanko/hanko/backend/v3/crypto/aes_gcm"
-	"math/big"
 	"time"
 
 	"github.com/gobuffalo/pop/v6"
@@ -30,8 +29,9 @@ type SamlCertificate struct {
 }
 
 func createTemplate(serviceName string, creationTime time.Time, validityYears int) *x509.Certificate {
+	// SerialNumber is left unset, so CreateCertificate generates a random one. The certificate is self-signed, so
+	// issuer and subject are the same and a fixed serial would repeat on every renewal.
 	return &x509.Certificate{
-		SerialNumber: big.NewInt(1),
 		Subject: pkix.Name{
 			CommonName: serviceName,
 		},
