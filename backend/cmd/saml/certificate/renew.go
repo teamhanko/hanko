@@ -19,13 +19,21 @@ func NewRenewCommand() *cobra.Command {
 		configFile string
 		tenantID   string
 		dryRun     bool
+		params     certificateParams
 	)
 
 	cmd := &cobra.Command{
 		Use:   "renew",
 		Short: "reissue a tenant's SAML certificate",
-		Long: `Reissues a tenant's SAML certificate with a new validity period. The key pair is kept, but the
-certificate itself changes, so identity providers that pinned the previous certificate need the new one.`,
+		Long: `Reissues a tenant's SAML certificate with a new validity period.
+
+By default the key pair is kept and only the certificate changes. Identity providers that pinned the previous
+certificate then need the new one, though one that only checks the public key keeps working, and encrypted logins
+still work because the private key is unchanged.
+
+A different --key-bits, or --rotate-key, generates a new key pair instead. The identity provider then no longer
+has the matching public key: encrypted logins fail and signatures may be rejected until it is given the new
+certificate.`,
 		Args: func(cmd *cobra.Command, args []string) error {
 			if tenantID == "" {
 				return errors.New("tenant_id is required")
@@ -33,7 +41,16 @@ certificate itself changes, so identity providers that pinned the previous certi
 			if _, err := uuid.FromString(tenantID); err != nil {
 				return errors.New("tenant_id is not a uuid")
 			}
-			return nil
+
+			// without --key-bits the size defaults to the current key's, which is only known once the
+			// certificate is loaded, so the size is validated here only when given
+			if cmd.Flags().Changed("key-bits") {
+				if err := models.ValidateKeyBits(params.keyBits); err != nil {
+					return err
+				}
+			}
+
+			return params.validate()
 		},
 		Run: func(cmd *cobra.Command, args []string) {
 			cfg, err := config.Load(&configFile)
@@ -52,7 +69,7 @@ certificate itself changes, so identity providers that pinned the previous certi
 			}
 			dbPersister := persistence.New(dbConnection)
 
-			result, err := renewCertificateForTenant(dbPersister, tID, dryRun)
+			result, err := renewCertificateForTenant(dbPersister, tID, dryRun, params)
 			if err != nil {
 				log.Fatalf("failed to renew certificate: %s", err)
 			}
@@ -62,12 +79,15 @@ certificate itself changes, so identity providers that pinned the previous certi
 
 	cmd.Flags().StringVar(&configFile, "config", config.DefaultConfigFilePath, "config file")
 	cmd.Flags().StringVar(&tenantID, "tenant_id", "", "tenant ID to renew the SAML certificate of")
-	cmd.Flags().BoolVar(&dryRun, "dry-run", false, "report the certificate's current validity without renewing it")
+	cmd.Flags().BoolVar(&dryRun, "dry-run", false, "report what would change without renewing the certificate")
+	cmd.Flags().IntVar(&params.keyBits, "key-bits", 0, keyBitsUsage()+"; a size other than the current one generates a new key pair (default: the current key size)")
+	cmd.Flags().IntVar(&params.validityYears, "validity-years", models.DefaultValidityYears, validityYearsUsage())
+	cmd.Flags().BoolVar(&params.rotateKey, "rotate-key", false, "generate a new key pair even if the key size stays the same")
 
 	return cmd
 }
 
-func renewCertificateForTenant(persister persistence.Persister, tenantID uuid.UUID, dryRun bool) (certResult, error) {
+func renewCertificateForTenant(persister persistence.Persister, tenantID uuid.UUID, dryRun bool, params certificateParams) (certResult, error) {
 	tenant, err := persister.GetTenantPersister().Get(tenantID)
 	if err != nil {
 		return certResult{}, fmt.Errorf("failed to load tenant: %w", err)
@@ -90,11 +110,28 @@ func renewCertificateForTenant(persister persistence.Persister, tenantID uuid.UU
 	}
 	validity := fmt.Sprintf("valid %s to %s", current.NotBefore, current.NotAfter)
 
-	if dryRun {
-		return certResult{outcomeWouldRenew, fmt.Sprintf("tenant %s: would renew certificate (currently %s)", tenantID, validity)}, nil
+	// the key size defaults to the current key's, so renewing only replaces the key if a different size
+	// or a rotation is asked for
+	if params.keyBits == 0 {
+		if params.keyBits, err = cert.KeyBits(); err != nil {
+			return certResult{}, err
+		}
 	}
 
-	if err := persister.GetSamlCertificatePersister().Renew(cert, tenantServiceName(tenant)); err != nil {
+	if dryRun {
+		replacesKey, err := cert.WouldReplaceKey(params.options()...)
+		if err != nil {
+			return certResult{}, err
+		}
+
+		return certResult{outcomeWouldRenew, fmt.Sprintf(
+			"tenant %s: would renew certificate (currently %s) for %d years, key pair %s",
+			tenantID, validity, params.validityYears, keyOutcome(replacesKey, params.keyBits),
+		)}, nil
+	}
+
+	keyChanged, err := persister.GetSamlCertificatePersister().Renew(cert, tenantServiceName(tenant), params.options()...)
+	if err != nil {
 		return certResult{}, err
 	}
 
@@ -103,10 +140,23 @@ func renewCertificateForTenant(persister persistence.Persister, tenantID uuid.UU
 		return certResult{}, err
 	}
 
+	warning := "identity providers that pinned the previous certificate need the new one"
+	if keyChanged {
+		warning = "the key pair changed: identity providers need the new certificate, until then encrypted logins fail and signatures may be rejected"
+	}
+
 	return certResult{outcomeRenewed, fmt.Sprintf(
-		"renewed SAML certificate for tenant %s (was %s, now valid %s to %s)\nidentity providers that pinned the previous certificate need the new one",
-		tenantID, validity, renewed.NotBefore, renewed.NotAfter,
+		"renewed SAML certificate for tenant %s (was %s, now valid %s to %s)\nkey pair %s\n%s",
+		tenantID, validity, renewed.NotBefore, renewed.NotAfter, keyOutcome(keyChanged, params.keyBits), warning,
 	)}, nil
+}
+
+func keyOutcome(replaced bool, keyBits int) string {
+	if replaced {
+		return fmt.Sprintf("replaced with a new %d-bit key", keyBits)
+	}
+
+	return "kept"
 }
 
 func parseCertificate(cert *models.SamlCertificate) (*x509.Certificate, error) {

@@ -59,7 +59,9 @@ func (s *samlCertificatePersisterSuite) TestRenew_PersistsNewCertificateWithSame
 	s.Require().NoError(persister.Create(cert))
 	encryptedKey := cert.CertKey
 
-	s.Require().NoError(persister.Renew(cert, "test"))
+	keyChanged, err := persister.Renew(cert, "test")
+	s.Require().NoError(err)
+	s.False(keyChanged)
 
 	stored, err := persister.GetFirst(tenantID)
 	s.Require().NoError(err)
@@ -72,4 +74,31 @@ func (s *samlCertificatePersisterSuite) TestRenew_PersistsNewCertificateWithSame
 	s.Equal(encryptedKey, stored.CertKey)
 	oldPublicKey := parseCertificate(s, expiredCert).PublicKey.(*rsa.PublicKey)
 	s.True(oldPublicKey.Equal(parseCertificate(s, stored.CertData).PublicKey))
+}
+
+func (s *samlCertificatePersisterSuite) TestRenew_PersistsNewKey() {
+	if testing.Short() {
+		s.T().Skip("skipping test in short mode.")
+	}
+
+	tenantID := uuid.Must(uuid.FromString(defaultTenantID))
+
+	cert, err := models.NewSamlCertificate("test")
+	s.Require().NoError(err)
+	cert.TenantID = tenantID
+	persister := s.Storage.GetSamlCertificatePersister()
+	s.Require().NoError(persister.Create(cert))
+	oldEncryptedKey := cert.CertKey
+
+	keyChanged, err := persister.Renew(cert, "test", models.WithKeyBits(3072))
+	s.Require().NoError(err)
+	s.True(keyChanged)
+
+	stored, err := persister.GetFirst(tenantID)
+	s.Require().NoError(err)
+	s.NotEqual(oldEncryptedKey, stored.CertKey, "new key must be persisted")
+	bits, err := stored.KeyBits()
+	s.Require().NoError(err)
+	s.Equal(3072, bits)
+	s.Equal(3072, parseCertificate(s, stored.CertData).PublicKey.(*rsa.PublicKey).N.BitLen())
 }

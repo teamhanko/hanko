@@ -15,6 +15,7 @@ func NewCreateCommand() *cobra.Command {
 	var (
 		configFile string
 		tenantID   string
+		params     certificateParams
 	)
 
 	cmd := &cobra.Command{
@@ -28,7 +29,7 @@ func NewCreateCommand() *cobra.Command {
 			if _, err := uuid.FromString(tenantID); err != nil {
 				return errors.New("tenant_id is not a uuid")
 			}
-			return nil
+			return params.validate()
 		},
 		Run: func(cmd *cobra.Command, args []string) {
 			cfg, err := config.Load(&configFile)
@@ -47,7 +48,7 @@ func NewCreateCommand() *cobra.Command {
 			}
 			dbPersister := persistence.New(dbConnection)
 
-			result, err := createCertificateForTenant(dbPersister, tID, false)
+			result, err := createCertificateForTenant(dbPersister, tID, false, params)
 			if err != nil {
 				log.Fatalf("failed to create certificate: %s", err)
 			}
@@ -57,6 +58,7 @@ func NewCreateCommand() *cobra.Command {
 
 	cmd.Flags().StringVar(&configFile, "config", config.DefaultConfigFilePath, "config file")
 	cmd.Flags().StringVar(&tenantID, "tenant_id", "", "tenant ID to create a SAML certificate for")
+	addCreateFlags(cmd, &params)
 
 	return cmd
 }

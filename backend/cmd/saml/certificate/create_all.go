@@ -16,12 +16,16 @@ func NewCreateAllCommand() *cobra.Command {
 		configFile string
 		dryRun     bool
 		checkOnly  bool
+		params     certificateParams
 	)
 
 	cmd := &cobra.Command{
 		Use:   "create-all",
 		Short: "create a SAML certificate for every tenant that doesn't have one yet",
 		Long:  ``,
+		Args: func(cmd *cobra.Command, args []string) error {
+			return params.validate()
+		},
 		Run: func(cmd *cobra.Command, args []string) {
 			cfg, err := config.Load(&configFile)
 			if err != nil {
@@ -55,7 +59,7 @@ func NewCreateAllCommand() *cobra.Command {
 
 			created, skipped, failed := 0, 0, 0
 			for _, tenantID := range affected {
-				result, err := createCertificateForTenant(dbPersister, tenantID, dryRun)
+				result, err := createCertificateForTenant(dbPersister, tenantID, dryRun, params)
 				if err != nil {
 					fmt.Printf("  tenant %s: FAILED - %s\n", tenantID, err)
 					failed++
@@ -78,6 +82,7 @@ func NewCreateAllCommand() *cobra.Command {
 	cmd.Flags().StringVar(&configFile, "config", config.DefaultConfigFilePath, "config file")
 	cmd.Flags().BoolVar(&dryRun, "dry-run", false, "report what would be created without writing anything")
 	cmd.Flags().BoolVar(&checkOnly, "check-only", false, "report how many tenants are missing a certificate and exit; no writes")
+	addCreateFlags(cmd, &params)
 
 	return cmd
 }

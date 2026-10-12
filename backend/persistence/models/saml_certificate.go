@@ -29,22 +29,27 @@ type SamlCertificate struct {
 	UpdatedAt     time.Time `json:"updated_at" db:"updated_at"`
 }
 
-func createTemplate(serviceName string, creationTime time.Time) *x509.Certificate {
+func createTemplate(serviceName string, creationTime time.Time, validityYears int) *x509.Certificate {
 	return &x509.Certificate{
 		SerialNumber: big.NewInt(1),
 		Subject: pkix.Name{
 			CommonName: serviceName,
 		},
 		NotBefore:             creationTime,
-		NotAfter:              creationTime.Add(3650 * 24 * time.Hour), // Valid for 10 years
+		NotAfter:              creationTime.AddDate(validityYears, 0, 0),
 		KeyUsage:              x509.KeyUsageKeyEncipherment | x509.KeyUsageDigitalSignature,
 		ExtKeyUsage:           []x509.ExtKeyUsage{x509.ExtKeyUsageServerAuth, x509.ExtKeyUsageClientAuth},
 		BasicConstraintsValid: true,
 	}
 }
 
-func GenerateCertificate(serviceName string, privateKey *rsa.PrivateKey, currentTime time.Time) (string, error) {
-	template := createTemplate(serviceName, currentTime)
+func GenerateCertificate(serviceName string, privateKey *rsa.PrivateKey, currentTime time.Time, opts ...CertificateOption) (string, error) {
+	options, err := newCertificateOptions(opts)
+	if err != nil {
+		return "", err
+	}
+
+	template := createTemplate(serviceName, currentTime, options.validityYears)
 	cert, err := x509.CreateCertificate(rand.Reader, template, template, &privateKey.PublicKey, privateKey)
 	if err != nil {
 		return "", err
@@ -68,7 +73,12 @@ func encryptPrivateKey(privateKey []byte, encryptionKey string) (string, error) 
 	return encryptedKey, nil
 }
 
-func NewSamlCertificate(serviceName string) (*SamlCertificate, error) {
+func NewSamlCertificate(serviceName string, opts ...CertificateOption) (*SamlCertificate, error) {
+	options, err := newCertificateOptions(opts)
+	if err != nil {
+		return nil, err
+	}
+
 	id, err := uuid.NewV4()
 	if err != nil {
 		return nil, fmt.Errorf("could not generate id: %w", err)
@@ -76,7 +86,7 @@ func NewSamlCertificate(serviceName string) (*SamlCertificate, error) {
 
 	now := time.Now()
 
-	privateKey, err := rsa.GenerateKey(rand.Reader, 2048)
+	privateKey, err := rsa.GenerateKey(rand.Reader, options.keyBitsOrDefault())
 	if err != nil {
 		return nil, fmt.Errorf("unable to generate private key: %w", err)
 	}
@@ -98,7 +108,7 @@ func NewSamlCertificate(serviceName string) (*SamlCertificate, error) {
 		return nil, fmt.Errorf("unable to encrypt private key: %w", err)
 	}
 
-	cert, err := GenerateCertificate(serviceName, privateKey, now)
+	cert, err := GenerateCertificate(serviceName, privateKey, now, opts...)
 	if err != nil {
 		return nil, fmt.Errorf("unable to create certificate: %w", err)
 	}
@@ -111,6 +121,99 @@ func NewSamlCertificate(serviceName string) (*SamlCertificate, error) {
 		CreatedAt:     now,
 		UpdatedAt:     now,
 	}, nil
+}
+
+func (s *SamlCertificate) privateKey() (*rsa.PrivateKey, error) {
+	keyPEM, err := s.DecryptCertKey()
+	if err != nil {
+		return nil, fmt.Errorf("unable to decrypt private key: %w", err)
+	}
+
+	decodedKey, _ := pem.Decode(keyPEM)
+	if decodedKey == nil || decodedKey.Type != "RSA PRIVATE KEY" {
+		return nil, fmt.Errorf("unable to decode private key")
+	}
+
+	privateKey, err := x509.ParsePKCS1PrivateKey(decodedKey.Bytes)
+	if err != nil {
+		return nil, fmt.Errorf("unable to parse private key: %w", err)
+	}
+
+	return privateKey, nil
+}
+
+// KeyBits returns the size of the certificate's RSA key.
+func (s *SamlCertificate) KeyBits() (int, error) {
+	privateKey, err := s.privateKey()
+	if err != nil {
+		return 0, err
+	}
+
+	return privateKey.N.BitLen(), nil
+}
+
+// WouldReplaceKey reports whether renewing with opts generates a new key pair.
+func (s *SamlCertificate) WouldReplaceKey(opts ...CertificateOption) (bool, error) {
+	options, err := newCertificateOptions(opts)
+	if err != nil {
+		return false, err
+	}
+
+	currentBits, err := s.KeyBits()
+	if err != nil {
+		return false, err
+	}
+
+	return options.replacesKey(currentBits), nil
+}
+
+// Renew reissues the certificate with a new validity period. The key pair is kept unless a key size other than
+// the current one is requested or the key is explicitly rotated, in which case a new key pair is generated and the
+// private key is re-encrypted. It reports whether the key pair was replaced.
+func (s *SamlCertificate) Renew(serviceName string, opts ...CertificateOption) (bool, error) {
+	options, err := newCertificateOptions(opts)
+	if err != nil {
+		return false, err
+	}
+
+	privateKey, err := s.privateKey()
+	if err != nil {
+		return false, err
+	}
+
+	currentBits := privateKey.N.BitLen()
+	keyChanged := options.replacesKey(currentBits)
+
+	var encryptedKey string
+	if keyChanged {
+		bits := options.keyBits
+		if bits == 0 {
+			bits = currentBits
+		}
+
+		privateKey, err = rsa.GenerateKey(rand.Reader, bits)
+		if err != nil {
+			return false, fmt.Errorf("unable to generate private key: %w", err)
+		}
+
+		privateKeyPEM := pem.EncodeToMemory(&pem.Block{Type: "RSA PRIVATE KEY", Bytes: x509.MarshalPKCS1PrivateKey(privateKey)})
+		encryptedKey, err = encryptPrivateKey(privateKeyPEM, s.EncryptionKey)
+		if err != nil {
+			return false, fmt.Errorf("unable to encrypt private key: %w", err)
+		}
+	}
+
+	certData, err := GenerateCertificate(serviceName, privateKey, time.Now(), opts...)
+	if err != nil {
+		return false, fmt.Errorf("unable to renew certificate: %w", err)
+	}
+
+	s.CertData = certData
+	if keyChanged {
+		s.CertKey = encryptedKey
+	}
+
+	return keyChanged, nil
 }
 
 func (s *SamlCertificate) DecryptCertKey() ([]byte, error) {

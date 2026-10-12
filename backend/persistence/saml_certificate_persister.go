@@ -1,12 +1,9 @@
 package persistence
 
 import (
-	"crypto/x509"
 	"database/sql"
-	"encoding/pem"
 	"errors"
 	"fmt"
-	"time"
 
 	"github.com/gobuffalo/pop/v6"
 	"github.com/gofrs/uuid"
@@ -16,7 +13,7 @@ import (
 type SamlCertificatePersister interface {
 	Create(cert *models.SamlCertificate) error
 	GetFirst(tenantID uuid.UUID) (*models.SamlCertificate, error)
-	Renew(cert *models.SamlCertificate, serviceName string) error
+	Renew(cert *models.SamlCertificate, serviceName string, opts ...models.CertificateOption) (keyChanged bool, err error)
 	Delete(cert *models.SamlCertificate) error
 }
 
@@ -57,41 +54,22 @@ func (s samlCertificatePersister) Create(cert *models.SamlCertificate) error {
 	return nil
 }
 
-func (s samlCertificatePersister) Renew(cert *models.SamlCertificate, serviceName string) error {
-	key, err := cert.DecryptCertKey()
-	if key == nil || err != nil {
-		return fmt.Errorf("unable to decrypt private key: %w", err)
-	}
-
-	decodedKey, _ := pem.Decode(key)
-	if decodedKey == nil || decodedKey.Type != "RSA PRIVATE KEY" {
-		return fmt.Errorf("unable to decode private key")
-	}
-
-	parsedKey, err := x509.ParsePKCS1PrivateKey(decodedKey.Bytes)
+func (s samlCertificatePersister) Renew(cert *models.SamlCertificate, serviceName string, opts ...models.CertificateOption) (bool, error) {
+	keyChanged, err := cert.Renew(serviceName, opts...)
 	if err != nil {
-		return fmt.Errorf("unable to parse private key: %w", err)
+		return false, err
 	}
-
-	now := time.Now()
-
-	newCert, err := models.GenerateCertificate(serviceName, parsedKey, now)
-	if err != nil {
-		return fmt.Errorf("unable to renew certificate: %w", err)
-	}
-
-	cert.CertData = newCert
 
 	validationError, err := s.db.ValidateAndUpdate(cert)
 	if err != nil {
-		return fmt.Errorf("unable to update certificate: %w", err)
+		return false, fmt.Errorf("unable to update certificate: %w", err)
 	}
 
 	if validationError != nil && validationError.HasAny() {
-		return fmt.Errorf("saml certificate validation failed: %v", validationError)
+		return false, fmt.Errorf("saml certificate validation failed: %v", validationError)
 	}
 
-	return nil
+	return keyChanged, nil
 }
 
 func (s samlCertificatePersister) Delete(cert *models.SamlCertificate) error {

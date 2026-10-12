@@ -1,6 +1,7 @@
 package handler
 
 import (
+	"crypto/rsa"
 	"crypto/x509"
 	"encoding/pem"
 	"fmt"
@@ -22,13 +23,26 @@ func NewSamlCertificateHandler(persister persistence.Persister) *SamlCertificate
 	return &SamlCertificateHandler{persister: persister}
 }
 
-// Renew reissues a tenant's SAML certificate. The key pair is kept, but the
-// certificate itself changes, so identity providers that pinned the previous
-// certificate need the new one.
+// Renew reissues a tenant's SAML certificate. By default the key pair is kept
+// and only the certificate changes, so identity providers that pinned the
+// previous certificate need the new one. A key size other than the current one,
+// or rotate_key, generates a new key pair instead: the identity provider then
+// no longer has the matching public key, and encrypted logins fail until it is
+// given the new certificate.
 func (h *SamlCertificateHandler) Renew(c echo.Context) error {
 	tenantID, err := uuid.FromString(c.Param("tenantId"))
 	if err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, "invalid tenant ID")
+	}
+
+	var request dto.RenewSamlCertificateRequest
+	if err := c.Bind(&request); err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, "invalid request body").SetInternal(err)
+	}
+
+	options, err := renewOptions(request)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 	}
 
 	tenant, err := h.persister.GetTenantPersister().Get(tenantID)
@@ -52,7 +66,8 @@ func (h *SamlCertificateHandler) Renew(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusNotFound, "SAML certificate not found")
 	}
 
-	if err := h.persister.GetSamlCertificatePersister().Renew(cert, tenantConfig.Service.Name); err != nil {
+	keyChanged, err := h.persister.GetSamlCertificatePersister().Renew(cert, tenantConfig.Service.Name, options...)
+	if err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, fmt.Sprintf("failed to renew SAML certificate: %v", err))
 	}
 
@@ -60,8 +75,34 @@ func (h *SamlCertificateHandler) Renew(c echo.Context) error {
 	if err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 	}
+	response.KeyChanged = keyChanged
 
 	return c.JSON(http.StatusOK, response)
+}
+
+// renewOptions validates the request and translates it to certificate options.
+func renewOptions(request dto.RenewSamlCertificateRequest) ([]models.CertificateOption, error) {
+	var options []models.CertificateOption
+
+	if request.KeyBits != nil {
+		if err := models.ValidateKeyBits(*request.KeyBits); err != nil {
+			return nil, err
+		}
+		options = append(options, models.WithKeyBits(*request.KeyBits))
+	}
+
+	if request.ValidityYears != nil {
+		if err := models.ValidateValidityYears(*request.ValidityYears); err != nil {
+			return nil, err
+		}
+		options = append(options, models.WithValidityYears(*request.ValidityYears))
+	}
+
+	if request.RotateKey {
+		options = append(options, models.WithRotateKey())
+	}
+
+	return options, nil
 }
 
 func certificateResponse(cert *models.SamlCertificate) (*dto.SamlCertificateResponse, error) {
@@ -75,8 +116,14 @@ func certificateResponse(cert *models.SamlCertificate) (*dto.SamlCertificateResp
 		return nil, fmt.Errorf("failed to parse SAML certificate: %w", err)
 	}
 
+	publicKey, ok := x509Cert.PublicKey.(*rsa.PublicKey)
+	if !ok {
+		return nil, fmt.Errorf("SAML certificate does not have an RSA key")
+	}
+
 	return &dto.SamlCertificateResponse{
 		NotBefore: x509Cert.NotBefore,
 		NotAfter:  x509Cert.NotAfter,
+		KeyBits:   publicKey.N.BitLen(),
 	}, nil
 }
