@@ -40,7 +40,7 @@ type certResult struct {
 // re-check-then-insert, so this is safe to call concurrently (e.g. once per
 // tenant from create-all) without two calls racing to create a certificate for
 // the same tenant.
-func createCertificateForTenant(persister persistence.Persister, tenantID uuid.UUID, dryRun bool, params certificateParams) (certResult, error) {
+func createCertificateForTenant(cfg *config.Config, persister persistence.Persister, tenantID uuid.UUID, dryRun bool, params certificateParams) (certResult, error) {
 	existing, err := persister.GetSamlCertificatePersister().GetFirst(tenantID)
 	if err != nil {
 		return certResult{}, fmt.Errorf("failed to check for an existing certificate: %w", err)
@@ -57,7 +57,7 @@ func createCertificateForTenant(persister persistence.Persister, tenantID uuid.U
 		return certResult{outcomeTenantNotFound, fmt.Sprintf("tenant %s not found", tenantID)}, nil
 	}
 
-	subject := tenantSubject(tenant)
+	subject := tenantSubject(cfg, tenant)
 
 	if dryRun {
 		return certResult{outcomeWouldCreate, fmt.Sprintf(
@@ -105,7 +105,14 @@ func createCertificateForTenant(persister persistence.Persister, tenantID uuid.U
 // the tenant's SAML endpoint. The service name is the common name if there is
 // no usable endpoint, falling back to the tenant ID if the config has no
 // service name or can't be read.
-func tenantSubject(tenant *models.Tenant) saml.CertificateSubject {
+//
+// Without multitenancy the tenant's config is the config file, the default
+// tenant's row in the database doesn't hold it.
+func tenantSubject(cfg *config.Config, tenant *models.Tenant) saml.CertificateSubject {
+	if !cfg.MultiTenancy.Enabled {
+		return saml.NewCertificateSubject(cfg.Service.Name, cfg.Saml.Endpoint)
+	}
+
 	var tenantConfig config.TenantConfig
 	if len(tenant.Config) > 0 {
 		k := koanf.New(".")

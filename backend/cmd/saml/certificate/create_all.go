@@ -59,7 +59,7 @@ func NewCreateAllCommand() *cobra.Command {
 
 			created, skipped, failed := 0, 0, 0
 			for _, tenantID := range affected {
-				result, err := createCertificateForTenant(dbPersister, tenantID, dryRun, params)
+				result, err := createCertificateForTenant(cfg, dbPersister, tenantID, dryRun, params)
 				if err != nil {
 					fmt.Printf("  tenant %s: FAILED - %s\n", tenantID, err)
 					failed++
