@@ -86,6 +86,15 @@ describe("WebauthnManager credential creation deadline", () => {
   });
 
 
+  it("leaves the ceremony unbounded when the options carry no timeout", async () => {
+    credentials.create.mockImplementation(() => new Promise(() => {}));
+
+    const outcome = runCreation(creationOptions());
+    await jest.advanceTimersByTimeAsync(PROBE_MS);
+
+    expect(outcome.current).toEqual({ status: "pending" });
+  });
+
   it("aborts only its own ceremony when a later one has superseded it", async () => {
     const signals: AbortSignal[] = [];
     credentials.create.mockImplementation(

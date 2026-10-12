@@ -100,6 +100,9 @@ class WebauthnManager {
     // configured default, or go-webauthn's internal fallback), so this deadline
     // mirrors the value the server asked for.
     const timeout = options.publicKey.timeout;
+    // `timeout` is optional in the WebAuthn JSON types; without one there is no
+    // deadline to enforce, so run the ceremony unbounded instead of aborting at once.
+    if (timeout === undefined) return await create({ ...options, signal });
     let deadline: ReturnType<typeof setTimeout>;
 
     try {
