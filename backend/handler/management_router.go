@@ -56,5 +56,11 @@ func NewManagementRouter(cfg *config.Config, persister persistence.Persister) *e
 	samlProviders.PUT("/:providerId", samlProviderHandler.Update)
 	samlProviders.DELETE("/:providerId", samlProviderHandler.Delete)
 
+	samlCertificateHandler := NewSamlCertificateHandler(persister)
+
+	samlCertificate := saml.Group("/certificate")
+	samlCertificate.GET("", samlCertificateHandler.Get)
+	samlCertificate.POST("/renew", samlCertificateHandler.Renew)
+
 	return e
 }
