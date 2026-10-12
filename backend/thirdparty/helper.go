@@ -73,7 +73,7 @@ func IsAllowedRedirect(config config.ThirdParty, redirectTo string) bool {
 		//
 		// The glob may match as a string, but the parsed host is not actually
 		// 127.0.0.1, so it must be rejected.
-		if matchesAllowedRedirectHostBoundary(allowedRedirectPattern, redirectURL) {
+		if matchesAllowedRedirectHostBoundary(allowedRedirectPattern, redirectURL, config.UnsafeWildcardRedirectURLAllowed) {
 			return true
 		}
 	}
@@ -103,7 +103,14 @@ func IsAllowedRedirect(config config.ThirdParty, redirectTo string) bool {
 // The original glob match is still responsible for path/query matching and
 // broader legacy pattern compatibility. This helper only adds a safe boundary
 // check around scheme, host, and port.
-func matchesAllowedRedirectHostBoundary(allowedRedirectPattern string, redirectURL *url.URL) bool {
+func matchesAllowedRedirectHostBoundary(allowedRedirectPattern string, redirectURL *url.URL, unsafeWildcardRedirectURLAllowed bool) bool {
+	// A bare run of 2+ asterisks ("**", "***", ...) has no scheme or host at all, so it would
+	// match any absolute URL outright - gobwas/glob treats any such run like "**" (see
+	// isAllAsterisks). Only permitted when unsafe_wildcard_redirect_url_allowed is enabled.
+	if isAllAsterisks(allowedRedirectPattern) {
+		return unsafeWildcardRedirectURLAllowed
+	}
+
 	allowedScheme, allowedAuthorityPattern, ok := extractSchemeAndAuthorityPattern(allowedRedirectPattern)
 	if !ok {
 		return false
@@ -137,7 +144,14 @@ func matchesAllowedRedirectHostBoundary(allowedRedirectPattern string, redirectU
 	allowedHostPattern, allowedPortPattern := splitAuthorityPattern(allowedAuthorityPattern)
 	allowedHostPattern = normalizeHost(allowedHostPattern)
 
-	if !matchesHostPatternSafely(allowedHostPattern, actualHost) {
+	if isAllAsterisks(allowedHostPattern) {
+		// "http://**", "http://***", ... have no host part after the scheme, so they match
+		// any host of that scheme outright. Same gate as the bare case above, just scoped to
+		// a specific scheme.
+		if !unsafeWildcardRedirectURLAllowed {
+			return false
+		}
+	} else if !matchesHostPatternSafely(allowedHostPattern, actualHost) {
 		return false
 	}
 
@@ -346,6 +360,13 @@ func matchesHostPatternSafely(allowedHostPattern string, actualHost string) bool
 	}
 
 	return hostGlob.Match(actualHost)
+}
+
+// isAllAsterisks reports whether s is two or more asterisks and nothing else ("**", "***", ...) -
+// gobwas/glob treats any such run identically to "**". A lone "*" is excluded; it behaves
+// differently (see matchesHostPatternSafely).
+func isAllAsterisks(s string) bool {
+	return len(s) >= 2 && strings.Trim(s, "*") == ""
 }
 
 // staticPrefixBeforeWildcard returns the part of a configured glob segment that
