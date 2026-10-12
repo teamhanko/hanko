@@ -20,6 +20,8 @@ const (
 	outcomeWouldCreate
 	outcomeAlreadyExists
 	outcomeTenantNotFound
+	outcomeRenewed
+	outcomeWouldRenew
 )
 
 type certResult struct {
@@ -53,17 +55,7 @@ func createCertificateForTenant(persister persistence.Persister, tenantID uuid.U
 		return certResult{outcomeTenantNotFound, fmt.Sprintf("tenant %s not found", tenantID)}, nil
 	}
 
-	serviceName := tenantID.String()
-	if len(tenant.Config) > 0 {
-		k := koanf.New(".")
-		var tenantConfig config.TenantConfig
-		if err := k.Load(rawbytes.Provider(tenant.Config), koanfJson.Parser()); err == nil {
-			_ = k.Unmarshal("", &tenantConfig)
-		}
-		if tenantConfig.Service.Name != "" {
-			serviceName = tenantConfig.Service.Name
-		}
-	}
+	serviceName := tenantServiceName(tenant)
 
 	if dryRun {
 		return certResult{outcomeWouldCreate, fmt.Sprintf("tenant %s: would create certificate (service name: %q)", tenantID, serviceName)}, nil
@@ -99,4 +91,22 @@ func createCertificateForTenant(persister persistence.Persister, tenantID uuid.U
 	})
 
 	return result, err
+}
+
+// tenantServiceName returns the tenant's configured service name, which is
+// used as the certificate's common name, falling back to the tenant ID if the
+// config has none or can't be read.
+func tenantServiceName(tenant *models.Tenant) string {
+	if len(tenant.Config) > 0 {
+		k := koanf.New(".")
+		var tenantConfig config.TenantConfig
+		if err := k.Load(rawbytes.Provider(tenant.Config), koanfJson.Parser()); err == nil {
+			_ = k.Unmarshal("", &tenantConfig)
+		}
+		if tenantConfig.Service.Name != "" {
+			return tenantConfig.Service.Name
+		}
+	}
+
+	return tenant.ID.String()
 }
