@@ -7,7 +7,7 @@ import (
 
 	"github.com/gofrs/uuid"
 	"github.com/stretchr/testify/suite"
-	"github.com/teamhanko/hanko/backend/v3/persistence/models"
+	"github.com/teamhanko/hanko/backend/v3/saml"
 	"github.com/teamhanko/hanko/backend/v3/test"
 )
 
@@ -24,7 +24,7 @@ type samlSuite struct {
 const defaultTenantID = "00000000-0000-0000-0000-000000000001"
 
 func (s *samlSuite) createCertificate() {
-	cert, err := models.NewSamlCertificate("test")
+	cert, err := saml.NewCertificateService(s.Storage).Generate("test", saml.CertificateParams{})
 	s.Require().NoError(err)
 	cert.TenantID = uuid.Must(uuid.FromString(defaultTenantID))
 	s.Require().NoError(s.Storage.GetSamlCertificatePersister().Create(cert))

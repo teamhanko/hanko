@@ -13,7 +13,7 @@ import (
 type SamlCertificatePersister interface {
 	Create(cert *models.SamlCertificate) error
 	GetFirst(tenantID uuid.UUID) (*models.SamlCertificate, error)
-	Renew(cert *models.SamlCertificate, serviceName string, opts ...models.CertificateOption) (keyChanged bool, err error)
+	Update(cert *models.SamlCertificate) error
 	Delete(cert *models.SamlCertificate) error
 }
 
@@ -54,22 +54,17 @@ func (s samlCertificatePersister) Create(cert *models.SamlCertificate) error {
 	return nil
 }
 
-func (s samlCertificatePersister) Renew(cert *models.SamlCertificate, serviceName string, opts ...models.CertificateOption) (bool, error) {
-	keyChanged, err := cert.Renew(serviceName, opts...)
-	if err != nil {
-		return false, err
-	}
-
+func (s samlCertificatePersister) Update(cert *models.SamlCertificate) error {
 	validationError, err := s.db.ValidateAndUpdate(cert)
 	if err != nil {
-		return false, fmt.Errorf("unable to update certificate: %w", err)
+		return fmt.Errorf("unable to update certificate: %w", err)
 	}
 
 	if validationError != nil && validationError.HasAny() {
-		return false, fmt.Errorf("saml certificate validation failed: %v", validationError)
+		return fmt.Errorf("saml certificate validation failed: %v", validationError)
 	}
 
-	return keyChanged, nil
+	return nil
 }
 
 func (s samlCertificatePersister) Delete(cert *models.SamlCertificate) error {

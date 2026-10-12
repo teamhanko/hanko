@@ -11,6 +11,7 @@ import (
 	"github.com/teamhanko/hanko/backend/v3/config"
 	"github.com/teamhanko/hanko/backend/v3/persistence"
 	"github.com/teamhanko/hanko/backend/v3/persistence/models"
+	"github.com/teamhanko/hanko/backend/v3/saml"
 )
 
 type certOutcome int
@@ -65,7 +66,7 @@ func createCertificateForTenant(persister persistence.Persister, tenantID uuid.U
 		)}, nil
 	}
 
-	cert, err := models.NewSamlCertificate(serviceName, params.options()...)
+	cert, err := saml.NewCertificateService(persister).Generate(serviceName, params.serviceParams())
 	if err != nil {
 		return certResult{}, fmt.Errorf("failed to generate certificate: %w", err)
 	}

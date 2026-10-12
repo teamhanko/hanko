@@ -12,6 +12,7 @@ import (
 	"github.com/teamhanko/hanko/backend/v3/config"
 	"github.com/teamhanko/hanko/backend/v3/persistence"
 	"github.com/teamhanko/hanko/backend/v3/persistence/models"
+	"github.com/teamhanko/hanko/backend/v3/saml"
 )
 
 func NewRenewCommand() *cobra.Command {
@@ -45,7 +46,7 @@ certificate.`,
 			// without --key-bits the size defaults to the current key's, which is only known once the
 			// certificate is loaded, so the size is validated here only when given
 			if cmd.Flags().Changed("key-bits") {
-				if err := models.ValidateKeyBits(params.keyBits); err != nil {
+				if err := saml.ValidateKeyBits(params.keyBits); err != nil {
 					return err
 				}
 			}
@@ -81,7 +82,7 @@ certificate.`,
 	cmd.Flags().StringVar(&tenantID, "tenant_id", "", "tenant ID to renew the SAML certificate of")
 	cmd.Flags().BoolVar(&dryRun, "dry-run", false, "report what would change without renewing the certificate")
 	cmd.Flags().IntVar(&params.keyBits, "key-bits", 0, keyBitsUsage()+"; a size other than the current one generates a new key pair (default: the current key size)")
-	cmd.Flags().IntVar(&params.validityYears, "validity-years", models.DefaultValidityYears, validityYearsUsage())
+	cmd.Flags().IntVar(&params.validityYears, "validity-years", saml.DefaultValidityYears, validityYearsUsage())
 	cmd.Flags().BoolVar(&params.rotateKey, "rotate-key", false, "generate a new key pair even if the key size stays the same")
 
 	return cmd
@@ -104,6 +105,8 @@ func renewCertificateForTenant(persister persistence.Persister, tenantID uuid.UU
 		return certResult{}, fmt.Errorf("tenant %s has no SAML certificate, create one with `saml certificate create`", tenantID)
 	}
 
+	service := saml.NewCertificateService(persister)
+
 	current, err := parseCertificate(cert)
 	if err != nil {
 		return certResult{}, err
@@ -119,7 +122,7 @@ func renewCertificateForTenant(persister persistence.Persister, tenantID uuid.UU
 	}
 
 	if dryRun {
-		replacesKey, err := cert.WouldReplaceKey(params.options()...)
+		replacesKey, err := service.WouldReplaceKey(cert, params.serviceParams())
 		if err != nil {
 			return certResult{}, err
 		}
@@ -130,7 +133,7 @@ func renewCertificateForTenant(persister persistence.Persister, tenantID uuid.UU
 		)}, nil
 	}
 
-	keyChanged, err := persister.GetSamlCertificatePersister().Renew(cert, tenantServiceName(tenant), params.options()...)
+	keyChanged, err := service.Renew(cert, tenantServiceName(tenant), params.serviceParams())
 	if err != nil {
 		return certResult{}, err
 	}

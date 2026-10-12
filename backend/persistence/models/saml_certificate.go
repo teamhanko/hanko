@@ -1,10 +1,8 @@
 package models
 
 import (
-	"crypto/rand"
 	"crypto/rsa"
 	"crypto/x509"
-	"crypto/x509/pkix"
 	"encoding/pem"
 	"fmt"
 	"github.com/gobuffalo/validate/v3/validators"
@@ -17,7 +15,6 @@ import (
 	"github.com/gofrs/uuid"
 )
 
-// SamlCertificate is used by pop to map your saml_certs database table to your go code.
 type SamlCertificate struct {
 	ID            uuid.UUID `json:"id" db:"id"`
 	TenantID      uuid.UUID `db:"tenant_id"`
@@ -28,94 +25,38 @@ type SamlCertificate struct {
 	UpdatedAt     time.Time `json:"updated_at" db:"updated_at"`
 }
 
-func createTemplate(serviceName string, creationTime time.Time, validityYears int) *x509.Certificate {
-	// SerialNumber is left unset, so CreateCertificate generates a random one. The certificate is self-signed, so
-	// issuer and subject are the same and a fixed serial would repeat on every renewal.
-	return &x509.Certificate{
-		Subject: pkix.Name{
-			CommonName: serviceName,
-		},
-		NotBefore:             creationTime,
-		NotAfter:              creationTime.AddDate(validityYears, 0, 0),
-		KeyUsage:              x509.KeyUsageKeyEncipherment | x509.KeyUsageDigitalSignature,
-		ExtKeyUsage:           []x509.ExtKeyUsage{x509.ExtKeyUsageServerAuth, x509.ExtKeyUsageClientAuth},
-		BasicConstraintsValid: true,
-	}
-}
-
-func GenerateCertificate(serviceName string, privateKey *rsa.PrivateKey, currentTime time.Time, opts ...CertificateOption) (string, error) {
-	options, err := newCertificateOptions(opts)
-	if err != nil {
-		return "", err
-	}
-
-	template := createTemplate(serviceName, currentTime, options.validityYears)
-	cert, err := x509.CreateCertificate(rand.Reader, template, template, &privateKey.PublicKey, privateKey)
-	if err != nil {
-		return "", err
-	}
-
-	certPem := pem.EncodeToMemory(&pem.Block{
-		Type:  "CERTIFICATE",
-		Bytes: cert,
-	})
-
-	return string(certPem), nil
-}
-
 func encryptPrivateKey(privateKey []byte, encryptionKey string) (string, error) {
 	gcm, err := aes_gcm.NewAESGCM([]string{encryptionKey})
 	if err != nil {
 		return "", err
 	}
-	encryptedKey, err := gcm.Encrypt(privateKey)
 
-	return encryptedKey, nil
+	return gcm.Encrypt(privateKey)
 }
 
-func NewSamlCertificate(serviceName string, opts ...CertificateOption) (*SamlCertificate, error) {
-	options, err := newCertificateOptions(opts)
-	if err != nil {
-		return nil, err
-	}
-
+// NewSamlCertificate creates a certificate from its generated certificate and private key. The private key is
+// stored encrypted with a newly generated encryption key.
+func NewSamlCertificate(certData string, privateKey *rsa.PrivateKey) (*SamlCertificate, error) {
 	id, err := uuid.NewV4()
 	if err != nil {
 		return nil, fmt.Errorf("could not generate id: %w", err)
 	}
-
-	now := time.Now()
-
-	privateKey, err := rsa.GenerateKey(rand.Reader, options.keyBitsOrDefault())
-	if err != nil {
-		return nil, fmt.Errorf("unable to generate private key: %w", err)
-	}
-
-	privateKeyPEM := x509.MarshalPKCS1PrivateKey(privateKey)
-	if err != nil {
-		return nil, fmt.Errorf("error encoding private key: %w", err)
-
-	}
-	privateKeyPEMBlock := pem.EncodeToMemory(&pem.Block{Type: "RSA PRIVATE KEY", Bytes: privateKeyPEM})
 
 	encryptionKey, err := crypto.GenerateRandomStringURLSafe(32)
 	if err != nil {
 		return nil, fmt.Errorf("unable to create encryptionKey: %w", err)
 	}
 
-	encryptedPrivateKey, err := encryptPrivateKey(privateKeyPEMBlock, encryptionKey)
+	encryptedPrivateKey, err := encryptPrivateKey(encodePrivateKey(privateKey), encryptionKey)
 	if err != nil {
 		return nil, fmt.Errorf("unable to encrypt private key: %w", err)
 	}
 
-	cert, err := GenerateCertificate(serviceName, privateKey, now, opts...)
-	if err != nil {
-		return nil, fmt.Errorf("unable to create certificate: %w", err)
-	}
+	now := time.Now()
 
 	return &SamlCertificate{
 		ID:            id,
-		CertData:      cert,
+		CertData:      certData,
 		CertKey:       encryptedPrivateKey,
 		EncryptionKey: encryptionKey,
 		CreatedAt:     now,
@@ -123,7 +64,12 @@ func NewSamlCertificate(serviceName string, opts ...CertificateOption) (*SamlCer
 	}, nil
 }
 
-func (s *SamlCertificate) privateKey() (*rsa.PrivateKey, error) {
+func encodePrivateKey(privateKey *rsa.PrivateKey) []byte {
+	return pem.EncodeToMemory(&pem.Block{Type: "RSA PRIVATE KEY", Bytes: x509.MarshalPKCS1PrivateKey(privateKey)})
+}
+
+// PrivateKey returns the decrypted private key.
+func (s *SamlCertificate) PrivateKey() (*rsa.PrivateKey, error) {
 	keyPEM, err := s.DecryptCertKey()
 	if err != nil {
 		return nil, fmt.Errorf("unable to decrypt private key: %w", err)
@@ -142,78 +88,26 @@ func (s *SamlCertificate) privateKey() (*rsa.PrivateKey, error) {
 	return privateKey, nil
 }
 
+// SetPrivateKey replaces the private key, encrypting it with the existing encryption key.
+func (s *SamlCertificate) SetPrivateKey(privateKey *rsa.PrivateKey) error {
+	encryptedKey, err := encryptPrivateKey(encodePrivateKey(privateKey), s.EncryptionKey)
+	if err != nil {
+		return fmt.Errorf("unable to encrypt private key: %w", err)
+	}
+
+	s.CertKey = encryptedKey
+
+	return nil
+}
+
 // KeyBits returns the size of the certificate's RSA key.
 func (s *SamlCertificate) KeyBits() (int, error) {
-	privateKey, err := s.privateKey()
+	privateKey, err := s.PrivateKey()
 	if err != nil {
 		return 0, err
 	}
 
 	return privateKey.N.BitLen(), nil
-}
-
-// WouldReplaceKey reports whether renewing with opts generates a new key pair.
-func (s *SamlCertificate) WouldReplaceKey(opts ...CertificateOption) (bool, error) {
-	options, err := newCertificateOptions(opts)
-	if err != nil {
-		return false, err
-	}
-
-	currentBits, err := s.KeyBits()
-	if err != nil {
-		return false, err
-	}
-
-	return options.replacesKey(currentBits), nil
-}
-
-// Renew reissues the certificate with a new validity period. The key pair is kept unless a key size other than
-// the current one is requested or the key is explicitly rotated, in which case a new key pair is generated and the
-// private key is re-encrypted. It reports whether the key pair was replaced.
-func (s *SamlCertificate) Renew(serviceName string, opts ...CertificateOption) (bool, error) {
-	options, err := newCertificateOptions(opts)
-	if err != nil {
-		return false, err
-	}
-
-	privateKey, err := s.privateKey()
-	if err != nil {
-		return false, err
-	}
-
-	currentBits := privateKey.N.BitLen()
-	keyChanged := options.replacesKey(currentBits)
-
-	var encryptedKey string
-	if keyChanged {
-		bits := options.keyBits
-		if bits == 0 {
-			bits = currentBits
-		}
-
-		privateKey, err = rsa.GenerateKey(rand.Reader, bits)
-		if err != nil {
-			return false, fmt.Errorf("unable to generate private key: %w", err)
-		}
-
-		privateKeyPEM := pem.EncodeToMemory(&pem.Block{Type: "RSA PRIVATE KEY", Bytes: x509.MarshalPKCS1PrivateKey(privateKey)})
-		encryptedKey, err = encryptPrivateKey(privateKeyPEM, s.EncryptionKey)
-		if err != nil {
-			return false, fmt.Errorf("unable to encrypt private key: %w", err)
-		}
-	}
-
-	certData, err := GenerateCertificate(serviceName, privateKey, time.Now(), opts...)
-	if err != nil {
-		return false, fmt.Errorf("unable to renew certificate: %w", err)
-	}
-
-	s.CertData = certData
-	if keyChanged {
-		s.CertKey = encryptedKey
-	}
-
-	return keyChanged, nil
 }
 
 func (s *SamlCertificate) DecryptCertKey() ([]byte, error) {

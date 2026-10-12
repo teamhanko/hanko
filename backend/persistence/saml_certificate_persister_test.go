@@ -1,15 +1,11 @@
 package persistence_test
 
 import (
-	"crypto/rsa"
-	"crypto/x509"
-	"encoding/pem"
 	"testing"
-	"time"
 
 	"github.com/gofrs/uuid"
 	"github.com/stretchr/testify/suite"
-	"github.com/teamhanko/hanko/backend/v3/persistence/models"
+	"github.com/teamhanko/hanko/backend/v3/saml"
 	"github.com/teamhanko/hanko/backend/v3/test"
 )
 
@@ -25,80 +21,34 @@ type samlCertificatePersisterSuite struct {
 // defaultTenantID is the tenant inserted by the add_tenant_id migration.
 const defaultTenantID = "00000000-0000-0000-0000-000000000001"
 
-func parseCertificate(s *samlCertificatePersisterSuite, certPEM string) *x509.Certificate {
-	block, _ := pem.Decode([]byte(certPEM))
-	s.Require().NotNil(block)
-	cert, err := x509.ParseCertificate(block.Bytes)
-	s.Require().NoError(err)
-	return cert
-}
-
-func (s *samlCertificatePersisterSuite) TestRenew_PersistsNewCertificateWithSameKey() {
+func (s *samlCertificatePersisterSuite) TestUpdate_PersistsCertificateAndKey() {
 	if testing.Short() {
 		s.T().Skip("skipping test in short mode.")
 	}
 
 	tenantID := uuid.Must(uuid.FromString(defaultTenantID))
+	service := saml.NewCertificateService(s.Storage)
 
-	cert, err := models.NewSamlCertificate("test")
+	cert, err := service.Generate("test", saml.CertificateParams{})
 	s.Require().NoError(err)
 	cert.TenantID = tenantID
-
-	// replace the certificate with one that expired a year ago, signed by the same key
-	keyPEM, err := cert.DecryptCertKey()
-	s.Require().NoError(err)
-	keyBlock, _ := pem.Decode(keyPEM)
-	s.Require().NotNil(keyBlock)
-	privateKey, err := x509.ParsePKCS1PrivateKey(keyBlock.Bytes)
-	s.Require().NoError(err)
-	expiredCert, err := models.GenerateCertificate("test", privateKey, time.Now().AddDate(-11, 0, 0))
-	s.Require().NoError(err)
-	cert.CertData = expiredCert
-
 	persister := s.Storage.GetSamlCertificatePersister()
 	s.Require().NoError(persister.Create(cert))
-	encryptedKey := cert.CertKey
 
-	keyChanged, err := persister.Renew(cert, "test")
+	replacement, err := service.Generate("test", saml.CertificateParams{KeyBits: 3072})
 	s.Require().NoError(err)
-	s.False(keyChanged)
+	key, err := replacement.PrivateKey()
+	s.Require().NoError(err)
+
+	cert.CertData = replacement.CertData
+	s.Require().NoError(cert.SetPrivateKey(key))
+	s.Require().NoError(persister.Update(cert))
 
 	stored, err := persister.GetFirst(tenantID)
 	s.Require().NoError(err)
 	s.Require().NotNil(stored)
-
-	s.NotEqual(expiredCert, stored.CertData, "renewed certificate must be persisted")
-	s.True(parseCertificate(s, stored.CertData).NotAfter.After(time.Now()))
-
-	// the key pair is kept, only the certificate changes
-	s.Equal(encryptedKey, stored.CertKey)
-	oldPublicKey := parseCertificate(s, expiredCert).PublicKey.(*rsa.PublicKey)
-	s.True(oldPublicKey.Equal(parseCertificate(s, stored.CertData).PublicKey))
-}
-
-func (s *samlCertificatePersisterSuite) TestRenew_PersistsNewKey() {
-	if testing.Short() {
-		s.T().Skip("skipping test in short mode.")
-	}
-
-	tenantID := uuid.Must(uuid.FromString(defaultTenantID))
-
-	cert, err := models.NewSamlCertificate("test")
-	s.Require().NoError(err)
-	cert.TenantID = tenantID
-	persister := s.Storage.GetSamlCertificatePersister()
-	s.Require().NoError(persister.Create(cert))
-	oldEncryptedKey := cert.CertKey
-
-	keyChanged, err := persister.Renew(cert, "test", models.WithKeyBits(3072))
-	s.Require().NoError(err)
-	s.True(keyChanged)
-
-	stored, err := persister.GetFirst(tenantID)
-	s.Require().NoError(err)
-	s.NotEqual(oldEncryptedKey, stored.CertKey, "new key must be persisted")
+	s.Equal(replacement.CertData, stored.CertData, "updated certificate must be persisted")
 	bits, err := stored.KeyBits()
 	s.Require().NoError(err)
-	s.Equal(3072, bits)
-	s.Equal(3072, parseCertificate(s, stored.CertData).PublicKey.(*rsa.PublicKey).N.BitLen())
+	s.Equal(3072, bits, "updated key must be persisted")
 }

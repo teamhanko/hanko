@@ -13,14 +13,16 @@ import (
 	"github.com/teamhanko/hanko/backend/v3/dto"
 	"github.com/teamhanko/hanko/backend/v3/persistence"
 	"github.com/teamhanko/hanko/backend/v3/persistence/models"
+	"github.com/teamhanko/hanko/backend/v3/saml"
 )
 
 type SamlCertificateHandler struct {
 	persister persistence.Persister
+	service   *saml.CertificateService
 }
 
 func NewSamlCertificateHandler(persister persistence.Persister) *SamlCertificateHandler {
-	return &SamlCertificateHandler{persister: persister}
+	return &SamlCertificateHandler{persister: persister, service: saml.NewCertificateService(persister)}
 }
 
 // Renew reissues a tenant's SAML certificate. By default the key pair is kept
@@ -40,7 +42,7 @@ func (h *SamlCertificateHandler) Renew(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusBadRequest, "invalid request body").SetInternal(err)
 	}
 
-	options, err := renewOptions(request)
+	params, err := renewParams(request)
 	if err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 	}
@@ -66,7 +68,7 @@ func (h *SamlCertificateHandler) Renew(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusNotFound, "SAML certificate not found")
 	}
 
-	keyChanged, err := h.persister.GetSamlCertificatePersister().Renew(cert, tenantConfig.Service.Name, options...)
+	keyChanged, err := h.service.Renew(cert, tenantConfig.Service.Name, params)
 	if err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, fmt.Sprintf("failed to renew SAML certificate: %v", err))
 	}
@@ -80,29 +82,26 @@ func (h *SamlCertificateHandler) Renew(c echo.Context) error {
 	return c.JSON(http.StatusOK, response)
 }
 
-// renewOptions validates the request and translates it to certificate options.
-func renewOptions(request dto.RenewSamlCertificateRequest) ([]models.CertificateOption, error) {
-	var options []models.CertificateOption
+// renewParams validates the request and translates it to certificate parameters. A field that is not in the
+// request stays at the zero value, which means the default.
+func renewParams(request dto.RenewSamlCertificateRequest) (saml.CertificateParams, error) {
+	params := saml.CertificateParams{RotateKey: request.RotateKey}
 
 	if request.KeyBits != nil {
-		if err := models.ValidateKeyBits(*request.KeyBits); err != nil {
-			return nil, err
+		if err := saml.ValidateKeyBits(*request.KeyBits); err != nil {
+			return saml.CertificateParams{}, err
 		}
-		options = append(options, models.WithKeyBits(*request.KeyBits))
+		params.KeyBits = *request.KeyBits
 	}
 
 	if request.ValidityYears != nil {
-		if err := models.ValidateValidityYears(*request.ValidityYears); err != nil {
-			return nil, err
+		if err := saml.ValidateValidityYears(*request.ValidityYears); err != nil {
+			return saml.CertificateParams{}, err
 		}
-		options = append(options, models.WithValidityYears(*request.ValidityYears))
+		params.ValidityYears = *request.ValidityYears
 	}
 
-	if request.RotateKey {
-		options = append(options, models.WithRotateKey())
-	}
-
-	return options, nil
+	return params, nil
 }
 
 func certificateResponse(cert *models.SamlCertificate) (*dto.SamlCertificateResponse, error) {

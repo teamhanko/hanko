@@ -1,9 +1,7 @@
 package handler
 
 import (
-	"crypto/x509"
 	"encoding/json"
-	"encoding/pem"
 	"fmt"
 	"net/http"
 	"net/http/httptest"
@@ -14,7 +12,7 @@ import (
 	"github.com/gofrs/uuid"
 	"github.com/stretchr/testify/suite"
 	"github.com/teamhanko/hanko/backend/v3/dto"
-	"github.com/teamhanko/hanko/backend/v3/persistence/models"
+	"github.com/teamhanko/hanko/backend/v3/saml"
 	"github.com/teamhanko/hanko/backend/v3/test"
 )
 
@@ -32,18 +30,14 @@ const samlCertificateTenantID = "00000000-0000-0000-0000-000000000001"
 
 // createExpiredCertificate stores a certificate that expired a year ago.
 func (s *samlCertificateSuite) createExpiredCertificate() {
-	cert, err := models.NewSamlCertificate("test")
+	cert, err := saml.NewCertificateService(s.Storage).Generate("test", saml.CertificateParams{})
 	s.Require().NoError(err)
 	cert.TenantID = uuid.Must(uuid.FromString(samlCertificateTenantID))
 
-	keyPEM, err := cert.DecryptCertKey()
-	s.Require().NoError(err)
-	keyBlock, _ := pem.Decode(keyPEM)
-	s.Require().NotNil(keyBlock)
-	privateKey, err := x509.ParsePKCS1PrivateKey(keyBlock.Bytes)
+	privateKey, err := cert.PrivateKey()
 	s.Require().NoError(err)
 
-	cert.CertData, err = models.GenerateCertificate("test", privateKey, time.Now().AddDate(-11, 0, 0))
+	cert.CertData, err = saml.SelfSign("test", privateKey, saml.DefaultValidityYears, time.Now().AddDate(-11, 0, 0))
 	s.Require().NoError(err)
 	s.Require().NoError(s.Storage.GetSamlCertificatePersister().Create(cert))
 }

@@ -8,7 +8,6 @@ import (
 	"github.com/gofrs/uuid"
 	"github.com/teamhanko/hanko/backend/v3/config"
 	"github.com/teamhanko/hanko/backend/v3/persistence"
-	"github.com/teamhanko/hanko/backend/v3/persistence/models"
 )
 
 // SyncProviderConfigToDatabase syncs SAML providers from config file to database
@@ -111,7 +110,7 @@ func ensureSamlCertificateExists(persister persistence.Persister, tenantID uuid.
 		if cert == nil {
 			log.Printf("[SAML Migration] No SAML certificate for tenant '%s' exists, creating certificate ...", tenantID.String())
 
-			cert, err = models.NewSamlCertificate(serviceName)
+			cert, err = NewCertificateService(persister).Generate(serviceName, CertificateParams{})
 			if err != nil {
 				return fmt.Errorf("unable to create SAML certificate: %w", err)
 			}
