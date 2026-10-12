@@ -50,13 +50,6 @@ func NewServeAllCommand() *cobra.Command {
 				// Don't fail startup - just log the error
 			}
 
-			// Only logs, so run it in the background instead of delaying startup
-			go func() {
-				if err := saml.CheckSAMLCertificateExpiry(persister); err != nil {
-					log.Printf("SAML certificate expiry check failed: %v", err)
-				}
-			}()
-
 			err = local_db.SyncSecretKeys(cfg, persister)
 			if err != nil {
 				log.Fatalf("Failed to sync secret keys: %v", err)
