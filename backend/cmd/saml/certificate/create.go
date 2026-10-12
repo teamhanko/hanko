@@ -48,7 +48,9 @@ func NewCreateCommand() *cobra.Command {
 			}
 			dbPersister := persistence.New(dbConnection)
 
-			result, err := createCertificateForTenant(cfg, dbPersister, tID, false, params)
+			certSubjectResolver := newSubjectResolver(cfg.MultiTenancy.Enabled, cfg.TenantConfig)
+
+			result, err := createCertificateForTenant(certSubjectResolver, dbPersister, tID, false, params)
 			if err != nil {
 				log.Fatalf("failed to create certificate: %s", err)
 			}

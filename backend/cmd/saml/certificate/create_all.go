@@ -57,9 +57,11 @@ func NewCreateAllCommand() *cobra.Command {
 			}
 			fmt.Printf("%d tenant(s) missing a SAML certificate\n", len(affected))
 
+			certSubjectResolver := newSubjectResolver(cfg.MultiTenancy.Enabled, cfg.TenantConfig)
+
 			created, skipped, failed := 0, 0, 0
 			for _, tenantID := range affected {
-				result, err := createCertificateForTenant(cfg, dbPersister, tenantID, dryRun, params)
+				result, err := createCertificateForTenant(certSubjectResolver, dbPersister, tenantID, dryRun, params)
 				if err != nil {
 					fmt.Printf("  tenant %s: FAILED - %s\n", tenantID, err)
 					failed++

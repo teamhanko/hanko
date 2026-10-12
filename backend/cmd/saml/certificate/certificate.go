@@ -40,7 +40,7 @@ type certResult struct {
 // re-check-then-insert, so this is safe to call concurrently (e.g. once per
 // tenant from create-all) without two calls racing to create a certificate for
 // the same tenant.
-func createCertificateForTenant(cfg *config.Config, persister persistence.Persister, tenantID uuid.UUID, dryRun bool, params certificateParams) (certResult, error) {
+func createCertificateForTenant(certSubjectResolver subjectResolver, persister persistence.Persister, tenantID uuid.UUID, dryRun bool, params certificateParams) (certResult, error) {
 	existing, err := persister.GetSamlCertificatePersister().GetFirst(tenantID)
 	if err != nil {
 		return certResult{}, fmt.Errorf("failed to check for an existing certificate: %w", err)
@@ -57,7 +57,7 @@ func createCertificateForTenant(cfg *config.Config, persister persistence.Persis
 		return certResult{outcomeTenantNotFound, fmt.Sprintf("tenant %s not found", tenantID)}, nil
 	}
 
-	subject := tenantSubject(cfg, tenant)
+	subject := certSubjectResolver.Resolve(tenant)
 
 	if dryRun {
 		return certResult{outcomeWouldCreate, fmt.Sprintf(
@@ -101,16 +101,27 @@ func createCertificateForTenant(cfg *config.Config, persister persistence.Persis
 	return result, err
 }
 
-// tenantSubject returns the subject of the tenant's certificate, derived from
-// the tenant's SAML endpoint. The service name is the common name if there is
-// no usable endpoint, falling back to the tenant ID if the config has no
-// service name or can't be read.
-//
-// Without multitenancy the tenant's config is the config file, the default
-// tenant's row in the database doesn't hold it.
-func tenantSubject(cfg *config.Config, tenant *models.Tenant) saml.CertificateSubject {
-	if !cfg.MultiTenancy.Enabled {
-		return saml.NewCertificateSubject(cfg.Service.Name, cfg.Saml.Endpoint)
+// subjectResolver resolves the subject of a tenant's certificate, which is
+// derived from the tenant's SAML endpoint. Where the tenant's config comes
+// from depends on the deployment mode, and is why the resolver exists: without
+// multitenancy it is the config file, the default tenant's row in the database
+// doesn't hold it.
+type subjectResolver struct {
+	multiTenancy bool
+	fileConfig   config.TenantConfig
+}
+
+func newSubjectResolver(multiTenancy bool, fileConfig config.TenantConfig) subjectResolver {
+	return subjectResolver{multiTenancy: multiTenancy, fileConfig: fileConfig}
+}
+
+// Resolve returns the subject of the tenant's certificate. The service name is
+// the common name if there is no usable endpoint. With multitenancy, the tenant
+// ID takes its place if the tenant's config has no service name or can't be
+// read.
+func (r subjectResolver) Resolve(tenant *models.Tenant) saml.CertificateSubject {
+	if !r.multiTenancy {
+		return saml.NewCertificateSubject(r.fileConfig.Service.Name, r.fileConfig.Saml.Endpoint)
 	}
 
 	var tenantConfig config.TenantConfig

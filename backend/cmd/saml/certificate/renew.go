@@ -74,7 +74,9 @@ certificate.`,
 			}
 			dbPersister := persistence.New(dbConnection)
 
-			result, err := renewCertificateForTenant(cfg, dbPersister, tID, dryRun, params)
+			certSubjectResolver := newSubjectResolver(cfg.MultiTenancy.Enabled, cfg.TenantConfig)
+
+			result, err := renewCertificateForTenant(certSubjectResolver, dbPersister, tID, dryRun, params)
 			if err != nil {
 				log.Fatalf("failed to renew certificate: %s", err)
 			}
@@ -92,7 +94,7 @@ certificate.`,
 	return cmd
 }
 
-func renewCertificateForTenant(cfg *config.Config, persister persistence.Persister, tenantID uuid.UUID, dryRun bool, params certificateParams) (certResult, error) {
+func renewCertificateForTenant(certSubjectResolver subjectResolver, persister persistence.Persister, tenantID uuid.UUID, dryRun bool, params certificateParams) (certResult, error) {
 	tenant, err := persister.GetTenantPersister().Get(tenantID)
 	if err != nil {
 		return certResult{}, fmt.Errorf("failed to load tenant: %w", err)
@@ -110,7 +112,7 @@ func renewCertificateForTenant(cfg *config.Config, persister persistence.Persist
 	}
 
 	service := saml.NewCertificateService(persister)
-	subject := tenantSubject(cfg, tenant)
+	subject := certSubjectResolver.Resolve(tenant)
 
 	current, err := parseCertificate(cert)
 	if err != nil {
