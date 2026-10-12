@@ -82,7 +82,7 @@ func (s samlCertificatePersister) Renew(cert *models.SamlCertificate, serviceNam
 
 	cert.CertData = newCert
 
-	validationError, err := s.db.ValidateAndUpdate(s)
+	validationError, err := s.db.ValidateAndUpdate(cert)
 	if err != nil {
 		return fmt.Errorf("unable to update certificate: %w", err)
 	}
