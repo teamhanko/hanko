@@ -5,9 +5,6 @@ import (
 
 	"github.com/gobuffalo/pop/v6"
 	"github.com/gofrs/uuid"
-	koanfJson "github.com/knadh/koanf/parsers/json"
-	"github.com/knadh/koanf/providers/rawbytes"
-	"github.com/knadh/koanf/v2"
 	"github.com/teamhanko/hanko/backend/v3/config"
 	"github.com/teamhanko/hanko/backend/v3/persistence"
 	"github.com/teamhanko/hanko/backend/v3/persistence/models"
@@ -57,7 +54,10 @@ func createCertificateForTenant(certSubjectResolver subjectResolver, persister p
 		return certResult{outcomeTenantNotFound, fmt.Sprintf("tenant %s not found", tenantID)}, nil
 	}
 
-	subject := certSubjectResolver.Resolve(tenant)
+	subject, err := certSubjectResolver.Resolve(tenant)
+	if err != nil {
+		return certResult{}, err
+	}
 
 	if dryRun {
 		return certResult{outcomeWouldCreate, fmt.Sprintf(
@@ -116,26 +116,23 @@ func newSubjectResolver(multiTenancy bool, fileConfig config.TenantConfig) subje
 }
 
 // Resolve returns the subject of the tenant's certificate. The service name is
-// the common name if there is no usable endpoint. With multitenancy, the tenant
-// ID takes its place if the tenant's config has no service name or can't be
-// read.
-func (r subjectResolver) Resolve(tenant *models.Tenant) saml.CertificateSubject {
-	if !r.multiTenancy {
-		return saml.NewCertificateSubject(r.fileConfig.Service.Name, r.fileConfig.Saml.Endpoint)
-	}
-
-	var tenantConfig config.TenantConfig
-	if len(tenant.Config) > 0 {
-		k := koanf.New(".")
-		if err := k.Load(rawbytes.Provider(tenant.Config), koanfJson.Parser()); err == nil {
-			_ = k.Unmarshal("", &tenantConfig)
+// the common name if there is no usable endpoint. It is an error if the
+// tenant's config can't be read, or if it has neither an endpoint nor a service
+// name, since the certificate would have no name at all.
+func (r subjectResolver) Resolve(tenant *models.Tenant) (saml.CertificateSubject, error) {
+	tenantConfig := r.fileConfig
+	if r.multiTenancy {
+		parsed, err := config.ParseMultitenancyTenantConfig(tenant.Config)
+		if err != nil {
+			return saml.CertificateSubject{}, fmt.Errorf("failed to read the config of tenant %s: %w", tenant.ID, err)
 		}
+		tenantConfig = *parsed
 	}
 
-	serviceName := tenantConfig.Service.Name
-	if serviceName == "" {
-		serviceName = tenant.ID.String()
+	subject := saml.NewCertificateSubject(tenantConfig.Service.Name, tenantConfig.Saml.Endpoint)
+	if subject.CommonName == "" {
+		return saml.CertificateSubject{}, fmt.Errorf("tenant %s has neither a SAML endpoint nor a service name", tenant.ID)
 	}
 
-	return saml.NewCertificateSubject(serviceName, tenantConfig.Saml.Endpoint)
+	return subject, nil
 }

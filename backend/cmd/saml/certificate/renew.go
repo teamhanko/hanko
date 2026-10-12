@@ -112,7 +112,10 @@ func renewCertificateForTenant(certSubjectResolver subjectResolver, persister pe
 	}
 
 	service := saml.NewCertificateService(persister)
-	subject := certSubjectResolver.Resolve(tenant)
+	subject, err := certSubjectResolver.Resolve(tenant)
+	if err != nil {
+		return certResult{}, err
+	}
 
 	current, err := parseCertificate(cert)
 	if err != nil {
