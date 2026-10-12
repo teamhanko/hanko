@@ -7,7 +7,11 @@ import (
 	"crypto/x509/pkix"
 	"encoding/pem"
 	"fmt"
+	"net"
+	"net/url"
+	"strings"
 	"time"
+	"unicode/utf8"
 )
 
 const (
@@ -52,9 +56,72 @@ func GenerateKey(bits int) (*rsa.PrivateKey, error) {
 	return key, nil
 }
 
+// maxCommonNameLength is the upper bound for a common name (RFC 5280).
+const maxCommonNameLength = 64
+
+// CertificateSubject is the identity of a SAML certificate: its common name and subject alternative names.
+type CertificateSubject struct {
+	CommonName string
+	DNSNames   []string
+}
+
+// NewCertificateSubject derives the subject from the host of the SAML endpoint URL, which becomes the common name
+// and the only subject alternative name.
+//
+// A common name is limited to 64 characters, so a longer host is only set as the subject alternative name and the
+// service name stays the common name. Without a usable host, which is none at all, an IP address or one that can't
+// be encoded in a subject alternative name (a non-ASCII one), the service name is the common name and there is no
+// subject alternative name. The service name is never used as a subject alternative name because it is free text
+// and not a host name.
+func NewCertificateSubject(serviceName, endpoint string) CertificateSubject {
+	subject := CertificateSubject{CommonName: serviceName}
+
+	host := endpointHost(endpoint)
+	if host == "" {
+		return subject
+	}
+
+	subject.DNSNames = []string{host}
+	if len(host) <= maxCommonNameLength {
+		subject.CommonName = host
+	}
+
+	return subject
+}
+
+func (s CertificateSubject) String() string {
+	if len(s.DNSNames) == 0 {
+		return fmt.Sprintf("CN=%q, no SAN", s.CommonName)
+	}
+
+	return fmt.Sprintf("CN=%q, SAN=%s", s.CommonName, strings.Join(s.DNSNames, ","))
+}
+
+// endpointHost returns the lower-cased host name of the endpoint URL without port, or an empty string if there is
+// no host name that can be used.
+func endpointHost(endpoint string) string {
+	u, err := url.Parse(strings.TrimSpace(endpoint))
+	if err != nil {
+		return ""
+	}
+
+	host := strings.ToLower(u.Hostname())
+	if net.ParseIP(host) != nil {
+		return ""
+	}
+
+	for i := 0; i < len(host); i++ {
+		if host[i] >= utf8.RuneSelf {
+			return ""
+		}
+	}
+
+	return host
+}
+
 // SelfSign creates a PEM encoded certificate for the key, signed by the key itself, which is valid from now for
 // the given number of whole years.
-func SelfSign(serviceName string, key *rsa.PrivateKey, validityYears int, now time.Time) (string, error) {
+func SelfSign(subject CertificateSubject, key *rsa.PrivateKey, validityYears int, now time.Time) (string, error) {
 	if err := ValidateValidityYears(validityYears); err != nil {
 		return "", err
 	}
@@ -63,8 +130,9 @@ func SelfSign(serviceName string, key *rsa.PrivateKey, validityYears int, now ti
 	// issuer and subject are the same and a fixed serial would repeat on every renewal.
 	template := &x509.Certificate{
 		Subject: pkix.Name{
-			CommonName: serviceName,
+			CommonName: subject.CommonName,
 		},
+		DNSNames:              subject.DNSNames,
 		NotBefore:             now,
 		NotAfter:              now.AddDate(validityYears, 0, 0),
 		KeyUsage:              x509.KeyUsageKeyEncipherment | x509.KeyUsageDigitalSignature,

@@ -1,7 +1,9 @@
 package handler
 
 import (
+	"crypto/x509"
 	"encoding/json"
+	"encoding/pem"
 	"fmt"
 	"net/http"
 	"net/http/httptest"
@@ -30,14 +32,15 @@ const samlCertificateTenantID = "00000000-0000-0000-0000-000000000001"
 
 // createExpiredCertificate stores a certificate that expired a year ago.
 func (s *samlCertificateSuite) createExpiredCertificate() {
-	cert, err := saml.NewCertificateService(s.Storage).Generate("test", saml.CertificateParams{})
+	subject := saml.NewCertificateSubject("test", "")
+	cert, err := saml.NewCertificateService(s.Storage).Generate(subject, saml.CertificateParams{})
 	s.Require().NoError(err)
 	cert.TenantID = uuid.Must(uuid.FromString(samlCertificateTenantID))
 
 	privateKey, err := cert.PrivateKey()
 	s.Require().NoError(err)
 
-	cert.CertData, err = saml.SelfSign("test", privateKey, saml.DefaultValidityYears, time.Now().AddDate(-11, 0, 0))
+	cert.CertData, err = saml.SelfSign(subject, privateKey, saml.DefaultValidityYears, time.Now().AddDate(-11, 0, 0))
 	s.Require().NoError(err)
 	s.Require().NoError(s.Storage.GetSamlCertificatePersister().Create(cert))
 }
@@ -98,6 +101,39 @@ func (s *samlCertificateSuite) TestRenew_KeySizeAndValidity() {
 	storedBits, err := stored.KeyBits()
 	s.Require().NoError(err)
 	s.Equal(3072, storedBits)
+}
+
+func (s *samlCertificateSuite) TestRenew_SubjectFromEndpoint() {
+	if testing.Short() {
+		s.T().Skip("skipping test in short mode.")
+	}
+	s.createExpiredCertificate()
+
+	tenantID := uuid.Must(uuid.FromString(samlCertificateTenantID))
+	tenant, err := s.Storage.GetTenantPersister().Get(tenantID)
+	s.Require().NoError(err)
+	var tenantConfig map[string]any
+	s.Require().NoError(json.Unmarshal(tenant.Config, &tenantConfig))
+	samlConfig, _ := tenantConfig["saml"].(map[string]any)
+	if samlConfig == nil {
+		samlConfig = map[string]any{}
+	}
+	samlConfig["endpoint_url"] = "https://auth.example.com/"
+	tenantConfig["saml"] = samlConfig
+	tenant.Config, err = json.Marshal(tenantConfig)
+	s.Require().NoError(err)
+	s.Require().NoError(s.Storage.GetTenantPersister().Update(*tenant))
+
+	s.Require().Equal(http.StatusOK, s.renew("").Code)
+
+	stored, err := s.Storage.GetSamlCertificatePersister().GetFirst(tenantID)
+	s.Require().NoError(err)
+	block, _ := pem.Decode([]byte(stored.CertData))
+	s.Require().NotNil(block)
+	renewed, err := x509.ParseCertificate(block.Bytes)
+	s.Require().NoError(err)
+	s.Equal("auth.example.com", renewed.Subject.CommonName)
+	s.Equal([]string{"auth.example.com"}, renewed.DNSNames)
 }
 
 func (s *samlCertificateSuite) TestRenew_InvalidRequest() {

@@ -43,7 +43,7 @@ func SyncProviderConfigToDatabase(cfg *config.Config, persister persistence.Pers
 		return fmt.Errorf("failed to ensure default tenant exists: %w", err)
 	}
 
-	err = ensureSamlCertificateExists(persister, tenantID, cfg.Service.Name)
+	err = ensureSamlCertificateExists(persister, tenantID, NewCertificateSubject(cfg.Service.Name, cfg.Saml.Endpoint))
 
 	providerSvc := NewSamlProviderManagementService(persister)
 
@@ -98,7 +98,7 @@ func ensureDefaultTenantExists(persister persistence.Persister, tenantID uuid.UU
 	return fmt.Errorf("default tenant does not exist")
 }
 
-func ensureSamlCertificateExists(persister persistence.Persister, tenantID uuid.UUID, serviceName string) error {
+func ensureSamlCertificateExists(persister persistence.Persister, tenantID uuid.UUID, subject CertificateSubject) error {
 	return persister.Transaction(func(tx *pop.Connection) error {
 		certPersister := persister.GetSamlCertificatePersisterWithConnection(tx)
 
@@ -110,7 +110,7 @@ func ensureSamlCertificateExists(persister persistence.Persister, tenantID uuid.
 		if cert == nil {
 			log.Printf("[SAML Migration] No SAML certificate for tenant '%s' exists, creating certificate ...", tenantID.String())
 
-			cert, err = NewCertificateService(persister).Generate(serviceName, CertificateParams{})
+			cert, err = NewCertificateService(persister).Generate(subject, CertificateParams{})
 			if err != nil {
 				return fmt.Errorf("unable to create SAML certificate: %w", err)
 			}

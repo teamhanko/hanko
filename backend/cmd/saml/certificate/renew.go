@@ -28,6 +28,10 @@ func NewRenewCommand() *cobra.Command {
 		Short: "reissue a tenant's SAML certificate",
 		Long: `Reissues a tenant's SAML certificate with a new validity period.
 
+The common name and subject alternative name of the certificate are derived from the tenant's current SAML
+endpoint again, so renewing after the endpoint changed, for example because of a custom domain, gives the
+certificate the new host name.
+
 By default the key pair is kept and only the certificate changes. Identity providers that pinned the previous
 certificate then need the new one, though one that only checks the public key keeps working, and encrypted logins
 still work because the private key is unchanged.
@@ -106,6 +110,7 @@ func renewCertificateForTenant(persister persistence.Persister, tenantID uuid.UU
 	}
 
 	service := saml.NewCertificateService(persister)
+	subject := tenantSubject(tenant)
 
 	current, err := parseCertificate(cert)
 	if err != nil {
@@ -128,12 +133,12 @@ func renewCertificateForTenant(persister persistence.Persister, tenantID uuid.UU
 		}
 
 		return certResult{outcomeWouldRenew, fmt.Sprintf(
-			"tenant %s: would renew certificate (currently %s) for %d years, key pair %s",
-			tenantID, validity, params.validityYears, keyOutcome(replacesKey, params.keyBits),
+			"tenant %s: would renew certificate (currently %s) for %d years, %s, key pair %s",
+			tenantID, validity, params.validityYears, subject, keyOutcome(replacesKey, params.keyBits),
 		)}, nil
 	}
 
-	keyChanged, err := service.Renew(cert, tenantServiceName(tenant), params.serviceParams())
+	keyChanged, err := service.Renew(cert, subject, params.serviceParams())
 	if err != nil {
 		return certResult{}, err
 	}
@@ -149,8 +154,8 @@ func renewCertificateForTenant(persister persistence.Persister, tenantID uuid.UU
 	}
 
 	return certResult{outcomeRenewed, fmt.Sprintf(
-		"renewed SAML certificate for tenant %s (was %s, now valid %s to %s)\nkey pair %s\n%s",
-		tenantID, validity, renewed.NotBefore, renewed.NotAfter, keyOutcome(keyChanged, params.keyBits), warning,
+		"renewed SAML certificate for tenant %s (was %s, now valid %s to %s)\n%s\nkey pair %s\n%s",
+		tenantID, validity, renewed.NotBefore, renewed.NotAfter, subject, keyOutcome(keyChanged, params.keyBits), warning,
 	)}, nil
 }
 

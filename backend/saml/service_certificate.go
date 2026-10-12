@@ -51,7 +51,7 @@ func NewCertificateService(persister persistence.Persister) *CertificateService 
 }
 
 // Generate creates a certificate with a new key pair. It is not persisted and has no tenant yet.
-func (s *CertificateService) Generate(serviceName string, params CertificateParams) (*models.SamlCertificate, error) {
+func (s *CertificateService) Generate(subject CertificateSubject, params CertificateParams) (*models.SamlCertificate, error) {
 	params, err := params.validated()
 	if err != nil {
 		return nil, err
@@ -67,7 +67,7 @@ func (s *CertificateService) Generate(serviceName string, params CertificatePara
 		return nil, err
 	}
 
-	certData, err := SelfSign(serviceName, key, params.ValidityYears, time.Now())
+	certData, err := SelfSign(subject, key, params.ValidityYears, time.Now())
 	if err != nil {
 		return nil, err
 	}
@@ -93,8 +93,8 @@ func (s *CertificateService) WouldReplaceKey(cert *models.SamlCertificate, param
 // Renew reissues the certificate with a new validity period and persists it. The key pair is kept unless a key
 // size other than the current one is requested or the key is explicitly rotated, in which case a new key pair is
 // generated. It reports whether the key pair was replaced.
-func (s *CertificateService) Renew(cert *models.SamlCertificate, serviceName string, params CertificateParams) (bool, error) {
-	keyChanged, err := renewCertificate(cert, serviceName, params)
+func (s *CertificateService) Renew(cert *models.SamlCertificate, subject CertificateSubject, params CertificateParams) (bool, error) {
+	keyChanged, err := renewCertificate(cert, subject, params)
 	if err != nil {
 		return false, err
 	}
@@ -107,7 +107,7 @@ func (s *CertificateService) Renew(cert *models.SamlCertificate, serviceName str
 }
 
 // renewCertificate reissues the certificate in place, without persisting it.
-func renewCertificate(cert *models.SamlCertificate, serviceName string, params CertificateParams) (bool, error) {
+func renewCertificate(cert *models.SamlCertificate, subject CertificateSubject, params CertificateParams) (bool, error) {
 	params, err := params.validated()
 	if err != nil {
 		return false, err
@@ -132,7 +132,7 @@ func renewCertificate(cert *models.SamlCertificate, serviceName string, params C
 		}
 	}
 
-	certData, err := SelfSign(serviceName, key, params.ValidityYears, time.Now())
+	certData, err := SelfSign(subject, key, params.ValidityYears, time.Now())
 	if err != nil {
 		return false, fmt.Errorf("unable to renew certificate: %w", err)
 	}

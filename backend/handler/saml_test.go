@@ -24,7 +24,7 @@ type samlSuite struct {
 const defaultTenantID = "00000000-0000-0000-0000-000000000001"
 
 func (s *samlSuite) createCertificate() {
-	cert, err := saml.NewCertificateService(s.Storage).Generate("test", saml.CertificateParams{})
+	cert, err := saml.NewCertificateService(s.Storage).Generate(saml.NewCertificateSubject("test", ""), saml.CertificateParams{})
 	s.Require().NoError(err)
 	cert.TenantID = uuid.Must(uuid.FromString(defaultTenantID))
 	s.Require().NoError(s.Storage.GetSamlCertificatePersister().Create(cert))

@@ -57,16 +57,16 @@ func createCertificateForTenant(persister persistence.Persister, tenantID uuid.U
 		return certResult{outcomeTenantNotFound, fmt.Sprintf("tenant %s not found", tenantID)}, nil
 	}
 
-	serviceName := tenantServiceName(tenant)
+	subject := tenantSubject(tenant)
 
 	if dryRun {
 		return certResult{outcomeWouldCreate, fmt.Sprintf(
-			"tenant %s: would create certificate (service name: %q, %d-bit key, valid %d years)",
-			tenantID, serviceName, params.keyBits, params.validityYears,
+			"tenant %s: would create certificate (%s, %d-bit key, valid %d years)",
+			tenantID, subject, params.keyBits, params.validityYears,
 		)}, nil
 	}
 
-	cert, err := saml.NewCertificateService(persister).Generate(serviceName, params.serviceParams())
+	cert, err := saml.NewCertificateService(persister).Generate(subject, params.serviceParams())
 	if err != nil {
 		return certResult{}, fmt.Errorf("failed to generate certificate: %w", err)
 	}
@@ -92,8 +92,8 @@ func createCertificateForTenant(persister persistence.Persister, tenantID uuid.U
 		}
 
 		result = certResult{outcomeCreated, fmt.Sprintf(
-			"created SAML certificate for tenant %s (%d-bit key, valid %d years)",
-			tenantID, params.keyBits, params.validityYears,
+			"created SAML certificate for tenant %s (%s, %d-bit key, valid %d years)",
+			tenantID, subject, params.keyBits, params.validityYears,
 		)}
 		return nil
 	})
@@ -101,20 +101,23 @@ func createCertificateForTenant(persister persistence.Persister, tenantID uuid.U
 	return result, err
 }
 
-// tenantServiceName returns the tenant's configured service name, which is
-// used as the certificate's common name, falling back to the tenant ID if the
-// config has none or can't be read.
-func tenantServiceName(tenant *models.Tenant) string {
+// tenantSubject returns the subject of the tenant's certificate, derived from
+// the tenant's SAML endpoint. The service name is the common name if there is
+// no usable endpoint, falling back to the tenant ID if the config has no
+// service name or can't be read.
+func tenantSubject(tenant *models.Tenant) saml.CertificateSubject {
+	var tenantConfig config.TenantConfig
 	if len(tenant.Config) > 0 {
 		k := koanf.New(".")
-		var tenantConfig config.TenantConfig
 		if err := k.Load(rawbytes.Provider(tenant.Config), koanfJson.Parser()); err == nil {
 			_ = k.Unmarshal("", &tenantConfig)
 		}
-		if tenantConfig.Service.Name != "" {
-			return tenantConfig.Service.Name
-		}
 	}
 
-	return tenant.ID.String()
+	serviceName := tenantConfig.Service.Name
+	if serviceName == "" {
+		serviceName = tenant.ID.String()
+	}
+
+	return saml.NewCertificateSubject(serviceName, tenantConfig.Saml.Endpoint)
 }

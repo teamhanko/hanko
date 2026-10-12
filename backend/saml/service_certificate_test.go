@@ -13,7 +13,7 @@ import (
 var certificateService = NewCertificateService(nil)
 
 func generateCertificate(t *testing.T, params CertificateParams) *models.SamlCertificate {
-	cert, err := certificateService.Generate("test", params)
+	cert, err := certificateService.Generate(testSubject, params)
 	require.NoError(t, err)
 	return cert
 }
@@ -54,7 +54,7 @@ func TestGenerate_InvalidParams(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			_, err := certificateService.Generate("test", tt.params)
+			_, err := certificateService.Generate(testSubject, tt.params)
 			assert.Error(t, err)
 		})
 	}
@@ -64,7 +64,7 @@ func TestRenewCertificate_KeepsKeyByDefault(t *testing.T) {
 	cert := generateCertificate(t, CertificateParams{})
 	encryptedKey := cert.CertKey
 
-	keyChanged, err := renewCertificate(cert, "test", CertificateParams{ValidityYears: 2})
+	keyChanged, err := renewCertificate(cert, testSubject, CertificateParams{ValidityYears: 2})
 	require.NoError(t, err)
 
 	assert.False(t, keyChanged)
@@ -77,7 +77,7 @@ func TestRenewCertificate_SameKeySizeKeepsKey(t *testing.T) {
 	cert := generateCertificate(t, CertificateParams{})
 	encryptedKey := cert.CertKey
 
-	keyChanged, err := renewCertificate(cert, "test", CertificateParams{KeyBits: 2048})
+	keyChanged, err := renewCertificate(cert, testSubject, CertificateParams{KeyBits: 2048})
 
 	require.NoError(t, err)
 	assert.False(t, keyChanged)
@@ -88,7 +88,7 @@ func TestRenewCertificate_DifferentKeySizeReplacesKey(t *testing.T) {
 	cert := generateCertificate(t, CertificateParams{})
 	encryptedKey := cert.CertKey
 
-	keyChanged, err := renewCertificate(cert, "test", CertificateParams{KeyBits: 3072})
+	keyChanged, err := renewCertificate(cert, testSubject, CertificateParams{KeyBits: 3072})
 	require.NoError(t, err)
 
 	assert.True(t, keyChanged)
@@ -103,7 +103,7 @@ func TestRenewCertificate_RotateKeyKeepsSize(t *testing.T) {
 	cert := generateCertificate(t, CertificateParams{})
 	encryptedKey := cert.CertKey
 
-	keyChanged, err := renewCertificate(cert, "test", CertificateParams{RotateKey: true})
+	keyChanged, err := renewCertificate(cert, testSubject, CertificateParams{RotateKey: true})
 	require.NoError(t, err)
 
 	assert.True(t, keyChanged)
@@ -117,7 +117,7 @@ func TestRenewCertificate_GeneratesNewSerial(t *testing.T) {
 	cert := generateCertificate(t, CertificateParams{})
 	serial := parseCert(t, cert.CertData).SerialNumber
 
-	_, err := renewCertificate(cert, "test", CertificateParams{})
+	_, err := renewCertificate(cert, testSubject, CertificateParams{})
 	require.NoError(t, err)
 
 	assert.NotEqual(t, serial, parseCert(t, cert.CertData).SerialNumber)
@@ -127,7 +127,7 @@ func TestRenewCertificate_InvalidParamsLeaveCertificateUntouched(t *testing.T) {
 	cert := generateCertificate(t, CertificateParams{})
 	certData, certKey := cert.CertData, cert.CertKey
 
-	_, err := renewCertificate(cert, "test", CertificateParams{KeyBits: 1024})
+	_, err := renewCertificate(cert, testSubject, CertificateParams{KeyBits: 1024})
 
 	assert.Error(t, err)
 	assert.Equal(t, certData, cert.CertData)

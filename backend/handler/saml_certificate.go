@@ -68,7 +68,7 @@ func (h *SamlCertificateHandler) Renew(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusNotFound, "SAML certificate not found")
 	}
 
-	keyChanged, err := h.service.Renew(cert, tenantConfig.Service.Name, params)
+	keyChanged, err := h.service.Renew(cert, saml.NewCertificateSubject(tenantConfig.Service.Name, tenantConfig.Saml.Endpoint), params)
 	if err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, fmt.Sprintf("failed to renew SAML certificate: %v", err))
 	}

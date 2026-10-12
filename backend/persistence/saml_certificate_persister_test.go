@@ -28,14 +28,15 @@ func (s *samlCertificatePersisterSuite) TestUpdate_PersistsCertificateAndKey() {
 
 	tenantID := uuid.Must(uuid.FromString(defaultTenantID))
 	service := saml.NewCertificateService(s.Storage)
+	subject := saml.NewCertificateSubject("test", "")
 
-	cert, err := service.Generate("test", saml.CertificateParams{})
+	cert, err := service.Generate(subject, saml.CertificateParams{})
 	s.Require().NoError(err)
 	cert.TenantID = tenantID
 	persister := s.Storage.GetSamlCertificatePersister()
 	s.Require().NoError(persister.Create(cert))
 
-	replacement, err := service.Generate("test", saml.CertificateParams{KeyBits: 3072})
+	replacement, err := service.Generate(subject, saml.CertificateParams{KeyBits: 3072})
 	s.Require().NoError(err)
 	key, err := replacement.PrivateKey()
 	s.Require().NoError(err)

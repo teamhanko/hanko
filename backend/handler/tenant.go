@@ -109,7 +109,7 @@ func (h *TenantHandler) Create(c echo.Context) error {
 		}
 
 		if cert == nil {
-			cert, err = saml.NewCertificateService(h.persister).Generate(tenantConfig.Service.Name, saml.CertificateParams{})
+			cert, err = saml.NewCertificateService(h.persister).Generate(saml.NewCertificateSubject(tenantConfig.Service.Name, tenantConfig.Saml.Endpoint), saml.CertificateParams{})
 			if err != nil {
 				return fmt.Errorf("unable to create SAML certificate: %w", err)
 			}
