@@ -59,7 +59,6 @@ func NewManagementRouter(cfg *config.Config, persister persistence.Persister) *e
 	samlCertificateHandler := NewSamlCertificateHandler(persister)
 
 	samlCertificate := saml.Group("/certificate")
-	samlCertificate.GET("", samlCertificateHandler.Get)
 	samlCertificate.POST("/renew", samlCertificateHandler.Renew)
 
 	return e

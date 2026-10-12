@@ -12,6 +12,7 @@ import (
 
 type SamlProviderService interface {
 	Persister() persistence.Persister
+	GetServiceProvider(tenantID uuid.UUID, tenantConfig config.TenantConfig) (*saml2.SAMLServiceProvider, error)
 	GetProviderByDomain(tenantID uuid.UUID, tenantConfig config.TenantConfig, domain string) (*saml2.SAMLServiceProvider, *ProviderConfig, error)
 	GetProviderByIssuer(tenantID uuid.UUID, tenantConfig config.TenantConfig, issuer string) (*saml2.SAMLServiceProvider, *ProviderConfig, error)
 	GetAuthUrl(tenantID uuid.UUID, config config.Config, providerID uuid.UUID, redirectTo string, isFlow bool) (string, error)
@@ -31,6 +32,12 @@ func NewSamlProviderService(persister persistence.Persister) SamlProviderService
 
 func (s *defaultService) Persister() persistence.Persister {
 	return s.persister
+}
+
+// GetServiceProvider builds the tenant-wide service provider, without any identity provider, using the tenant
+// configuration.
+func (s *defaultService) GetServiceProvider(tenantID uuid.UUID, tenantConfig config.TenantConfig) (*saml2.SAMLServiceProvider, error) {
+	return s.runtimeBuilder.GetServiceProvider(tenantID, tenantConfig.Saml, tenantConfig.Service.Name)
 }
 
 // GetProviderByDomain attempts to retrieve an enabled provider for the given domain from DB and builds the runtime

@@ -47,36 +47,13 @@ func (s *samlCertificateSuite) createExpiredCertificate() {
 	s.Require().NoError(s.Storage.GetSamlCertificatePersister().Create(cert))
 }
 
-func (s *samlCertificateSuite) request(method string) *httptest.ResponseRecorder {
+func (s *samlCertificateSuite) renew() *httptest.ResponseRecorder {
 	cfg := test.DefaultConfig
 	e := NewManagementRouter(&cfg, s.Storage)
 
-	path := fmt.Sprintf("/tenants/%s/saml/certificate", samlCertificateTenantID)
-	if method == http.MethodPost {
-		path += "/renew"
-	}
-
 	rec := httptest.NewRecorder()
-	e.ServeHTTP(rec, httptest.NewRequest(method, path, nil))
+	e.ServeHTTP(rec, httptest.NewRequest(http.MethodPost, fmt.Sprintf("/tenants/%s/saml/certificate/renew", samlCertificateTenantID), nil))
 	return rec
-}
-
-func (s *samlCertificateSuite) decode(rec *httptest.ResponseRecorder) dto.SamlCertificateResponse {
-	var response dto.SamlCertificateResponse
-	s.Require().NoError(json.Unmarshal(rec.Body.Bytes(), &response), rec.Body.String())
-	return response
-}
-
-func (s *samlCertificateSuite) TestGet() {
-	if testing.Short() {
-		s.T().Skip("skipping test in short mode.")
-	}
-	s.createExpiredCertificate()
-
-	rec := s.request(http.MethodGet)
-
-	s.Require().Equal(http.StatusOK, rec.Code, rec.Body.String())
-	s.True(s.decode(rec).NotAfter.Before(time.Now()))
 }
 
 func (s *samlCertificateSuite) TestRenew() {
@@ -85,21 +62,25 @@ func (s *samlCertificateSuite) TestRenew() {
 	}
 	s.createExpiredCertificate()
 
-	rec := s.request(http.MethodPost)
+	rec := s.renew()
 
 	s.Require().Equal(http.StatusOK, rec.Code, rec.Body.String())
-	renewed := s.decode(rec)
+	var renewed dto.SamlCertificateResponse
+	s.Require().NoError(json.Unmarshal(rec.Body.Bytes(), &renewed), rec.Body.String())
 	s.True(renewed.NotAfter.After(time.Now()))
 
 	// the new certificate must have been persisted, not just returned
-	s.True(s.decode(s.request(http.MethodGet)).NotAfter.Equal(renewed.NotAfter))
+	stored, err := s.Storage.GetSamlCertificatePersister().GetFirst(uuid.Must(uuid.FromString(samlCertificateTenantID)))
+	s.Require().NoError(err)
+	storedValidity, err := certificateResponse(stored)
+	s.Require().NoError(err)
+	s.True(storedValidity.NotAfter.Equal(renewed.NotAfter))
 }
 
-func (s *samlCertificateSuite) TestNoCertificate() {
+func (s *samlCertificateSuite) TestRenew_NoCertificate() {
 	if testing.Short() {
 		s.T().Skip("skipping test in short mode.")
 	}
 
-	s.Equal(http.StatusNotFound, s.request(http.MethodGet).Code)
-	s.Equal(http.StatusNotFound, s.request(http.MethodPost).Code)
+	s.Equal(http.StatusNotFound, s.renew().Code)
 }

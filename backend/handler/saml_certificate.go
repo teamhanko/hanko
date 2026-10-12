@@ -22,29 +22,6 @@ func NewSamlCertificateHandler(persister persistence.Persister) *SamlCertificate
 	return &SamlCertificateHandler{persister: persister}
 }
 
-// Get returns the validity period of a tenant's SAML certificate.
-func (h *SamlCertificateHandler) Get(c echo.Context) error {
-	tenantID, err := uuid.FromString(c.Param("tenantId"))
-	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, "invalid tenant ID")
-	}
-
-	cert, err := h.persister.GetSamlCertificatePersister().GetFirst(tenantID)
-	if err != nil {
-		return echo.NewHTTPError(http.StatusInternalServerError, fmt.Sprintf("failed to get SAML certificate: %v", err))
-	}
-	if cert == nil {
-		return echo.NewHTTPError(http.StatusNotFound, "SAML certificate not found")
-	}
-
-	response, err := certificateResponse(cert)
-	if err != nil {
-		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
-	}
-
-	return c.JSON(http.StatusOK, response)
-}
-
 // Renew reissues a tenant's SAML certificate. The key pair is kept, but the
 // certificate itself changes, so identity providers that pinned the previous
 // certificate need the new one.
