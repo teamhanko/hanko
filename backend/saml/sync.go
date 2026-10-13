@@ -44,6 +44,9 @@ func SyncProviderConfigToDatabase(cfg *config.Config, persister persistence.Pers
 	}
 
 	err = ensureSamlCertificateExists(persister, tenantID, NewCertificateSubject(cfg.Service.Name, cfg.Saml.Endpoint))
+	if err != nil {
+		return fmt.Errorf("failed to ensure SAML certificate exists: %w", err)
+	}
 
 	providerSvc := NewSamlProviderManagementService(persister)
 
