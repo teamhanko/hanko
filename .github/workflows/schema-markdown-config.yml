@@ -5,6 +5,9 @@ on:
     tags:
       - 'backend/*'
   workflow_dispatch:
+permissions:
+  contents: write
+
 
 jobs:
   config:

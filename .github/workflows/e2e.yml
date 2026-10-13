@@ -2,6 +2,9 @@ name: E2E Test
 
 on:
   workflow_dispatch:
+permissions:
+  contents: read
+
 
 jobs:
   passwordless:
