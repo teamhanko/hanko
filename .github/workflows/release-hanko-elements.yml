@@ -19,7 +19,7 @@ jobs:
       - uses: actions/checkout@v7
       - name: get-npm-version
         id: package-version
-        uses: martinbeentjes/npm-get-version-action@main
+        uses: martinbeentjes/npm-get-version-action@3cf273023a0dda27efcd3164bdfb51908dd46a5b # v1.3.1
         with:
           path: frontend/elements
       - run: |

@@ -20,7 +20,7 @@ jobs:
       - uses: actions/checkout@v7
       - name: get-npm-version
         id: package-version
-        uses: martinbeentjes/npm-get-version-action@main
+        uses: martinbeentjes/npm-get-version-action@3cf273023a0dda27efcd3164bdfb51908dd46a5b # v1.3.1
         with:
           path: frontend/frontend-sdk
       - run: |
@@ -65,7 +65,7 @@ jobs:
       - name: Generate docs
         run: npm run docs
       - name: Deploy to gh-pages branch
-        uses: peaceiris/actions-gh-pages@v4
+        uses: peaceiris/actions-gh-pages@84c30a85c19949d7eee79c4ff27748b70285e453 # v4.1.0
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           publish_dir: frontend/frontend-sdk/.generated/docs
