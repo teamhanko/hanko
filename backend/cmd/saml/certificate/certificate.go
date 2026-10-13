@@ -34,9 +34,9 @@ type certResult struct {
 // without holding any lock. Generating an RSA key takes from around 100ms
 // (2048 bit) to around a second (4096 bit), far too long to hold a row lock
 // for. The tenant row is only locked (via FOR UPDATE) for the final, fast
-// re-check-then-insert, so this is safe to call concurrently (e.g. once per
-// tenant from create-all) without two calls racing to create a certificate for
-// the same tenant.
+// re-check-then-insert, so two calls for the same tenant that run at the same
+// time (e.g. from two simultaneous runs of a command) can't both create a
+// certificate.
 func createCertificateForTenant(certSubjectResolver subjectResolver, persister persistence.Persister, tenantID uuid.UUID, dryRun bool, params certificateParams) (certResult, error) {
 	existing, err := persister.GetSamlCertificatePersister().GetFirst(tenantID)
 	if err != nil {

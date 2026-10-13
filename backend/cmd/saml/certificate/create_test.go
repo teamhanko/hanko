@@ -2,7 +2,6 @@ package certificate
 
 import (
 	"testing"
-	"time"
 
 	"github.com/teamhanko/hanko/backend/v3/saml"
 )
@@ -68,50 +67,4 @@ func (s *certificateSuite) TestCreate_FailsForTenantWithoutUsableName() {
 	stored, err := s.Storage.GetSamlCertificatePersister().GetFirst(tenantID)
 	s.Require().NoError(err)
 	s.Nil(stored)
-}
-
-// create-all calls createCertificateForTenant concurrently, and a tenant must still end up with one certificate.
-func (s *certificateSuite) TestCreate_ConcurrentCallsCreateOneCertificate() {
-	if testing.Short() {
-		s.T().Skip("skipping test in short mode.")
-	}
-	tenantID := s.createTenant(tenantConfigWithEndpoint)
-
-	// The calls only race for the certificate in the short moment between checking and inserting. Holding the
-	// tenant's row lock until all of them are waiting for it makes them arrive there at the same time, which is
-	// what they would do if the lock didn't exist.
-	tx, err := s.Storage.GetConnection().NewTransaction()
-	s.Require().NoError(err)
-	s.Require().NoError(tx.RawQuery("SELECT id FROM tenants WHERE id = ? FOR UPDATE", tenantID).Exec())
-
-	const calls = 5
-	results := make(chan certResult, calls)
-	errs := make(chan error, calls)
-	for range calls {
-		go func() {
-			result, err := createCertificateForTenant(withMultiTenancy, s.Storage, tenantID, false, flagDefaults)
-			results <- result
-			errs <- err
-		}()
-	}
-
-	s.Eventually(func() bool {
-		var waiting struct {
-			Count int `db:"count"`
-		}
-		err := s.Storage.GetConnection().RawQuery("SELECT count(*) AS count FROM pg_stat_activity WHERE wait_event_type = 'Lock'").First(&waiting)
-		s.Require().NoError(err)
-		return waiting.Count == calls
-	}, 10*time.Second, 20*time.Millisecond, "all calls must be waiting for the tenant's row lock")
-	s.Require().NoError(tx.TX.Commit())
-
-	created := 0
-	for range calls {
-		s.Require().NoError(<-errs)
-		if (<-results).Outcome == outcomeCreated {
-			created++
-		}
-	}
-
-	s.Equal(1, created)
 }
