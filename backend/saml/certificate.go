@@ -9,6 +9,7 @@ import (
 	"fmt"
 	"net"
 	"net/url"
+	"slices"
 	"strings"
 	"time"
 	"unicode/utf8"
@@ -26,12 +27,10 @@ var AllowedKeyBits = []int{2048, 3072, 4096}
 
 // ValidateKeyBits reports whether bits is an allowed RSA key size.
 func ValidateKeyBits(bits int) error {
-	for _, allowed := range AllowedKeyBits {
-		if bits == allowed {
-			return nil
-		}
+	if !slices.Contains(AllowedKeyBits, bits) {
+		return fmt.Errorf("key size must be one of %v bits, got %d", AllowedKeyBits, bits)
 	}
-	return fmt.Errorf("key size must be one of %v bits, got %d", AllowedKeyBits, bits)
+	return nil
 }
 
 // ValidateValidityYears reports whether years is an allowed certificate validity.
@@ -110,10 +109,8 @@ func endpointHost(endpoint string) string {
 		return ""
 	}
 
-	for i := 0; i < len(host); i++ {
-		if host[i] >= utf8.RuneSelf {
-			return ""
-		}
+	if strings.ContainsFunc(host, func(r rune) bool { return r >= utf8.RuneSelf }) {
+		return ""
 	}
 
 	return host
