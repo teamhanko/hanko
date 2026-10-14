@@ -34,6 +34,12 @@ func (a WebauthnVerifyAttestationResponse) Execute(c flowpilot.ExecutionContext)
 		return err
 	}
 
+	// The hook reports an invalid attestation as a flow error rather than a Go
+	// error, so the flow must not continue to the next state in that case.
+	if flowErr := c.GetFlowError(); flowErr != nil {
+		return c.Error(flowErr)
+	}
+
 	c.PreventRevert()
 
 	if err := c.ExecuteHook(shared.ScheduleMFACreationStates{}); err != nil {
