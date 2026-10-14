@@ -8,6 +8,7 @@ import (
 	"time"
 
 	"github.com/gofrs/uuid"
+	"github.com/gomodule/redigo/redis"
 	"github.com/ory/dockertest/v3"
 	"github.com/ory/dockertest/v3/docker"
 	"github.com/stretchr/testify/assert"
@@ -425,6 +426,37 @@ func (suite *RedisLockerTestSuite) TestRaceCondition() {
 	}()
 
 	wg.Wait()
+}
+
+func (suite *RedisLockerTestSuite) TestLock_UsesDatabaseFromAddress() {
+	locker := NewRedisLocker(RedisLockerConfig{
+		Address: suite.redisAddress + "/9",
+		Expiry:  10 * time.Second,
+	})
+	ctx := context.Background()
+	flowID := uuid.Must(uuid.NewV4())
+	key := "flow:lock:" + flowID.String()
+
+	unlock, err := locker.Lock(ctx, flowID)
+	require.NoError(suite.T(), err)
+	defer func() {
+		err := unlock(ctx)
+		assert.NoError(suite.T(), err)
+	}()
+
+	db9, err := redis.DialURL("redis://" + suite.redisAddress + "/9")
+	require.NoError(suite.T(), err)
+	defer db9.Close()
+	exists, err := redis.Bool(db9.Do("EXISTS", key))
+	require.NoError(suite.T(), err)
+	assert.True(suite.T(), exists, "lock should be stored in database 9")
+
+	db0, err := redis.DialURL("redis://" + suite.redisAddress)
+	require.NoError(suite.T(), err)
+	defer db0.Close()
+	exists, err = redis.Bool(db0.Do("EXISTS", key))
+	require.NoError(suite.T(), err)
+	assert.False(suite.T(), exists, "lock should not be stored in database 0")
 }
 
 func (suite *RedisLockerTestSuite) TestRedisLocker_UnlockReturnsError() {
