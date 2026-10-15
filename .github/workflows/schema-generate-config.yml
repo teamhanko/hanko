@@ -8,6 +8,10 @@ on:
       - 'backend/config/*.go'
       - '!backend/config/config_default.go'
       - '!backend/config/**test.go'
+permissions:
+  contents: write
+  pull-requests: write
+
 
 jobs:
   config:
