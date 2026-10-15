@@ -38,7 +38,7 @@ func (a PasswordUpdate) Initialize(c flowpilot.InitializationContext) {
 		c.SuspendAction()
 	}
 
-	c.AddInputs(flowpilot.StringInput("password").
+	c.AddInputs(flowpilot.PasswordInput("password").
 		Required(true).
 		MinLength(deps.Cfg.Password.MinLength).
 		MaxLength(72))
@@ -60,7 +60,7 @@ func (a PasswordUpdate) Execute(c flowpilot.ExecutionContext) error {
 
 	err := deps.PasswordService.UpdatePassword(deps.Tx, userModel.PasswordCredential, password)
 	if err != nil {
-		return fmt.Errorf("could not udate password: %w", err)
+		return fmt.Errorf("could not update password: %w", err)
 	}
 
 	if deps.Cfg.SecurityNotifications.Notifications.PasswordUpdate.Enabled {
