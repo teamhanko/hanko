@@ -167,6 +167,7 @@ export interface Translation {
   };
   flowErrors: {
     technical_error: string;
+    request_timeout: string;
     flow_expired_error: string;
     value_invalid_error: string;
     otp_code_invalid: string;
