@@ -42,9 +42,8 @@ func NewProviderManager(persister persistence.Persister) *ProviderManager {
 func (b *ProviderManager) GetServiceProvider(
 	tenantID uuid.UUID,
 	tenantSettings samlConfig.Saml,
-	serviceName string,
 ) (*saml2.SAMLServiceProvider, error) {
-	spCertStore, err := b.loadServiceProviderCertificate(tenantID, serviceName)
+	spCertStore, err := b.loadServiceProviderCertificate(tenantID)
 	if err != nil {
 		return nil, fmt.Errorf("failed to load SP certificate: %w", err)
 	}
@@ -73,7 +72,6 @@ func (b *ProviderManager) GetProvider(
 	tenantID uuid.UUID,
 	providerID uuid.UUID,
 	tenantSettings samlConfig.Saml,
-	serviceName string,
 ) (*saml2.SAMLServiceProvider, *ProviderConfig, error) {
 	// Get provider from DB
 	provider, err := b.persister.GetSamlProviderPersister().Get(tenantID, providerID)
@@ -94,7 +92,7 @@ func (b *ProviderManager) GetProvider(
 	}
 
 	// Construct the SP half from tenant config, then add the IdP half from cached metadata
-	samlServiceProvider, err := b.GetServiceProvider(tenantID, tenantSettings, serviceName)
+	samlServiceProvider, err := b.GetServiceProvider(tenantID, tenantSettings)
 	if err != nil {
 		return nil, nil, err
 	}
@@ -130,7 +128,7 @@ func (b *ProviderManager) GetProvider(
 }
 
 // loadServiceProviderCertificate loads the tenant's SP certificate and key, or returns ErrorSamlCertificateNotFound
-func (b *ProviderManager) loadServiceProviderCertificate(tenantID uuid.UUID, serviceName string) (dsig.X509KeyStore, error) {
+func (b *ProviderManager) loadServiceProviderCertificate(tenantID uuid.UUID) (dsig.X509KeyStore, error) {
 	cert, err := b.persister.GetSamlCertificatePersister().GetFirst(tenantID)
 	if err != nil {
 		return nil, err

@@ -37,7 +37,7 @@ func (s *defaultService) Persister() persistence.Persister {
 // GetServiceProvider builds the tenant-wide service provider, without any identity provider, using the tenant
 // configuration.
 func (s *defaultService) GetServiceProvider(tenantID uuid.UUID, tenantConfig config.TenantConfig) (*saml2.SAMLServiceProvider, error) {
-	return s.runtimeBuilder.GetServiceProvider(tenantID, tenantConfig.Saml, tenantConfig.Service.Name)
+	return s.runtimeBuilder.GetServiceProvider(tenantID, tenantConfig.Saml)
 }
 
 // GetProviderByDomain attempts to retrieve an enabled provider for the given domain from DB and builds the runtime
@@ -53,7 +53,7 @@ func (s *defaultService) GetProviderByDomain(tenantID uuid.UUID, tenantConfig co
 	}
 
 	// GetProvider runtime provider from cached metadata using tenant-specific config
-	samlProvider, providerConfig, err := s.runtimeBuilder.GetProvider(tenantID, providerModel.ID, tenantConfig.Saml, tenantConfig.Service.Name)
+	samlProvider, providerConfig, err := s.runtimeBuilder.GetProvider(tenantID, providerModel.ID, tenantConfig.Saml)
 	if err != nil {
 		return nil, nil, fmt.Errorf("failed to build SAML provider: %w", err)
 	}
@@ -73,7 +73,7 @@ func (s *defaultService) GetProviderByIssuer(tenantID uuid.UUID, tenantConfig co
 	}
 
 	// GetProvider runtime provider from cached metadata using tenant-specific config
-	samlProvider, providerConfig, err := s.runtimeBuilder.GetProvider(tenantID, providerModel.ID, tenantConfig.Saml, tenantConfig.Service.Name)
+	samlProvider, providerConfig, err := s.runtimeBuilder.GetProvider(tenantID, providerModel.ID, tenantConfig.Saml)
 	if err != nil {
 		return nil, nil, fmt.Errorf("failed to build SAML provider: %w", err)
 	}
@@ -107,7 +107,7 @@ func (s *defaultService) GetAuthUrl(tenantID uuid.UUID, config config.Config, pr
 		return "", thirdparty.ErrorServer("could not generate state").WithCause(err)
 	}
 
-	samlProvider, _, err := s.runtimeBuilder.GetProvider(tenantID, providerID, config.TenantConfig.Saml, config.TenantConfig.Service.Name)
+	samlProvider, _, err := s.runtimeBuilder.GetProvider(tenantID, providerID, config.TenantConfig.Saml)
 	if err != nil {
 		return "", thirdparty.ErrorServer("could not build SAML provider").WithCause(err)
 	}
