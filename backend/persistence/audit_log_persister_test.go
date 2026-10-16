@@ -46,3 +46,68 @@ func (s *auditLogPersisterSuite) TestAuditLogPersister_CreateStoresLongUserAgent
 	s.Require().NotNil(stored)
 	s.Equal(userAgent, stored.MetaUserAgent)
 }
+
+// TestAuditLogPersister_BackfillActorUserIdToPublicID confirms the
+// change_audit_logs_actor_user_id_to_public_id migration rewrites actor_user_id from the internal
+// user id to the public id - only for users whose public id differs - and that down reverts it.
+func (s *auditLogPersisterSuite) TestAuditLogPersister_BackfillActorUserIdToPublicID() {
+	if testing.Short() {
+		s.T().Skip("skipping test in short mode.")
+	}
+
+	// Revert the backfill migration so the seeded rows look like pre-migration data.
+	s.Require().NoError(s.Storage.MigrateDown(1))
+
+	tenantID := uuid.FromStringOrNil(config.DefaultTenantID)
+	now := time.Now().UTC()
+
+	divergedInternalID := uuid.Must(uuid.NewV4())
+	divergedPublicID := uuid.Must(uuid.NewV4())
+	legacyID := uuid.Must(uuid.NewV4())
+	deletedUserID := uuid.Must(uuid.NewV4())
+
+	userPersister := s.Storage.GetUserPersister()
+	s.Require().NoError(userPersister.Create(models.User{ID: divergedInternalID, PublicID: &divergedPublicID, TenantID: tenantID, CreatedAt: now, UpdatedAt: now}))
+	s.Require().NoError(userPersister.Create(models.User{ID: legacyID, PublicID: &legacyID, TenantID: tenantID, CreatedAt: now, UpdatedAt: now}))
+
+	newAuditLog := func(actorUserID *uuid.UUID) models.AuditLog {
+		auditLog := models.AuditLog{
+			ID:                uuid.Must(uuid.NewV4()),
+			Type:              models.AuditLogLoginSuccess,
+			MetaHttpRequestId: uuid.Must(uuid.NewV4()).String(),
+			MetaSourceIp:      testSourceIP,
+			ActorUserId:       actorUserID,
+			TenantID:          tenantID,
+			CreatedAt:         now,
+			UpdatedAt:         now,
+		}
+		s.Require().NoError(s.Storage.GetAuditLogPersister().Create(auditLog))
+		return auditLog
+	}
+
+	divergedLog := newAuditLog(&divergedInternalID)
+	legacyLog := newAuditLog(&legacyID)
+	deletedUserLog := newAuditLog(&deletedUserID)
+	anonymousLog := newAuditLog(nil)
+
+	actorUserID := func(auditLog models.AuditLog) *uuid.UUID {
+		stored, err := s.Storage.GetAuditLogPersister().Get(auditLog.ID, tenantID)
+		s.Require().NoError(err)
+		s.Require().NotNil(stored)
+		return stored.ActorUserId
+	}
+
+	s.Require().NoError(s.Storage.MigrateUp())
+
+	s.Equal(divergedPublicID, *actorUserID(divergedLog))
+	s.Equal(legacyID, *actorUserID(legacyLog))
+	s.Equal(deletedUserID, *actorUserID(deletedUserLog), "logs of deleted users can't be backfilled and stay unchanged")
+	s.Nil(actorUserID(anonymousLog))
+
+	s.Require().NoError(s.Storage.MigrateDown(1))
+
+	s.Equal(divergedInternalID, *actorUserID(divergedLog))
+	s.Equal(legacyID, *actorUserID(legacyLog))
+	s.Equal(deletedUserID, *actorUserID(deletedUserLog))
+	s.Nil(actorUserID(anonymousLog))
+}
