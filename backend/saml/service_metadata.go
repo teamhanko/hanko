@@ -11,6 +11,7 @@ import (
 	"strings"
 
 	"github.com/gofrs/uuid"
+	saml2 "github.com/russellhaering/gosaml2"
 	"github.com/russellhaering/gosaml2/types"
 	dsigTypes "github.com/russellhaering/goxmldsig/types"
 	"github.com/teamhanko/hanko/backend/v3/persistence"
@@ -70,25 +71,41 @@ func (s *SamlMetadataService) FetchAndParse(metadataURL string) (*ParsedMetadata
 		}
 	}
 
-	// Extract SSO URL (prefer POST binding, fallback to first available)
-	ssoURL := ""
-	for _, ssoService := range idpMetadata.IDPSSODescriptor.SingleSignOnServices {
-		if ssoService.Binding == "urn:oasis:names:tc:SAML:2.0:bindings:HTTP-POST" {
-			ssoURL = ssoService.Location
-			break
-		}
-	}
-	if ssoURL == "" && len(idpMetadata.IDPSSODescriptor.SingleSignOnServices) > 0 {
-		ssoURL = idpMetadata.IDPSSODescriptor.SingleSignOnServices[0].Location
-	}
-
 	return &ParsedMetadata{
 		EntityID:        idpMetadata.EntityID,
 		Issuer:          idpMetadata.EntityID, // EntityID typically serves as Issuer
-		SSOURL:          ssoURL,
+		SSOURL:          selectSSOURL(idpMetadata.IDPSSODescriptor.SingleSignOnServices),
 		CertificatesPEM: certificatesPEM,
 		RawXML:          string(metadataBody),
 	}, nil
+}
+
+// selectSSOURL returns the location Hanko sends authentication requests to. Requests are sent using the HTTP-Redirect
+// binding, so that binding's location is preferred; if the identity provider does not list one, the first listed
+// location is used.
+func selectSSOURL(ssoServices []types.SingleSignOnService) string {
+	for _, ssoService := range ssoServices {
+		if ssoService.Binding == saml2.BindingHttpRedirect {
+			return ssoService.Location
+		}
+	}
+
+	if len(ssoServices) > 0 {
+		return ssoServices[0].Location
+	}
+
+	return ""
+}
+
+// ssoURLFromMetadataXML selects the SSO location from stored identity provider metadata XML. It returns an empty
+// string if the XML cannot be parsed or lists no location.
+func ssoURLFromMetadataXML(rawXML string) string {
+	idpMetadata := &types.EntityDescriptor{}
+	if err := xml.Unmarshal([]byte(rawXML), idpMetadata); err != nil || idpMetadata.IDPSSODescriptor == nil {
+		return ""
+	}
+
+	return selectSSOURL(idpMetadata.IDPSSODescriptor.SingleSignOnServices)
 }
 
 // Get retrieves metadata from cache
@@ -108,10 +125,18 @@ func (s *SamlMetadataService) Get(tenantID uuid.UUID, providerID uuid.UUID) (*Pa
 		return nil, fmt.Errorf("failed to unmarshal certificates: %w", err)
 	}
 
+	// The location is derived from the stored XML on every read, so that connections stored before the HTTP-Redirect
+	// binding was preferred get the right location without being fetched again. The stored column is only used if the
+	// XML yields none.
+	ssoURL := ssoURLFromMetadataXML(metadata.RawMetadataXML)
+	if ssoURL == "" {
+		ssoURL = metadata.SSOURL
+	}
+
 	return &ParsedMetadata{
 		EntityID:        metadata.ProviderID.String(), // ProviderID is derived from EntityID
 		Issuer:          metadata.Issuer,
-		SSOURL:          metadata.SSOURL,
+		SSOURL:          ssoURL,
 		CertificatesPEM: certificatesPEM,
 		RawXML:          metadata.RawMetadataXML,
 	}, nil
