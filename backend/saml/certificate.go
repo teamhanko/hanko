@@ -47,7 +47,8 @@ func GenerateKey(bits int) (*rsa.PrivateKey, error) {
 		return nil, err
 	}
 
-	key, err := rsa.GenerateKey(rand.Reader, bits)
+	// The size passed on is read from AllowedKeyBits, so only an allowed size is ever generated.
+	key, err := rsa.GenerateKey(rand.Reader, AllowedKeyBits[slices.Index(AllowedKeyBits, bits)])
 	if err != nil {
 		return nil, fmt.Errorf("unable to generate private key: %w", err)
 	}
