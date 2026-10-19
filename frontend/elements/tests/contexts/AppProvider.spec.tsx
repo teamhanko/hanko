@@ -50,6 +50,7 @@ const COMPLETED_FLOW_STATE = "success";
 const INITIALIZATION_DELAY_MS = 50;
 const INITIAL_CREATE_STATE_CALLS = 1;
 const REINITIALIZED_CREATE_STATE_CALLS = 2;
+const REINITIALIZED_TWICE_CREATE_STATE_CALLS = 3;
 
 describe("AppProvider session events", () => {
   let container: HTMLDivElement;
@@ -162,6 +163,22 @@ describe("AppProvider session events", () => {
     eventCallbacks.onSessionExpired.forEach((callback) => callback());
 
     expect(createState).toHaveBeenCalledTimes(REINITIALIZED_CREATE_STATE_CALLS);
+  });
+
+  it("restarts after session expiry once an active flow was reinitialized", async () => {
+    renderProvider();
+    await waitForInitialization();
+    dispatchStateChange(ACTIVE_FLOW_STATE);
+
+    eventCallbacks.onUserLoggedOut.forEach((callback) => callback());
+
+    expect(createState).toHaveBeenCalledTimes(REINITIALIZED_CREATE_STATE_CALLS);
+
+    eventCallbacks.onSessionExpired.forEach((callback) => callback());
+
+    expect(createState).toHaveBeenCalledTimes(
+      REINITIALIZED_TWICE_CREATE_STATE_CALLS,
+    );
   });
 
   it.each([
