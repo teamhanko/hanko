@@ -44,9 +44,6 @@ type Claims struct {
 	UpdatedAt         string         `json:"updated_at,omitempty" mapstructure:"updated_at,omitempty"`
 	Website           string         `json:"website,omitempty" mapstructure:"website,omitempty"`
 	ZoneInfo          string         `json:"zoneinfo,omitempty" mapstructure:"zoneinfo,omitempty"`
-
-	// Custom profile claims that are oidc specific
-	CustomClaims map[string]interface{} `json:"custom_claims,omitempty" mapstructure:"custom_claims,remain,omitempty"`
 }
 
 type claimWarning struct {

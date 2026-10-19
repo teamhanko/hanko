@@ -1,0 +1,14 @@
+resources:
+  - namespace.yaml
+  - deployment.yaml
+  - service.yaml
+  - ingress.yaml
+  - db-secret.yaml
+namespace: hanko
+configMapGenerator:
+  - files:
+      - config.yaml
+    name: hanko-config
+images:
+  - name: ghcr.io/teamhanko/hanko
+    newTag: latest

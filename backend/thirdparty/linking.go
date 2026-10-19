@@ -20,13 +20,7 @@ type AccountLinkingResult struct {
 	UserCreated  bool
 }
 
-func LinkAccount(tx *pop.Connection, cfg *config.TenantConfig, p persistence.Persister, userData *UserData, providerID string, isSaml bool, samlDomain *string, isFlow bool, userID *uuid.UUID, tenantID uuid.UUID) (*AccountLinkingResult, error) {
-	if !isFlow {
-		if cfg.Email.RequireVerification && !userData.Metadata.EmailVerified {
-			return nil, ErrorUnverifiedProviderEmail("third party provider email must be verified")
-		}
-	}
-
+func LinkAccount(tx *pop.Connection, cfg *config.TenantConfig, p persistence.Persister, userData *UserData, providerID string, isSaml bool, samlDomain *string, userID *uuid.UUID, tenantID uuid.UUID) (*AccountLinkingResult, error) {
 	// Validate userData
 	if userData == nil {
 		return nil, ErrorInvalidRequest("user data must be set")
@@ -40,6 +34,7 @@ func LinkAccount(tx *pop.Connection, cfg *config.TenantConfig, p persistence.Per
 		return nil, ErrorServer("could not get identity").WithCause(err)
 	}
 
+	var result *AccountLinkingResult
 	if identity == nil {
 		var user *models.User
 		if userID != nil {
@@ -52,13 +47,59 @@ func LinkAccount(tx *pop.Connection, cfg *config.TenantConfig, p persistence.Per
 		}
 
 		if user == nil {
-			return signUp(tx, cfg, p, userData, providerID, isSaml, samlDomain, tenantID)
+			result, err = signUp(tx, cfg, p, userData, providerID, isSaml, samlDomain, tenantID)
 		} else {
-			return link(tx, cfg, p, userData, providerID, user, isSaml, samlDomain, userID != nil, tenantID)
+			// Linking attaches a new identity to an account matched purely by email address. Unlike signUp/signIn,
+			// where an unverified email is caught downstream by ExchangeToken's re-check on the freshly-created
+			// Email row, link() reuses the target account's pre-existing, already-verified Email row, so that
+			// downstream check would otherwise never see that this particular login never proved ownership of it.
+			//
+			// SECURITY: This check prevents account takeover attacks. Without it, an attacker could:
+			// 1. Create an OAuth account at a provider (e.g., Google) with an unverified email matching a victim's email
+			// 2. Initiate OAuth login, which would match the victim's existing account by email address
+			// 3. Link their malicious OAuth identity to the victim's account without proving ownership of the email
+			// 4. Gain full access to the victim's account
+			// By requiring email verification at the provider, we ensure the user proves ownership before linking.
+			if !isSaml && cfg.Email.RequireVerification && !userData.Metadata.EmailVerified {
+				return nil, ErrorUnverifiedProviderEmail("third party provider email must be verified")
+			}
+
+			result, err = link(tx, cfg, p, userData, providerID, user, isSaml, samlDomain, userID != nil, tenantID)
 		}
 	} else {
-		return signIn(tx, cfg, p, userData, identity, tenantID)
+		result, err = signIn(tx, cfg, p, userData, identity, tenantID)
 	}
+	if err != nil {
+		return nil, err
+	}
+
+	// Custom claims: applied after signUp/link/signIn's own branch-specific logic, once
+	// result.User is known, regardless of which branch ran.
+	updatedCustomClaims, customClaimsValueChanged, err := applyCustomClaims(tx, p, cfg, userData, customClaimConnectionSource(providerID, isSaml), result.User.ID, tenantID)
+	if err != nil {
+		return nil, ErrorServer("could not apply custom claims").WithCause(err)
+	}
+	// Callers (e.g. the webhook payload built from result.User right after LinkAccount returns)
+	// would otherwise see whatever CustomClaims was eager-loaded before this write - stale by
+	// exactly one change - since applyCustomClaims only touches the database, it has no way to
+	// update result.User itself. Refreshed on any write, including a source-only handoff, since
+	// that's real DB state too even when customClaimsValueChanged is false.
+	if updatedCustomClaims != nil {
+		result.User.CustomClaims = updatedCustomClaims
+	}
+	// Only fill in a webhook event if the branch above didn't already set a real one - link()
+	// always leaves it nil, and signIn() leaves it at its zero value whenever the provider's
+	// email didn't change (the common case) - see applyCustomClaims's call site discussion for
+	// why this can never overwrite a real event like UserCreate/UserEmailCreate. Gated on
+	// customClaimsValueChanged, not updatedCustomClaims != nil, so a source-only handoff (or an
+	// IdP re-asserting the same value) never fires a webhook for what looks like nothing
+	// happening.
+	if customClaimsValueChanged && (result.WebhookEvent == nil || *result.WebhookEvent == "") {
+		customClaimsEvent := events.UserCustomClaims
+		result.WebhookEvent = &customClaimsEvent
+	}
+
+	return result, nil
 }
 
 func link(tx *pop.Connection, cfg *config.TenantConfig, p persistence.Persister, userData *UserData, providerID string, user *models.User, isSaml bool, samlDomain *string, comesFromProfile bool, tenantID uuid.UUID) (*AccountLinkingResult, error) {

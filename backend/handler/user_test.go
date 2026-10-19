@@ -53,7 +53,7 @@ func (s *userSuite) TestUserHandler_Me() {
 	cfg.MFA.SecurityKeys.Enabled = true
 	e := NewPublicRouter(&cfg, s.Storage, nil, nil)
 
-	cookie, err := generateSessionCookie(s.Storage, userId, tenantID)
+	cookie, err := generateSessionWithCookie(s.Storage, userId, userId, tenantID, nil)
 	s.Require().NoError(err)
 
 	req := httptest.NewRequest(http.MethodGet, "/me", nil)
@@ -113,7 +113,7 @@ func (s *userSuite) TestUserHandler_Logout() {
 
 	e := NewPublicRouter(&cfg, s.Storage, nil, nil)
 
-	cookie, err := generateSessionCookie(s.Storage, userId, tenantID)
+	cookie, err := generateSessionWithCookie(s.Storage, userId, userId, tenantID, nil)
 	s.Require().NoError(err)
 
 	req := httptest.NewRequest(http.MethodPost, "/logout", nil)

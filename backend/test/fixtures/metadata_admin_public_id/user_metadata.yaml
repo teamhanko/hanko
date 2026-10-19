@@ -1,0 +1,8 @@
+- id: 7b1dd04a-1414-4a11-8a11-141414141414
+  user_id: 599bb04a-1212-4a11-8a11-121212121212
+  tenant_id: 00000000-0000-0000-0000-000000000001
+  public_metadata: {"key":"value"}
+  private_metadata: {}
+  unsafe_metadata: {}
+  created_at: 2020-12-31 23:59:59
+  updated_at: 2020-12-31 23:59:59

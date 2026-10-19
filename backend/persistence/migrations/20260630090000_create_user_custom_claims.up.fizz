@@ -1,0 +1,13 @@
+create_table("user_custom_claims") {
+	t.Column("id", "uuid", {primary: true})
+	t.Column("user_id", "uuid", {"null": false})
+	t.Column("tenant_id", "uuid", {"null": false})
+	t.Column("claims", "json", {"null": true})
+	t.Timestamps()
+
+	t.ForeignKey("user_id", {"users": ["id"]}, {"on_delete": "cascade"})
+	t.ForeignKey("tenant_id", {"tenants": ["id"]}, {"on_delete": "cascade", "on_update": "cascade"})
+	t.Index(["tenant_id", "user_id"], {"unique": true})
+	t.Index(["tenant_id"])
+}
+sql("ALTER TABLE user_custom_claims ADD CONSTRAINT user_custom_claims_tenant_user_fkey FOREIGN KEY (tenant_id, user_id) REFERENCES users(tenant_id, id) ON DELETE CASCADE ON UPDATE CASCADE;")

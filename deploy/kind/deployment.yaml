@@ -1,0 +1,88 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: hanko
+  namespace: hanko
+  labels:
+    app: hanko
+spec:
+  replicas: 1 # for production use at least 3
+  selector:
+    matchLabels:
+      app: hanko
+  template:
+    metadata:
+      labels:
+        app: hanko
+    spec:
+      topologySpreadConstraints:
+        - maxSkew: 1
+          topologyKey: topology.kubernetes.io/zone
+          whenUnsatisfiable: ScheduleAnyway
+          labelSelector:
+            matchLabels:
+              app: hanko
+      volumes:
+        - name: config-volume
+          configMap:
+            name: hanko-config
+      initContainers:
+        - name: hanko-db-migration
+          image: ghcr.io/teamhanko/hanko:latest
+          imagePullPolicy: IfNotPresent
+          args:
+            - migrate
+            - up
+            - "--config"
+            - "/etc/config/config.yaml"
+          volumeMounts:
+            - mountPath: /etc/config
+              name: config-volume
+      containers:
+        - name: hanko-backend
+          image: ghcr.io/teamhanko/hanko:latest
+          imagePullPolicy: IfNotPresent
+          args:
+            - serve
+            - all
+            - "--config"
+            - "/etc/config/config.yaml"
+          ports:
+            - containerPort: 8000
+              name: http-public
+            - containerPort: 8001
+              name: http-admin
+            - containerPort: 8002
+              name: http-management
+          volumeMounts:
+            - name: config-volume
+              mountPath: /etc/config
+          env:
+            - name: DATABASE_USER
+              valueFrom:
+                secretKeyRef:
+                  name: db-config
+                  key: username
+            - name: DATABASE_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: db-config
+                  key: password
+          resources:
+            requests:
+              cpu: 100m
+              memory: 128Mi # check if this is enough
+            limits:
+              memory: 256Mi # check if this is enough
+          readinessProbe:
+            httpGet:
+              path: /health/ready
+              port: http-admin
+              scheme: HTTP
+          livenessProbe:
+            httpGet:
+              path: /health/alive
+              port: http-admin
+              scheme: HTTP
+          terminationMessagePath: /dev/termination-log
+          terminationMessagePolicy: File

@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
+	"regexp"
 	"strconv"
 	"strings"
 	"text/template"
@@ -12,6 +13,12 @@ import (
 	"github.com/rs/zerolog/log"
 	"github.com/teamhanko/hanko/backend/v3/dto"
 )
+
+// bareCustomClaimsPattern matches a claim template that's nothing but a single, bare
+// `.User.CustomClaims` reference - `{{ .User.CustomClaims }}` or `{{ .User.CustomClaims "name" }}`,
+// optionally with "-" whitespace-trim markers - and nothing else around it. See
+// parseClaimTemplateValue for why this one shape gets special-cased.
+var bareCustomClaimsPattern = regexp.MustCompile(`^\s*\{\{-?\s*\.User\.CustomClaims(?:\s+"([^"]*)")?\s*-?\}\}\s*$`)
 
 // JWTTemplateData holds the data available for template processing
 type JWTTemplateData struct {
@@ -70,6 +77,21 @@ func processClaimTemplate(value interface{}, data JWTTemplateData) (interface{},
 
 // parseClaimTemplateValue parses and executes a template string using the provided data
 func parseClaimTemplateValue(tmplStr string, data JWTTemplateData) (interface{}, error) {
+	// text/template's Execute can only ever produce text (see the docstring on
+	// dto.UserJWT.CustomClaims), so a custom claim's real, already-resolved type
+	// (config.CustomClaimDefinition.Type - number/boolean/string_list) is otherwise always lost:
+	// a number-typed claim would always come out as a JSON string in the JWT, no matter what.
+	// This is only unambiguous - and thus only skipped this way - when the WHOLE claim template
+	// is nothing but this one bare accessor; anything glued to other text still has to go
+	// through normal execution below, where there's no meaningful "typed" value to preserve
+	// anyway.
+	if m := bareCustomClaimsPattern.FindStringSubmatch(tmplStr); m != nil {
+		if m[1] == "" {
+			return data.User.CustomClaims(), nil
+		}
+		return data.User.CustomClaims(m[1]), nil
+	}
+
 	tmpl, err := template.New("").Parse(tmplStr)
 	if err != nil {
 		return "", fmt.Errorf("failed to parse template: %w", err)

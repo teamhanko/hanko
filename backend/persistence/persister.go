@@ -55,6 +55,8 @@ type Persister interface {
 	GetUserPersisterWithConnection(tx *pop.Connection) UserPersister
 	GetUserMetadataPersister() UserMetadataPersister
 	GetUserMetadataPersisterWithConnection(tx *pop.Connection) UserMetadataPersister
+	GetUserCustomClaimsPersister() UserCustomClaimsPersister
+	GetUserCustomClaimsPersisterWithConnection(tx *pop.Connection) UserCustomClaimsPersister
 	GetWebauthnCredentialPersister() WebauthnCredentialPersister
 	GetWebauthnCredentialPersisterWithConnection(tx *pop.Connection) WebauthnCredentialPersister
 	GetWebauthnSessionDataPersister() WebauthnSessionDataPersister
@@ -70,6 +72,14 @@ type Persister interface {
 	GetOTPSecretPersisterWithConnection(tx *pop.Connection) OTPSecretPersister
 	GetWebauthnCredentialUserHandlePersister() WebauthnCredentialUserHandlePersister
 	GetWebauthnCredentialUserHandlePersisterWithConnection(tx *pop.Connection) WebauthnCredentialUserHandlePersister
+	GetOrganizationPersister() OrganizationPersister
+	GetOrganizationPersisterWithConnection(tx *pop.Connection) OrganizationPersister
+	GetRolePersister() RolePersister
+	GetRolePersisterWithConnection(tx *pop.Connection) RolePersister
+	GetOrganizationMembershipPersister() OrganizationMembershipPersister
+	GetOrganizationMembershipPersisterWithConnection(tx *pop.Connection) OrganizationMembershipPersister
+	GetRoleBindingPersister() RoleBindingPersister
+	GetRoleBindingPersisterWithConnection(tx *pop.Connection) RoleBindingPersister
 	Transaction(func(tx *pop.Connection) error) error
 }
 
@@ -359,10 +369,50 @@ func (p *persister) GetUserMetadataPersisterWithConnection(tx *pop.Connection) U
 	return NewUserMetadataPersister(tx)
 }
 
+func (p *persister) GetUserCustomClaimsPersister() UserCustomClaimsPersister {
+	return NewUserCustomClaimsPersister(p.DB)
+}
+
+func (p *persister) GetUserCustomClaimsPersisterWithConnection(tx *pop.Connection) UserCustomClaimsPersister {
+	return NewUserCustomClaimsPersister(tx)
+}
+
 func (p *persister) GetTenantPersister() TenantPersister {
 	return NewTenantPersister(p.DB)
 }
 
 func (p *persister) GetTenantPersisterWithConnection(tx *pop.Connection) TenantPersister {
 	return NewTenantPersister(tx)
+}
+
+func (p *persister) GetOrganizationPersister() OrganizationPersister {
+	return NewOrganizationPersister(p.DB)
+}
+
+func (p *persister) GetOrganizationPersisterWithConnection(tx *pop.Connection) OrganizationPersister {
+	return NewOrganizationPersister(tx)
+}
+
+func (p *persister) GetRolePersister() RolePersister {
+	return NewRolePersister(p.DB)
+}
+
+func (p *persister) GetRolePersisterWithConnection(tx *pop.Connection) RolePersister {
+	return NewRolePersister(tx)
+}
+
+func (p *persister) GetOrganizationMembershipPersister() OrganizationMembershipPersister {
+	return NewOrganizationMembershipPersister(p.DB)
+}
+
+func (p *persister) GetOrganizationMembershipPersisterWithConnection(tx *pop.Connection) OrganizationMembershipPersister {
+	return NewOrganizationMembershipPersister(tx)
+}
+
+func (p *persister) GetRoleBindingPersister() RoleBindingPersister {
+	return NewRoleBindingPersister(p.DB)
+}
+
+func (p *persister) GetRoleBindingPersisterWithConnection(tx *pop.Connection) RoleBindingPersister {
+	return NewRoleBindingPersister(tx)
 }

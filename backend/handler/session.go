@@ -5,6 +5,7 @@ import (
 	"net/http"
 	"time"
 
+	"github.com/gofrs/uuid"
 	echojwt "github.com/labstack/echo-jwt/v4"
 	"github.com/labstack/echo/v4"
 	"github.com/teamhanko/hanko/backend/v3/context"
@@ -98,12 +99,18 @@ func (h *SessionHandler) ValidateSession(c echo.Context) error {
 				idleExpiresAt = &expiresAt
 			}
 
+			organizations, err := h.getOrganizations(claims.Subject, tenant.ID)
+			if err != nil {
+				return fmt.Errorf("failed to get organizations: %w", err)
+			}
+
 			return c.JSON(http.StatusOK, dto.ValidateSessionResponse{
 				IsValid:        true,
 				Claims:         claims,
 				ExpirationTime: &claims.Expiration,
 				UserID:         &claims.Subject,
 				IdleExpiresAt:  idleExpiresAt,
+				Organizations:  organizations,
 			})
 		}
 	}
@@ -191,11 +198,46 @@ func (h *SessionHandler) ValidateSessionFromBody(c echo.Context) error {
 		idleExpiresAt = &expiresAt
 	}
 
+	organizations, err := h.getOrganizations(claims.Subject, tenant.ID)
+	if err != nil {
+		return fmt.Errorf("failed to get organizations: %w", err)
+	}
+
 	return c.JSON(http.StatusOK, dto.ValidateSessionResponse{
 		IsValid:        true,
 		Claims:         claims,
 		ExpirationTime: &claims.Expiration,
 		UserID:         &claims.Subject,
 		IdleExpiresAt:  idleExpiresAt,
+		Organizations:  organizations,
 	})
+}
+
+// getOrganizations returns publicUserID's organizations and role slugs,
+// computed fresh from the database on every call so a role or membership
+// change takes effect immediately, without reissuing the session token.
+func (h *SessionHandler) getOrganizations(publicUserID uuid.UUID, tenantID uuid.UUID) ([]dto.ValidateSessionOrganization, error) {
+	user, err := h.persister.GetUserPersister().GetByPublicID(publicUserID, tenantID)
+	if err != nil {
+		return nil, fmt.Errorf("failed to resolve user: %w", err)
+	}
+	if user == nil {
+		return nil, nil
+	}
+
+	organizations := make([]dto.ValidateSessionOrganization, 0, len(user.Organizations))
+	for _, org := range user.Organizations {
+		roleSlugs := make([]string, 0, len(org.Roles))
+		for _, role := range org.Roles {
+			roleSlugs = append(roleSlugs, role.Slug)
+		}
+
+		organizations = append(organizations, dto.ValidateSessionOrganization{
+			ID:    org.OrganizationID,
+			Name:  org.OrganizationName,
+			Roles: roleSlugs,
+		})
+	}
+
+	return organizations, nil
 }

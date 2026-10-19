@@ -88,7 +88,7 @@ func NewPublicRouter(cfg *config.Config, persister persistence.Persister, promet
 	samlGroup := tenantGroup.Group("/saml")
 	samlGroup.GET("/metadata", samlHandler.Metadata)
 	samlGroup.GET("/auth", samlHandler.Auth)
-	samlGroup.POST("/callback", samlHandler.CallbackPost)
+	samlGroup.POST("/callback", samlHandler.CallbackPost, webhookMiddleware)
 	tenantGroup.POST("/token_exchange", flowAPIHandler.TokenExchangeFlowHandler, webhookMiddleware)
 
 	tenantGroup.GET("/", statusHandler.Status)
@@ -115,6 +115,9 @@ func NewPublicRouter(cfg *config.Config, persister persistence.Persister, promet
 	sessions := tenantGroup.Group("/sessions", webhookMiddleware)
 	sessions.GET("/validate", sessionHandler.ValidateSession)
 	sessions.POST("/validate", sessionHandler.ValidateSessionFromBody)
+
+	organizationPublicHandler := NewOrganizationPublicHandler(persister)
+	tenantGroup.POST("/organizations/roles/check", organizationPublicHandler.CheckRole, sessionMiddleware)
 
 	return e
 }

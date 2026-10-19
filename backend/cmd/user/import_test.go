@@ -223,3 +223,38 @@ func (s *importSuite) Test_addToDatabase() {
 		})
 	}
 }
+
+// Test_addToDatabase_ReImportFails covers the actual real-world scenario reported: running
+// `hanko user import` a second time against the same tenant, with a file whose user_id was
+// already imported in a prior, separate run - not just a duplicate within the same file. This
+// must fail, exactly like a duplicate within one file does, rather than silently succeeding.
+func (s *importSuite) Test_addToDatabase_ReImportFails() {
+	if testing.Short() {
+		s.T().Skip("skipping test in short mode.")
+	}
+
+	s.SetupTest()
+	defer s.TearDownTest()
+
+	entry := []ImportOrExportEntry{
+		{
+			UserID: validUUID,
+			Emails: Emails{
+				ImportOrExportEmail{
+					Address:    "primary@hanko.io",
+					IsPrimary:  true,
+					IsVerified: false,
+				},
+			},
+		},
+	}
+
+	s.NoError(addToDatabase(entry, s.Storage, uuid.FromStringOrNil(config.DefaultTenantID)))
+
+	err := addToDatabase(entry, s.Storage, uuid.FromStringOrNil(config.DefaultTenantID))
+	s.Error(err, "re-importing the same user_id in a separate run must fail")
+
+	users, err := s.Storage.GetUserPersister().List(0, 100, []uuid.UUID{}, "", "", "", uuid.FromStringOrNil(config.DefaultTenantID))
+	s.NoError(err)
+	s.Equal(1, len(users), "the second run must not have created a duplicate or partial user")
+}

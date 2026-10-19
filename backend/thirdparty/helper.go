@@ -38,16 +38,17 @@ func IsAllowedRedirect(config config.ThirdParty, redirectTo string) bool {
 		return false
 	}
 
-	// Only allow normal browser-navigation schemes. This prevents redirects to
-	// dangerous or unexpected schemes such as:
+	// Unlike before, we no longer hard-code the scheme to http/https here.
+	// Native mobile apps (Android, iOS) commonly use a custom URI scheme for
+	// OAuth redirects, e.g.:
 	//
-	//   javascript:alert(1)
-	//   data:text/html,...
-	//   file:///etc/passwd
-	if redirectURL.Scheme != "http" && redirectURL.Scheme != "https" {
-		return false
-	}
-
+	//   com.example.myapp://callback
+	//
+	// and the admin-configured allowlist below is the actual safety boundary:
+	// a redirect is only ever accepted if it matches an explicit, operator-
+	// chosen pattern (including its scheme). Dangerous pseudo-schemes such as
+	// javascript:, data:, and file:/// are still rejected above, because they
+	// have no authority component and so fail the Hostname() == "" check.
 	for allowedRedirectPattern, pattern := range config.AllowedRedirectURLMap {
 		// Keep legacy semantics: the configured allowlist entry is still used
 		// as a glob against the full redirect URL string. This preserves support
@@ -72,7 +73,7 @@ func IsAllowedRedirect(config config.ThirdParty, redirectTo string) bool {
 		//
 		// The glob may match as a string, but the parsed host is not actually
 		// 127.0.0.1, so it must be rejected.
-		if matchesAllowedRedirectHostBoundary(allowedRedirectPattern, redirectURL) {
+		if matchesAllowedRedirectHostBoundary(allowedRedirectPattern, redirectURL, config.UnsafeWildcardRedirectURLAllowed) {
 			return true
 		}
 	}
@@ -102,7 +103,14 @@ func IsAllowedRedirect(config config.ThirdParty, redirectTo string) bool {
 // The original glob match is still responsible for path/query matching and
 // broader legacy pattern compatibility. This helper only adds a safe boundary
 // check around scheme, host, and port.
-func matchesAllowedRedirectHostBoundary(allowedRedirectPattern string, redirectURL *url.URL) bool {
+func matchesAllowedRedirectHostBoundary(allowedRedirectPattern string, redirectURL *url.URL, unsafeWildcardRedirectURLAllowed bool) bool {
+	// A bare run of 2+ asterisks ("**", "***", ...) has no scheme or host at all, so it would
+	// match any absolute URL outright - gobwas/glob treats any such run like "**" (see
+	// isAllAsterisks). Only permitted when unsafe_wildcard_redirect_url_allowed is enabled.
+	if isAllAsterisks(allowedRedirectPattern) {
+		return unsafeWildcardRedirectURLAllowed
+	}
+
 	allowedScheme, allowedAuthorityPattern, ok := extractSchemeAndAuthorityPattern(allowedRedirectPattern)
 	if !ok {
 		return false
@@ -115,13 +123,35 @@ func matchesAllowedRedirectHostBoundary(allowedRedirectPattern string, redirectU
 		return false
 	}
 
+	// The host-collision defense below exists to stop a browser from being
+	// redirected to an attacker-controlled DNS host that merely starts with
+	// an allowed prefix (e.g. "127.0.0.1**" must not match
+	// "127.0.0.1.evil.com"). That concept doesn't apply to non-HTTP(S)
+	// schemes such as a custom mobile app URI scheme
+	// ("com.example.myapp://callback"): the OS dispatches purely on the
+	// scheme, so there's no network host for an attacker to collide with, and
+	// anything after "scheme://" is just app-specific data. Having already
+	// verified the scheme matches, and with the caller having already glob-
+	// matched the full URL against the configured pattern, no further host
+	// matching is needed.
+	if !strings.EqualFold(redirectURL.Scheme, "http") && !strings.EqualFold(redirectURL.Scheme, "https") {
+		return true
+	}
+
 	actualHost := normalizeHost(redirectURL.Hostname())
 	actualPort := redirectURL.Port()
 
 	allowedHostPattern, allowedPortPattern := splitAuthorityPattern(allowedAuthorityPattern)
 	allowedHostPattern = normalizeHost(allowedHostPattern)
 
-	if !matchesHostPatternSafely(allowedHostPattern, actualHost) {
+	if isAllAsterisks(allowedHostPattern) {
+		// "http://**", "http://***", ... have no host part after the scheme, so they match
+		// any host of that scheme outright. Same gate as the bare case above, just scoped to
+		// a specific scheme.
+		if !unsafeWildcardRedirectURLAllowed {
+			return false
+		}
+	} else if !matchesHostPatternSafely(allowedHostPattern, actualHost) {
 		return false
 	}
 
@@ -330,6 +360,13 @@ func matchesHostPatternSafely(allowedHostPattern string, actualHost string) bool
 	}
 
 	return hostGlob.Match(actualHost)
+}
+
+// isAllAsterisks reports whether s is two or more asterisks and nothing else ("**", "***", ...) -
+// gobwas/glob treats any such run identically to "**". A lone "*" is excluded; it behaves
+// differently (see matchesHostPatternSafely).
+func isAllAsterisks(s string) bool {
+	return len(s) >= 2 && strings.Trim(s, "*") == ""
 }
 
 // staticPrefixBeforeWildcard returns the part of a configured glob segment that

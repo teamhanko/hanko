@@ -4,9 +4,6 @@ import (
 	"net/http"
 
 	"github.com/gofrs/uuid"
-	"github.com/knadh/koanf/parsers/json"
-	"github.com/knadh/koanf/providers/rawbytes"
-	"github.com/knadh/koanf/v2"
 	"github.com/labstack/echo/v4"
 	"github.com/teamhanko/hanko/backend/v3/config"
 	"github.com/teamhanko/hanko/backend/v3/context"
@@ -34,19 +31,9 @@ func TenantMiddlewareMultitenancy(persister persistence.Persister) echo.Middlewa
 				return echo.NewHTTPError(http.StatusNotFound, "tenant not found")
 			}
 
-			requestTenantConfig := new(config.DefaultTenantConfig())
-			k := koanf.New(".")
-
-			if err = k.Load(rawbytes.Provider(tenantModel.Config), json.Parser()); err != nil {
-				return echo.NewHTTPError(http.StatusInternalServerError, "failed to parse tenant config").SetInternal(err)
-			}
-
-			if err = k.Unmarshal("", requestTenantConfig); err != nil {
-				return echo.NewHTTPError(http.StatusInternalServerError, "failed to unmarshal tenant config").SetInternal(err)
-			}
-
-			if err = requestTenantConfig.PostProcess(); err != nil {
-				return echo.NewHTTPError(http.StatusInternalServerError, "failed to post process tenant settings").SetInternal(err) // TODO: Why only webauthn postprocess?
+			requestTenantConfig, err := config.ParseMultitenancyTenantConfig(tenantModel.Config)
+			if err != nil {
+				return echo.NewHTTPError(http.StatusInternalServerError, "failed to load tenant config").SetInternal(err)
 			}
 
 			tenant := context.Tenant{

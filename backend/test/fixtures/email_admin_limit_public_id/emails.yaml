@@ -1,0 +1,7 @@
+- id: ae40004b-1717-4b22-8b22-171717171717
+  user_id: 8c2ee04a-1515-4a11-8a11-151515151515
+  tenant_id: 00000000-0000-0000-0000-000000000001
+  address: already-has-one-email@example.com
+  verified: true
+  created_at: 2020-12-31 23:59:59
+  updated_at: 2020-12-31 23:59:59

@@ -126,7 +126,7 @@ func (h *ThirdPartyHandler) Callback(c echo.Context) error {
 			return thirdparty.ErrorInvalidRequest("could not retrieve user data from provider").WithCause(terr)
 		}
 
-		linkingResult, terr := thirdparty.LinkAccount(tx, &tenant.Config, h.persister, userData, provider.ID(), false, nil, state.IsFlow, state.UserID, tenant.ID)
+		linkingResult, terr := thirdparty.LinkAccount(tx, &tenant.Config, h.persister, userData, provider.ID(), false, nil, state.UserID, tenant.ID)
 		if terr != nil {
 			return terr
 		}

@@ -18,8 +18,22 @@ import (
 )
 
 type UserData struct {
-	Emails   Emails
-	Metadata *Claims
+	Emails            Emails
+	Metadata          *Claims
+	CustomClaimSource *CustomClaimSource // not serialized into identities.data - ToMap() below only ever reads Metadata.
+}
+
+// CustomClaimSource is the raw material a SAML/OIDC connection hands to ResolveCustomClaims,
+// filled independently by each connection type's fill site (saml/userdata.go,
+// thirdparty/provider_custom.go) from whatever the connection's config declares.
+type CustomClaimSource struct {
+	// Mapping is hanko claim name -> provider attribute/claim name (config.AttributeMap.Custom
+	// for SAML, config.CustomThirdPartyProvider.CustomClaimMapping for OIDC - the latter may be
+	// a gjson path, not just a flat key).
+	Mapping map[string]string
+	// Attributes is provider attribute/claim name -> raw value (string, []string for SAML;
+	// string, float64, bool, []interface{}, or nested map/slice for OIDC, prior to coercion).
+	Attributes map[string]any
 }
 
 func (u *UserData) ToMap() (map[string]interface{}, error) {

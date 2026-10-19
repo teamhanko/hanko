@@ -45,13 +45,13 @@ func (s *sessionAdminSuite) TestSessionAdminHandler_List() {
 	}{
 		{
 			name:               "should return a list of sessions with multiple entries",
-			userID:             "ec4ef049-5b88-4321-a173-21b0eff06a04",
+			userID:             "eeeeeeee-0000-0000-0000-000000000001",
 			expectedStatusCode: http.StatusOK,
 			expectedCount:      2,
 		},
 		{
 			name:               "should return a list of sessions with one entry",
-			userID:             "38bf5a00-d7ea-40a5-a5de-48722c148925",
+			userID:             "eeeeeeee-0000-0000-0000-000000000002",
 			expectedStatusCode: http.StatusOK,
 			expectedCount:      1,
 		},
@@ -100,6 +100,41 @@ func (s *sessionAdminSuite) TestSessionAdminHandler_List() {
 	}
 }
 
+// TestSessionAdminHandler_List_UsesPublicIdNotInternalId proves :user_id resolves via public_id
+// and not the real internal id.
+func (s *sessionAdminSuite) TestSessionAdminHandler_List_UsesPublicIdNotInternalId() {
+	if testing.Short() {
+		s.T().Skip("skipping test in short mode.")
+	}
+
+	err := s.LoadFixtures("../test/fixtures/session_admin_public_id")
+	s.Require().NoError(err)
+
+	cfg := test.DefaultConfig
+	err = cfg.PostProcess()
+	s.Require().NoError(err)
+
+	e := NewAdminRouter(&cfg, s.Storage, nil)
+
+	internalID := "f37f9f1b-4040-4b22-8b22-404040404040"
+	publicID := "0448a04a-5050-4a11-8a11-505050505050"
+
+	req := httptest.NewRequest(http.MethodGet, fmt.Sprintf("/users/%s/sessions", internalID), nil)
+	rec := httptest.NewRecorder()
+	e.ServeHTTP(rec, req)
+	s.Equal(http.StatusNotFound, rec.Code, "the real internal id must not resolve the user or their sessions")
+
+	req = httptest.NewRequest(http.MethodGet, fmt.Sprintf("/users/%s/sessions", publicID), nil)
+	rec = httptest.NewRecorder()
+	e.ServeHTTP(rec, req)
+	s.Require().Equal(http.StatusOK, rec.Code, "the public_id must resolve the user and their sessions")
+
+	var sessions []admin.ListSessionsRequestDto
+	err = json.Unmarshal(rec.Body.Bytes(), &sessions)
+	s.Require().NoError(err)
+	s.Equal(1, len(sessions))
+}
+
 func (s *sessionAdminSuite) TestSessionAdminHandler_Delete() {
 	if testing.Short() {
 		s.T().Skip("skipping test in short mode.")
@@ -117,20 +152,23 @@ func (s *sessionAdminSuite) TestSessionAdminHandler_Delete() {
 	tests := []struct {
 		name               string
 		userID             string
+		internalUserID     string
 		sessionID          string
 		expectedStatusCode int
 		expectedCount      int
 	}{
 		{
 			name:               "should delete session for user with multiple sessions",
-			userID:             "ec4ef049-5b88-4321-a173-21b0eff06a04",
+			userID:             "eeeeeeee-0000-0000-0000-000000000001",
+			internalUserID:     "ec4ef049-5b88-4321-a173-21b0eff06a04",
 			sessionID:          "d8d6dc27-fcf9-4a5c-bb50-a7a03067d936",
 			expectedCount:      1,
 			expectedStatusCode: http.StatusNoContent,
 		},
 		{
 			name:               "should delete session for user with one session",
-			userID:             "38bf5a00-d7ea-40a5-a5de-48722c148925",
+			userID:             "eeeeeeee-0000-0000-0000-000000000002",
+			internalUserID:     "38bf5a00-d7ea-40a5-a5de-48722c148925",
 			sessionID:          "108f3789-a795-43bd-a58f-ac8e80a213cd",
 			expectedCount:      0,
 			expectedStatusCode: http.StatusNoContent,
@@ -143,7 +181,7 @@ func (s *sessionAdminSuite) TestSessionAdminHandler_Delete() {
 		},
 		{
 			name:               "should fail if session is not associated to the user",
-			userID:             "38bf5a00-d7ea-40a5-a5de-48722c148925",
+			userID:             "eeeeeeee-0000-0000-0000-000000000002",
 			sessionID:          "74ba812a-923a-43e4-8020-9535dcadc0a8",
 			expectedStatusCode: http.StatusNotFound,
 		},
@@ -183,7 +221,7 @@ func (s *sessionAdminSuite) TestSessionAdminHandler_Delete() {
 			s.Equal(currentTest.expectedStatusCode, rec.Code)
 			if http.StatusNoContent == rec.Code {
 				credentials, err := s.Storage.GetSessionPersister().ListActive(
-					uuid.FromStringOrNil(currentTest.userID),
+					uuid.FromStringOrNil(currentTest.internalUserID),
 					uuid.FromStringOrNil(config.DefaultTenantID),
 				)
 				s.Require().NoError(err)

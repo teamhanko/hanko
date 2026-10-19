@@ -1,9 +1,6 @@
 package handler
 
 import (
-	"bytes"
-	"encoding/json"
-	"errors"
 	"fmt"
 	"net/http"
 	"net/url"
@@ -12,11 +9,9 @@ import (
 	"strings"
 	"time"
 
-	"github.com/go-sql-driver/mysql"
 	"github.com/gobuffalo/nulls"
 	"github.com/gobuffalo/pop/v6"
 	"github.com/gofrs/uuid"
-	"github.com/jackc/pgx/v5/pgconn"
 	"github.com/labstack/echo/v4"
 	"github.com/teamhanko/hanko/backend/v3/context"
 	"github.com/teamhanko/hanko/backend/v3/dto"
@@ -50,7 +45,9 @@ func (h *UserHandlerAdmin) Delete(c echo.Context) error {
 
 	err = h.persister.Transaction(func(tx *pop.Connection) error {
 		p := h.persister.GetUserPersisterWithConnection(tx)
-		user, err := p.Get(userId, tenant.ID)
+		// Fetched before Delete, since deleting the user cascades away
+		// their organization_memberships/role_bindings rows.
+		user, err := p.GetByPublicID(userId, tenant.ID)
 		if err != nil {
 			return fmt.Errorf("failed to get user: %w", err)
 		}
@@ -166,7 +163,7 @@ func (h *UserHandlerAdmin) Get(c echo.Context) error {
 	}
 
 	p := h.persister.GetUserPersister()
-	user, err := p.Get(userId, tenant.ID)
+	user, err := p.GetByPublicID(userId, tenant.ID)
 	if err != nil {
 		return fmt.Errorf("failed to get user: %w", err)
 	}
@@ -197,13 +194,21 @@ func (h *UserHandlerAdmin) Create(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusBadRequest, "at least one of [Emails, Username] must be set")
 	}
 
-	// if no userID is provided, create a new one
-	if body.ID.IsNil() {
-		userId, err := uuid.NewV4()
+	// The internal id is always freshly generated, regardless of what the caller
+	// supplied - body.ID (if present) sets the tenant-scoped public_id instead.
+	userInternalID, err := uuid.NewV4()
+	if err != nil {
+		return fmt.Errorf("failed to create new internal user id: %w", err)
+	}
+
+	// public_id is independently generated when not supplied, not a copy of the
+	// internal id - see the comment on models.NewUser for why.
+	publicID := body.ID
+	if publicID.IsNil() {
+		publicID, err = uuid.NewV4()
 		if err != nil {
-			return fmt.Errorf("failed to create new userId: %w", err)
+			return fmt.Errorf("failed to create new public user id: %w", err)
 		}
-		body.ID = userId
 	}
 
 	// check that only one email is marked as primary
@@ -220,25 +225,57 @@ func (h *UserHandlerAdmin) Create(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusBadRequest, "only one primary email is allowed")
 	}
 
+	// Resolve every organization and role reference before any writes, so
+	// an unrecognized reference fails with a clean 400 rather than
+	// partway through the transaction below.
+	type resolvedOrganization struct {
+		id      uuid.UUID
+		roleIDs []uuid.UUID
+	}
+	resolvedOrganizations := make([]resolvedOrganization, 0, len(body.Organizations))
+	if len(body.Organizations) > 0 {
+		organizationPersister := h.persister.GetOrganizationPersister()
+		rolePersister := h.persister.GetRolePersister()
+
+		for _, orgEntry := range body.Organizations {
+			organization, err := organizationPersister.Get(orgEntry.ID, tenant.ID)
+			if err != nil {
+				return fmt.Errorf("failed to get organization: %w", err)
+			}
+			if organization == nil {
+				return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("organization '%s' not found", orgEntry.ID))
+			}
+
+			roleIDs := make([]uuid.UUID, 0, len(orgEntry.Roles))
+			for _, roleRef := range orgEntry.Roles {
+				role, err := rolePersister.GetByIDOrSlug(roleRef, tenant.ID)
+				if err != nil {
+					return fmt.Errorf("failed to resolve role: %w", err)
+				}
+				if role == nil {
+					return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("role '%s' not found", roleRef))
+				}
+				roleIDs = append(roleIDs, role.ID)
+			}
+
+			resolvedOrganizations = append(resolvedOrganizations, resolvedOrganization{id: orgEntry.ID, roleIDs: roleIDs})
+		}
+	}
+
 	err = h.persister.GetConnection().Transaction(func(tx *pop.Connection) error {
 		u := models.User{
-			ID:        body.ID,
+			ID:        userInternalID,
+			PublicID:  &publicID,
 			TenantID:  tenant.ID,
 			CreatedAt: body.CreatedAt,
 		}
 
 		err := tx.Create(&u)
 		if err != nil {
-			if pgErr, ok := errors.AsType[*pgconn.PgError](err); ok {
-				if pgErr.Code == "23505" {
-					return echo.NewHTTPError(http.StatusConflict, fmt.Errorf("failed to create user with id '%v': %w", u.ID, fmt.Errorf("user already exists")))
-				}
-			} else if mysqlErr, ok2 := errors.AsType[*mysql.MySQLError](err); ok2 {
-				if mysqlErr.Number == 1062 {
-					return echo.NewHTTPError(http.StatusConflict, fmt.Errorf("failed to create user with id '%v': %w", u.ID, fmt.Errorf("user already exists")))
-				}
+			if isUniqueConstraintViolation(err) {
+				return echo.NewHTTPError(http.StatusConflict, fmt.Errorf("failed to create user with id '%v': %w", publicID, fmt.Errorf("user already exists")))
 			}
-			return fmt.Errorf("failed to create user with id '%v': %w", u.ID, err)
+			return fmt.Errorf("failed to create user with id '%v': %w", publicID, err)
 		}
 
 		now := time.Now()
@@ -256,16 +293,10 @@ func (h *UserHandlerAdmin) Create(c echo.Context) error {
 
 			err := tx.Create(&mail)
 			if err != nil {
-				if pgErr, ok := errors.AsType[*pgconn.PgError](err); ok {
-					if pgErr.Code == "23505" {
-						return echo.NewHTTPError(http.StatusConflict, fmt.Errorf("failed to create email '%s' for user '%v': %w", mail.Address, u.ID, fmt.Errorf("email already exists")))
-					}
-				} else if mysqlErr, ok2 := errors.AsType[*mysql.MySQLError](err); ok2 {
-					if mysqlErr.Number == 1062 {
-						return echo.NewHTTPError(http.StatusConflict, fmt.Errorf("failed to create email '%s' for user '%v': %w", mail.Address, u.ID, fmt.Errorf("email already exists")))
-					}
+				if isUniqueConstraintViolation(err) {
+					return echo.NewHTTPError(http.StatusConflict, fmt.Errorf("failed to create email '%s' for user '%v': %w", mail.Address, publicID, fmt.Errorf("email already exists")))
 				}
-				return fmt.Errorf("failed to create email '%s' for user '%v': %w", mail.Address, u.ID, err)
+				return fmt.Errorf("failed to create email '%s' for user '%v': %w", mail.Address, publicID, err)
 			}
 
 			if email.IsPrimary {
@@ -276,7 +307,7 @@ func (h *UserHandlerAdmin) Create(c echo.Context) error {
 				}
 				err := tx.Create(&primary)
 				if err != nil {
-					return fmt.Errorf("failed to set email '%s' as primary for user '%v': %w", mail.Address, u.ID, err)
+					return fmt.Errorf("failed to set email '%s' as primary for user '%v': %w", mail.Address, publicID, err)
 				}
 			}
 		}
@@ -285,18 +316,55 @@ func (h *UserHandlerAdmin) Create(c echo.Context) error {
 			username := models.NewUsername(u.ID, *body.Username, tenant.ID)
 			err = tx.Create(username)
 			if err != nil {
-				if pgErr, ok := errors.AsType[*pgconn.PgError](err); ok {
-					if pgErr.Code == "23505" {
-						return echo.NewHTTPError(http.StatusConflict, fmt.Errorf("failed to create username '%s' for user '%v': %w", username.Username, u.ID, fmt.Errorf("username already exists")))
-					}
-				} else if mysqlErr, ok2 := errors.AsType[*mysql.MySQLError](err); ok2 {
-					if mysqlErr.Number == 1062 {
-						return echo.NewHTTPError(http.StatusConflict, fmt.Errorf("failed to create username '%s' for user '%v': %w", username.Username, u.ID, fmt.Errorf("username already exists")))
-					}
+				if isUniqueConstraintViolation(err) {
+					return echo.NewHTTPError(http.StatusConflict, fmt.Errorf("failed to create username '%s' for user '%v': %w", username.Username, publicID, fmt.Errorf("username already exists")))
 				}
-				return fmt.Errorf("failed to create email '%s' for user '%v': %w", username.Username, u.ID, err)
+				return fmt.Errorf("failed to create username '%s' for user '%v': %w", username.Username, publicID, err)
 			}
 		}
+
+		if len(resolvedOrganizations) > 0 {
+			membershipPersister := h.persister.GetOrganizationMembershipPersisterWithConnection(tx)
+			roleBindingPersister := h.persister.GetRoleBindingPersisterWithConnection(tx)
+
+			for _, org := range resolvedOrganizations {
+				membershipId, err := uuid.NewV4()
+				if err != nil {
+					return fmt.Errorf("failed to create new organization membership id: %w", err)
+				}
+
+				err = membershipPersister.Create(models.OrganizationMembership{
+					ID:             membershipId,
+					TenantID:       tenant.ID,
+					UserID:         u.ID,
+					OrganizationID: org.id,
+					CreatedAt:      now,
+				})
+				if err != nil {
+					return fmt.Errorf("failed to add user '%v' to organization '%v': %w", u.ID, org.id, err)
+				}
+
+				for _, roleID := range org.roleIDs {
+					bindingId, err := uuid.NewV4()
+					if err != nil {
+						return fmt.Errorf("failed to create new role binding id: %w", err)
+					}
+
+					err = roleBindingPersister.Create(models.RoleBinding{
+						ID:             bindingId,
+						TenantID:       tenant.ID,
+						UserID:         u.ID,
+						RoleID:         roleID,
+						OrganizationID: org.id,
+						CreatedAt:      now,
+					})
+					if err != nil {
+						return fmt.Errorf("failed to bind role '%v' for user '%v' in organization '%v': %w", roleID, u.ID, org.id, err)
+					}
+				}
+			}
+		}
+
 		return nil
 	})
 
@@ -307,7 +375,7 @@ func (h *UserHandlerAdmin) Create(c echo.Context) error {
 	}
 
 	p := h.persister.GetUserPersister()
-	user, err := p.Get(body.ID, tenant.ID)
+	user, err := p.Get(userInternalID, tenant.ID)
 	if err != nil {
 		return fmt.Errorf("failed to get user: %w", err)
 	}
@@ -326,38 +394,12 @@ func (h *UserHandlerAdmin) Create(c echo.Context) error {
 	return c.JSON(http.StatusOK, userDto)
 }
 
-// OptionalString represents a PATCH-able string field with 3 states:
-// - not present in JSON => Present=false (no change)
-// - present with string => Present=true, Value!=nil (set)
-// - present with null   => Present=true, Value==nil (clear)
-type OptionalString struct {
-	Present bool
-	Value   *string
-}
-
-func (o *OptionalString) UnmarshalJSON(b []byte) error {
-	o.Present = true
-
-	if bytes.Equal(bytes.TrimSpace(b), []byte("null")) {
-		o.Value = nil
-		return nil
-	}
-
-	var s string
-	if err := json.Unmarshal(b, &s); err != nil {
-		return fmt.Errorf("expected string or null: %w", err)
-	}
-
-	o.Value = &s
-	return nil
-}
-
 type PatchUserAdminRequest struct {
-	Username   OptionalString `json:"username"`
-	Name       OptionalString `json:"name"`
-	GivenName  OptionalString `json:"given_name"`
-	FamilyName OptionalString `json:"family_name"`
-	Picture    OptionalString `json:"picture"`
+	Username   dto.OptionalString `json:"username"`
+	Name       dto.OptionalString `json:"name"`
+	GivenName  dto.OptionalString `json:"given_name"`
+	FamilyName dto.OptionalString `json:"family_name"`
+	Picture    dto.OptionalString `json:"picture"`
 }
 
 func (h *UserHandlerAdmin) Patch(c echo.Context) error {
@@ -377,7 +419,7 @@ func (h *UserHandlerAdmin) Patch(c echo.Context) error {
 	}
 
 	// Empty/whitespace-only strings are invalid (`null` is used to clear).
-	normalizeOptionalString := func(field string, v OptionalString, lower bool) (OptionalString, error) {
+	normalizeOptionalString := func(field string, v dto.OptionalString, lower bool) (dto.OptionalString, error) {
 		if !v.Present || v.Value == nil {
 			return v, nil
 		}
@@ -424,7 +466,7 @@ func (h *UserHandlerAdmin) Patch(c echo.Context) error {
 		userPersister := h.persister.GetUserPersisterWithConnection(tx)
 		usernamePersister := h.persister.GetUsernamePersisterWithConnection(tx)
 
-		user, err := userPersister.Get(userId, tenant.ID)
+		user, err := userPersister.GetByPublicID(userId, tenant.ID)
 		if err != nil {
 			return fmt.Errorf("failed to get user: %w", err)
 		}
@@ -434,7 +476,7 @@ func (h *UserHandlerAdmin) Patch(c echo.Context) error {
 
 		changed := false
 
-		applyNullsString := func(dst *nulls.String, in OptionalString) {
+		applyNullsString := func(dst *nulls.String, in dto.OptionalString) {
 			if !in.Present {
 				return
 			}
@@ -511,7 +553,7 @@ func (h *UserHandlerAdmin) Patch(c echo.Context) error {
 		return err
 	}
 
-	user, err := h.persister.GetUserPersister().Get(userId, tenant.ID)
+	user, err := h.persister.GetUserPersister().GetByPublicID(userId, tenant.ID)
 	if err != nil {
 		return fmt.Errorf("failed to get user: %w", err)
 	}

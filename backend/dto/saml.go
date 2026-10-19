@@ -72,7 +72,7 @@ func FromSamlProvider(provider *models.SamlProvider) SamlProviderResponse {
 	}
 
 	// Parse attribute map if present
-	if len(provider.AttributeMap) == 0 || bytes.Equal(provider.AttributeMap, []byte("null")) {
+	if len(provider.AttributeMap) > 0 && !bytes.Equal(provider.AttributeMap, []byte("null")) {
 		var attrMap config.AttributeMap
 		err := json.Unmarshal(provider.AttributeMap, &attrMap)
 		if err == nil {

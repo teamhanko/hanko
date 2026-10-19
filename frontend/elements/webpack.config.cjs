@@ -12,6 +12,13 @@ module.exports = {
         type: "module",
       },
     },
+    da: {
+      filename: "i18n/da.js",
+      import: "./src/i18n/da.ts",
+      library: {
+        type: "module",
+      },
+    },
     de: {
       filename: "i18n/de.js",
       import: "./src/i18n/de.ts",

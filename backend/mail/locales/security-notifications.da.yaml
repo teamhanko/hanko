@@ -1,0 +1,48 @@
+password_update_text:
+  description: ""
+  other: "Adgangskoden til din {{ .ServiceName }}-konto er blevet ændret."
+subject_password_update:
+  description: ""
+  other: "Din adgangskode er blevet ændret"
+
+primary_email_update_text:
+  description: ""
+  other: "Den primære e-mailadresse på din {{ .ServiceName }}-konto er blevet ændret fra {{ .OldEmailAddress }} til {{ .NewEmailAddress }}."
+subject_primary_email_update:
+  description: ""
+  other: "Din primære e-mailadresse er blevet ændret"
+
+email_create_text:
+  description: ""
+  other: "E-mailadressen {{ .NewEmailAddress }} er blevet tilføjet til din {{ .ServiceName }}-konto."
+subject_email_create:
+  description: ""
+  other: "En ny e-mailadresse er blevet tilføjet"
+
+email_delete_text:
+  description: ""
+  other: "E-mailadressen {{ .DeletedEmailAddress }} er blevet fjernet fra din {{ .ServiceName }}-konto."
+subject_email_delete:
+  description: ""
+  other: "En e-mailadresse er blevet fjernet"
+
+passkey_create_text:
+  description: ""
+  other: "En ny adgangsnøgle er blevet tilføjet til din {{ .ServiceName }}-konto."
+subject_passkey_create:
+  description: ""
+  other: "En ny adgangsnøgle er blevet tilføjet"
+
+mfa_create_text:
+  description: ""
+  other: "En ny metode til multifaktorgodkendelse (MFA) er blevet tilføjet til din {{ .ServiceName }}-konto."
+subject_mfa_create:
+  description: ""
+  other: "En ny MFA-metode er blevet tilføjet"
+
+mfa_delete_text:
+  description: ""
+  other: "En metode til multifaktorgodkendelse (MFA) er blevet fjernet fra din {{ .ServiceName }}-konto."
+subject_mfa_delete:
+  description: ""
+  other: "MFA-metode fjernet"

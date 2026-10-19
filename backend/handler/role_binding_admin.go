@@ -1,0 +1,205 @@
+package handler
+
+import (
+	"fmt"
+	"net/http"
+	"time"
+
+	"github.com/gofrs/uuid"
+	"github.com/labstack/echo/v4"
+	"github.com/teamhanko/hanko/backend/v3/context"
+	"github.com/teamhanko/hanko/backend/v3/dto"
+	"github.com/teamhanko/hanko/backend/v3/dto/admin"
+	"github.com/teamhanko/hanko/backend/v3/persistence"
+	"github.com/teamhanko/hanko/backend/v3/persistence/models"
+)
+
+type RoleBindingHandlerAdmin struct {
+	persister persistence.Persister
+}
+
+func NewRoleBindingHandlerAdmin(persister persistence.Persister) *RoleBindingHandlerAdmin {
+	return &RoleBindingHandlerAdmin{persister: persister}
+}
+
+// Create binds a role to a user within an organization. user_id must
+// resolve to a real user (404 if not); org_id and the membership itself
+// aren't separately verified - a missing membership, whether because the
+// organization doesn't exist or the user just isn't a member of it,
+// resolves to 400, same as an unrecognized role reference in the body.
+func (h *RoleBindingHandlerAdmin) Create(c echo.Context) error {
+	tenant, err := context.GetTenant(c)
+	if err != nil {
+		return fmt.Errorf("failed to get tenant from context: %w", err)
+	}
+
+	organizationId, err := uuid.FromString(c.Param("org_id"))
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, "failed to parse organizationId as uuid").SetInternal(err)
+	}
+
+	publicUserId, err := uuid.FromString(c.Param("user_id"))
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, "failed to parse userId as uuid").SetInternal(err)
+	}
+
+	var body admin.CreateRoleBindingRequest
+	if err := (&echo.DefaultBinder{}).BindBody(c, &body); err != nil {
+		return dto.ToHttpError(err)
+	}
+
+	if err := c.Validate(body); err != nil {
+		return dto.ToHttpError(err)
+	}
+
+	user, err := h.persister.GetUserPersister().GetByPublicID(publicUserId, tenant.ID)
+	if err != nil {
+		return fmt.Errorf("failed to get user: %w", err)
+	}
+	if user == nil {
+		return echo.NewHTTPError(http.StatusNotFound, "user not found")
+	}
+
+	membership, err := h.persister.GetOrganizationMembershipPersister().Get(user.ID, organizationId, tenant.ID)
+	if err != nil {
+		return fmt.Errorf("failed to get organization membership: %w", err)
+	}
+	if membership == nil {
+		return echo.NewHTTPError(http.StatusBadRequest, "user is not a member of this organization")
+	}
+
+	role, err := h.persister.GetRolePersister().GetByIDOrSlug(body.Role, tenant.ID)
+	if err != nil {
+		return fmt.Errorf("failed to resolve role: %w", err)
+	}
+	if role == nil {
+		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("role '%s' not found", body.Role))
+	}
+
+	id, err := uuid.NewV4()
+	if err != nil {
+		return fmt.Errorf("failed to create new role binding id: %w", err)
+	}
+
+	binding := models.RoleBinding{
+		ID:             id,
+		TenantID:       tenant.ID,
+		UserID:         user.ID,
+		RoleID:         role.ID,
+		OrganizationID: organizationId,
+		CreatedAt:      time.Now(),
+	}
+
+	err = h.persister.GetRoleBindingPersister().Create(binding)
+	if err != nil {
+		if isUniqueConstraintViolation(err) {
+			return echo.NewHTTPError(http.StatusConflict, "user already holds this role in this organization")
+		}
+		return fmt.Errorf("failed to create role binding: %w", err)
+	}
+
+	return c.JSON(http.StatusOK, admin.FromRoleBindingModel(binding, *role))
+}
+
+func (h *RoleBindingHandlerAdmin) List(c echo.Context) error {
+	tenant, err := context.GetTenant(c)
+	if err != nil {
+		return fmt.Errorf("failed to get tenant from context: %w", err)
+	}
+
+	organizationId, err := uuid.FromString(c.Param("org_id"))
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, "failed to parse organizationId as uuid").SetInternal(err)
+	}
+
+	publicUserId, err := uuid.FromString(c.Param("user_id"))
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, "failed to parse userId as uuid").SetInternal(err)
+	}
+
+	organization, err := h.persister.GetOrganizationPersister().Get(organizationId, tenant.ID)
+	if err != nil {
+		return fmt.Errorf("failed to get organization: %w", err)
+	}
+	if organization == nil {
+		return echo.NewHTTPError(http.StatusNotFound, "organization not found")
+	}
+
+	user, err := h.persister.GetUserPersister().GetByPublicID(publicUserId, tenant.ID)
+	if err != nil {
+		return fmt.Errorf("failed to get user: %w", err)
+	}
+	if user == nil {
+		return echo.NewHTTPError(http.StatusNotFound, "user not found")
+	}
+
+	bindings, err := h.persister.GetRoleBindingPersister().ListByUserAndOrganization(user.ID, organizationId, tenant.ID)
+	if err != nil {
+		return fmt.Errorf("failed to get list of role bindings: %w", err)
+	}
+
+	l := make([]admin.RoleBinding, 0, len(bindings))
+	for _, binding := range bindings {
+		if binding.Role == nil {
+			continue
+		}
+		l = append(l, admin.FromRoleBindingModel(binding, *binding.Role))
+	}
+
+	return c.JSON(http.StatusOK, l)
+}
+
+// Delete removes a role binding. role_ref, like org_id and user_id, is a
+// path segment identifying the specific binding being deleted, so an
+// unresolvable role reference here is a 404, not a 400 (unlike Create's
+// body-embedded role reference).
+func (h *RoleBindingHandlerAdmin) Delete(c echo.Context) error {
+	tenant, err := context.GetTenant(c)
+	if err != nil {
+		return fmt.Errorf("failed to get tenant from context: %w", err)
+	}
+
+	organizationId, err := uuid.FromString(c.Param("org_id"))
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, "failed to parse organizationId as uuid").SetInternal(err)
+	}
+
+	publicUserId, err := uuid.FromString(c.Param("user_id"))
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, "failed to parse userId as uuid").SetInternal(err)
+	}
+
+	roleRef := c.Param("role_ref")
+
+	role, err := h.persister.GetRolePersister().GetByIDOrSlug(roleRef, tenant.ID)
+	if err != nil {
+		return fmt.Errorf("failed to resolve role: %w", err)
+	}
+	if role == nil {
+		return echo.NewHTTPError(http.StatusNotFound, "role not found")
+	}
+
+	user, err := h.persister.GetUserPersister().GetByPublicID(publicUserId, tenant.ID)
+	if err != nil {
+		return fmt.Errorf("failed to get user: %w", err)
+	}
+	if user == nil {
+		return echo.NewHTTPError(http.StatusNotFound, "role binding not found")
+	}
+
+	p := h.persister.GetRoleBindingPersister()
+	binding, err := p.Get(user.ID, role.ID, organizationId, tenant.ID)
+	if err != nil {
+		return fmt.Errorf("failed to get role binding: %w", err)
+	}
+	if binding == nil {
+		return echo.NewHTTPError(http.StatusNotFound, "role binding not found")
+	}
+
+	err = p.Delete(*binding)
+	if err != nil {
+		return fmt.Errorf("failed to delete role binding: %w", err)
+	}
+
+	return c.NoContent(http.StatusNoContent)
+}

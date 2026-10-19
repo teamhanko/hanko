@@ -3,6 +3,7 @@ import { WebauthnSupport } from "../WebauthnSupport";
 import WebauthnManager from "./WebauthnManager";
 import { CredentialCreationOptionsJSON } from "@github/webauthn-json";
 import { clearStoredCodeVerifier, getStoredCodeVerifier } from "../Pkce";
+import { redirectTo } from "../Navigation";
 
 // Helper function to handle WebAuthn credential creation and error handling
 // eslint-disable-next-line require-jsdoc
@@ -148,7 +149,7 @@ export const autoSteps: AutoSteps = {
 
     if (!state.isCached) {
       state.saveToLocalStorage();
-      window.location.assign(state.payload.redirect_url);
+      redirectTo(state.payload.redirect_url);
     } else {
       return await state.actions.back.run();
     }

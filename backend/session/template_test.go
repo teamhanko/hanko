@@ -261,6 +261,107 @@ func TestProcessJWTTemplate(t *testing.T) {
 				"ui_theme": "dark"
 			}`),
 		},
+		{
+			name: "should process access to custom claims",
+			claims: map[string]interface{}{
+				"custom_claims_whole": "{{ .User.CustomClaims }}",
+				"matriculation_number": `{{ .User.CustomClaims "matriculation_number" }}`,
+				"age":                  `{{ .User.CustomClaims "age" }}`,
+				"is_staff":             `{{ .User.CustomClaims "is_staff" }}`,
+				"affiliation":          `{{ .User.CustomClaims "affiliation" }}`,
+			},
+			user: dto.UserJWT{}.WithCustomClaims(json.RawMessage(`{
+				"matriculation_number": "12345",
+				"age": 29,
+				"is_staff": true,
+				"affiliation": ["student", "staff"]
+			}`)),
+			expectedClaims: json.RawMessage(`{
+				"custom_claims_whole": {
+					"matriculation_number": "12345",
+					"age": 29,
+					"is_staff": true,
+					"affiliation": ["student", "staff"]
+				},
+				"matriculation_number": "12345",
+				"age": 29,
+				"is_staff": true,
+				"affiliation": ["student", "staff"]
+			}`),
+		},
+		{
+			name: "should preserve a custom claim's real type only for a bare accessor, not glued to other text",
+			claims: map[string]interface{}{
+				"age_bare":      `{{ .User.CustomClaims "age" }}`,
+				"age_composite": `Age: {{ .User.CustomClaims "age" }}`,
+			},
+			user: dto.UserJWT{}.WithCustomClaims(json.RawMessage(`{"age": 29}`)),
+			expectedClaims: json.RawMessage(`{
+				"age_bare": 29,
+				"age_composite": "Age: 29"
+			}`),
+		},
+		{
+			name: "should return an empty string for a claim key that isn't in the user's data",
+			claims: map[string]interface{}{
+				"missing_claim": `{{ .User.CustomClaims "not_a_real_claim" }}`,
+			},
+			user:           dto.UserJWT{}.WithCustomClaims(json.RawMessage(`{"age": 29}`)),
+			expectedClaims: json.RawMessage(`{"missing_claim": ""}`),
+		},
+		{
+			name: "should return an empty string for a user with no custom claims at all",
+			claims: map[string]interface{}{
+				"bare":  "{{ .User.CustomClaims }}",
+				"named": `{{ .User.CustomClaims "age" }}`,
+			},
+			user: dto.UserJWT{
+				Username: "test_user",
+			},
+			expectedClaims: json.RawMessage(`{
+				"bare": "",
+				"named": ""
+			}`),
+		},
+		{
+			// CustomClaims used to always return a Go string, so a false boolean claim rendered
+			// as the non-empty text "false" - which {{if}} treats as truthy, taking the wrong
+			// branch. CustomClaims now returns the value's real Go type (see its doc comment in
+			// dto/user.go), so {{if}}/{{and}}/{{or}}/{{not}}/eq all see the actual bool/number/
+			// slice and behave correctly - not just a bare claim template's own output type.
+			name: "should evaluate a custom claim's real type correctly inside conditionals, not just as a bare value",
+			claims: map[string]interface{}{
+				"is_staff_if":       `{{if .User.CustomClaims "is_staff"}}yes{{else}}no{{end}}`,
+				"is_staff_not":      `{{if not (.User.CustomClaims "is_staff")}}yes{{else}}no{{end}}`,
+				"affiliation_empty": `{{if .User.CustomClaims "affiliation"}}has_some{{else}}none{{end}}`,
+				"age_eq":            `{{if eq (.User.CustomClaims "age") 29.0}}matched{{else}}no_match{{end}}`,
+				"missing_claim_if":  `{{if .User.CustomClaims "not_a_real_claim"}}yes{{else}}no{{end}}`,
+			},
+			user: dto.UserJWT{}.WithCustomClaims(json.RawMessage(`{
+				"is_staff": false,
+				"affiliation": [],
+				"age": 29
+			}`)),
+			expectedClaims: json.RawMessage(`{
+				"is_staff_if": "no",
+				"is_staff_not": "yes",
+				"affiliation_empty": "none",
+				"age_eq": "matched",
+				"missing_claim_if": "no"
+			}`),
+		},
+		{
+			name: "should fall back to a stringified array/object for a custom claim glued to other text",
+			claims: map[string]interface{}{
+				"piped": `{{ .User.CustomClaims "affiliation" | printf "%v" }}`,
+			},
+			user: dto.UserJWT{}.WithCustomClaims(json.RawMessage(`{"affiliation": ["student", "staff"]}`)),
+			// Go's default %v formatting of a []interface{}, not JSON syntax - a known,
+			// accepted limitation of gluing an array/object into a larger expression (there's
+			// no well-defined "typed" form for that anyway). Scalars are unaffected: %v on a
+			// string/number/bool renders identically to before.
+			expectedClaims: json.RawMessage(`{"piped": "[student staff]"}`),
+		},
 	}
 
 	for _, tt := range tests {

@@ -4,6 +4,7 @@ import (
 	"time"
 
 	"github.com/gofrs/uuid"
+	zeroLogger "github.com/rs/zerolog/log"
 	"github.com/teamhanko/hanko/backend/v3/dto"
 	"github.com/teamhanko/hanko/backend/v3/persistence/models"
 )
@@ -21,10 +22,42 @@ type User struct {
 	IPAddress           *string                          `json:"ip_address,omitempty"`
 	UserAgent           *string                          `json:"user_agent,omitempty"`
 	Metadata            *Metadata                        `json:"metadata,omitempty"`
+	CustomClaims        CustomClaims                     `json:"custom_claims,omitempty"`
 	GivenName           string                           `json:"given_name,omitempty"`
 	FamilyName          string                           `json:"family_name,omitempty"`
 	Name                string                           `json:"name,omitempty"`
 	Picture             string                           `json:"picture,omitempty"`
+	Organizations       []UserOrganization               `json:"organizations,omitempty"`
+}
+
+// UserOrganization is an organization a user belongs to, along with the
+// roles they hold in it.
+type UserOrganization struct {
+	ID    uuid.UUID  `json:"id"`
+	Name  string     `json:"name"`
+	Roles []UserRole `json:"roles"`
+}
+
+type UserRole struct {
+	ID   uuid.UUID `json:"id"`
+	Slug string    `json:"slug"`
+	Name string    `json:"name"`
+}
+
+func fromUserOrganizationRoles(rows []models.UserOrganizationRoles) []UserOrganization {
+	organizations := make([]UserOrganization, len(rows))
+	for i, row := range rows {
+		roles := make([]UserRole, len(row.Roles))
+		for j, role := range row.Roles {
+			roles[j] = UserRole{ID: role.ID, Slug: role.Slug, Name: role.Name}
+		}
+		organizations[i] = UserOrganization{
+			ID:    row.OrganizationID,
+			Name:  row.OrganizationName,
+			Roles: roles,
+		}
+	}
+	return organizations
 }
 
 func (u *User) SetIPAddress(ip string) {
@@ -35,7 +68,7 @@ func (u *User) SetUserAgent(agent string) {
 	u.UserAgent = &agent
 }
 
-// FromUserModel Converts the DB model to a DTO object
+// FromUserModel converts the DB model to a DTO object.
 func FromUserModel(model models.User) User {
 	credentials := make([]dto.WebauthnCredentialResponse, len(model.WebauthnCredentials))
 	for i := range model.WebauthnCredentials {
@@ -77,8 +110,22 @@ func FromUserModel(model models.User) User {
 		metadata = NewMetadata(model.Metadata)
 	}
 
+	var customClaims CustomClaims
+	if model.CustomClaims != nil {
+		var err error
+		customClaims, err = NewCustomClaims(model.CustomClaims)
+		if err != nil {
+			// Should never happen - this backend is the only writer of this column, and
+			// always writes valid JSON (thirdparty.applyCustomClaims, the custom claims
+			// Admin API). Fall back to omitting them rather than failing this widely-used
+			// conversion (webhooks, other admin responses) over corrupted data.
+			zeroLogger.Warn().Err(err).Str("component", "dto/admin").Str("user_id", model.ID.String()).
+				Msg("could not build custom claims for user response, omitting them")
+		}
+	}
+
 	return User{
-		ID:                  model.ID,
+		ID:                  model.GetPublicID(),
 		WebauthnCredentials: credentials,
 		Emails:              emails,
 		Username:            username,
@@ -88,16 +135,28 @@ func FromUserModel(model models.User) User {
 		Identities:          identities,
 		OTP:                 otp,
 		Metadata:            metadata,
+		CustomClaims:        customClaims,
 		GivenName:           model.GivenName.String,
 		FamilyName:          model.FamilyName.String,
 		Name:                model.Name.String,
 		Picture:             model.Picture.String,
+		Organizations:       fromUserOrganizationRoles(model.Organizations),
 	}
 }
 
 type CreateUser struct {
-	ID        uuid.UUID     `json:"id"`
-	Emails    []CreateEmail `json:"emails" validate:"unique=Address,dive"`
-	Username  *string       `json:"username"`
-	CreatedAt time.Time     `json:"created_at"`
+	// ID, if supplied, sets the user's tenant-scoped public_id, not the internal
+	// primary key - the internal id is always server-generated regardless.
+	ID            uuid.UUID                `json:"id"`
+	Emails        []CreateEmail            `json:"emails" validate:"unique=Address,dive"`
+	Username      *string                  `json:"username"`
+	CreatedAt     time.Time                `json:"created_at"`
+	Organizations []CreateUserOrganization `json:"organizations,omitempty" validate:"dive"`
+}
+
+// CreateUserOrganization.Roles entries may reference a role by either its
+// id or its slug - resolved via RolePersister.GetByIDOrSlug.
+type CreateUserOrganization struct {
+	ID    uuid.UUID `json:"id" validate:"required"`
+	Roles []string  `json:"roles,omitempty"`
 }

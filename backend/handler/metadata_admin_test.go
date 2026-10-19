@@ -859,3 +859,35 @@ const metadataExceedingLimit = `{
     ]
   }
 }`
+
+// TestMetadataAdminHandler_UsesPublicIdNotInternalId asserts that GetMetadata resolves the
+// :user_id path parameter via public_id, not the real internal id, matching every other
+// handler mounted under the same /users/:id route group.
+func (s *metadataAdminSuite) TestMetadataAdminHandler_UsesPublicIdNotInternalId() {
+	if testing.Short() {
+		s.T().Skip("skipping test in short mode.")
+	}
+
+	err := s.LoadFixtures("../test/fixtures/metadata_admin_public_id")
+	s.Require().NoError(err)
+
+	e := NewAdminRouter(&test.DefaultConfig, s.Storage, nil)
+
+	internalID := "599bb04a-1212-4a11-8a11-121212121212"
+	publicID := "6a0cc04a-1313-4b22-8b22-131313131313"
+
+	req := httptest.NewRequest(http.MethodGet, fmt.Sprintf("/users/%s/metadata", internalID), nil)
+	rec := httptest.NewRecorder()
+	e.ServeHTTP(rec, req)
+	s.Equal(http.StatusNotFound, rec.Code, "the real internal id must not resolve the user or their metadata")
+
+	req = httptest.NewRequest(http.MethodGet, fmt.Sprintf("/users/%s/metadata", publicID), nil)
+	rec = httptest.NewRecorder()
+	e.ServeHTTP(rec, req)
+	s.Equal(http.StatusOK, rec.Code, "the public_id must resolve the user and their metadata")
+
+	var metadataResponse *admin.Metadata
+	s.Require().NoError(json.Unmarshal(rec.Body.Bytes(), &metadataResponse))
+	s.Require().NotNil(metadataResponse)
+	s.Equal(`{"key":"value"}`, string(metadataResponse.Public))
+}

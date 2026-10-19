@@ -3,18 +3,37 @@ package config
 import (
 	"errors"
 	"fmt"
+	"regexp"
 	"strings"
 
 	"github.com/fatih/structs"
 	"github.com/gobwas/glob"
 	"github.com/invopop/jsonschema"
-	orderedmap "github.com/pb33f/ordered-map/v2"
+	orderedmap "github.com/wk8/go-ordered-map/v2"
 )
+
+// wildcardOnlyRedirectURLPattern matches an allowed_redirect_urls entry whose host is nothing
+// but asterisks ("*", "**", "***", ...), bare or after "http(s)://". A structural "only
+// asterisks" check is needed because the glob matcher doesn't treat N>=2 asterisks as
+// meaningfully different from "**", so no finite literal enumeration can close this off.
+//
+// Scoped to http(s) only: a custom scheme (e.g. "myapp://", common for mobile OAuth redirects)
+// is matched by scheme alone at runtime, with no host check at all, so it carries none of the
+// DNS/host-spoofing risk this check exists to prevent for http(s).
+var wildcardOnlyRedirectURLPattern = regexp.MustCompile(`^(https?://)?(\*+)$`)
 
 type ThirdParty struct {
 	// `providers` contains the configurations for the available OAuth/OIDC identity providers.
 	Providers ThirdPartyProviders `yaml:"providers" json:"providers" koanf:"providers" jsonschema:"title=providers,uniqueItems=true"`
 	// `custom_providers contains the configurations for custom OAuth/OIDC identity providers.
+	//
+	// Treat each key here as permanent once you've configured custom_claim_mapping on it: if
+	// this provider maps to any tenant-defined custom claim (see custom_claims.definitions),
+	// renaming the key changes the provider's internal identity, and any custom claims
+	// already set by users who signed in through it become orphaned - still stored, and still
+	// overwritable the next time that user signs in through the renamed connection, but no
+	// longer clearable by it if it later stops asserting a value. Prefer adding a new entry
+	// over renaming an existing one if this applies to you.
 	CustomProviders CustomThirdPartyProviders `yaml:"custom_providers" json:"custom_providers" koanf:"custom_providers" jsonschema:"title=custom_providers"`
 	// `redirect_url` is the URL the third party provider redirects to with an authorization code. Must consist of the base URL
 	// of your running Hanko backend instance and the `callback` endpoint of the API,
@@ -47,13 +66,36 @@ type ThirdParty struct {
 	// Globbing is also supported for paths, e.g. `https://foo.example.com/*` will match `https://foo.example.com/page1`
 	// and `https://foo.example.com/page2`.
 	//
-	// A double asterisk (`**`) acts as a "super"-wildcard/match-all.
+	// A double asterisk (`**`) acts as a "super"-wildcard/match-all, e.g. `https://example.com/**` matches
+	// both `https://example.com/foo` and `https://example.com/foo/bar`.
+	//
+	// For security reasons, an entry whose host is nothing but asterisks - bare (`**`, `***`, ...) or
+	// after `http(s)://` (`http://*`, `https://**`, ...) - is rejected unless
+	// [`unsafe_wildcard_redirect_url_allowed`](#unsafe_wildcard_redirect_url_allowed) is set to `true`.
+	//
+	// The one exception is a bare single `*` with no protocol at all, which is always rejected with no
+	// opt-out: every valid redirect URL contains `://`, a `/`, which a lone `*` can never cross, so such
+	// an entry could never match anything - it would just be a confusing no-op, not a genuine (if
+	// insecure) capability like the patterns above.
 	//
 	// See [here](https://pkg.go.dev/github.com/gobwas/glob#Compile) for more on globbing.
 	//
 	// Must not be empty if any of the [`providers`](#providers) are `enabled`. URLs in the list must not have a trailing slash.
-	AllowedRedirectURLS   []string             `yaml:"allowed_redirect_urls" json:"allowed_redirect_urls" koanf:"allowed_redirect_urls" split_words:"true" jsonschema:"minItems=1"`
-	AllowedRedirectURLMap map[string]glob.Glob `jsonschema:"-" yaml:"-" json:"-" koanf:"-"`
+	AllowedRedirectURLS []string `yaml:"allowed_redirect_urls" json:"allowed_redirect_urls" koanf:"allowed_redirect_urls" split_words:"true" jsonschema:"minItems=1"`
+	// `unsafe_wildcard_redirect_url_allowed` allows `allowed_redirect_urls` entries whose host is
+	// nothing but asterisks - bare (`**`, `***`, ...) or after `http(s)://` (`http://*`, `https://**`,
+	// ...). A bare run of asterisks allows redirecting to any http(s) URL (of the given scheme, if one
+	// is specified) after third party sign-in; asterisks after a scheme allow redirecting to any
+	// single-label hostname of that scheme (e.g. `https://localhost`, `https://some-internal-host`), on
+	// any port and without a path. A bare single `*` with no protocol is a separate case: it is always
+	// rejected regardless of this setting, with no opt-out, because it can never match any redirect
+	// target at all (see [`allowed_redirect_urls`](#allowed_redirect_urls)).
+	//
+	// This is INSECURE and should only be used for testing purposes, never in production.
+	//
+	// Optional. Default value is `false`.
+	UnsafeWildcardRedirectURLAllowed bool                 `yaml:"unsafe_wildcard_redirect_url_allowed" json:"unsafe_wildcard_redirect_url_allowed" koanf:"unsafe_wildcard_redirect_url_allowed" split_words:"true" jsonschema:"title=unsafe_wildcard_redirect_url_allowed,default=false"`
+	AllowedRedirectURLMap            map[string]glob.Glob `jsonschema:"-" yaml:"-" json:"-" koanf:"-"`
 }
 
 func (t *ThirdParty) Validate() error {
@@ -80,6 +122,30 @@ func (t *ThirdParty) Validate() error {
 		for _, u := range urls {
 			if strings.HasSuffix(u, "/") {
 				return fmt.Errorf("redirect url %s must not have trailing slash", u)
+			}
+		}
+
+		for _, u := range t.AllowedRedirectURLS {
+			match := wildcardOnlyRedirectURLPattern.FindStringSubmatch(u)
+			if match == nil {
+				continue
+			}
+
+			scheme := match[1]
+			asterisks := match[2]
+
+			// A bare single "*" has no scheme and no further host part at all, so it can never
+			// match any valid redirect URL (every valid redirect URL contains "://", a "/",
+			// which a lone "*" can never cross). Unlike every other entry this loop can match
+			// (two or more bare asterisks, or any count of asterisks after http(s)://), it is
+			// not a genuine (if insecure) capability unsafe_wildcard_redirect_url_allowed could
+			// reasonably unlock, so it is rejected unconditionally, with no opt-out.
+			if scheme == "" && len(asterisks) == 1 {
+				return fmt.Errorf("redirect url %q can never match any redirect target and is not a valid allowed_redirect_urls entry", u)
+			}
+
+			if !t.UnsafeWildcardRedirectURLAllowed {
+				return fmt.Errorf("found unsafe wildcard redirect url %q in third_party.allowed_redirect_urls, if this is intentional (e.g. for testing) set third_party.unsafe_wildcard_redirect_url_allowed to true", u)
 			}
 		}
 	}
@@ -243,11 +309,28 @@ type CustomThirdPartyProvider struct {
 	// ```
 	//
 	// See https://openid.net/specs/openid-connect-core-1_0.html#StandardClaims for a list of known standard claims
-	// that provider claims can be mapped into. Any other claims received from a provider are not discarded but are
-	// retained internally in a `custom_claims` claim.
+	// that provider claims can be mapped into.
 	//
 	// Mappings are one-to-one mappings, complex mappings (e.g. mapping concatenations of two claims) are not possible.
 	AttributeMapping map[string]string `yaml:"attribute_mapping" json:"attribute_mapping" koanf:"attribute_mapping"`
+	// `custom_claim_mapping` maps tenant-defined custom claims (key, declared under
+	// custom_claims.definitions) to provider claim names (value) - deliberately separate from
+	// `attribute_mapping` above, which has different semantics (renames a provider claim into
+	// a standard slot and removes the original; this instead resolves a value for a claim the
+	// tenant declared, and leaves the provider's own claims untouched).
+	//
+	// The value may be a plain top-level claim name, or a gjson path
+	// (https://github.com/tidwall/gjson#path-syntax) to reach into a nested provider claim,
+	// e.g. `address.locality` for a claim shaped like `{"address": {"locality": "Hamburg"}}`.
+	// Whatever the path resolves to must still be a single value or a list of values matching
+	// the target custom claim's declared type (string/number/boolean/string_list) - resolving
+	// to a JSON object or a list of objects is treated as a coercion failure like any other
+	// (logged and skipped, never fails the login), not stored as-is. An admin who wants such a
+	// nested provider claim represented as a nested structure in the session JWT can still
+	// declare several flat custom claims (one per leaf field) and recompose them into a nested
+	// shape in session.jwt_template.claims, which already supports arbitrary nested map
+	// literals with templated leaves.
+	CustomClaimMapping map[string]string `yaml:"custom_claim_mapping" json:"custom_claim_mapping" koanf:"custom_claim_mapping"`
 	// URL of the provider's authorization endpoint where the end-user is redirected to authenticate and grant consent for
 	// an application to access their resources.
 	//
