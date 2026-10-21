@@ -1,0 +1,9 @@
+- id: 9d2e4f60-7b81-4c92-a3d4-e5f6a7b8c901
+  provider_user_id: jane-doe-name-id
+  provider_id: "saml_7c9e6679-7425-40de-944b-e07fc1f90ae8"
+  data: "{}"
+  email_id: 5a0b7c1e-2d34-4e56-8f70-1a2b3c4d5e01
+  user_id: 3f1c8d0e-6a53-4f0b-9a54-0d1c6a1f2b01
+  tenant_id: 00000000-0000-0000-0000-000000000001
+  created_at: 2020-12-31 23:59:59
+  updated_at: 2020-12-31 23:59:59
