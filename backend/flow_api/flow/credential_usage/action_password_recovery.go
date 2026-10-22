@@ -32,7 +32,7 @@ func (a PasswordRecovery) Initialize(c flowpilot.InitializationContext) {
 	c.AddInputs(flowpilot.PasswordInput("new_password").
 		Required(true).
 		MinLength(deps.Cfg.Password.MinLength).
-		MaxLength(72),
+		MaxLength(services.MaxPasswordLength),
 	)
 
 	if !deps.Cfg.Password.Enabled {
