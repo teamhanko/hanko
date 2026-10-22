@@ -5,6 +5,9 @@ on:
     tags:
       - 'backend/*'
   workflow_dispatch:
+permissions:
+  contents: write
+
 
 jobs:
   import:
@@ -23,6 +26,7 @@ jobs:
       - name: Checkout backend
         uses: actions/checkout@v7
         with:
+          persist-credentials: false
           path: hanko
 
       - name: Checkout backend wiki

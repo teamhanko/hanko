@@ -6,6 +6,10 @@ on:
       - main
     paths:
       - backend/cmd/user/format.go
+permissions:
+  contents: write
+  pull-requests: write
+
 
 jobs:
   import:
