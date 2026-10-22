@@ -30,6 +30,57 @@ func tenantTestConfig() config.Config {
 	return cfg
 }
 
+func (s *tenantSuite) TestList_Pagination_BehindProxy() {
+	if testing.Short() {
+		s.T().Skip("skipping test in short mode.")
+	}
+
+	tests := []struct {
+		name           string
+		trustedProxies []string
+		remoteAddr     string
+		expectedLink   string
+	}{
+		{
+			name:         "private proxy is trusted without configuration",
+			remoteAddr:   "10.0.1.25:12345",
+			expectedLink: "<https://example.com/tenants?page=1&per_page=20>; rel=\"first\"",
+		},
+		{
+			name:         "public proxy is ignored without configuration",
+			remoteAddr:   "35.191.1.2:12345",
+			expectedLink: "<http://example.com/tenants?page=1&per_page=20>; rel=\"first\"",
+		},
+		{
+			name:           "public proxy in trusted_proxies is trusted",
+			trustedProxies: []string{"35.191.0.0/16"},
+			remoteAddr:     "35.191.1.2:12345",
+			expectedLink:   "<https://example.com/tenants?page=1&per_page=20>; rel=\"first\"",
+		},
+	}
+
+	for _, currentTest := range tests {
+		s.Run(currentTest.name, func() {
+			err := s.LoadFixtures("../test/fixtures/thirdparty")
+			s.Require().NoError(err)
+
+			cfg := tenantTestConfig()
+			cfg.Server.IP.TrustedProxies = currentTest.trustedProxies
+			e := NewManagementRouter(&cfg, s.Storage)
+
+			req := httptest.NewRequest(http.MethodGet, "/tenants", nil)
+			req.RemoteAddr = currentTest.remoteAddr
+			req.Header.Set("X-Forwarded-Proto", "https")
+			rec := httptest.NewRecorder()
+
+			e.ServeHTTP(rec, req)
+
+			s.Require().Equal(http.StatusOK, rec.Code, rec.Body.String())
+			s.Equal(currentTest.expectedLink, rec.Header().Get("Link"))
+		})
+	}
+}
+
 func (s *tenantSuite) TestUpdate_SamlProviderClaimMapping() {
 	if testing.Short() {
 		s.T().Skip("skipping test in short mode.")

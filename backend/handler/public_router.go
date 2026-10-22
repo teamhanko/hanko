@@ -27,6 +27,10 @@ func NewPublicRouter(cfg *config.Config, persister persistence.Persister, promet
 		panic(err)
 	}
 
+	if err := utils.ConfigureSchemeExtractor(e, cfg.Server.IP); err != nil {
+		panic(err)
+	}
+
 	e.Validator = dto.NewCustomValidator()
 	e.HTTPErrorHandler = dto.NewHTTPErrorHandler(dto.HTTPErrorHandlerConfig{Debug: cfg.Debug, Logger: e.Logger})
 
