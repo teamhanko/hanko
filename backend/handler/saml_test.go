@@ -86,3 +86,13 @@ func TestSamlHandler_getAssertionInfo_reportsIdPStatus(t *testing.T) {
 		assert.NotContains(t, err.Error(), "idp returned status")
 	})
 }
+
+func TestSamlHandler_getAssertionInfo_reportsInvalidRequest(t *testing.T) {
+	sp := &saml2.SAMLServiceProvider{IDPCertificateStore: &dsig.MemoryX509CertificateStore{}}
+
+	_, err := (&Handler{}).getAssertionInfo(sp, "not a saml response")
+
+	var thirdPartyErr *thirdparty.ThirdPartyError
+	require.ErrorAs(t, err, &thirdPartyErr)
+	assert.Equal(t, thirdparty.ErrorCodeInvalidRequest, thirdPartyErr.Code)
+}
