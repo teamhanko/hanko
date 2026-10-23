@@ -413,7 +413,7 @@ func (handler *Handler) linkAccount(c echo.Context, redirectTo *url.URL, isFlow 
 func (handler *Handler) getAssertionInfo(samlProvider *saml2.SAMLServiceProvider, samlResponse string) (*saml2.AssertionInfo, error) {
 	assertionInfo, err := samlProvider.RetrieveAssertionInfo(samlResponse)
 	if err != nil {
-		return nil, thirdparty.ErrorInvalidRequest("unable to parse SAML response").WithCause(err)
+		return nil, thirdparty.ErrorInvalidRequest("unable to parse SAML response").WithCause(withIdPStatus(samlResponse, err))
 	}
 
 	if assertionInfo.WarningInfo.InvalidTime {
@@ -425,6 +425,32 @@ func (handler *Handler) getAssertionInfo(samlProvider *saml2.SAMLServiceProvider
 	}
 
 	return assertionInfo, nil
+}
+
+// withIdPStatus adds the IdP's own reason to a "missing Assertion" error. The library checks for
+// assertions before it reads the status, so an IdP error response would otherwise lose its reason.
+func withIdPStatus(samlResponse string, err error) error {
+	var verificationErr saml2.ErrVerification
+	if !errors.As(err, &verificationErr) || verificationErr.Cause != saml2.ErrMissingAssertion {
+		return err
+	}
+
+	_, response, parseErr := saml.ParseSamlResponse(samlResponse)
+	if parseErr != nil {
+		return err
+	}
+
+	statusCode := response.FindElement("Status/StatusCode")
+	if statusCode == nil {
+		return err
+	}
+
+	message := ""
+	if statusMessage := response.FindElement("Status/StatusMessage"); statusMessage != nil {
+		message = statusMessage.Text()
+	}
+
+	return fmt.Errorf("idp returned status %q (message %q): %w", statusCode.SelectAttrValue("Value", ""), message, err)
 }
 
 func (handler *Handler) redirectError(c echo.Context, error error, to string) error {
