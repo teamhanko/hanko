@@ -65,7 +65,7 @@ func (s *thirdPartySuite) TestThirdPartyHandler_Callback_SignUp_Google() {
 		identity := email.Identities.GetIdentity("google", "google_abcde")
 		s.NotNil(identity)
 
-		logs, lerr := s.Storage.GetAuditLogPersister().List(0, 0, nil, nil, []string{"thirdparty_signup_succeeded"}, user.ID.String(), email.Address, "", "", uuid.FromStringOrNil(config.DefaultTenantID))
+		logs, lerr := s.Storage.GetAuditLogPersister().List(0, 0, nil, nil, []string{"thirdparty_signup_succeeded"}, user.GetPublicID().String(), email.Address, "", "", uuid.FromStringOrNil(config.DefaultTenantID))
 		s.NoError(lerr)
 		s.Len(logs, 1)
 	}
@@ -126,7 +126,7 @@ func (s *thirdPartySuite) TestThirdPartyHandler_Callback_SignIn_Google() {
 		identity := email.Identities.GetIdentity("google", "google_abcde")
 		s.NotNil(identity)
 
-		logs, lerr := s.Storage.GetAuditLogPersister().List(0, 0, nil, nil, []string{"thirdparty_signin_succeeded"}, user.ID.String(), "", "", "", uuid.FromStringOrNil(config.DefaultTenantID))
+		logs, lerr := s.Storage.GetAuditLogPersister().List(0, 0, nil, nil, []string{"thirdparty_signin_succeeded"}, user.GetPublicID().String(), "", "", "", uuid.FromStringOrNil(config.DefaultTenantID))
 		s.NoError(lerr)
 		s.Len(logs, 1)
 	}
@@ -194,7 +194,7 @@ func (s *thirdPartySuite) TestThirdPartyHandler_Callback_SignUp_GitHub() {
 		identity := email.Identities.GetIdentity("github", "1234")
 		s.NotNil(identity)
 
-		logs, lerr := s.Storage.GetAuditLogPersister().List(0, 0, nil, nil, []string{"thirdparty_signup_succeeded"}, user.ID.String(), email.Address, "", "", uuid.FromStringOrNil(config.DefaultTenantID))
+		logs, lerr := s.Storage.GetAuditLogPersister().List(0, 0, nil, nil, []string{"thirdparty_signup_succeeded"}, user.GetPublicID().String(), email.Address, "", "", uuid.FromStringOrNil(config.DefaultTenantID))
 		s.NoError(lerr)
 		s.Len(logs, 1)
 	}
@@ -265,7 +265,7 @@ func (s *thirdPartySuite) TestThirdPartyHandler_Callback_SignIn_GitHub() {
 		identity := email.Identities.GetIdentity("github", "1234")
 		s.NotNil(identity)
 
-		logs, lerr := s.Storage.GetAuditLogPersister().List(0, 0, nil, nil, []string{"thirdparty_signin_succeeded"}, user.ID.String(), email.Address, "", "", uuid.FromStringOrNil(config.DefaultTenantID))
+		logs, lerr := s.Storage.GetAuditLogPersister().List(0, 0, nil, nil, []string{"thirdparty_signin_succeeded"}, user.GetPublicID().String(), email.Address, "", "", uuid.FromStringOrNil(config.DefaultTenantID))
 		s.NoError(lerr)
 		s.Len(logs, 1)
 	}
@@ -321,7 +321,7 @@ func (s *thirdPartySuite) TestThirdPartyHandler_Callback_SignUp_Apple() {
 		identity := email.Identities.GetIdentity("apple", "apple_abcde")
 		s.NotNil(identity)
 
-		logs, lerr := s.Storage.GetAuditLogPersister().List(0, 0, nil, nil, []string{"thirdparty_signup_succeeded"}, user.ID.String(), email.Address, "", "", uuid.FromStringOrNil(config.DefaultTenantID))
+		logs, lerr := s.Storage.GetAuditLogPersister().List(0, 0, nil, nil, []string{"thirdparty_signup_succeeded"}, user.GetPublicID().String(), email.Address, "", "", uuid.FromStringOrNil(config.DefaultTenantID))
 		s.NoError(lerr)
 		s.Len(logs, 1)
 	}
@@ -380,7 +380,7 @@ func (s *thirdPartySuite) TestThirdPartyHandler_Callback_SignIn_Apple() {
 		identity := email.Identities.GetIdentity("apple", "apple_abcde")
 		s.NotNil(identity)
 
-		logs, lerr := s.Storage.GetAuditLogPersister().List(0, 0, nil, nil, []string{"thirdparty_signin_succeeded"}, user.ID.String(), email.Address, "", "", uuid.FromStringOrNil(config.DefaultTenantID))
+		logs, lerr := s.Storage.GetAuditLogPersister().List(0, 0, nil, nil, []string{"thirdparty_signin_succeeded"}, user.GetPublicID().String(), email.Address, "", "", uuid.FromStringOrNil(config.DefaultTenantID))
 		s.NoError(lerr)
 		s.Len(logs, 1)
 	}
@@ -439,7 +439,7 @@ func (s *thirdPartySuite) TestThirdPartyHandler_Callback_SignIn_Apple_WithBoolea
 		identity := email.Identities.GetIdentity("apple", "apple_abcde")
 		s.NotNil(identity)
 
-		logs, lerr := s.Storage.GetAuditLogPersister().List(0, 0, nil, nil, []string{"thirdparty_signin_succeeded"}, user.ID.String(), email.Address, "", "", uuid.FromStringOrNil(config.DefaultTenantID))
+		logs, lerr := s.Storage.GetAuditLogPersister().List(0, 0, nil, nil, []string{"thirdparty_signin_succeeded"}, user.GetPublicID().String(), email.Address, "", "", uuid.FromStringOrNil(config.DefaultTenantID))
 		s.NoError(lerr)
 		s.Len(logs, 1)
 	}
@@ -497,7 +497,7 @@ func (s *thirdPartySuite) TestThirdPartyHandler_Callback_SignUp_Discord() {
 		identity := email.Identities.GetIdentity("discord", "discord_abcde")
 		s.NotNil(identity)
 
-		logs, lerr := s.Storage.GetAuditLogPersister().List(0, 0, nil, nil, []string{"thirdparty_signup_succeeded"}, user.ID.String(), email.Address, "", "", uuid.FromStringOrNil(config.DefaultTenantID))
+		logs, lerr := s.Storage.GetAuditLogPersister().List(0, 0, nil, nil, []string{"thirdparty_signup_succeeded"}, user.GetPublicID().String(), email.Address, "", "", uuid.FromStringOrNil(config.DefaultTenantID))
 		s.NoError(lerr)
 		s.Len(logs, 1)
 	}
@@ -558,7 +558,7 @@ func (s *thirdPartySuite) TestThirdPartyHandler_Callback_SignIn_Discord() {
 		identity := email.Identities.GetIdentity("discord", "discord_abcde")
 		s.NotNil(identity)
 
-		logs, lerr := s.Storage.GetAuditLogPersister().List(0, 0, nil, nil, []string{"thirdparty_signin_succeeded"}, user.ID.String(), "", "", "", uuid.FromStringOrNil(config.DefaultTenantID))
+		logs, lerr := s.Storage.GetAuditLogPersister().List(0, 0, nil, nil, []string{"thirdparty_signin_succeeded"}, user.GetPublicID().String(), "", "", "", uuid.FromStringOrNil(config.DefaultTenantID))
 		s.NoError(lerr)
 		s.Len(logs, 1)
 	}
@@ -614,7 +614,7 @@ func (s *thirdPartySuite) TestThirdPartyHandler_Callback_SignUp_Microsoft() {
 		identity := email.Identities.GetIdentity("microsoft", "microsoft_abcde")
 		s.NotNil(identity)
 
-		logs, lerr := s.Storage.GetAuditLogPersister().List(0, 0, nil, nil, []string{"thirdparty_signup_succeeded"}, user.ID.String(), email.Address, "", "", uuid.FromStringOrNil(config.DefaultTenantID))
+		logs, lerr := s.Storage.GetAuditLogPersister().List(0, 0, nil, nil, []string{"thirdparty_signup_succeeded"}, user.GetPublicID().String(), email.Address, "", "", uuid.FromStringOrNil(config.DefaultTenantID))
 		s.NoError(lerr)
 		s.Len(logs, 1)
 	}
@@ -673,7 +673,7 @@ func (s *thirdPartySuite) TestThirdPartyHandler_Callback_SignIn_Microsoft() {
 		identity := email.Identities.GetIdentity("microsoft", "microsoft_abcde")
 		s.NotNil(identity)
 
-		logs, lerr := s.Storage.GetAuditLogPersister().List(0, 0, nil, nil, []string{"thirdparty_signin_succeeded"}, user.ID.String(), "", "", "", uuid.FromStringOrNil(config.DefaultTenantID))
+		logs, lerr := s.Storage.GetAuditLogPersister().List(0, 0, nil, nil, []string{"thirdparty_signin_succeeded"}, user.GetPublicID().String(), "", "", "", uuid.FromStringOrNil(config.DefaultTenantID))
 		s.NoError(lerr)
 		s.Len(logs, 1)
 	}
@@ -730,7 +730,7 @@ func (s *thirdPartySuite) TestThirdPartyHandler_Callback_SignUp_Facebook() {
 		identity := email.Identities.GetIdentity("facebook", "facebook_abcde")
 		s.NotNil(identity)
 
-		logs, lerr := s.Storage.GetAuditLogPersister().List(0, 0, nil, nil, []string{"thirdparty_signup_succeeded"}, user.ID.String(), email.Address, "", "", uuid.FromStringOrNil(config.DefaultTenantID))
+		logs, lerr := s.Storage.GetAuditLogPersister().List(0, 0, nil, nil, []string{"thirdparty_signup_succeeded"}, user.GetPublicID().String(), email.Address, "", "", uuid.FromStringOrNil(config.DefaultTenantID))
 		s.NoError(lerr)
 		s.Len(logs, 1)
 	}
@@ -790,7 +790,7 @@ func (s *thirdPartySuite) TestThirdPartyHandler_Callback_SignIn_Facebook() {
 		identity := email.Identities.GetIdentity("facebook", "facebook_abcde")
 		s.NotNil(identity)
 
-		logs, lerr := s.Storage.GetAuditLogPersister().List(0, 0, nil, nil, []string{"thirdparty_signin_succeeded"}, user.ID.String(), "", "", "", uuid.FromStringOrNil(config.DefaultTenantID))
+		logs, lerr := s.Storage.GetAuditLogPersister().List(0, 0, nil, nil, []string{"thirdparty_signin_succeeded"}, user.GetPublicID().String(), "", "", "", uuid.FromStringOrNil(config.DefaultTenantID))
 		s.NoError(lerr)
 		s.Len(logs, 1)
 	}
@@ -851,7 +851,7 @@ func (s *thirdPartySuite) TestThirdPartyHandler_Callback_SignUp_WithUnclaimedEma
 		identity := email.Identities.GetIdentity("google", "google_unclaimed_email")
 		s.NotNil(identity)
 
-		logs, lerr := s.Storage.GetAuditLogPersister().List(0, 0, nil, nil, []string{"thirdparty_signup_succeeded"}, user.ID.String(), email.Address, "", "", uuid.FromStringOrNil(config.DefaultTenantID))
+		logs, lerr := s.Storage.GetAuditLogPersister().List(0, 0, nil, nil, []string{"thirdparty_signup_succeeded"}, user.GetPublicID().String(), email.Address, "", "", uuid.FromStringOrNil(config.DefaultTenantID))
 		s.NoError(lerr)
 		s.Len(logs, 1)
 	}
@@ -912,7 +912,7 @@ func (s *thirdPartySuite) TestThirdPartyHandler_Callback_SignIn_ProviderEMailCha
 		s.NotNil(identity)
 		s.Equal("test-with-google-identity-changed@example.com", identity.Data["email"])
 
-		logs, lerr := s.Storage.GetAuditLogPersister().List(0, 0, nil, nil, []string{"thirdparty_signin_succeeded"}, user.ID.String(), user.Emails.GetPrimary().Address, "", "", uuid.FromStringOrNil(config.DefaultTenantID))
+		logs, lerr := s.Storage.GetAuditLogPersister().List(0, 0, nil, nil, []string{"thirdparty_signin_succeeded"}, user.GetPublicID().String(), user.Emails.GetPrimary().Address, "", "", uuid.FromStringOrNil(config.DefaultTenantID))
 		s.NoError(lerr)
 		s.Len(logs, 1)
 	}
@@ -973,7 +973,7 @@ func (s *thirdPartySuite) TestThirdPartyHandler_Callback_SignIn_ProviderEMailCha
 		s.NotNil(identity)
 		s.Equal("unclaimed-email@example.com", identity.Data["email"])
 
-		logs, lerr := s.Storage.GetAuditLogPersister().List(0, 0, nil, nil, []string{"thirdparty_signin_succeeded"}, user.ID.String(), user.Emails.GetPrimary().Address, "", "", uuid.FromStringOrNil(config.DefaultTenantID))
+		logs, lerr := s.Storage.GetAuditLogPersister().List(0, 0, nil, nil, []string{"thirdparty_signin_succeeded"}, user.GetPublicID().String(), user.Emails.GetPrimary().Address, "", "", uuid.FromStringOrNil(config.DefaultTenantID))
 		s.NoError(lerr)
 		s.Len(logs, 1)
 	}
@@ -1035,7 +1035,7 @@ func (s *thirdPartySuite) TestThirdPartyHandler_Callback_SignIn_ProviderEMailCha
 		s.NotNil(identity)
 		s.Equal("non-existent-email@example.com", identity.Data["email"])
 
-		logs, lerr := s.Storage.GetAuditLogPersister().List(0, 0, nil, nil, []string{"thirdparty_signin_succeeded"}, user.ID.String(), user.Emails.GetPrimary().Address, "", "", uuid.FromStringOrNil(config.DefaultTenantID))
+		logs, lerr := s.Storage.GetAuditLogPersister().List(0, 0, nil, nil, []string{"thirdparty_signin_succeeded"}, user.GetPublicID().String(), user.Emails.GetPrimary().Address, "", "", uuid.FromStringOrNil(config.DefaultTenantID))
 		s.NoError(lerr)
 		s.Len(logs, 1)
 	}
@@ -1097,7 +1097,7 @@ func (s *thirdPartySuite) TestThirdPartyHandler_Callback_Link_ExistingAccountNoI
 		s.NotNil(identity)
 		s.Equal("test-no-identity@example.com", identity.Data["email"])
 
-		logs, lerr := s.Storage.GetAuditLogPersister().List(0, 0, nil, nil, []string{"thirdparty_linking_succeeded"}, user.ID.String(), user.Emails.GetPrimary().Address, "", "", uuid.FromStringOrNil(config.DefaultTenantID))
+		logs, lerr := s.Storage.GetAuditLogPersister().List(0, 0, nil, nil, []string{"thirdparty_linking_succeeded"}, user.GetPublicID().String(), user.Emails.GetPrimary().Address, "", "", uuid.FromStringOrNil(config.DefaultTenantID))
 		s.NoError(lerr)
 		s.Len(logs, 1)
 	}
@@ -1159,7 +1159,7 @@ func (s *thirdPartySuite) TestThirdPartyHandler_Callback_SignUp_WithUnverifiedPr
 		identity := email.Identities.GetIdentity("google", "google_abcde")
 		s.NotNil(identity)
 
-		logs, lerr := s.Storage.GetAuditLogPersister().List(0, 0, nil, nil, []string{"thirdparty_signup_succeeded"}, user.ID.String(), email.Address, "", "", uuid.FromStringOrNil(config.DefaultTenantID))
+		logs, lerr := s.Storage.GetAuditLogPersister().List(0, 0, nil, nil, []string{"thirdparty_signup_succeeded"}, user.GetPublicID().String(), email.Address, "", "", uuid.FromStringOrNil(config.DefaultTenantID))
 		s.NoError(lerr)
 		s.Len(logs, 1)
 	}
@@ -1221,7 +1221,7 @@ func (s *thirdPartySuite) TestThirdPartyHandler_Callback_SignIn_WithUnverifiedPr
 		identity := email.Identities.GetIdentity("microsoft", "microsoft_abcde")
 		s.NotNil(identity)
 
-		logs, lerr := s.Storage.GetAuditLogPersister().List(0, 0, nil, nil, []string{"thirdparty_signin_succeeded"}, user.ID.String(), "", "", "", uuid.FromStringOrNil(config.DefaultTenantID))
+		logs, lerr := s.Storage.GetAuditLogPersister().List(0, 0, nil, nil, []string{"thirdparty_signin_succeeded"}, user.GetPublicID().String(), "", "", "", uuid.FromStringOrNil(config.DefaultTenantID))
 		s.NoError(lerr)
 		s.Len(logs, 1)
 	}
@@ -1284,7 +1284,7 @@ func (s *thirdPartySuite) TestThirdPartyHandler_Callback_Link_GoogleToAccountWit
 		s.NotNil(identity)
 		s.Equal("test-with-github-identity@example.com", identity.Data["email"])
 
-		logs, lerr := s.Storage.GetAuditLogPersister().List(0, 0, nil, nil, []string{"thirdparty_linking_succeeded"}, user.ID.String(), user.Emails.GetPrimary().Address, "", "", uuid.FromStringOrNil(config.DefaultTenantID))
+		logs, lerr := s.Storage.GetAuditLogPersister().List(0, 0, nil, nil, []string{"thirdparty_linking_succeeded"}, user.GetPublicID().String(), user.Emails.GetPrimary().Address, "", "", uuid.FromStringOrNil(config.DefaultTenantID))
 		s.NoError(lerr)
 		s.Len(logs, 1)
 	}
