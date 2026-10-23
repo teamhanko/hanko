@@ -1,0 +1,6 @@
+- id: c4a5b6d7-8e9f-4a01-b2c3-d4e5f6a7b801
+  identity_id: 9d2e4f60-7b81-4c92-a3d4-e5f6a7b8c901
+  domain: uni-a.example.com
+  tenant_id: 00000000-0000-0000-0000-000000000001
+  created_at: 2020-12-31 23:59:59
+  updated_at: 2020-12-31 23:59:59

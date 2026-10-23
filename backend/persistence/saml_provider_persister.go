@@ -1,6 +1,8 @@
 package persistence
 
 import (
+	"database/sql"
+	"errors"
 	"fmt"
 
 	"github.com/gobuffalo/pop/v6"
@@ -57,7 +59,7 @@ func (p *samlProviderPersister) Get(tenantID uuid.UUID, providerID uuid.UUID) (*
 	provider := &models.SamlProvider{}
 	err := p.db.Where("tenant_id = ? AND id = ?", tenantID, providerID).First(provider)
 	if err != nil {
-		if err.Error() == "sql: no rows in result set" {
+		if errors.Is(err, sql.ErrNoRows) {
 			return nil, nil
 		}
 		return nil, fmt.Errorf("failed to get SAML provider: %w", err)
@@ -70,7 +72,7 @@ func (p *samlProviderPersister) GetByEntityID(tenantID uuid.UUID, entityID strin
 	provider := &models.SamlProvider{}
 	err := p.db.Where("tenant_id = ? AND entity_id = ?", tenantID, entityID).First(provider)
 	if err != nil {
-		if err.Error() == "sql: no rows in result set" {
+		if errors.Is(err, sql.ErrNoRows) {
 			return nil, nil
 		}
 		return nil, fmt.Errorf("failed to get SAML provider by entity_id: %w", err)
@@ -83,7 +85,7 @@ func (p *samlProviderPersister) GetByDomain(tenantID uuid.UUID, domain string) (
 	provider := &models.SamlProvider{}
 	err := p.db.Where("tenant_id = ? AND domain = ?", tenantID, domain).First(provider)
 	if err != nil {
-		if err.Error() == "sql: no rows in result set" {
+		if errors.Is(err, sql.ErrNoRows) {
 			return nil, nil
 		}
 		return nil, fmt.Errorf("failed to get SAML provider by domain: %w", err)
@@ -96,7 +98,7 @@ func (p *samlProviderPersister) GetEnabledByDomain(tenantID uuid.UUID, domain st
 	provider := &models.SamlProvider{}
 	err := p.db.Where("tenant_id = ? AND domain = ? AND enabled = ?", tenantID, domain, true).First(provider)
 	if err != nil {
-		if err.Error() == "sql: no rows in result set" {
+		if errors.Is(err, sql.ErrNoRows) {
 			return nil, nil
 		}
 		return nil, fmt.Errorf("failed to get SAML provider by domain: %w", err)
