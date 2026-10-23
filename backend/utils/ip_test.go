@@ -10,6 +10,64 @@ import (
 	"github.com/teamhanko/hanko/backend/v3/config"
 )
 
+func TestConfigureSchemeExtractor_SchemeResolution(t *testing.T) {
+	tests := []struct {
+		name           string
+		cfg            config.IPConfig
+		remoteAddr     string
+		expectedScheme string
+	}{
+		{
+			name:           "private peer is trusted by default",
+			cfg:            config.IPConfig{},
+			remoteAddr:     "10.0.1.25:12345",
+			expectedScheme: "https",
+		},
+		{
+			name:           "public peer is ignored by default",
+			cfg:            config.IPConfig{},
+			remoteAddr:     "35.191.1.2:12345",
+			expectedScheme: "http",
+		},
+		{
+			name:           "public peer in trusted_proxies is trusted",
+			cfg:            config.IPConfig{TrustedProxies: []string{"35.191.0.0/16"}},
+			remoteAddr:     "35.191.1.2:12345",
+			expectedScheme: "https",
+		},
+		{
+			name:           "public peer outside trusted_proxies is ignored",
+			cfg:            config.IPConfig{TrustedProxies: []string{"35.191.0.0/16"}},
+			remoteAddr:     "198.51.100.10:12345",
+			expectedScheme: "http",
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			e := echo.New()
+
+			err := ConfigureSchemeExtractor(e, tt.cfg)
+			require.NoError(t, err)
+
+			e.GET("/scheme", func(c echo.Context) error {
+				return c.String(http.StatusOK, c.Scheme())
+			})
+
+			req := httptest.NewRequest(http.MethodGet, "/scheme", nil)
+			req.RemoteAddr = tt.remoteAddr
+			req.Header.Set("X-Forwarded-Proto", "https")
+
+			rec := httptest.NewRecorder()
+
+			e.ServeHTTP(rec, req)
+
+			require.Equal(t, http.StatusOK, rec.Code)
+			require.Equal(t, tt.expectedScheme, rec.Body.String())
+		})
+	}
+}
+
 func TestConfigureIPExtractor_RealIPResolution(t *testing.T) {
 	tests := []struct {
 		name           string

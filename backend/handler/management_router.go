@@ -20,6 +20,10 @@ func NewManagementRouter(cfg *config.Config, persister persistence.Persister) *e
 		panic(err)
 	}
 
+	if err := utils.ConfigureSchemeExtractor(e, cfg.Server.IP); err != nil {
+		panic(err)
+	}
+
 	e.HTTPErrorHandler = dto.NewHTTPErrorHandler(dto.HTTPErrorHandlerConfig{Debug: false, Logger: e.Logger})
 	e.Use(middleware.RequestID())
 	e.Use(hankoMiddleware.GetLoggerMiddleware())
