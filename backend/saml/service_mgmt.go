@@ -16,6 +16,7 @@ import (
 var (
 	ErrorSamlProviderAlreadyExists      = errors.New("SAML provider already exists")
 	ErrorSamlProviderMetadataValidation = errors.New("SAML provider metadata validation failed")
+	ErrorSamlCertificateNotFound        = errors.New("no SAML certificate found")
 )
 
 // SamlProviderManagementService handles SAML provider lifecycle operations

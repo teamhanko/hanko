@@ -11,6 +11,7 @@ import (
 	"github.com/teamhanko/hanko/backend/v3/cmd/jwk"
 	"github.com/teamhanko/hanko/backend/v3/cmd/jwt"
 	"github.com/teamhanko/hanko/backend/v3/cmd/migrate"
+	"github.com/teamhanko/hanko/backend/v3/cmd/saml"
 	"github.com/teamhanko/hanko/backend/v3/cmd/schema"
 	"github.com/teamhanko/hanko/backend/v3/cmd/serve"
 	"github.com/teamhanko/hanko/backend/v3/cmd/siwa"
@@ -34,6 +35,7 @@ func NewRootCmd() *cobra.Command {
 	siwa.RegisterCommands(cmd)
 	schema.RegisterCommands(cmd)
 	cleanup.RegisterCommands(cmd)
+	saml.RegisterCommands(cmd)
 	hankoConfig.RegisterCommands(cmd)
 
 	return cmd
