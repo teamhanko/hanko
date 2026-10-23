@@ -447,9 +447,9 @@ func (handler *Handler) redirectError(c echo.Context, error error, to string) er
 	return c.Redirect(http.StatusSeeOther, redirectURL)
 }
 
-func (handler *Handler) auditError(c echo.Context, err error) error {
+func (handler *Handler) auditError(c echo.Context, logError error) error {
 	var e *thirdparty.ThirdPartyError
-	ok := errors.As(err, &e)
+	ok := errors.As(logError, &e)
 
 	tenant, err := context.GetTenant(c)
 	if err != nil {
@@ -458,7 +458,7 @@ func (handler *Handler) auditError(c echo.Context, err error) error {
 
 	var auditLogError error
 	if ok && e.Code != thirdparty.ErrorCodeServerError {
-		auditLogError = handler.auditLogger.Create(c, models.AuditLogThirdPartySignInSignUpFailed, nil, err, tenant.ID)
+		auditLogError = handler.auditLogger.Create(c, models.AuditLogThirdPartySignInSignUpFailed, nil, logError, tenant.ID)
 	}
 	return auditLogError
 }
