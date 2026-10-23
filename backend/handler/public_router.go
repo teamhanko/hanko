@@ -50,7 +50,6 @@ func NewPublicRouter(cfg *config.Config, persister persistence.Persister, promet
 	}
 
 	e.Use(middleware.RequestID())
-	e.Static("/flowpilot", "flow_api/static") // TODO: remove!
 
 	auditLogger := auditlog.NewLogger(persister, cfg.AuditLog)
 
