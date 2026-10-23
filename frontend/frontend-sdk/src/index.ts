@@ -129,3 +129,28 @@ export * from "./lib/flow-api/types/flowError";
 export * from "./lib/flow-api/types/payload";
 export * from "./lib/flow-api/types/state";
 export * from "./lib/flow-api/types/input";
+export type {
+  Action as FlowAction,
+  PreflightActions,
+  LoginInitActions,
+  ProfileInitActions,
+  LoginMethodChooserActions,
+  LoginOTPActions,
+  LoginPasswordActions,
+  LoginPasswordRecoveryActions,
+  LoginPasskeyActions,
+  LoginSecurityKeyActions,
+  MFAMethodChooserActions,
+  MFAAOTPSecretCreationActions,
+  MFASecurityKeyCreationActions,
+  OnboardingCreatePasskeyActions,
+  OnboardingVerifyPasskeyAttestationActions,
+  RegistrationInitActions,
+  PasswordCreationActions,
+  PasscodeConfirmationActions,
+  OnboardingEmailActions,
+  OnboardingUsernameActions,
+  CredentialOnboardingChooserActions,
+  DeviceTrustActions,
+  ThirdPartyActions,
+} from "./lib/flow-api/types/action";
