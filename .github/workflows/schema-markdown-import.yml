@@ -7,6 +7,9 @@ on:
   workflow_dispatch:
 permissions:
   contents: write
+  # The delay check lists this repository's workflow runs through the
+  # API, which needs actions read on the token.
+  actions: read
 
 
 jobs:
