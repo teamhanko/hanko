@@ -23,6 +23,9 @@ type jwkManagerSuite struct {
 }
 
 func (s *jwkManagerSuite) TestDefaultManager() {
+	if testing.Short() {
+		s.T().Skip("skipping test in short mode.")
+	}
 	cfg := config.DefaultConfig()
 	cfg.SecretKeys = []string{"asfnoadnfoaegnq3094intoaegjnoadjgnoadng", "apdisfoaiegnoaiegnbouaebgn982"}
 

@@ -47,6 +47,9 @@ func (s *managerSuite) TestManager_GenerateJWT() {
 }
 
 func (s *managerSuite) TestManager_TriggerWithoutHook() {
+	if testing.Short() {
+		s.T().Skip("skipping test in short mode.")
+	}
 	triggered := false
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		triggered = true
@@ -67,6 +70,9 @@ func (s *managerSuite) TestManager_TriggerWithoutHook() {
 	s.False(triggered)
 }
 func (s *managerSuite) TestManager_TriggerWithConfigHook() {
+	if testing.Short() {
+		s.T().Skip("skipping test in short mode.")
+	}
 	triggered := false
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		triggered = true
@@ -102,6 +108,9 @@ func (s *managerSuite) TestManager_TriggerWithConfigHook() {
 }
 
 func (s *managerSuite) TestManager_TriggerWithDisabledConfigHook() {
+	if testing.Short() {
+		s.T().Skip("skipping test in short mode.")
+	}
 	triggered := false
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		triggered = true
@@ -137,6 +146,9 @@ func (s *managerSuite) TestManager_TriggerWithDisabledConfigHook() {
 }
 
 func (s *managerSuite) TestManager_TriggerWithDbHook() {
+	if testing.Short() {
+		s.T().Skip("skipping test in short mode.")
+	}
 	triggered := false
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		triggered = true
@@ -162,6 +174,9 @@ func (s *managerSuite) TestManager_TriggerWithDbHook() {
 }
 
 func (s *managerSuite) TestManager_TriggerWithDisabledDbHook() {
+	if testing.Short() {
+		s.T().Skip("skipping test in short mode.")
+	}
 	triggered := false
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		triggered = true
@@ -186,6 +201,9 @@ func (s *managerSuite) TestManager_TriggerWithDisabledDbHook() {
 }
 
 func (s *managerSuite) TestManager_TriggerSessionEventHierarchy() {
+	if testing.Short() {
+		s.T().Skip("skipping test in short mode.")
+	}
 	tests := []struct {
 		name            string
 		hookEvent       events.Event
