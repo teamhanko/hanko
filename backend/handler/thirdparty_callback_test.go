@@ -1289,3 +1289,121 @@ func (s *thirdPartySuite) TestThirdPartyHandler_Callback_Link_GoogleToAccountWit
 		s.Len(logs, 1)
 	}
 }
+
+func (s *thirdPartySuite) TestThirdPartyHandler_Callback_Link_RetryProfileLinkWithPendingIdentity() {
+	defer gock.Off()
+	if testing.Short() {
+		s.T().Skip("skipping test in short mode.")
+	}
+
+	err := s.LoadFixtures("../test/fixtures/thirdparty")
+	s.NoError(err)
+
+	cfg := s.setUpConfig([]string{"google", "github"}, []string{"https://example.com"})
+	userID := uuid.FromStringOrNil("1d6a4824-d935-4980-8f18-8ee5d6efe2fc")
+
+	// The first attempt leaves an identity that is not yet linked to the user, because the token is never exchanged.
+	for i := 0; i < 2; i++ {
+		gock.New(thirdparty.GoogleOauthTokenEndpoint).
+			Post("/").
+			Reply(200).
+			JSON(map[string]string{"access_token": "fakeAccessToken"})
+
+		gock.New(thirdparty.GoogleUserInfoEndpoint).
+			Get("/").
+			Reply(200).
+			JSON(&thirdparty.GoogleUser{
+				ID:            "google_1234",
+				Email:         "test-with-github-identity@example.com",
+				EmailVerified: true,
+			})
+
+		state, err := thirdparty.GenerateState(cfg, "google", "https://example.com", thirdparty.GenerateStateWithUserID(userID))
+		s.NoError(err)
+
+		req := httptest.NewRequest(http.MethodGet, fmt.Sprintf("/thirdparty/callback?code=abcde&state=%s", state), nil)
+		req.AddCookie(&http.Cookie{
+			Name:  utils.HankoThirdpartyStateCookie,
+			Value: string(state),
+		})
+
+		c, rec := s.setUpContext(req, cfg.TenantConfig)
+		handler := s.setUpHandler(cfg)
+
+		if s.NoError(handler.Callback(c)) {
+			s.Equal(http.StatusTemporaryRedirect, rec.Code)
+			s.assertLocationHeaderHasToken(rec)
+			s.assertStateCookieRemoved(rec)
+		}
+	}
+
+	identity, err := s.Storage.GetIdentityPersister().Get("google_1234", "google", uuid.FromStringOrNil(config.DefaultTenantID))
+	s.NoError(err)
+	s.NotNil(identity)
+	s.Nil(identity.UserID)
+
+	email, err := s.Storage.GetEmailPersister().FindByAddress("test-with-github-identity@example.com", uuid.FromStringOrNil(config.DefaultTenantID))
+	s.NoError(err)
+	s.NotNil(email)
+	s.Len(email.Identities, 2)
+}
+
+func (s *thirdPartySuite) TestThirdPartyHandler_Callback_SignIn_WithPendingIdentity() {
+	defer gock.Off()
+	if testing.Short() {
+		s.T().Skip("skipping test in short mode.")
+	}
+
+	err := s.LoadFixtures("../test/fixtures/thirdparty")
+	s.NoError(err)
+
+	cfg := s.setUpConfig([]string{"google", "github"}, []string{"https://example.com"})
+	userID := uuid.FromStringOrNil("1d6a4824-d935-4980-8f18-8ee5d6efe2fc")
+
+	// A profile link whose token is never exchanged, followed by a sign in with the same provider account.
+	for _, stateOpts := range [][]func(*thirdparty.State){{thirdparty.GenerateStateWithUserID(userID)}, {}} {
+		gock.New(thirdparty.GoogleOauthTokenEndpoint).
+			Post("/").
+			Reply(200).
+			JSON(map[string]string{"access_token": "fakeAccessToken"})
+
+		gock.New(thirdparty.GoogleUserInfoEndpoint).
+			Get("/").
+			Reply(200).
+			JSON(&thirdparty.GoogleUser{
+				ID:            "google_1234",
+				Email:         "test-with-github-identity@example.com",
+				EmailVerified: true,
+			})
+
+		state, err := thirdparty.GenerateState(cfg, "google", "https://example.com", stateOpts...)
+		s.NoError(err)
+
+		req := httptest.NewRequest(http.MethodGet, fmt.Sprintf("/thirdparty/callback?code=abcde&state=%s", state), nil)
+		req.AddCookie(&http.Cookie{
+			Name:  utils.HankoThirdpartyStateCookie,
+			Value: string(state),
+		})
+
+		c, rec := s.setUpContext(req, cfg.TenantConfig)
+		handler := s.setUpHandler(cfg)
+
+		if s.NoError(handler.Callback(c)) {
+			s.Equal(http.StatusTemporaryRedirect, rec.Code)
+			s.assertLocationHeaderHasToken(rec)
+			s.assertStateCookieRemoved(rec)
+		}
+	}
+
+	identity, err := s.Storage.GetIdentityPersister().Get("google_1234", "google", uuid.FromStringOrNil(config.DefaultTenantID))
+	s.NoError(err)
+	s.NotNil(identity)
+	if s.NotNil(identity.UserID) {
+		s.Equal(userID, *identity.UserID)
+	}
+
+	user, err := s.Storage.GetUserPersister().Get(userID, uuid.FromStringOrNil(config.DefaultTenantID))
+	s.NoError(err)
+	s.NotNil(user)
+	s.Len(user.Identities, 2)
+}
