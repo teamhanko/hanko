@@ -75,6 +75,9 @@ func (s *userAdminSuite) TestUserHandlerAdmin_Delete_UnknownUserId() {
 }
 
 func (s *userAdminSuite) TestUserHandlerAdmin_Delete_InvalidUserId() {
+	if testing.Short() {
+		s.T().Skip("skipping test in short mode.")
+	}
 	cfg := test.DefaultConfig
 	err := cfg.PostProcess()
 	s.Require().NoError(err)

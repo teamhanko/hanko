@@ -80,6 +80,9 @@ func (suite *RedisLockerTestSuite) getTestRedisLocker() *RedisLocker {
 
 // TestRedisLockerSuite runs the test suite
 func TestRedisLockerSuite(t *testing.T) {
+	if testing.Short() {
+		t.Skip("skipping test in short mode")
+	}
 	suite.Run(t, new(RedisLockerTestSuite))
 }
 
