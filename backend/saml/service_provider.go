@@ -105,7 +105,14 @@ func (s *defaultService) GetAuthUrl(tenantID uuid.UUID, config config.Config, pr
 		return "", thirdparty.ErrorServer("could not build SAML provider").WithCause(err)
 	}
 
-	redirectUrl, err := samlProvider.BuildAuthURL(string(state))
+	// The request is sent using the HTTP-Redirect binding, which forbids a signature inside the XML: if request signing
+	// is enabled, the redirect URL itself is signed (SigAlg and Signature query parameters).
+	authnRequest, err := samlProvider.BuildAuthRequestDocumentNoSig()
+	if err != nil {
+		return "", thirdparty.ErrorServer("could not generate auth request").WithCause(err)
+	}
+
+	redirectUrl, err := samlProvider.BuildAuthURLRedirect(string(state), authnRequest)
 	if err != nil {
 		return "", thirdparty.ErrorServer("could not generate auth url").WithCause(err)
 	}
