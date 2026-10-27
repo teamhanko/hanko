@@ -61,6 +61,8 @@ type actionExecutionContext interface {
 	// CopyInputValuesToStash copies specified inputs to the stash.
 	CopyInputValuesToStash(inputNames ...string) error
 	SetFlowError(FlowError)
+	// GetFlowError returns the flow error set during this execution, e.g. by a hook, or nil.
+	GetFlowError() FlowError
 	PreventRevert()
 	ExecuteHook(HookAction) error
 	actionSuspender
@@ -103,7 +105,6 @@ type HookExecutionContext interface {
 	context
 	actionExecutionContext
 
-	GetFlowError() FlowError
 	AddLink(...Link)
 	ScheduleStates(...StateName)
 }
