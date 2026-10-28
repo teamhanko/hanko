@@ -21,6 +21,10 @@ func NewAdminRouter(cfg *config.Config, persister persistence.Persister, prometh
 		panic(err)
 	}
 
+	if err := utils.ConfigureSchemeExtractor(e, cfg.Server.IP); err != nil {
+		panic(err)
+	}
+
 	e.HideBanner = true
 	g := e.Group("")
 

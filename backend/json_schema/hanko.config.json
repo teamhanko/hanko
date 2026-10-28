@@ -834,7 +834,7 @@
             "type": "string"
           },
           "type": "array",
-          "description": "`trusted_proxies` contains CIDR ranges of reverse proxies that are trusted to provide client IP headers.\n\nRequired when `extractor` is `x_forwarded_for` or `x_real_ip`.\nDo not configure public client IP ranges here. Only configure your own reverse proxies,\nload balancers, or ingress controllers."
+          "description": "`trusted_proxies` contains CIDR ranges of reverse proxies that are trusted to provide client IP headers and the\nrequest scheme (`X-Forwarded-Proto`).\n\nRequired when `extractor` is `x_forwarded_for` or `x_real_ip`.\nPeers with loopback, link-local or private addresses are always trusted, even if they are not listed here.\nList a proxy here if it connects from any other address, e.g. a CDN or a cloud load balancer with a public\naddress, or an address in 100.64.0.0/10. Otherwise its forwarding headers are ignored: the client IP is the proxy\naddress and requests that arrived over https are treated as http.\nDo not configure public client IP ranges here. Only configure your own reverse proxies,\nload balancers, or ingress controllers."
         }
       },
       "additionalProperties": false,

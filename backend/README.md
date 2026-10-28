@@ -980,7 +980,10 @@ server:
 If Hanko is deployed behind a reverse proxy, load balancer, ingress controller, or CDN, the direct peer address seen
 by Hanko may be the proxy address instead of the original client address.
 
-In this case, you can configure Hanko to use a forwarding header, but only from explicitly trusted proxy IP ranges.
+In this case, you can configure Hanko to use a forwarding header, but only from trusted proxies. Peers with loopback,
+link-local or private addresses (`127.0.0.0/8`, `::1`, `169.254.0.0/16`, `fe80::/10`, `10.0.0.0/8`, `172.16.0.0/12`,
+`192.168.0.0/16`, `fc00::/7`) are always trusted. Proxies with any other address, for example a CDN or a cloud load
+balancer with a public address, are only trusted if their ranges are listed in `trusted_proxies`.
 
 Example using `X-Forwarded-For`:
 
@@ -1014,32 +1017,61 @@ For deployments with meaningful traffic behind a reverse proxy, configure a head
 `x_forwarded_for` together with narrow `trusted_proxies` ranges. This allows Hanko to resolve the original client
 IP while still ignoring forwarding headers from untrusted peers.
 
+#### Request scheme behind reverse proxies
+
+The Admin and Management APIs build the `Link` pagination headers from the request scheme. Behind a proxy, the scheme comes from the
+`X-Forwarded-Proto` header, which Hanko only reads from trusted peers: the always-trusted addresses listed above, unix
+sockets, and the ranges in `server.ip.trusted_proxies`. For requests from any other peer, the header is ignored and the
+scheme is `http`.
+
+If your proxy connects from another address, for example a CDN or cloud load balancer with a public address, or an
+address in `100.64.0.0/10`, list its ranges in `trusted_proxies`. This applies with every `extractor` value, including
+`direct`:
+
+```yaml
+server:
+  ip:
+    extractor: direct
+    trusted_proxies:
+      - 35.191.0.0/16
+      - 130.211.0.0/22
+```
+
+The proxy must set `X-Forwarded-Proto` itself instead of passing through the value sent by the client.
+
 #### Available options
 
 | Option | Description |
 |---|---|
 | `server.ip.extractor` | Determines how Hanko resolves the client IP address. |
-| `server.ip.trusted_proxies` | List of trusted reverse proxy CIDR ranges. Required when using a header-based extractor. |
+| `server.ip.trusted_proxies` | CIDR ranges of reverse proxies that are trusted in addition to the always-trusted addresses. Used for the client IP headers and for `X-Forwarded-Proto`. Required when using a header-based extractor. |
 
 Supported values for `server.ip.extractor`:
 
 | Value | Description |
 |---|---|
 | `direct` | Uses the direct network peer address. Ignores `X-Forwarded-For` and `X-Real-IP`. This is the default. |
-| `x_forwarded_for` | Uses the `X-Forwarded-For` header, but only when the direct peer is in `trusted_proxies`. |
-| `x_real_ip` | Uses the `X-Real-IP` header, but only when the direct peer is in `trusted_proxies`. |
+| `x_forwarded_for` | Uses the `X-Forwarded-For` header. The address chain (`X-Forwarded-For` followed by the direct peer) is read from the right, and the first address that is not trusted is the client IP. If the direct peer is not trusted, it is the client IP. |
+| `x_real_ip` | Uses the `X-Real-IP` header, but only when the direct peer is trusted. |
 
 #### Security considerations
 
 Only enable `x_forwarded_for` or `x_real_ip` if Hanko is reachable exclusively through trusted reverse proxies.
 
+Because loopback, link-local and private addresses are always trusted, any host that can reach Hanko from such an
+address, for example another workload in the same private network, can set the forwarding headers, even if it is not
+listed in `trusted_proxies`.
+
 When using a header-based extractor:
 
-- configure only your own reverse proxies, load balancers, ingress controllers, or CDN proxy ranges in `trusted_proxies`;
+- configure only your own reverse proxies, load balancers, ingress controllers, or the ranges of a CDN or cloud load
+  balancer you use in `trusted_proxies`, and only those that connect from a non-private address, since private
+  addresses are trusted anyway;
 - keep `trusted_proxies` as narrow as possible;
 - do not include client networks, public internet ranges, or other untrusted networks in `trusted_proxies`;
 - ensure the Hanko service is not directly reachable from the public internet;
-- ensure your proxy strips or overwrites incoming `X-Forwarded-For` and `X-Real-IP` headers from clients.
+- ensure your proxy strips or overwrites incoming `X-Forwarded-For`, `X-Real-IP` and `X-Forwarded-Proto` headers from
+  clients.
 
 ## API specification
 

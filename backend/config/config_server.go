@@ -100,9 +100,14 @@ type IPConfig struct {
 	// that your reverse proxy strips or overwrites incoming forwarding headers.
 	Extractor IPExtractorType `yaml:"extractor" json:"extractor,omitempty" koanf:"extractor" jsonschema:"default=direct,enum=direct,enum=x_forwarded_for,enum=x_real_ip"`
 
-	// `trusted_proxies` contains CIDR ranges of reverse proxies that are trusted to provide client IP headers.
+	// `trusted_proxies` contains CIDR ranges of reverse proxies that are trusted to provide client IP headers and the
+	// request scheme (`X-Forwarded-Proto`).
 	//
 	// Required when `extractor` is `x_forwarded_for` or `x_real_ip`.
+	// Peers with loopback, link-local or private addresses are always trusted, even if they are not listed here.
+	// List a proxy here if it connects from any other address, e.g. a CDN or a cloud load balancer with a public
+	// address, or an address in 100.64.0.0/10. Otherwise its forwarding headers are ignored: the client IP is the proxy
+	// address and requests that arrived over https are treated as http.
 	// Do not configure public client IP ranges here. Only configure your own reverse proxies,
 	// load balancers, or ingress controllers.
 	TrustedProxies []string `yaml:"trusted_proxies" json:"trusted_proxies,omitempty" koanf:"trusted_proxies"`
@@ -147,22 +152,21 @@ func (IPConfig) JSONSchemaExtend(schema *jsonschema.Schema) {
 func (c IPConfig) Validate() error {
 	switch c.Extractor {
 	case "", IPExtractorDirect:
-		return nil
 
 	case IPExtractorXForwardedFor, IPExtractorXRealIP:
 		if len(c.TrustedProxies) == 0 {
 			return fmt.Errorf("trusted_proxies must be configured when ip.extractor is %q", c.Extractor)
 		}
 
-		for _, trustedProxy := range c.TrustedProxies {
-			if _, _, err := net.ParseCIDR(trustedProxy); err != nil {
-				return fmt.Errorf("invalid trusted proxy CIDR %q: %w", trustedProxy, err)
-			}
-		}
-
-		return nil
-
 	default:
 		return errors.New("ip.extractor must be one of: direct, x_forwarded_for, x_real_ip")
 	}
+
+	for _, trustedProxy := range c.TrustedProxies {
+		if _, _, err := net.ParseCIDR(trustedProxy); err != nil {
+			return fmt.Errorf("invalid trusted proxy CIDR %q: %w", trustedProxy, err)
+		}
+	}
+
+	return nil
 }
