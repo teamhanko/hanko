@@ -195,11 +195,7 @@ func (handler *Handler) callbackPostIdPInitiated(c echo.Context, samlResponse st
 
 	assertionInfo, err := handler.getAssertionInfo(serviceProvider, samlResponse)
 	if err != nil {
-		return handler.redirectError(
-			c,
-			thirdparty.ErrorInvalidRequest("could not get assertion info").WithCause(err),
-			redirectTo.String(),
-		)
+		return handler.redirectError(c, err, redirectTo.String())
 	}
 
 	samlResponseIDAttr := responseElement.SelectAttr("ID")
@@ -327,11 +323,7 @@ func (handler *Handler) CallbackPost(c echo.Context) error {
 
 		assertionInfo, err := handler.getAssertionInfo(foundProvider, samlResponse)
 		if err != nil {
-			return handler.redirectError(
-				c,
-				thirdparty.ErrorServer("unable to parse saml response").WithCause(err),
-				redirectTo.String(),
-			)
+			return handler.redirectError(c, err, redirectTo.String())
 		}
 
 		redirectUrl, err := handler.linkAccount(c, redirectTo, state.IsFlow, foundProvider, providerConfig, assertionInfo)
@@ -421,18 +413,44 @@ func (handler *Handler) linkAccount(c echo.Context, redirectTo *url.URL, isFlow 
 func (handler *Handler) getAssertionInfo(samlProvider *saml2.SAMLServiceProvider, samlResponse string) (*saml2.AssertionInfo, error) {
 	assertionInfo, err := samlProvider.RetrieveAssertionInfo(samlResponse)
 	if err != nil {
-		return nil, thirdparty.ErrorServer("unable to parse SAML response").WithCause(err)
+		return nil, thirdparty.ErrorInvalidRequest("unable to parse SAML response").WithCause(withIdPStatus(samlResponse, err))
 	}
 
 	if assertionInfo.WarningInfo.InvalidTime {
-		return nil, thirdparty.ErrorServer("SAMLAssertion expired")
+		return nil, thirdparty.ErrorInvalidRequest("SAMLAssertion expired")
 	}
 
 	if assertionInfo.WarningInfo.NotInAudience {
-		return nil, thirdparty.ErrorServer("not in SAML audience")
+		return nil, thirdparty.ErrorInvalidRequest("not in SAML audience")
 	}
 
 	return assertionInfo, nil
+}
+
+// withIdPStatus adds the IdP's own reason to a "missing Assertion" error. The library checks for
+// assertions before it reads the status, so an IdP error response would otherwise lose its reason.
+func withIdPStatus(samlResponse string, err error) error {
+	var verificationErr saml2.ErrVerification
+	if !errors.As(err, &verificationErr) || verificationErr.Cause != saml2.ErrMissingAssertion {
+		return err
+	}
+
+	_, response, parseErr := saml.ParseSamlResponse(samlResponse)
+	if parseErr != nil {
+		return err
+	}
+
+	statusCode := response.FindElement("Status/StatusCode")
+	if statusCode == nil {
+		return err
+	}
+
+	message := ""
+	if statusMessage := response.FindElement("Status/StatusMessage"); statusMessage != nil {
+		message = statusMessage.Text()
+	}
+
+	return fmt.Errorf("idp returned status %q (message %q): %w", statusCode.SelectAttrValue("Value", ""), message, err)
 }
 
 func (handler *Handler) redirectError(c echo.Context, error error, to string) error {
@@ -447,9 +465,9 @@ func (handler *Handler) redirectError(c echo.Context, error error, to string) er
 	return c.Redirect(http.StatusSeeOther, redirectURL)
 }
 
-func (handler *Handler) auditError(c echo.Context, err error) error {
+func (handler *Handler) auditError(c echo.Context, logError error) error {
 	var e *thirdparty.ThirdPartyError
-	ok := errors.As(err, &e)
+	ok := errors.As(logError, &e)
 
 	tenant, err := context.GetTenant(c)
 	if err != nil {
@@ -458,7 +476,7 @@ func (handler *Handler) auditError(c echo.Context, err error) error {
 
 	var auditLogError error
 	if ok && e.Code != thirdparty.ErrorCodeServerError {
-		auditLogError = handler.auditLogger.Create(c, models.AuditLogThirdPartySignInSignUpFailed, nil, err, tenant.ID)
+		auditLogError = handler.auditLogger.Create(c, models.AuditLogThirdPartySignInSignUpFailed, nil, logError, tenant.ID)
 	}
 	return auditLogError
 }
