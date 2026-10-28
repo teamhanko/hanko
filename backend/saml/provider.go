@@ -36,12 +36,42 @@ func NewProviderManager(persister persistence.Persister) *ProviderManager {
 	}
 }
 
-// GetProvider creates an ephemeral gosaml2.SAMLServiceProvider from cached metadata
+// GetServiceProvider creates a gosaml2.SAMLServiceProvider with only the service provider side set, which is
+// everything that is tenant-wide: the certificate and the settings from the tenant config. It has no identity
+// provider settings, so it can build the service provider metadata but cannot send requests or validate responses.
+func (b *ProviderManager) GetServiceProvider(
+	tenantID uuid.UUID,
+	tenantSettings samlConfig.Saml,
+) (*saml2.SAMLServiceProvider, error) {
+	spCertStore, err := b.loadServiceProviderCertificate(tenantID)
+	if err != nil {
+		return nil, fmt.Errorf("failed to load SP certificate: %w", err)
+	}
+
+	return &saml2.SAMLServiceProvider{
+		// SP settings (from tenant config)
+		AssertionConsumerServiceURL: fmt.Sprintf("%s/saml/callback", tenantSettings.Endpoint),
+		ServiceProviderIssuer:       tenantSettings.Endpoint,
+		ServiceProviderSLOURL:       fmt.Sprintf("%s/saml/logout", tenantSettings.Endpoint),
+		SPKeyStore:                  spCertStore,
+
+		// Options (from tenant config)
+		SignAuthnRequests:       tenantSettings.Options.SignAuthnRequests,
+		ForceAuthn:              tenantSettings.Options.ForceLogin,
+		IsPassive:               false,
+		AudienceURI:             tenantSettings.AudienceUri,
+		ValidateEncryptionCert:  tenantSettings.Options.ValidateEncryptionCertificate,
+		SkipSignatureValidation: tenantSettings.Options.SkipSignatureValidation,
+		AllowMissingAttributes:  tenantSettings.Options.AllowMissingAttributes,
+	}, nil
+}
+
+// GetProvider creates an ephemeral gosaml2.SAMLServiceProvider: the service provider side from the tenant's
+// configuration and certificate, the identity provider side from the metadata stored for the provider
 func (b *ProviderManager) GetProvider(
 	tenantID uuid.UUID,
 	providerID uuid.UUID,
 	tenantSettings samlConfig.Saml,
-	serviceName string,
 ) (*saml2.SAMLServiceProvider, *ProviderConfig, error) {
 	// Get provider from DB
 	provider, err := b.persister.GetSamlProviderPersister().Get(tenantID, providerID)
@@ -61,40 +91,20 @@ func (b *ProviderManager) GetProvider(
 		return nil, nil, fmt.Errorf("metadata not found for provider")
 	}
 
-	// Load SP certificate
-	spCertStore, err := b.loadServiceProviderCertificate(tenantID, serviceName)
+	// Construct the SP half from tenant config, then add the IdP half from cached metadata
+	samlServiceProvider, err := b.GetServiceProvider(tenantID, tenantSettings)
 	if err != nil {
-		return nil, nil, fmt.Errorf("failed to load SP certificate: %w", err)
+		return nil, nil, err
 	}
 
-	// GetProvider IdP certificate store from cached PEM certificates
 	idpCertStore, err := b.buildIdPCertificateStore(cachedMetadata.CertificatesPEM)
 	if err != nil {
 		return nil, nil, fmt.Errorf("failed to build IdP certificate store: %w", err)
 	}
 
-	// Construct gosaml2.SAMLServiceProvider
-	samlServiceProvider := &saml2.SAMLServiceProvider{
-		// IdP settings (from cached metadata)
-		IdentityProviderSSOURL: cachedMetadata.SSOURL,
-		IdentityProviderIssuer: cachedMetadata.Issuer,
-		IDPCertificateStore:    idpCertStore,
-
-		// SP settings (from tenant config)
-		AssertionConsumerServiceURL: fmt.Sprintf("%s/saml/callback", tenantSettings.Endpoint),
-		ServiceProviderIssuer:       tenantSettings.Endpoint,
-		ServiceProviderSLOURL:       fmt.Sprintf("%s/saml/logout", tenantSettings.Endpoint),
-		SPKeyStore:                  spCertStore,
-
-		// Options (from tenant config)
-		SignAuthnRequests:       tenantSettings.Options.SignAuthnRequests,
-		ForceAuthn:              tenantSettings.Options.ForceLogin,
-		IsPassive:               false,
-		AudienceURI:             tenantSettings.AudienceUri,
-		ValidateEncryptionCert:  tenantSettings.Options.ValidateEncryptionCertificate,
-		SkipSignatureValidation: tenantSettings.Options.SkipSignatureValidation,
-		AllowMissingAttributes:  tenantSettings.Options.AllowMissingAttributes,
-	}
+	samlServiceProvider.IdentityProviderSSOURL = cachedMetadata.SSOURL
+	samlServiceProvider.IdentityProviderIssuer = cachedMetadata.Issuer
+	samlServiceProvider.IDPCertificateStore = idpCertStore
 
 	// Parse attribute map from provider
 	var attributeMap samlConfig.AttributeMap
@@ -117,15 +127,15 @@ func (b *ProviderManager) GetProvider(
 	return samlServiceProvider, providerConfig, nil
 }
 
-// loadServiceProviderCertificate loads the SP certificate for signing, auto-creating if missing
-func (b *ProviderManager) loadServiceProviderCertificate(tenantID uuid.UUID, serviceName string) (dsig.X509KeyStore, error) {
+// loadServiceProviderCertificate loads the tenant's SP certificate and key, or returns ErrorSamlCertificateNotFound
+func (b *ProviderManager) loadServiceProviderCertificate(tenantID uuid.UUID) (dsig.X509KeyStore, error) {
 	cert, err := b.persister.GetSamlCertificatePersister().GetFirst(tenantID)
 	if err != nil {
 		return nil, err
 	}
 
 	if cert == nil {
-		return nil, fmt.Errorf("no SAML certificate found for tenant %s", tenantID)
+		return nil, fmt.Errorf("%w for tenant %s", ErrorSamlCertificateNotFound, tenantID)
 	}
 
 	privateKey, err := cert.DecryptCertKey()
