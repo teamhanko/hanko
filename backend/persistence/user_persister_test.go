@@ -223,8 +223,8 @@ func (s *userPersisterSuite) TestGetByPublicID() {
 	s.Nil(notFoundEither, "the real internal id must not work as a public_id lookup key")
 }
 
-// TestGetPublicID confirms the lightweight internal id -> public_id lookup used by the audit
-// logger: resolves within the tenant, returns nil (not an error) for unknown ids and other tenants.
+// TestGetPublicID confirms GetPublicID returns the public id for an internal id without eager
+// loading the user, only within the given tenant, and nil (not an error) for unknown ids.
 func (s *userPersisterSuite) TestGetPublicID() {
 	if testing.Short() {
 		s.T().Skip("skipping test in short mode.")

@@ -16,6 +16,10 @@ import (
 	"github.com/teamhanko/hanko/backend/v3/utils"
 )
 
+// Logger writes audit logs. The user's public id is stored as the actor user id. Callers that
+// have the user loaded pass its PublicID along (this saves a lookup); callers that only know the
+// internal id may pass just that, and the logger resolves the public id. A user deleted before
+// the audit log is written can't be resolved anymore, so its PublicID must be passed.
 type Logger interface {
 	Create(echo.Context, models.AuditLogType, *models.User, error, uuid.UUID, ...DetailOption) error
 	CreateWithConnection(*pop.Connection, echo.Context, models.AuditLogType, *models.User, error, uuid.UUID, ...DetailOption) error
