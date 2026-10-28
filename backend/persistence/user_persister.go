@@ -13,6 +13,7 @@ import (
 type UserPersister interface {
 	Get(id uuid.UUID, tenantID uuid.UUID) (*models.User, error)
 	GetByPublicID(publicID uuid.UUID, tenantID uuid.UUID) (*models.User, error)
+	GetPublicID(id uuid.UUID, tenantID uuid.UUID) (*uuid.UUID, error)
 	GetByEmailAddress(emailAddress string, tenantID uuid.UUID) (*models.User, error)
 	Create(models.User) error
 	Update(models.User) error
@@ -65,6 +66,24 @@ func (p *userPersister) GetByPublicID(publicID uuid.UUID, tenantID uuid.UUID) (*
 		Where("users.tenant_id = ?", tenantID).
 		Where("users.public_id = ?", publicID)
 	return p.findUser(query, tenantID)
+}
+
+// GetPublicID resolves only the tenant-scoped public_id of the user with the given internal id,
+// without eager loading any associations. Returns nil if no such user exists.
+func (p *userPersister) GetPublicID(id uuid.UUID, tenantID uuid.UUID) (*uuid.UUID, error) {
+	user := models.User{}
+	err := p.db.Select("public_id").
+		Where("users.tenant_id = ?", tenantID).
+		Where("users.id = ?", id).
+		First(&user)
+	if err != nil && errors.Is(err, sql.ErrNoRows) {
+		return nil, nil
+	}
+	if err != nil {
+		return nil, fmt.Errorf("failed to get public id of user: %w", err)
+	}
+
+	return user.PublicID, nil
 }
 
 // findUser runs an already-scoped, eager-loaded query for a single user and attaches the

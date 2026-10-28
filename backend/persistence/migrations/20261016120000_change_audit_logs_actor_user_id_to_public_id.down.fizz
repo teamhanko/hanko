@@ -1,0 +1,1 @@
+sql("UPDATE audit_logs SET actor_user_id = (SELECT users.id FROM users WHERE users.public_id = audit_logs.actor_user_id AND users.tenant_id = audit_logs.tenant_id) WHERE EXISTS (SELECT 1 FROM users WHERE users.public_id = audit_logs.actor_user_id AND users.tenant_id = audit_logs.tenant_id AND users.public_id <> users.id);")

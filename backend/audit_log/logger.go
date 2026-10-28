@@ -16,6 +16,10 @@ import (
 	"github.com/teamhanko/hanko/backend/v3/utils"
 )
 
+// Logger writes audit logs. The user's public id is stored as the actor user id. Callers that
+// have the user loaded pass its PublicID along (this saves a lookup); callers that only know the
+// internal id may pass just that, and the logger resolves the public id. A user deleted before
+// the audit log is written can't be resolved anymore, so its PublicID must be passed.
 type Logger interface {
 	Create(echo.Context, models.AuditLogType, *models.User, error, uuid.UUID, ...DetailOption) error
 	CreateWithConnection(*pop.Connection, echo.Context, models.AuditLogType, *models.User, error, uuid.UUID, ...DetailOption) error
@@ -69,6 +73,11 @@ func (l *logger) CreateWithConnection(tx *pop.Connection, context echo.Context, 
 		detailOpt(details)
 	}
 
+	user, err := l.withPublicID(tx, user, tenantID)
+	if err != nil {
+		return err
+	}
+
 	auditLog, err := models.NewAuditLog(auditLogType, l.getRequestMeta(context), details, user, logError, tenantID)
 	if err != nil {
 		return err
@@ -90,6 +99,27 @@ func (l *logger) CreateWithConnection(tx *pop.Connection, context echo.Context, 
 	}
 
 	return nil
+}
+
+// withPublicID makes sure the user carries its public id, so the audit log does not fall back to
+// the internal id. Callers often only pass a user with the internal id set. If the user can't be
+// found (e.g. it was already deleted), the user is returned unchanged.
+func (l *logger) withPublicID(tx *pop.Connection, user *models.User, tenantID uuid.UUID) (*models.User, error) {
+	if user == nil || user.PublicID != nil || user.ID.IsNil() {
+		return user, nil
+	}
+
+	publicID, err := l.persister.GetUserPersisterWithConnection(tx).GetPublicID(user.ID, tenantID)
+	if err != nil {
+		return nil, err
+	}
+	if publicID == nil {
+		return user, nil
+	}
+
+	userWithPublicID := *user
+	userWithPublicID.PublicID = publicID
+	return &userWithPublicID, nil
 }
 
 func (l *logger) store(tx *pop.Connection, auditLog models.AuditLog) error {

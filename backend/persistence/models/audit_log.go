@@ -56,7 +56,10 @@ func NewAuditLog(auditLogType AuditLogType, requestMeta RequestMeta, details Det
 	}
 
 	if user != nil {
-		auditLog.ActorUserId = &user.ID
+		// Store the tenant-scoped public id, the only user id exposed via the API, so audit
+		// logs can be filtered by and linked to the user id API consumers know.
+		publicID := user.GetPublicID()
+		auditLog.ActorUserId = &publicID
 
 		if e := user.Emails.GetPrimary(); e != nil {
 			auditLog.ActorEmail = &e.Address
