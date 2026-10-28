@@ -25,6 +25,9 @@ const (
 	userPersisterRoleID   = "cafecafe-0000-0000-0000-000000000002" // slug "admin"
 	userPersisterMemberID = "b5dd5267-b462-48be-b70d-bcd6f1bbe7a5"
 	userPersisterOtherID  = "38bf5a00-d7ea-40a5-a5de-48722c148925" // no memberships
+
+	userPersisterSamlUserID     = "3f1c8d0e-6a53-4f0b-9a54-0d1c6a1f2b01"
+	userPersisterSamlProviderID = "7c9e6679-7425-40de-944b-e07fc1f90ae8"
 )
 
 func (s *userPersisterSuite) addMembershipAndBinding() {
@@ -221,4 +224,36 @@ func (s *userPersisterSuite) TestGetByPublicID() {
 	notFoundEither, err := userPersister.GetByPublicID(internalID, tenantAID)
 	s.NoError(err)
 	s.Nil(notFoundEither, "the real internal id must not work as a public_id lookup key")
+}
+
+func (s *userPersisterSuite) TestGet_AttachesSamlProvider() {
+	if testing.Short() {
+		s.T().Skip("skipping test in short mode.")
+	}
+	err := s.LoadFixtures("../test/fixtures/saml_provider_lookup")
+	s.Require().NoError(err)
+
+	user, err := s.Storage.GetUserPersister().Get(uuid.FromStringOrNil(userPersisterSamlUserID), uuid.FromStringOrNil(userPersisterTenantID))
+	s.Require().NoError(err)
+	s.Require().NotNil(user)
+	s.Require().Len(user.Identities, 1)
+	s.Require().NotNil(user.Identities[0].SamlIdentity)
+	s.Require().NotNil(user.Identities[0].SamlIdentity.SamlProvider)
+	s.Equal(userPersisterSamlProviderID, user.Identities[0].SamlIdentity.SamlProvider.ID.String())
+}
+
+func (s *userPersisterSuite) TestGetByPublicID_AttachesSamlProvider() {
+	if testing.Short() {
+		s.T().Skip("skipping test in short mode.")
+	}
+	err := s.LoadFixtures("../test/fixtures/saml_provider_lookup")
+	s.Require().NoError(err)
+
+	user, err := s.Storage.GetUserPersister().GetByPublicID(uuid.FromStringOrNil(userPersisterSamlUserID), uuid.FromStringOrNil(userPersisterTenantID))
+	s.Require().NoError(err)
+	s.Require().NotNil(user)
+	s.Require().Len(user.Identities, 1)
+	s.Require().NotNil(user.Identities[0].SamlIdentity)
+	s.Require().NotNil(user.Identities[0].SamlIdentity.SamlProvider)
+	s.Equal(userPersisterSamlProviderID, user.Identities[0].SamlIdentity.SamlProvider.ID.String())
 }
