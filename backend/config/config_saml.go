@@ -190,7 +190,7 @@ func (s *Saml) ValidateUrls() error {
 	}
 
 	for _, redirectUrl := range s.AllowedRedirectURLS {
-		_, err = url.Parse(s.DefaultRedirectUrl)
+		_, err = url.Parse(redirectUrl)
 		if err != nil {
 			return fmt.Errorf(invalidUrlFormat, redirectUrl)
 		}

@@ -163,8 +163,8 @@ func TestSamlConfig_ValidateUrlsWithWrongDefaultRedirecttUrl(t *testing.T) {
 func TestSamlConfig_ValidateUrlsWithWrongAllowedRedirectUrl(t *testing.T) {
 	cfg := &Saml{
 		Endpoint:            "http://lorem.ipsum",
-		DefaultRedirectUrl:  "http://lorem:8000.de/ipsum",
-		AllowedRedirectURLS: []string{"s:/"},
+		DefaultRedirectUrl:  "http://lorem.ipsum/redirect",
+		AllowedRedirectURLS: []string{"http://lorem:8000.de/ipsum"},
 	}
 
 	err := cfg.ValidateUrls()
