@@ -13,11 +13,12 @@ jobs:
     steps:
       - uses: actions/checkout@v7
         with:
+          persist-credentials: false
           fetch-depth: 0
       - uses: actions/setup-go@v7
         with:
           go-version: stable
-      - uses: goreleaser/goreleaser-action@v7
+      - uses: goreleaser/goreleaser-action@a4f02ab5355a589de60d917a659ce617ed19b3de # v7.3.0
         with:
           distribution: goreleaser
           version: latest
@@ -30,7 +31,7 @@ jobs:
           cp dist/*.{tar.gz,zip} dist/artifacts
         working-directory: ./backend
       - name: Upload assets
-        uses: softprops/action-gh-release@v3
+        uses: softprops/action-gh-release@efb35369e0ad2afab669f228072c1b0d510eae64 # v3.0.3
         with:
           files: ./backend/dist/artifacts/*
           fail_on_unmatched_files: true

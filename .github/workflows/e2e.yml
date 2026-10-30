@@ -2,6 +2,9 @@ name: E2E Test
 
 on:
   workflow_dispatch:
+permissions:
+  contents: read
+
 
 jobs:
   passwordless:
@@ -9,6 +12,8 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v7
+        with:
+          persist-credentials: false
 
       - name: Start containers
         working-directory: ./deploy/docker-compose
@@ -33,6 +38,8 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v7
+        with:
+          persist-credentials: false
 
       - name: Start containers
         working-directory: ./deploy/docker-compose
@@ -59,6 +66,8 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v7
+        with:
+          persist-credentials: false
 
       - name: Copy config
         working-directory: ./deploy/docker-compose

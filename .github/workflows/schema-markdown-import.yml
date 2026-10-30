@@ -5,6 +5,12 @@ on:
     tags:
       - 'backend/*'
   workflow_dispatch:
+permissions:
+  contents: write
+  # The delay check lists this repository's workflow runs through the
+  # API, which needs actions read on the token.
+  actions: read
+
 
 jobs:
   import:
@@ -23,6 +29,7 @@ jobs:
       - name: Checkout backend
         uses: actions/checkout@v7
         with:
+          persist-credentials: false
           path: hanko
 
       - name: Checkout backend wiki
