@@ -1019,10 +1019,10 @@ IP while still ignoring forwarding headers from untrusted peers.
 
 #### Request scheme behind reverse proxies
 
-The Admin and Management APIs build the `Link` pagination headers from the request scheme. Behind a proxy, the scheme comes from the
-`X-Forwarded-Proto` header, which Hanko only reads from trusted peers: the always-trusted addresses listed above, unix
-sockets, and the ranges in `server.ip.trusted_proxies`. For requests from any other peer, the header is ignored and the
-scheme is `http`.
+The Admin and Management APIs build the `Link` pagination headers from the request scheme. Behind a proxy, the scheme
+comes from the `X-Forwarded-Proto` header, which Hanko only reads from trusted peers: the always-trusted addresses
+listed above, unix sockets, and the ranges in `server.ip.trusted_proxies`. For requests from any other peer, the header
+is ignored and the scheme is `http`.
 
 If your proxy connects from another address, for example a CDN or cloud load balancer with a public address, or an
 address in `100.64.0.0/10`, list its ranges in `trusted_proxies`. This applies with every `extractor` value, including
@@ -1044,7 +1044,7 @@ The proxy must set `X-Forwarded-Proto` itself instead of passing through the val
 | Option | Description |
 |---|---|
 | `server.ip.extractor` | Determines how Hanko resolves the client IP address. |
-| `server.ip.trusted_proxies` | CIDR ranges of reverse proxies that are trusted in addition to the always-trusted addresses. Used for the client IP headers and for `X-Forwarded-Proto`. Required when using a header-based extractor. |
+| `server.ip.trusted_proxies` | CIDR ranges of reverse proxies that are trusted in addition to the always-trusted addresses. Used for the client IP headers and for `X-Forwarded-Proto`. Entries must be valid CIDR ranges, for example `10.0.0.1/32`; an invalid entry stops startup. Required when using a header-based extractor. |
 
 Supported values for `server.ip.extractor`:
 
