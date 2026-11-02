@@ -7,6 +7,7 @@ import (
 	"net/http/httptest"
 	"strings"
 	"testing"
+	"time"
 
 	"github.com/gobuffalo/pop/v6"
 	"github.com/gofrs/uuid"
@@ -110,6 +111,83 @@ func TestSamlHandler_withIdPStatus_reportsStatusOfBareError(t *testing.T) {
 
 	require.ErrorIs(t, err, saml2.ErrMissingAssertion)
 	assert.Contains(t, err.Error(), "Could not encrypt assertion")
+}
+
+// An assertion that is not valid yet or has expired must be rejected, and the error must name its validity period.
+func TestSamlHandler_getAssertionInfo_rejectsAssertionOutsideValidityPeriod(t *testing.T) {
+	now := time.Now()
+
+	tests := map[string]struct {
+		notBefore    time.Time
+		notOnOrAfter time.Time
+	}{
+		"expired":       {notBefore: now.Add(-2 * time.Hour), notOnOrAfter: now.Add(-time.Hour)},
+		"not valid yet": {notBefore: now.Add(time.Hour), notOnOrAfter: now.Add(2 * time.Hour)},
+	}
+
+	for name, tt := range tests {
+		t.Run(name, func(t *testing.T) {
+			_, err := (&Handler{}).getAssertionInfo(assertionTestServiceProvider(), assertionResponse(tt.notBefore, tt.notOnOrAfter, testAudience))
+
+			require.Error(t, err)
+			assert.Contains(t, err.Error(), "SAMLAssertion is not valid at this time")
+			assert.Contains(t, err.Error(), tt.notBefore.UTC().Format(time.RFC3339))
+			assert.Contains(t, err.Error(), tt.notOnOrAfter.UTC().Format(time.RFC3339))
+		})
+	}
+}
+
+// An assertion that is meant for another audience must be rejected.
+func TestSamlHandler_getAssertionInfo_rejectsAssertionForOtherAudience(t *testing.T) {
+	now := time.Now()
+
+	_, err := (&Handler{}).getAssertionInfo(assertionTestServiceProvider(), assertionResponse(now.Add(-time.Hour), now.Add(time.Hour), "https://other.example.com"))
+
+	require.Error(t, err)
+	assert.Contains(t, err.Error(), "not in SAML audience")
+}
+
+const (
+	testAudience = "https://sp.example.com"
+	testACSURL   = "https://sp.example.com/saml/callback"
+)
+
+// assertionTestServiceProvider returns a service provider that accepts an unsigned response with an assertion.
+func assertionTestServiceProvider() *saml2.SAMLServiceProvider {
+	return &saml2.SAMLServiceProvider{
+		SkipSignatureValidation:     true,
+		AllowMissingAttributes:      true,
+		Clock:                       dsig.NewRealClock(),
+		AudienceURI:                 testAudience,
+		AssertionConsumerServiceURL: testACSURL,
+	}
+}
+
+// assertionResponse returns a base64 encoded, unsigned SAML response with a successful status and one assertion
+// that has the given validity period and audience.
+func assertionResponse(notBefore time.Time, notOnOrAfter time.Time, audience string) string {
+	response := fmt.Sprintf(`<samlp:Response xmlns:samlp="urn:oasis:names:tc:SAML:2.0:protocol" xmlns:saml="urn:oasis:names:tc:SAML:2.0:assertion" Version="2.0">
+  <saml:Issuer>https://idp.example.com</saml:Issuer>
+  <samlp:Status>
+    <samlp:StatusCode Value="urn:oasis:names:tc:SAML:2.0:status:Success"/>
+  </samlp:Status>
+  <saml:Assertion Version="2.0">
+    <saml:Issuer>https://idp.example.com</saml:Issuer>
+    <saml:Subject>
+      <saml:NameID>user@example.com</saml:NameID>
+      <saml:SubjectConfirmation Method="urn:oasis:names:tc:SAML:2.0:cm:bearer">
+        <saml:SubjectConfirmationData Recipient="%s" NotOnOrAfter="%s"/>
+      </saml:SubjectConfirmation>
+    </saml:Subject>
+    <saml:Conditions NotBefore="%s" NotOnOrAfter="%s">
+      <saml:AudienceRestriction>
+        <saml:Audience>%s</saml:Audience>
+      </saml:AudienceRestriction>
+    </saml:Conditions>
+  </saml:Assertion>
+</samlp:Response>`, testACSURL, time.Now().Add(time.Hour).UTC().Format(time.RFC3339), notBefore.UTC().Format(time.RFC3339), notOnOrAfter.UTC().Format(time.RFC3339), audience)
+
+	return base64.StdEncoding.EncodeToString([]byte(response))
 }
 
 // idpErrorResponse returns a base64 encoded, unsigned SAML response that has a status and no assertion. The
