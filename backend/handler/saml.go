@@ -425,7 +425,11 @@ func (handler *Handler) getAssertionInfo(samlProvider *saml2.SAMLServiceProvider
 	}
 
 	if assertionInfo.WarningInfo.InvalidTime {
-		return nil, errors.New("SAMLAssertion expired")
+		// The library sets this flag both for an assertion that is not valid yet and for one that has expired, so
+		// the validity period and the current time are reported instead of a single cause.
+		conditions := assertionInfo.Assertions[0].Conditions
+		return nil, fmt.Errorf("SAMLAssertion is not valid at this time (now %s, not before %s, not on or after %s)",
+			samlProvider.Clock.Now().UTC().Format(time.RFC3339), conditions.NotBefore, conditions.NotOnOrAfter)
 	}
 
 	if assertionInfo.WarningInfo.NotInAudience {
