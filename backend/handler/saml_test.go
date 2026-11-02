@@ -68,6 +68,7 @@ func TestSamlHandler_getAssertionInfo_reportsIdPStatus(t *testing.T) {
 		_, err := h.getAssertionInfo(sp, idpErrorResponse("urn:oasis:names:tc:SAML:2.0:status:Responder", "Could not encrypt assertion"))
 
 		require.Error(t, err)
+		assert.Contains(t, err.Error(), "response status")
 		assert.Contains(t, err.Error(), "urn:oasis:names:tc:SAML:2.0:status:Responder")
 		assert.Contains(t, err.Error(), "Could not encrypt assertion")
 		assert.Contains(t, err.Error(), "missing Assertion element")
@@ -77,7 +78,7 @@ func TestSamlHandler_getAssertionInfo_reportsIdPStatus(t *testing.T) {
 		_, err := h.getAssertionInfo(sp, "not a saml response")
 
 		require.Error(t, err)
-		assert.NotContains(t, err.Error(), "idp returned status")
+		assert.NotContains(t, err.Error(), "response status")
 	})
 }
 
