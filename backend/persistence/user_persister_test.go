@@ -27,6 +27,7 @@ const (
 	userPersisterOtherID  = "38bf5a00-d7ea-40a5-a5de-48722c148925" // no memberships
 
 	userPersisterSamlUserID     = "3f1c8d0e-6a53-4f0b-9a54-0d1c6a1f2b01"
+	userPersisterSamlPublicID   = "a7d3e1b2-5c48-4f19-8e26-9b0c4d7f3a15"
 	userPersisterSamlProviderID = "7c9e6679-7425-40de-944b-e07fc1f90ae8"
 )
 
@@ -249,7 +250,7 @@ func (s *userPersisterSuite) TestGetByPublicID_AttachesSamlProvider() {
 	err := s.LoadFixtures("../test/fixtures/saml_provider_lookup")
 	s.Require().NoError(err)
 
-	user, err := s.Storage.GetUserPersister().GetByPublicID(uuid.FromStringOrNil(userPersisterSamlUserID), uuid.FromStringOrNil(userPersisterTenantID))
+	user, err := s.Storage.GetUserPersister().GetByPublicID(uuid.FromStringOrNil(userPersisterSamlPublicID), uuid.FromStringOrNil(userPersisterTenantID))
 	s.Require().NoError(err)
 	s.Require().NotNil(user)
 	s.Require().Len(user.Identities, 1)
