@@ -38,6 +38,7 @@ func (r *recordingAuditLogger) CreateWithConnection(_ *pop.Connection, c echo.Co
 	return r.Create(c, logType, user, logError, tenantID, opts...)
 }
 
+// auditError must hand the error it was given, including its cause, to the audit logger.
 func TestSamlHandler_auditError_carriesOriginalError(t *testing.T) {
 	logger := &recordingAuditLogger{}
 	h := &Handler{auditLogger: logger}
@@ -56,6 +57,7 @@ func TestSamlHandler_auditError_carriesOriginalError(t *testing.T) {
 	assert.Contains(t, logger.entries[0].logError.Error(), cause.Error())
 }
 
+// A response that carries a status but no assertion must report that status in the error.
 func TestSamlHandler_getAssertionInfo_reportsIdPStatus(t *testing.T) {
 	sp := &saml2.SAMLServiceProvider{IDPCertificateStore: &dsig.MemoryX509CertificateStore{}}
 
@@ -73,7 +75,6 @@ func TestSamlHandler_getAssertionInfo_reportsIdPStatus(t *testing.T) {
 		_, err := h.getAssertionInfo(sp, base64.StdEncoding.EncodeToString([]byte(errorResponse)))
 
 		require.Error(t, err)
-		assert.Contains(t, err.Error(), "invalid_request")
 		assert.Contains(t, err.Error(), "urn:oasis:names:tc:SAML:2.0:status:Responder")
 		assert.Contains(t, err.Error(), "Could not encrypt assertion")
 		assert.Contains(t, err.Error(), "missing Assertion element")
@@ -85,14 +86,4 @@ func TestSamlHandler_getAssertionInfo_reportsIdPStatus(t *testing.T) {
 		require.Error(t, err)
 		assert.NotContains(t, err.Error(), "idp returned status")
 	})
-}
-
-func TestSamlHandler_getAssertionInfo_reportsInvalidRequest(t *testing.T) {
-	sp := &saml2.SAMLServiceProvider{IDPCertificateStore: &dsig.MemoryX509CertificateStore{}}
-
-	_, err := (&Handler{}).getAssertionInfo(sp, "not a saml response")
-
-	var thirdPartyErr *thirdparty.ThirdPartyError
-	require.ErrorAs(t, err, &thirdPartyErr)
-	assert.Equal(t, thirdparty.ErrorCodeInvalidRequest, thirdPartyErr.Code)
 }

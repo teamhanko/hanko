@@ -195,7 +195,11 @@ func (handler *Handler) callbackPostIdPInitiated(c echo.Context, samlResponse st
 
 	assertionInfo, err := handler.getAssertionInfo(serviceProvider, samlResponse)
 	if err != nil {
-		return handler.redirectError(c, err, redirectTo.String())
+		return handler.redirectError(
+			c,
+			thirdparty.ErrorInvalidRequest("could not process saml response").WithCause(fmt.Errorf("idp-initiated: %w", err)),
+			redirectTo.String(),
+		)
 	}
 
 	samlResponseIDAttr := responseElement.SelectAttr("ID")
@@ -323,7 +327,11 @@ func (handler *Handler) CallbackPost(c echo.Context) error {
 
 		assertionInfo, err := handler.getAssertionInfo(foundProvider, samlResponse)
 		if err != nil {
-			return handler.redirectError(c, err, redirectTo.String())
+			return handler.redirectError(
+				c,
+				thirdparty.ErrorInvalidRequest("could not process saml response").WithCause(fmt.Errorf("sp-initiated: %w", err)),
+				redirectTo.String(),
+			)
 		}
 
 		redirectUrl, err := handler.linkAccount(c, redirectTo, state.IsFlow, foundProvider, providerConfig, assertionInfo)
@@ -413,15 +421,15 @@ func (handler *Handler) linkAccount(c echo.Context, redirectTo *url.URL, isFlow 
 func (handler *Handler) getAssertionInfo(samlProvider *saml2.SAMLServiceProvider, samlResponse string) (*saml2.AssertionInfo, error) {
 	assertionInfo, err := samlProvider.RetrieveAssertionInfo(samlResponse)
 	if err != nil {
-		return nil, thirdparty.ErrorInvalidRequest("unable to parse SAML response").WithCause(withIdPStatus(samlResponse, err))
+		return nil, fmt.Errorf("unable to parse SAML response: %w", withIdPStatus(samlResponse, err))
 	}
 
 	if assertionInfo.WarningInfo.InvalidTime {
-		return nil, thirdparty.ErrorInvalidRequest("SAMLAssertion expired")
+		return nil, errors.New("SAMLAssertion expired")
 	}
 
 	if assertionInfo.WarningInfo.NotInAudience {
-		return nil, thirdparty.ErrorInvalidRequest("not in SAML audience")
+		return nil, errors.New("not in SAML audience")
 	}
 
 	return assertionInfo, nil
