@@ -65,7 +65,7 @@ func TestSamlHandler_getAssertionInfo_reportsIdPStatus(t *testing.T) {
 	h := &Handler{}
 
 	t.Run("error response reports the status of the IdP", func(t *testing.T) {
-		_, err := h.getAssertionInfo(sp, idpErrorResponse("urn:oasis:names:tc:SAML:2.0:status:Responder", "Could not encrypt assertion"))
+		_, err := h.getAssertionInfo(sp, idpErrorResponse("urn:oasis:names:tc:SAML:2.0:status:Responder", "", "Could not encrypt assertion"))
 
 		require.Error(t, err)
 		assert.Contains(t, err.Error(), "response status")
@@ -87,22 +87,38 @@ func TestSamlHandler_getAssertionInfo_truncatesIdPStatusMessage(t *testing.T) {
 	sp := &saml2.SAMLServiceProvider{IDPCertificateStore: &dsig.MemoryX509CertificateStore{}}
 	message := strings.Repeat("ü", 2000)
 
-	_, err := (&Handler{}).getAssertionInfo(sp, idpErrorResponse("urn:oasis:names:tc:SAML:2.0:status:Responder", message))
+	_, err := (&Handler{}).getAssertionInfo(sp, idpErrorResponse("urn:oasis:names:tc:SAML:2.0:status:Responder", "", message))
 
 	require.Error(t, err)
 	assert.Contains(t, err.Error(), strings.Repeat("ü", 1024))
 	assert.NotContains(t, err.Error(), strings.Repeat("ü", 1025))
 }
 
-// idpErrorResponse returns a base64 encoded, unsigned SAML response that has a status and no assertion.
-func idpErrorResponse(statusCode string, message string) string {
+// The nested status code of a response is reported after the top-level one.
+func TestSamlHandler_getAssertionInfo_reportsNestedStatusCode(t *testing.T) {
+	sp := &saml2.SAMLServiceProvider{IDPCertificateStore: &dsig.MemoryX509CertificateStore{}}
+
+	_, err := (&Handler{}).getAssertionInfo(sp, idpErrorResponse("urn:oasis:names:tc:SAML:2.0:status:Responder", "urn:oasis:names:tc:SAML:2.0:status:AuthnFailed", "Authentication failed"))
+
+	require.Error(t, err)
+	assert.Contains(t, err.Error(), `"urn:oasis:names:tc:SAML:2.0:status:Responder/urn:oasis:names:tc:SAML:2.0:status:AuthnFailed"`)
+}
+
+// idpErrorResponse returns a base64 encoded, unsigned SAML response that has a status and no assertion. The
+// nested status code is left out if it is empty.
+func idpErrorResponse(statusCode string, nestedStatusCode string, message string) string {
+	nested := ""
+	if nestedStatusCode != "" {
+		nested = fmt.Sprintf(`<samlp:StatusCode Value="%s"/>`, nestedStatusCode)
+	}
+
 	response := fmt.Sprintf(`<samlp:Response xmlns:samlp="urn:oasis:names:tc:SAML:2.0:protocol" xmlns:saml="urn:oasis:names:tc:SAML:2.0:assertion" Version="2.0">
   <saml:Issuer>https://idp.example.com</saml:Issuer>
   <samlp:Status>
-    <samlp:StatusCode Value="%s"/>
+    <samlp:StatusCode Value="%s">%s</samlp:StatusCode>
     <samlp:StatusMessage>%s</samlp:StatusMessage>
   </samlp:Status>
-</samlp:Response>`, statusCode, message)
+</samlp:Response>`, statusCode, nested, message)
 
 	return base64.StdEncoding.EncodeToString([]byte(response))
 }

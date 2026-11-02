@@ -440,7 +440,8 @@ const maxIdPStatusLength = 1024
 
 // withIdPStatus adds the status of a response to a "missing Assertion" error. The library checks for
 // assertions before it reads the status, so an IdP error response would otherwise lose its reason. The status
-// code and the message are cut to maxIdPStatusLength characters.
+// code is the top-level code followed by the nested code, if there is one, separated by "/". The status code
+// and the message are cut to maxIdPStatusLength characters.
 func withIdPStatus(samlResponse string, err error) error {
 	var verificationErr saml2.ErrVerification
 	if !errors.As(err, &verificationErr) || verificationErr.Cause != saml2.ErrMissingAssertion {
@@ -452,9 +453,14 @@ func withIdPStatus(samlResponse string, err error) error {
 		return err
 	}
 
-	statusCode := response.FindElement("Status/StatusCode")
-	if statusCode == nil {
+	topLevelStatusCode := response.FindElement("Status/StatusCode")
+	if topLevelStatusCode == nil {
 		return err
+	}
+
+	statusCode := topLevelStatusCode.SelectAttrValue("Value", "")
+	if nestedStatusCode := topLevelStatusCode.FindElement("StatusCode"); nestedStatusCode != nil {
+		statusCode += "/" + nestedStatusCode.SelectAttrValue("Value", "")
 	}
 
 	message := ""
@@ -462,7 +468,7 @@ func withIdPStatus(samlResponse string, err error) error {
 		message = statusMessage.Text()
 	}
 
-	return fmt.Errorf("response status %q, message %q: %w", truncateIdPStatus(statusCode.SelectAttrValue("Value", "")), truncateIdPStatus(message), err)
+	return fmt.Errorf("response status %q, message %q: %w", truncateIdPStatus(statusCode), truncateIdPStatus(message), err)
 }
 
 func truncateIdPStatus(value string) string {
