@@ -184,18 +184,6 @@ func (s *Saml) ValidateUrls() error {
 		return fmt.Errorf(invalidUrlFormat, s.Endpoint)
 	}
 
-	_, err = url.Parse(s.DefaultRedirectUrl)
-	if err != nil {
-		return fmt.Errorf(invalidUrlFormat, s.DefaultRedirectUrl)
-	}
-
-	for _, redirectUrl := range s.AllowedRedirectURLS {
-		_, err = url.Parse(redirectUrl)
-		if err != nil {
-			return fmt.Errorf(invalidUrlFormat, redirectUrl)
-		}
-	}
-
 	return nil
 }
 
