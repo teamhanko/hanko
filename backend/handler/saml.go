@@ -435,8 +435,12 @@ func (handler *Handler) getAssertionInfo(samlProvider *saml2.SAMLServiceProvider
 	return assertionInfo, nil
 }
 
+// maxIdPStatusLength limits the status code and the status message copied out of a response.
+const maxIdPStatusLength = 1024
+
 // withIdPStatus adds the IdP's own reason to a "missing Assertion" error. The library checks for
-// assertions before it reads the status, so an IdP error response would otherwise lose its reason.
+// assertions before it reads the status, so an IdP error response would otherwise lose its reason. The status
+// code and the message are cut to maxIdPStatusLength characters.
 func withIdPStatus(samlResponse string, err error) error {
 	var verificationErr saml2.ErrVerification
 	if !errors.As(err, &verificationErr) || verificationErr.Cause != saml2.ErrMissingAssertion {
@@ -458,7 +462,18 @@ func withIdPStatus(samlResponse string, err error) error {
 		message = statusMessage.Text()
 	}
 
-	return fmt.Errorf("idp returned status %q (message %q): %w", statusCode.SelectAttrValue("Value", ""), message, err)
+	return fmt.Errorf("idp returned status %q (message %q): %w", truncateIdPStatus(statusCode.SelectAttrValue("Value", "")), truncateIdPStatus(message), err)
+}
+
+func truncateIdPStatus(value string) string {
+	count := 0
+	for i := range value {
+		if count == maxIdPStatusLength {
+			return value[:i]
+		}
+		count++
+	}
+	return value
 }
 
 func (handler *Handler) redirectError(c echo.Context, error error, to string) error {

@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"net/http"
 	"net/http/httptest"
+	"strings"
 	"testing"
 
 	"github.com/gobuffalo/pop/v6"
@@ -61,18 +62,10 @@ func TestSamlHandler_auditError_carriesOriginalError(t *testing.T) {
 func TestSamlHandler_getAssertionInfo_reportsIdPStatus(t *testing.T) {
 	sp := &saml2.SAMLServiceProvider{IDPCertificateStore: &dsig.MemoryX509CertificateStore{}}
 
-	errorResponse := `<samlp:Response xmlns:samlp="urn:oasis:names:tc:SAML:2.0:protocol" xmlns:saml="urn:oasis:names:tc:SAML:2.0:assertion" Version="2.0">
-  <saml:Issuer>https://idp.example.com</saml:Issuer>
-  <samlp:Status>
-    <samlp:StatusCode Value="urn:oasis:names:tc:SAML:2.0:status:Responder"/>
-    <samlp:StatusMessage>Could not encrypt assertion</samlp:StatusMessage>
-  </samlp:Status>
-</samlp:Response>`
-
 	h := &Handler{}
 
 	t.Run("error response reports the status of the IdP", func(t *testing.T) {
-		_, err := h.getAssertionInfo(sp, base64.StdEncoding.EncodeToString([]byte(errorResponse)))
+		_, err := h.getAssertionInfo(sp, idpErrorResponse("urn:oasis:names:tc:SAML:2.0:status:Responder", "Could not encrypt assertion"))
 
 		require.Error(t, err)
 		assert.Contains(t, err.Error(), "urn:oasis:names:tc:SAML:2.0:status:Responder")
@@ -86,4 +79,29 @@ func TestSamlHandler_getAssertionInfo_reportsIdPStatus(t *testing.T) {
 		require.Error(t, err)
 		assert.NotContains(t, err.Error(), "idp returned status")
 	})
+}
+
+// The status message of a response is cut to 1024 characters, counting characters and not bytes.
+func TestSamlHandler_getAssertionInfo_truncatesIdPStatusMessage(t *testing.T) {
+	sp := &saml2.SAMLServiceProvider{IDPCertificateStore: &dsig.MemoryX509CertificateStore{}}
+	message := strings.Repeat("ü", 2000)
+
+	_, err := (&Handler{}).getAssertionInfo(sp, idpErrorResponse("urn:oasis:names:tc:SAML:2.0:status:Responder", message))
+
+	require.Error(t, err)
+	assert.Contains(t, err.Error(), strings.Repeat("ü", 1024))
+	assert.NotContains(t, err.Error(), strings.Repeat("ü", 1025))
+}
+
+// idpErrorResponse returns a base64 encoded, unsigned SAML response that has a status and no assertion.
+func idpErrorResponse(statusCode string, message string) string {
+	response := fmt.Sprintf(`<samlp:Response xmlns:samlp="urn:oasis:names:tc:SAML:2.0:protocol" xmlns:saml="urn:oasis:names:tc:SAML:2.0:assertion" Version="2.0">
+  <saml:Issuer>https://idp.example.com</saml:Issuer>
+  <samlp:Status>
+    <samlp:StatusCode Value="%s"/>
+    <samlp:StatusMessage>%s</samlp:StatusMessage>
+  </samlp:Status>
+</samlp:Response>`, statusCode, message)
+
+	return base64.StdEncoding.EncodeToString([]byte(response))
 }
