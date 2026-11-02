@@ -187,6 +187,7 @@ export const pl: Translation = {
   },
   flowErrors: {
     technical_error: "Wystąpił błąd techniczny. Spróbuj ponownie później.",
+    request_timeout: "Żądanie przekroczyło limit czasu. Spróbuj ponownie.",
     flow_expired_error:
       "Sesja wygasła, kliknij przycisk, aby rozpocząć od nowa.",
     value_invalid_error: "Wprowadzona wartość jest nieprawidłowa.",

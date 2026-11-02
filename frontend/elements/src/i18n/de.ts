@@ -198,6 +198,7 @@ export const de: Translation = {
   flowErrors: {
     technical_error:
       "Ein technischer Fehler ist aufgetreten. Bitte versuchen Sie es später erneut.",
+    request_timeout: "Die Anfrage hat das Zeitlimit überschritten. Bitte versuchen Sie es erneut.",
     flow_expired_error:
       "Die Sitzung ist abgelaufen, bitte klicken Sie auf die Schaltfläche, um neu zu starten.",
     value_invalid_error: "Der eingegebene Wert ist ungültig.",
