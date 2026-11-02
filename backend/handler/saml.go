@@ -444,7 +444,9 @@ const maxIdPStatusLength = 1024
 // and the message are cut to maxIdPStatusLength characters.
 func withIdPStatus(samlResponse string, err error) error {
 	var verificationErr saml2.ErrVerification
-	if !errors.As(err, &verificationErr) || verificationErr.Cause != saml2.ErrMissingAssertion {
+	isWrapped := errors.As(err, &verificationErr) && verificationErr.Cause == saml2.ErrMissingAssertion
+	isBare := err == saml2.ErrMissingAssertion
+	if !isWrapped && !isBare {
 		return err
 	}
 

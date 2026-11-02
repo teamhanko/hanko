@@ -104,6 +104,14 @@ func TestSamlHandler_getAssertionInfo_reportsNestedStatusCode(t *testing.T) {
 	assert.Contains(t, err.Error(), `"urn:oasis:names:tc:SAML:2.0:status:Responder/urn:oasis:names:tc:SAML:2.0:status:AuthnFailed"`)
 }
 
+// The status of a response is also reported if the library returns the missing assertion error without wrapping it.
+func TestSamlHandler_withIdPStatus_reportsStatusOfBareError(t *testing.T) {
+	err := withIdPStatus(idpErrorResponse("urn:oasis:names:tc:SAML:2.0:status:Responder", "", "Could not encrypt assertion"), saml2.ErrMissingAssertion)
+
+	require.ErrorIs(t, err, saml2.ErrMissingAssertion)
+	assert.Contains(t, err.Error(), "Could not encrypt assertion")
+}
+
 // idpErrorResponse returns a base64 encoded, unsigned SAML response that has a status and no assertion. The
 // nested status code is left out if it is empty.
 func idpErrorResponse(statusCode string, nestedStatusCode string, message string) string {
