@@ -21,9 +21,10 @@ func NewAdminRouter(cfg *config.Config, persister persistence.Persister, prometh
 		panic(err)
 	}
 
-	if err := utils.ConfigureSchemeExtractor(e, cfg.Server.IP); err != nil {
-		panic(err)
-	}
+	// By default Echo only reads X-Forwarded-Proto from loopback, link-local and private peers. The legacy extractor reads
+	// it from any peer, so the pagination Link headers stay https behind a proxy that connects from a public address.
+	// Any client can set the header, so don't base security decisions on Scheme().
+	e.SchemeExtractor = echo.LegacySchemeExtractor()
 
 	e.HideBanner = true
 	g := e.Group("")
