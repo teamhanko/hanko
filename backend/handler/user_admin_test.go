@@ -227,6 +227,28 @@ func (s *userAdminSuite) TestUserHandlerAdmin_List_Pagination() {
 	}
 }
 
+// TestUserHandlerAdmin_List_Pagination_BehindProxy tests that the Link header uses https when a proxy with a public
+// address sends X-Forwarded-Proto: https.
+func (s *userAdminSuite) TestUserHandlerAdmin_List_Pagination_BehindProxy() {
+	if testing.Short() {
+		s.T().Skip("skipping test in short mode.")
+	}
+	err := s.LoadFixtures("../test/fixtures/user_admin")
+	s.Require().NoError(err)
+
+	e := NewAdminRouter(&test.DefaultConfig, s.Storage, nil)
+
+	req := httptest.NewRequest(http.MethodGet, "/users", nil)
+	req.RemoteAddr = "35.191.1.2:12345"
+	req.Header.Set("X-Forwarded-Proto", "https")
+	rec := httptest.NewRecorder()
+
+	e.ServeHTTP(rec, req)
+
+	s.Require().Equal(http.StatusOK, rec.Code)
+	s.Equal("<https://example.com/users?page=1&per_page=20>; rel=\"first\"", rec.Header().Get("Link"))
+}
+
 func (s *userAdminSuite) TestUserHandlerAdmin_List_NoUsers() {
 	if testing.Short() {
 		s.T().Skip("skipping test in short mode.")
