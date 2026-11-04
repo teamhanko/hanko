@@ -16,12 +16,12 @@ jobs:
   check-matching-versions:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v7
+      - uses: actions/checkout@v7.0.1
         with:
           persist-credentials: false
       - name: get-npm-version
         id: package-version
-        uses: martinbeentjes/npm-get-version-action@main
+        uses: martinbeentjes/npm-get-version-action@v1.3.1
         with:
           path: frontend/elements
       - run: |
@@ -31,7 +31,7 @@ jobs:
       - run: echo ${{ steps.tag-version.outputs.git_tag_version }}
       - name: Version correctly set check
         if: steps.package-version.outputs.current-version != steps.tag-version.outputs.git_tag_version
-        uses: actions/github-script@v9
+        uses: actions/github-script@v9.0.0
         with:
           script: |
             core.setFailed('version in package.json is not equal to git tag version!')
@@ -40,10 +40,10 @@ jobs:
     needs: check-matching-versions
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v7
+      - uses: actions/checkout@v7.0.1
         with:
           persist-credentials: false
-      - uses: actions/setup-node@v7
+      - uses: actions/setup-node@v7.1.0
         with:
           node-version: 24.11.1
           registry-url: https://registry.npmjs.org/
