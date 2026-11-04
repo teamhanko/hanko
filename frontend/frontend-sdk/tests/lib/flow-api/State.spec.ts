@@ -236,6 +236,17 @@ describe("State", () => {
       expect(response.name).toBe("error");
       expect(response.error).toBeDefined();
     });
+
+    it("creates an error state with disabled actions on fetch failure", async () => {
+      (localStorage.getItem as jest.Mock).mockReturnValue(null);
+      (hankoMock.client.post as jest.Mock).mockRejectedValue(
+        new Error("Network error"),
+      );
+      const state = await State.create(hankoMock, flowName);
+      expect(state.name).toBe("error");
+      expect(state.error).toBeDefined();
+      expect(Object.keys(state.actions)).toEqual([]);
+    });
   });
 
   describe("initializeFlowState", () => {

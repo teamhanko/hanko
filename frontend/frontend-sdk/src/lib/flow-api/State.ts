@@ -194,7 +194,7 @@ export class State<TState extends StateName = StateName> {
   private buildActionMap(actions: Actions[TState]): ActionMap<TState> {
     const actionMap: Partial<ActionMap<TState>> = {};
 
-    Object.keys(actions).forEach((actionName) => {
+    Object.keys(actions ?? {}).forEach((actionName) => {
       const key = actionName as keyof Actions[TState];
       const action = actions[key] as ActionType<any>;
 
