@@ -19,6 +19,7 @@ import (
 	"github.com/teamhanko/hanko/backend/v3/pagination"
 	"github.com/teamhanko/hanko/backend/v3/persistence"
 	"github.com/teamhanko/hanko/backend/v3/persistence/models"
+	"github.com/teamhanko/hanko/backend/v3/saml"
 )
 
 type TenantHandler struct {
@@ -108,7 +109,7 @@ func (h *TenantHandler) Create(c echo.Context) error {
 		}
 
 		if cert == nil {
-			cert, err = models.NewSamlCertificate(tenantConfig.Service.Name)
+			cert, err = saml.NewCertificateService(h.persister).Generate(saml.NewCertificateSubject(tenantConfig.Service.Name, tenantConfig.Saml.Endpoint), saml.CertificateParams{})
 			if err != nil {
 				return fmt.Errorf("unable to create SAML certificate: %w", err)
 			}

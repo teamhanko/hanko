@@ -51,12 +51,7 @@ func (handler *Handler) Metadata(c echo.Context) error {
 	var request dto.SamlMetadataRequest
 	err = c.Bind(&request)
 	if err != nil {
-		return c.JSON(http.StatusBadRequest, thirdparty.ErrorInvalidRequest("domain is missing"))
-	}
-
-	foundProvider, _, err := handler.samlService.GetProviderByDomain(tenant.ID, tenant.Config, request.Domain)
-	if err != nil {
-		return c.NoContent(http.StatusNotFound)
+		return c.JSON(http.StatusBadRequest, thirdparty.ErrorInvalidRequest("invalid request"))
 	}
 
 	if request.CertOnly {
@@ -73,7 +68,15 @@ func (handler *Handler) Metadata(c echo.Context) error {
 		return c.Blob(http.StatusOK, echo.MIMEOctetStream, []byte(cert.CertData))
 	}
 
-	metadata, err := foundProvider.Metadata()
+	serviceProvider, err := handler.samlService.GetServiceProvider(tenant.ID, tenant.Config)
+	if err != nil {
+		if errors.Is(err, saml.ErrorSamlCertificateNotFound) {
+			return c.NoContent(http.StatusNotFound)
+		}
+		return c.JSON(http.StatusInternalServerError, thirdparty.ErrorServer("unable to provide metadata").WithCause(err))
+	}
+
+	metadata, err := serviceProvider.Metadata()
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, thirdparty.ErrorServer("unable to provide metadata").WithCause(err))
 	}

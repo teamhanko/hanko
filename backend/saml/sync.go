@@ -8,7 +8,6 @@ import (
 	"github.com/gofrs/uuid"
 	"github.com/teamhanko/hanko/backend/v3/config"
 	"github.com/teamhanko/hanko/backend/v3/persistence"
-	"github.com/teamhanko/hanko/backend/v3/persistence/models"
 )
 
 // SyncProviderConfigToDatabase syncs SAML providers from config file to database
@@ -44,7 +43,10 @@ func SyncProviderConfigToDatabase(cfg *config.Config, persister persistence.Pers
 		return fmt.Errorf("failed to ensure default tenant exists: %w", err)
 	}
 
-	err = ensureSamlCertificateExists(persister, tenantID, cfg.Service.Name)
+	err = ensureSamlCertificateExists(persister, tenantID, NewCertificateSubject(cfg.Service.Name, cfg.Saml.Endpoint))
+	if err != nil {
+		return fmt.Errorf("failed to ensure SAML certificate exists: %w", err)
+	}
 
 	providerSvc := NewSamlProviderManagementService(persister)
 
@@ -99,7 +101,7 @@ func ensureDefaultTenantExists(persister persistence.Persister, tenantID uuid.UU
 	return fmt.Errorf("default tenant does not exist")
 }
 
-func ensureSamlCertificateExists(persister persistence.Persister, tenantID uuid.UUID, serviceName string) error {
+func ensureSamlCertificateExists(persister persistence.Persister, tenantID uuid.UUID, subject CertificateSubject) error {
 	return persister.Transaction(func(tx *pop.Connection) error {
 		certPersister := persister.GetSamlCertificatePersisterWithConnection(tx)
 
@@ -111,7 +113,7 @@ func ensureSamlCertificateExists(persister persistence.Persister, tenantID uuid.
 		if cert == nil {
 			log.Printf("[SAML Migration] No SAML certificate for tenant '%s' exists, creating certificate ...", tenantID.String())
 
-			cert, err = models.NewSamlCertificate(serviceName)
+			cert, err = NewCertificateService(persister).Generate(subject, CertificateParams{})
 			if err != nil {
 				return fmt.Errorf("unable to create SAML certificate: %w", err)
 			}
