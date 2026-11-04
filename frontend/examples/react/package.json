@@ -29,7 +29,7 @@
     "@types/react-dom": "^18.3.7",
     "@vitejs/plugin-react": "6.1.2",
     "typescript": "^5.9.3",
-    "vite": "^8.3.4"
+    "vite": "^8.3.5"
   },
   "optionalDependencies": {
     "@rollup/rollup-linux-x64-gnu": "^4.64.5"
