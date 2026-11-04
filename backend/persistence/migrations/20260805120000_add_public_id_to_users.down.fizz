@@ -1,1 +1,2 @@
+drop_index("users", "users_tenant_id_public_id_idx")
 drop_column("users", "public_id")

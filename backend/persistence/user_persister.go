@@ -83,7 +83,7 @@ func (p *userPersister) findUser(query *pop.Query, tenantID uuid.UUID) (*models.
 	for _, identity := range user.Identities {
 		if identity.SamlIdentity != nil {
 			var samlProvider models.SamlProvider
-			q2 := p.db.RawQuery("select * from saml_providers where tenant_id = $1 and domain = $2", tenantID.String(), identity.SamlIdentity.Domain)
+			q2 := p.db.Where("tenant_id = ? AND domain = ?", tenantID.String(), identity.SamlIdentity.Domain)
 			if err := q2.First(&samlProvider); err != nil {
 				if errors.Is(err, sql.ErrNoRows) {
 					return nil, nil
