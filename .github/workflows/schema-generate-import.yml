@@ -6,18 +6,22 @@ on:
       - main
     paths:
       - backend/cmd/user/format.go
+permissions:
+  contents: write
+  pull-requests: write
+
 
 jobs:
   import:
     runs-on: ubuntu-latest
     steps:
       - name: Set up Go
-        uses: actions/setup-go@v7
+        uses: actions/setup-go@v7.0.0
         with:
           go-version: '1.26'
 
       - name: Checkout backend
-        uses: actions/checkout@v7
+        uses: actions/checkout@v7.0.1
         with:
           path: hanko
 
