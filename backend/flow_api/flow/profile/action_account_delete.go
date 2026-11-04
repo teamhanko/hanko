@@ -49,7 +49,7 @@ func (a AccountDelete) Execute(c flowpilot.ExecutionContext) error {
 		deps.Tx,
 		deps.HttpContext,
 		models.AuditLogUserDeleted,
-		&models.User{ID: userModel.ID},
+		&models.User{ID: userModel.ID, PublicID: userModel.PublicID},
 		nil,
 		deps.TenantID,
 		auditlog.Detail("flow_id", c.GetFlowID()))

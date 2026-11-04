@@ -222,3 +222,49 @@ func (s *userPersisterSuite) TestGetByPublicID() {
 	s.NoError(err)
 	s.Nil(notFoundEither, "the real internal id must not work as a public_id lookup key")
 }
+
+// TestGetPublicID confirms GetPublicID returns the public id for an internal id without eager
+// loading the user, only within the given tenant, and nil (not an error) for unknown ids.
+func (s *userPersisterSuite) TestGetPublicID() {
+	if testing.Short() {
+		s.T().Skip("skipping test in short mode.")
+	}
+
+	tenantAID, err := uuid.NewV4()
+	s.Require().NoError(err)
+	tenantBID, err := uuid.NewV4()
+	s.Require().NoError(err)
+
+	now := time.Now()
+	tenantPersister := s.Storage.GetTenantPersister()
+	s.Require().NoError(tenantPersister.Create(models.Tenant{ID: tenantAID, CreatedAt: now, UpdatedAt: now}))
+	s.Require().NoError(tenantPersister.Create(models.Tenant{ID: tenantBID, CreatedAt: now, UpdatedAt: now}))
+
+	userPersister := s.Storage.GetUserPersister()
+
+	internalID, err := uuid.NewV4()
+	s.Require().NoError(err)
+	publicID, err := uuid.NewV4()
+	s.Require().NoError(err)
+
+	s.Require().NoError(userPersister.Create(models.User{
+		ID:        internalID,
+		PublicID:  &publicID,
+		TenantID:  tenantAID,
+		CreatedAt: now,
+		UpdatedAt: now,
+	}))
+
+	found, err := userPersister.GetPublicID(internalID, tenantAID)
+	s.NoError(err)
+	s.Require().NotNil(found)
+	s.Equal(publicID, *found)
+
+	otherTenant, err := userPersister.GetPublicID(internalID, tenantBID)
+	s.NoError(err)
+	s.Nil(otherTenant, "an internal id must never resolve across tenants")
+
+	unknown, err := userPersister.GetPublicID(uuid.Must(uuid.NewV4()), tenantAID)
+	s.NoError(err)
+	s.Nil(unknown)
+}
