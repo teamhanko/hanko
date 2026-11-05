@@ -18,7 +18,7 @@
     "prettier": "3.9.10",
     "typescript": "~5.9.0",
     "vite": "^8.3.5",
-    "vue-tsc": "^3.3.13"
+    "vue-tsc": "^3.3.14"
   },
   "optionalDependencies": {
     "@rollup/rollup-linux-x64-gnu": "^4.64.5"
