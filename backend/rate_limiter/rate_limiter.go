@@ -25,8 +25,7 @@ func NewRateLimiter(cfg config.RateLimiter, limits config.RateLimits) limiter.St
 			Tokens:   limits.Tokens,
 			Interval: limits.Interval,
 			Dial: func() (redis.Conn, error) {
-				return redis.Dial("tcp", cfg.Redis.Address,
-					redis.DialPassword(cfg.Redis.Password))
+				return redis.DialURL("redis://"+cfg.Redis.Address, redis.DialPassword(cfg.Redis.Password))
 			},
 		})
 		if err != nil {
