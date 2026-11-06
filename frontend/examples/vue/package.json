@@ -21,7 +21,7 @@
     "vue-tsc": "^3.3.14"
   },
   "optionalDependencies": {
-    "@rollup/rollup-linux-x64-gnu": "^4.64.5"
+    "@rollup/rollup-linux-x64-gnu": "^4.67.4"
   },
   "overrides": {
     "vite": {
