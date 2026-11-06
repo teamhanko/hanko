@@ -34,6 +34,17 @@ func LinkAccount(tx *pop.Connection, cfg *config.TenantConfig, p persistence.Per
 		return nil, ErrorServer("could not get identity").WithCause(err)
 	}
 
+	if identity != nil && identity.UserID == nil {
+		// Connecting an account from the profile creates the identity without a user and only links it to the
+		// user when the token is exchanged. If the exchange never happens, the identity stays unlinked. Remove it,
+		// so that this attempt links the provider account again instead of signing in to an identity without a user.
+		err = p.GetIdentityPersisterWithConnection(tx).Delete(*identity)
+		if err != nil {
+			return nil, ErrorServer("could not delete unlinked identity").WithCause(err)
+		}
+		identity = nil
+	}
+
 	var result *AccountLinkingResult
 	if identity == nil {
 		var user *models.User
