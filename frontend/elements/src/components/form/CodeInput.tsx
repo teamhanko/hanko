@@ -65,7 +65,6 @@ const Digit = ({ index, focus, digit = "", ...props }: DigitProps) => {
         name={props.name + index.toString(10)}
         type={"text"}
         inputMode={"numeric"}
-        maxLength={1}
         ref={ref}
         value={digit.charAt(0)}
         required={true}
@@ -105,31 +104,29 @@ const CodeInput = ({
     onInput(digits);
   };
 
+  // Writes the code to the inputs starting at the given position and focuses the input following the last written
+  // digit, or the last input if the code reaches it
+  const fillDigits = (code: string, startIndex: number) => {
+    const digits = getPasscodeDigits();
+    const chars = code.slice(0, numberOfInputs - startIndex).split("");
+
+    chars.forEach((char, index) => {
+      digits[startIndex + index] = char;
+    });
+
+    setActiveInputIndex(
+      Math.min(startIndex + chars.length, numberOfInputs - 1),
+    );
+    onInput(digits);
+  };
+
   const handleOnPaste = (event: ClipboardEvent) => {
     event.preventDefault();
     if (disabled) {
       return;
     }
 
-    // Get pastedData in an array of max size (num of inputs - current position)
-    const pastedData = event.clipboardData
-      .getData("text/plain")
-      .slice(0, numberOfInputs - activeInputIndex)
-      .split("");
-
-    const digits = getPasscodeDigits();
-    let nextActiveInput = activeInputIndex;
-
-    // Paste data from focused input onwards
-    for (let index = 0; index < numberOfInputs; ++index) {
-      if (index >= activeInputIndex && pastedData.length > 0) {
-        digits[index] = pastedData.shift();
-        nextActiveInput++;
-      }
-    }
-
-    setActiveInputIndex(nextActiveInput);
-    onInput(digits);
+    fillDigits(event.clipboardData.getData("text/plain"), activeInputIndex);
   };
 
   // Handle cases of backspace, delete, left arrow, right arrow, space
@@ -159,6 +156,11 @@ const CodeInput = ({
   // The content may not have changed, but some input took place hence change the focus
   const handleOnInput = (event: Event) => {
     if (event.target instanceof HTMLInputElement) {
+      // Only the first input accepts more than one character, which happens when the browser autofills the whole code
+      if (event.target.value.length > 1) {
+        fillDigits(event.target.value, 0);
+        return;
+      }
       changeCodeAtFocus(event.target.value);
     }
     focusNextInput();
@@ -184,6 +186,8 @@ const CodeInput = ({
           index={index}
           focus={activeInputIndex === index}
           digit={passcodeDigits[index]}
+          autocomplete={index === 0 ? "one-time-code" : "off"}
+          maxLength={index === 0 ? numberOfInputs : 1}
           onKeyDown={handleOnKeyDown}
           onInput={handleOnInput}
           onPaste={handleOnPaste}
