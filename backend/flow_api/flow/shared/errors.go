@@ -25,4 +25,5 @@ var (
 	ErrorOTPCodeInvalid        = flowpilot.NewInputError("otp_code_invalid", "The OTP code is invalid.")
 	ErrorOTPCodeAlreadyUsed    = flowpilot.NewInputError("otp_code_already_used", "The OTP code has already been used.")
 	ErrorInvalidMetadata       = flowpilot.NewInputError("invalid_metadata_error", "The metadata is invalid.")
+	ErrorRedirectURLNotAllowed = flowpilot.NewInputError("redirect_url_not_allowed", "The redirect URL is not on the list of allowed redirect URLs.")
 )
