@@ -1,0 +1,38 @@
+login_text:
+  description: "The sign in content of the text email."
+  other: "Въведете следния код за достъп, за да потвърдите самоличността си:"
+ttl_text:
+  description: "The length how long the passcode is valid."
+  other: "Кодът за достъп е валиден {{ .TTL }} мин."
+email_subject_login:
+  description: ""
+  other: "{{ .Code }} е вашият код за достъп до {{ .ServiceName }}"
+subject_email_verification:
+  description: ""
+  other: "Използвайте код {{ .Code }}, за да потвърдите имейл адреса си"
+subject_login:
+  description: ""
+  other: "Използвайте код {{ .Code }}, за да влезете в профила си"
+subject_recovery:
+  description: ""
+  other: "Използвайте код {{ .Code }}, за да възстановите профила си"
+email_verification_text:
+  description: ""
+  other: "Въведете следния код за достъп, за да потвърдите имейл адреса си:"
+recovery_text:
+  description: "The content of the recovery text email."
+  other: "Въведете следния код за достъп на екрана за вход:"
+
+subject_email_login_attempted:
+  description: "Subject for notification about a login attempt."
+  other: "Посоченият имейл адрес не е разпознат"
+email_login_attempted_text:
+  description: "Notifies the recipient that either they or someone else attempted to log in to a specific service using an unrecognized email address."
+  other: "Вие или някой друг се опита да влезе в {{ .ServiceName }}, но посоченият имейл адрес не е разпознат. Моля, първо създайте профил."
+
+subject_email_registration_attempted:
+  description: "Subject for notification about a registration attempt."
+  other: "Посоченият имейл адрес вече е регистриран"
+email_registration_attempted_text:
+  description: "Notifies the recipient that either they or someone else attempted to register for a specific service using an email address that is already in use."
+  other: "Вие или някой друг се опита да регистрира имейл адрес в {{ .ServiceName }}, но посоченият имейл адрес вече е регистриран. Моля, вместо това опитайте да влезете."

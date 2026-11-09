@@ -1,0 +1,48 @@
+password_update_text:
+  description: ""
+  other: "Паролата за вашия профил в {{ .ServiceName }} беше променена."
+subject_password_update:
+  description: ""
+  other: "Паролата ви беше променена"
+
+primary_email_update_text:
+  description: ""
+  other: "Основният имейл адрес на вашия профил в {{ .ServiceName }} беше променен от {{ .OldEmailAddress }} на {{ .NewEmailAddress }}."
+subject_primary_email_update:
+  description: ""
+  other: "Основният ви имейл адрес беше променен"
+
+email_create_text:
+  description: ""
+  other: "Имейл адресът {{ .NewEmailAddress }} беше добавен към вашия профил в {{ .ServiceName }}."
+subject_email_create:
+  description: ""
+  other: "Добавен е нов имейл адрес"
+
+email_delete_text:
+  description: ""
+  other: "Имейл адресът {{ .DeletedEmailAddress }} беше премахнат от вашия профил в {{ .ServiceName }}."
+subject_email_delete:
+  description: ""
+  other: "Имейл адрес беше премахнат"
+
+passkey_create_text:
+  description: ""
+  other: "Към вашия профил в {{ .ServiceName }} беше добавен нов ключ за достъп."
+subject_passkey_create:
+  description: ""
+  other: "Добавен е нов ключ за достъп"
+
+mfa_create_text:
+  description: ""
+  other: "Към вашия профил в {{ .ServiceName }} беше успешно добавен нов метод за многофакторно удостоверяване (MFA)."
+subject_mfa_create:
+  description: ""
+  other: "Добавен е нов метод за MFA"
+
+mfa_delete_text:
+  description: ""
+  other: "Съществуващ метод за многофакторно удостоверяване (MFA) беше премахнат от вашия профил в {{ .ServiceName }}."
+subject_mfa_delete:
+  description: ""
+  other: "Методът за MFA беше премахнат"
