@@ -16,7 +16,6 @@ import (
 	"github.com/gofrs/uuid"
 	"github.com/stretchr/testify/suite"
 	"github.com/teamhanko/hanko/backend/v3/config"
-	"github.com/teamhanko/hanko/backend/v3/persistence/models"
 	"github.com/teamhanko/hanko/backend/v3/test"
 )
 
@@ -45,7 +44,7 @@ func (s *samlProviderServiceSuite) getAuthUrl(signAuthnRequests bool) (*url.URL,
 	)
 	providerID := storeTestProviderMetadata(&s.Suite, tenantID, rawXML, testPostSSOLocation)
 
-	certificate, err := models.NewSamlCertificate("Test Service")
+	certificate, err := NewCertificateService(s.Storage).Generate(NewCertificateSubject("Test Service", ""), CertificateParams{})
 	s.Require().NoError(err)
 	certificate.TenantID = tenantID
 	s.Require().NoError(s.Storage.GetSamlCertificatePersister().Create(certificate))
