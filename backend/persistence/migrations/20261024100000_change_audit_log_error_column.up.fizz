@@ -1,0 +1,1 @@
+change_column("audit_logs", "error", "text", {"null": true})

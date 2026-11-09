@@ -3,10 +3,12 @@ package credential_onboarding
 import (
 	"errors"
 	"fmt"
+	"unicode/utf8"
+
 	"github.com/teamhanko/hanko/backend/v3/flow_api/flow/shared"
+	"github.com/teamhanko/hanko/backend/v3/flow_api/services"
 	"github.com/teamhanko/hanko/backend/v3/flowpilot"
 	"golang.org/x/crypto/bcrypt"
-	"unicode/utf8"
 )
 
 type RegisterPassword struct {
@@ -26,7 +28,8 @@ func (a RegisterPassword) Initialize(c flowpilot.InitializationContext) {
 
 	input := flowpilot.PasswordInput("new_password").
 		Required(!deps.Cfg.Password.Optional).
-		MinLength(deps.Cfg.Password.MinLength)
+		MinLength(deps.Cfg.Password.MinLength).
+		MaxLength(services.MaxPasswordLength)
 
 	c.AddInputs(input)
 }

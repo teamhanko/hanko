@@ -6,7 +6,7 @@
     "@teamhanko/hanko-elements": "^3.1.0",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
-    "react-router-dom": "7.18.4"
+    "react-router-dom": "7.18.5"
   },
   "scripts": {
     "start": "vite --port 8888 --host",
@@ -29,7 +29,7 @@
     "@types/react-dom": "^18.3.7",
     "@vitejs/plugin-react": "6.1.2",
     "typescript": "^5.9.3",
-    "vite": "^8.3.4"
+    "vite": "^8.3.5"
   },
   "optionalDependencies": {
     "@rollup/rollup-linux-x64-gnu": "^4.64.5"

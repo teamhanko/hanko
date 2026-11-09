@@ -200,7 +200,7 @@ func (handler *Handler) callbackPostIdPInitiated(c echo.Context, samlResponse st
 	if err != nil {
 		return handler.redirectError(
 			c,
-			thirdparty.ErrorInvalidRequest("could not get assertion info").WithCause(err),
+			thirdparty.ErrorInvalidRequest("could not process saml response").WithCause(fmt.Errorf("idp-initiated: %w", err)),
 			redirectTo.String(),
 		)
 	}
@@ -332,7 +332,7 @@ func (handler *Handler) CallbackPost(c echo.Context) error {
 		if err != nil {
 			return handler.redirectError(
 				c,
-				thirdparty.ErrorServer("unable to parse saml response").WithCause(err),
+				thirdparty.ErrorInvalidRequest("could not process saml response").WithCause(fmt.Errorf("sp-initiated: %w", err)),
 				redirectTo.String(),
 			)
 		}
@@ -424,18 +424,71 @@ func (handler *Handler) linkAccount(c echo.Context, redirectTo *url.URL, isFlow 
 func (handler *Handler) getAssertionInfo(samlProvider *saml2.SAMLServiceProvider, samlResponse string) (*saml2.AssertionInfo, error) {
 	assertionInfo, err := samlProvider.RetrieveAssertionInfo(samlResponse)
 	if err != nil {
-		return nil, thirdparty.ErrorServer("unable to parse SAML response").WithCause(err)
+		return nil, fmt.Errorf("unable to parse SAML response: %w", withIdPStatus(samlResponse, err))
 	}
 
 	if assertionInfo.WarningInfo.InvalidTime {
-		return nil, thirdparty.ErrorServer("SAMLAssertion expired")
+		// The library sets this flag both for an assertion that is not valid yet and for one that has expired, so
+		// the validity period and the current time are reported instead of a single cause.
+		conditions := assertionInfo.Assertions[0].Conditions
+		return nil, fmt.Errorf("SAMLAssertion is not valid at this time (now %s, not before %s, not on or after %s)",
+			samlProvider.Clock.Now().UTC().Format(time.RFC3339), conditions.NotBefore, conditions.NotOnOrAfter)
 	}
 
 	if assertionInfo.WarningInfo.NotInAudience {
-		return nil, thirdparty.ErrorServer("not in SAML audience")
+		return nil, errors.New("not in SAML audience")
 	}
 
 	return assertionInfo, nil
+}
+
+// maxIdPStatusLength limits the status code and the status message copied out of a response.
+const maxIdPStatusLength = 1024
+
+// withIdPStatus adds the status of a response to a "missing Assertion" error. The library checks for
+// assertions before it reads the status, so an IdP error response would otherwise lose its reason. The status
+// code is the top-level code followed by the nested code, if there is one, separated by "/". The status code
+// and the message are cut to maxIdPStatusLength characters.
+func withIdPStatus(samlResponse string, err error) error {
+	var verificationErr saml2.ErrVerification
+	isWrapped := errors.As(err, &verificationErr) && verificationErr.Cause == saml2.ErrMissingAssertion
+	isBare := err == saml2.ErrMissingAssertion
+	if !isWrapped && !isBare {
+		return err
+	}
+
+	_, response, parseErr := saml.ParseSamlResponse(samlResponse)
+	if parseErr != nil {
+		return err
+	}
+
+	topLevelStatusCode := response.FindElement("Status/StatusCode")
+	if topLevelStatusCode == nil {
+		return err
+	}
+
+	statusCode := topLevelStatusCode.SelectAttrValue("Value", "")
+	if nestedStatusCode := topLevelStatusCode.FindElement("StatusCode"); nestedStatusCode != nil {
+		statusCode += "/" + nestedStatusCode.SelectAttrValue("Value", "")
+	}
+
+	message := ""
+	if statusMessage := response.FindElement("Status/StatusMessage"); statusMessage != nil {
+		message = statusMessage.Text()
+	}
+
+	return fmt.Errorf("response status %q, message %q: %w", truncateIdPStatus(statusCode), truncateIdPStatus(message), err)
+}
+
+func truncateIdPStatus(value string) string {
+	count := 0
+	for i := range value {
+		if count == maxIdPStatusLength {
+			return value[:i]
+		}
+		count++
+	}
+	return value
 }
 
 func (handler *Handler) redirectError(c echo.Context, error error, to string) error {
@@ -450,9 +503,9 @@ func (handler *Handler) redirectError(c echo.Context, error error, to string) er
 	return c.Redirect(http.StatusSeeOther, redirectURL)
 }
 
-func (handler *Handler) auditError(c echo.Context, err error) error {
+func (handler *Handler) auditError(c echo.Context, logError error) error {
 	var e *thirdparty.ThirdPartyError
-	ok := errors.As(err, &e)
+	ok := errors.As(logError, &e)
 
 	tenant, err := context.GetTenant(c)
 	if err != nil {
@@ -461,7 +514,7 @@ func (handler *Handler) auditError(c echo.Context, err error) error {
 
 	var auditLogError error
 	if ok && e.Code != thirdparty.ErrorCodeServerError {
-		auditLogError = handler.auditLogger.Create(c, models.AuditLogThirdPartySignInSignUpFailed, nil, err, tenant.ID)
+		auditLogError = handler.auditLogger.Create(c, models.AuditLogThirdPartySignInSignUpFailed, nil, logError, tenant.ID)
 	}
 	return auditLogError
 }

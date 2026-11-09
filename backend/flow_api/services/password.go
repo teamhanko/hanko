@@ -43,6 +43,7 @@ var fbscryptStringRegexp = regexp.MustCompile(`^\$fbscrypt\$v=(?P<v>[0-9]+),n=(?
 const (
 	FirebaseScryptPrefix = "$fbscrypt"
 	FirebaseScryptKeyLen = 32
+	MaxPasswordLength    = 72 // The maximum password length supported by bcrypt
 )
 
 type FirebaseScryptParameters struct {

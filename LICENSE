@@ -1,21 +1,3 @@
-  Portions of this software are licensed as follows:
-
-  All content that resides under the "elements" directory
-(https://github.com/teamhanko/hanko/tree/main/frontend/elements) of this repository is
-licensed under the license defined in "elements/LICENSE".
-
-  All content that resides under the "frontend-sdk" directory
-(https://github.com/teamhanko/hanko/tree/main/frontend/frontend-sdk) of this repository is
-licensed under the license defined in "frontend-sdk/LICENSE".
-
-  All third party components incorporated into Hanko software are licensed
-under the original license provided by the owner of the applicable component.
-
-  Content outside of the above mentioned directories or restrictions above is
-available under the "AGPLv3" license as defined below.
-
---
-
                     GNU AFFERO GENERAL PUBLIC LICENSE
                        Version 3, 19 November 2007
 

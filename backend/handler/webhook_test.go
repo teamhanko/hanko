@@ -196,6 +196,9 @@ func (s *webhookSuite) TestWebhookHandler_CreateWithParams() {
 }
 
 func (s *webhookSuite) TestWebhookHandler_Delete() {
+	if testing.Short() {
+		s.T().Skip("skipping test in short mode.")
+	}
 	s.Require().NoError(s.Storage.MigrateUp())
 
 	err := s.LoadFixtures("../test/fixtures/webhooks")
@@ -291,6 +294,9 @@ func (s *webhookSuite) TestWebhookHandler_DeleteWithParams() {
 	}
 }
 func (s *webhookSuite) TestWebhookHandler_Get() {
+	if testing.Short() {
+		s.T().Skip("skipping test in short mode.")
+	}
 	s.Require().NoError(s.Storage.MigrateUp())
 
 	err := s.LoadFixtures("../test/fixtures/webhooks")
@@ -392,6 +398,9 @@ func (s *webhookSuite) TestWebhookHandler_GetWithParams() {
 	}
 }
 func (s *webhookSuite) TestWebhookHandler_Update() {
+	if testing.Short() {
+		s.T().Skip("skipping test in short mode.")
+	}
 	s.Require().NoError(s.Storage.MigrateUp())
 
 	err := s.LoadFixtures("../test/fixtures/webhooks")

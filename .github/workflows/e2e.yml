@@ -2,13 +2,18 @@ name: E2E Test
 
 on:
   workflow_dispatch:
+permissions:
+  contents: read
+
 
 jobs:
   passwordless:
     runs-on: ubuntu-22.04
     steps:
       - name: Checkout
-        uses: actions/checkout@v7
+        uses: actions/checkout@v7.0.1
+        with:
+          persist-credentials: false
 
       - name: Start containers
         working-directory: ./deploy/docker-compose
@@ -32,7 +37,9 @@ jobs:
     runs-on: ubuntu-22.04
     steps:
       - name: Checkout
-        uses: actions/checkout@v7
+        uses: actions/checkout@v7.0.1
+        with:
+          persist-credentials: false
 
       - name: Start containers
         working-directory: ./deploy/docker-compose
@@ -58,7 +65,9 @@ jobs:
     runs-on: ubuntu-22.04
     steps:
       - name: Checkout
-        uses: actions/checkout@v7
+        uses: actions/checkout@v7.0.1
+        with:
+          persist-credentials: false
 
       - name: Copy config
         working-directory: ./deploy/docker-compose

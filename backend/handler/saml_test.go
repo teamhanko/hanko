@@ -1,89 +1,192 @@
 package handler
 
 import (
+	"encoding/base64"
+	"fmt"
 	"net/http"
 	"net/http/httptest"
+	"strings"
 	"testing"
+	"time"
 
 	"github.com/gofrs/uuid"
-	"github.com/stretchr/testify/suite"
-	"github.com/teamhanko/hanko/backend/v3/saml"
+	"github.com/labstack/echo/v4"
+	saml2 "github.com/russellhaering/gosaml2"
+	dsig "github.com/russellhaering/goxmldsig"
+	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
+	"github.com/teamhanko/hanko/backend/v3/context"
+	"github.com/teamhanko/hanko/backend/v3/persistence/models"
 	"github.com/teamhanko/hanko/backend/v3/test"
+	"github.com/teamhanko/hanko/backend/v3/thirdparty"
 )
 
-func TestSamlSuite(t *testing.T) {
-	t.Parallel()
-	suite.Run(t, new(samlSuite))
+// auditError must hand the error it was given, including its cause, to the audit logger.
+func TestSamlHandler_auditError_carriesOriginalError(t *testing.T) {
+	logger := test.NewAuditLogger()
+	h := &Handler{auditLogger: logger}
+
+	c := echo.New().NewContext(httptest.NewRequest(http.MethodPost, "/saml/callback", nil), httptest.NewRecorder())
+	c.Set("tenant", context.Tenant{ID: uuid.Must(uuid.NewV4())})
+
+	cause := fmt.Errorf("assertion rejected")
+	err := h.auditError(c, thirdparty.ErrorInvalidRequest("could not get assertion info").WithCause(cause))
+
+	require.NoError(t, err)
+	entries := logger.Entries()
+	require.Len(t, entries, 1)
+	assert.Equal(t, models.AuditLogThirdPartySignInSignUpFailed, entries[0].Type)
+	require.Error(t, entries[0].Error)
+	assert.Contains(t, entries[0].Error.Error(), "could not get assertion info")
+	assert.Contains(t, entries[0].Error.Error(), cause.Error())
 }
 
-type samlSuite struct {
-	test.Suite
+// A response that carries a status but no assertion must report that status in the error.
+func TestSamlHandler_getAssertionInfo_reportsIdPStatus(t *testing.T) {
+	sp := &saml2.SAMLServiceProvider{IDPCertificateStore: &dsig.MemoryX509CertificateStore{}}
+
+	h := &Handler{}
+
+	t.Run("error response reports the status of the IdP", func(t *testing.T) {
+		_, err := h.getAssertionInfo(sp, idpErrorResponse("urn:oasis:names:tc:SAML:2.0:status:Responder", "", "Could not encrypt assertion"))
+
+		require.Error(t, err)
+		assert.Contains(t, err.Error(), "response status")
+		assert.Contains(t, err.Error(), "urn:oasis:names:tc:SAML:2.0:status:Responder")
+		assert.Contains(t, err.Error(), "Could not encrypt assertion")
+		assert.Contains(t, err.Error(), "missing Assertion element")
+	})
+
+	t.Run("other failures are left as they are", func(t *testing.T) {
+		_, err := h.getAssertionInfo(sp, "not a saml response")
+
+		require.Error(t, err)
+		assert.NotContains(t, err.Error(), "response status")
+	})
 }
 
-// defaultTenantID is the tenant inserted by the add_tenant_id migration.
-const defaultTenantID = "00000000-0000-0000-0000-000000000001"
+// The status message of a response is cut to 1024 characters, counting characters and not bytes.
+func TestSamlHandler_getAssertionInfo_truncatesIdPStatusMessage(t *testing.T) {
+	sp := &saml2.SAMLServiceProvider{IDPCertificateStore: &dsig.MemoryX509CertificateStore{}}
+	message := strings.Repeat("ü", 2000)
 
-func (s *samlSuite) createCertificate() {
-	cert, err := saml.NewCertificateService(s.Storage).Generate(saml.NewCertificateSubject("test", ""), saml.CertificateParams{})
-	s.Require().NoError(err)
-	cert.TenantID = uuid.Must(uuid.FromString(defaultTenantID))
-	s.Require().NoError(s.Storage.GetSamlCertificatePersister().Create(cert))
+	_, err := (&Handler{}).getAssertionInfo(sp, idpErrorResponse("urn:oasis:names:tc:SAML:2.0:status:Responder", "", message))
+
+	require.Error(t, err)
+	assert.Contains(t, err.Error(), strings.Repeat("ü", 1024))
+	assert.NotContains(t, err.Error(), strings.Repeat("ü", 1025))
 }
 
-func (s *samlSuite) get(path string) *httptest.ResponseRecorder {
-	cfg := test.DefaultConfig
-	cfg.TenantConfig.Saml.Enabled = true
-	cfg.TenantConfig.Saml.Endpoint = "https://hanko.example.com"
-	e := NewPublicRouter(&cfg, s.Storage, nil, nil)
+// The nested status code of a response is reported after the top-level one.
+func TestSamlHandler_getAssertionInfo_reportsNestedStatusCode(t *testing.T) {
+	sp := &saml2.SAMLServiceProvider{IDPCertificateStore: &dsig.MemoryX509CertificateStore{}}
 
-	rec := httptest.NewRecorder()
-	e.ServeHTTP(rec, httptest.NewRequest(http.MethodGet, path, nil))
-	return rec
+	_, err := (&Handler{}).getAssertionInfo(sp, idpErrorResponse("urn:oasis:names:tc:SAML:2.0:status:Responder", "urn:oasis:names:tc:SAML:2.0:status:AuthnFailed", "Authentication failed"))
+
+	require.Error(t, err)
+	assert.Contains(t, err.Error(), `"urn:oasis:names:tc:SAML:2.0:status:Responder/urn:oasis:names:tc:SAML:2.0:status:AuthnFailed"`)
 }
 
-// The metadata is tenant-wide, so it must be available without any SAML provider
-// configured and without a domain.
-func (s *samlSuite) TestMetadata_WithoutProviderOrDomain() {
-	if testing.Short() {
-		s.T().Skip("skipping test in short mode.")
+// The status of a response is also reported if the library returns the missing assertion error without wrapping it.
+func TestSamlHandler_withIdPStatus_reportsStatusOfBareError(t *testing.T) {
+	err := withIdPStatus(idpErrorResponse("urn:oasis:names:tc:SAML:2.0:status:Responder", "", "Could not encrypt assertion"), saml2.ErrMissingAssertion)
+
+	require.ErrorIs(t, err, saml2.ErrMissingAssertion)
+	assert.Contains(t, err.Error(), "Could not encrypt assertion")
+}
+
+// An assertion that is not valid yet or has expired must be rejected, and the error must name its validity period.
+func TestSamlHandler_getAssertionInfo_rejectsAssertionOutsideValidityPeriod(t *testing.T) {
+	now := time.Now()
+
+	tests := map[string]struct {
+		notBefore    time.Time
+		notOnOrAfter time.Time
+	}{
+		"expired":       {notBefore: now.Add(-2 * time.Hour), notOnOrAfter: now.Add(-time.Hour)},
+		"not valid yet": {notBefore: now.Add(time.Hour), notOnOrAfter: now.Add(2 * time.Hour)},
 	}
-	s.createCertificate()
 
-	rec := s.get("/saml/metadata")
+	for name, tt := range tests {
+		t.Run(name, func(t *testing.T) {
+			_, err := (&Handler{}).getAssertionInfo(assertionTestServiceProvider(), assertionResponse(tt.notBefore, tt.notOnOrAfter, testAudience))
 
-	s.Require().Equal(http.StatusOK, rec.Code, rec.Body.String())
-	s.Contains(rec.Body.String(), `entityID="https://hanko.example.com"`)
-	s.Contains(rec.Body.String(), "https://hanko.example.com/saml/callback")
-	s.Contains(rec.Body.String(), `use="signing"`)
+			require.Error(t, err)
+			assert.Contains(t, err.Error(), "SAMLAssertion is not valid at this time")
+			assert.Contains(t, err.Error(), tt.notBefore.UTC().Format(time.RFC3339))
+			assert.Contains(t, err.Error(), tt.notOnOrAfter.UTC().Format(time.RFC3339))
+		})
+	}
 }
 
-// Metadata URLs handed out before the domain was dropped must keep working.
-func (s *samlSuite) TestMetadata_IgnoresDomain() {
-	if testing.Short() {
-		s.T().Skip("skipping test in short mode.")
-	}
-	s.createCertificate()
+// An assertion that is meant for another audience must be rejected.
+func TestSamlHandler_getAssertionInfo_rejectsAssertionForOtherAudience(t *testing.T) {
+	now := time.Now()
 
-	s.Equal(http.StatusOK, s.get("/saml/metadata?domain=idp.example.com").Code)
+	_, err := (&Handler{}).getAssertionInfo(assertionTestServiceProvider(), assertionResponse(now.Add(-time.Hour), now.Add(time.Hour), "https://other.example.com"))
+
+	require.Error(t, err)
+	assert.Contains(t, err.Error(), "not in SAML audience")
 }
 
-func (s *samlSuite) TestMetadata_CertOnly() {
-	if testing.Short() {
-		s.T().Skip("skipping test in short mode.")
+const (
+	testAudience = "https://sp.example.com"
+	testACSURL   = "https://sp.example.com/saml/callback"
+)
+
+// assertionTestServiceProvider returns a service provider that accepts an unsigned response with an assertion.
+func assertionTestServiceProvider() *saml2.SAMLServiceProvider {
+	return &saml2.SAMLServiceProvider{
+		SkipSignatureValidation:     true,
+		AllowMissingAttributes:      true,
+		Clock:                       dsig.NewRealClock(),
+		AudienceURI:                 testAudience,
+		AssertionConsumerServiceURL: testACSURL,
 	}
-	s.createCertificate()
-
-	rec := s.get("/saml/metadata?cert_only=true")
-
-	s.Require().Equal(http.StatusOK, rec.Code, rec.Body.String())
-	s.Contains(rec.Body.String(), "-----BEGIN CERTIFICATE-----")
 }
 
-func (s *samlSuite) TestMetadata_NoCertificate() {
-	if testing.Short() {
-		s.T().Skip("skipping test in short mode.")
+// assertionResponse returns a base64 encoded, unsigned SAML response with a successful status and one assertion
+// that has the given validity period and audience.
+func assertionResponse(notBefore time.Time, notOnOrAfter time.Time, audience string) string {
+	response := fmt.Sprintf(`<samlp:Response xmlns:samlp="urn:oasis:names:tc:SAML:2.0:protocol" xmlns:saml="urn:oasis:names:tc:SAML:2.0:assertion" Version="2.0">
+  <saml:Issuer>https://idp.example.com</saml:Issuer>
+  <samlp:Status>
+    <samlp:StatusCode Value="urn:oasis:names:tc:SAML:2.0:status:Success"/>
+  </samlp:Status>
+  <saml:Assertion Version="2.0">
+    <saml:Issuer>https://idp.example.com</saml:Issuer>
+    <saml:Subject>
+      <saml:NameID>user@example.com</saml:NameID>
+      <saml:SubjectConfirmation Method="urn:oasis:names:tc:SAML:2.0:cm:bearer">
+        <saml:SubjectConfirmationData Recipient="%s" NotOnOrAfter="%s"/>
+      </saml:SubjectConfirmation>
+    </saml:Subject>
+    <saml:Conditions NotBefore="%s" NotOnOrAfter="%s">
+      <saml:AudienceRestriction>
+        <saml:Audience>%s</saml:Audience>
+      </saml:AudienceRestriction>
+    </saml:Conditions>
+  </saml:Assertion>
+</samlp:Response>`, testACSURL, time.Now().Add(time.Hour).UTC().Format(time.RFC3339), notBefore.UTC().Format(time.RFC3339), notOnOrAfter.UTC().Format(time.RFC3339), audience)
+
+	return base64.StdEncoding.EncodeToString([]byte(response))
+}
+
+// idpErrorResponse returns a base64 encoded, unsigned SAML response that has a status and no assertion. The
+// nested status code is left out if it is empty.
+func idpErrorResponse(statusCode string, nestedStatusCode string, message string) string {
+	nested := ""
+	if nestedStatusCode != "" {
+		nested = fmt.Sprintf(`<samlp:StatusCode Value="%s"/>`, nestedStatusCode)
 	}
 
-	s.Equal(http.StatusNotFound, s.get("/saml/metadata").Code)
-	s.Equal(http.StatusNotFound, s.get("/saml/metadata?cert_only=true").Code)
+	response := fmt.Sprintf(`<samlp:Response xmlns:samlp="urn:oasis:names:tc:SAML:2.0:protocol" xmlns:saml="urn:oasis:names:tc:SAML:2.0:assertion" Version="2.0">
+  <saml:Issuer>https://idp.example.com</saml:Issuer>
+  <samlp:Status>
+    <samlp:StatusCode Value="%s">%s</samlp:StatusCode>
+    <samlp:StatusMessage>%s</samlp:StatusMessage>
+  </samlp:Status>
+</samlp:Response>`, statusCode, nested, message)
+
+	return base64.StdEncoding.EncodeToString([]byte(response))
 }
