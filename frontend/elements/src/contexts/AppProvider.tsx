@@ -332,7 +332,14 @@ const AppProvider = ({
     } else {
       const state = await hanko.createState(flowName, config);
       setAuthComponentFlow(state.flowName);
-      setTimeout(() => state.dispatchAfterStateChangeEvent(), 500);
+      // Skip the delayed dispatch if an action was already invoked on this state:
+      // the flow has moved on (or a request is pending) and re-publishing the
+      // initial state would replace the newer screen.
+      setTimeout(() => {
+        if (!state.invokedAction) {
+          state.dispatchAfterStateChangeEvent();
+        }
+      }, 500);
     }
   }, []);
 
