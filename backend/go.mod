@@ -52,7 +52,7 @@ require (
 	github.com/spf13/cobra v1.10.2
 	github.com/stretchr/testify v1.12.1
 	github.com/tidwall/gjson v1.20.1
-	github.com/tidwall/sjson v1.2.5
+	github.com/tidwall/sjson v1.2.7
 	github.com/wk8/go-ordered-map/v2 v2.1.8
 	golang.org/x/crypto v0.58.0
 	golang.org/x/oauth2 v0.37.0
