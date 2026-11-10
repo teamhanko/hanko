@@ -9,6 +9,7 @@
 [![GoDoc](https://godoc.org/github.com/teamhanko/hanko?status.svg)](https://godoc.org/github.com/teamhanko/hanko)
 [![npm (scoped)](https://img.shields.io/npm/v/@teamhanko/hanko-elements?label=hanko-elements)](https://www.npmjs.com/package/@teamhanko/hanko-elements)
 [![npm (scoped)](https://img.shields.io/npm/v/@teamhanko/hanko-frontend-sdk?label=hanko-frontend-sdk)](https://www.npmjs.com/package/@teamhanko/hanko-frontend-sdk)
+[![Plumber Score](https://score.getplumber.io/github.com/teamhanko/hanko.svg)](https://score.getplumber.io/github.com/teamhanko/hanko)
 
 # About Hanko
 Hanko is an open source authentication and user management solution that is easy to integrate, framework-agnostic, and built on privacy-first principles like data minimalism and phishing resistance.
