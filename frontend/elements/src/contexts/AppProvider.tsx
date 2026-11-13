@@ -188,6 +188,7 @@ const AppProvider = ({
   );
 
   const handleError = (e: any) => {
+    setUIState((prev) => ({ ...prev, isDisabled: false }));
     setPage(
       <ErrorPage error={e instanceof HankoError ? e : new TechnicalError(e)} />,
     );
