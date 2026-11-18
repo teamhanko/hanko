@@ -4,9 +4,13 @@ Status: draft for discussion. This document proposes API and data-model changes;
 
 ## Problem and scope
 
-A static application can authenticate users with Hanko Elements but still needs an application backend to create organizations, invite users, and manage membership roles safely. The browser cannot hold an Admin API credential.
+Applications integrating Hanko currently need to build their own organization-management workflows around the Admin API: invitation endpoints and email delivery, membership lifecycle, role-change authorization, ownership transfer, and the corresponding frontend state transitions. This duplicates security-sensitive logic even when an application already has its own backend.
 
-Provide these capabilities through Hanko's public API, authenticated with the user's ordinary Hanko session. Hanko remains the trusted backend. Organizations are groups inside a Hanko tenant; they are not Hanko tenants or Cloud console organizations.
+Provide built-in, session-authenticated organization management for applications, with consistent authorization and UI flows. Hanko owns the organization lifecycle and enforces its management rules; applications can consume the same flows through a custom frontend or Hanko Elements instead of reimplementing them across frontend and backend.
+
+This benefits applications with existing backends as well as browser-only applications. Existing backends remain responsible for business logic and authorization of their own protected resources, while Hanko handles common organization-management operations. Static applications additionally gain the ability to use these operations without a separate application backend. Admin API credentials must never be exposed to the browser.
+
+Organizations are groups inside a Hanko tenant; they are not Hanko tenants or Cloud console organizations.
 
 The first use case is:
 
