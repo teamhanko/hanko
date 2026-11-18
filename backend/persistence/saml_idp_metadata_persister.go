@@ -1,6 +1,8 @@
 package persistence
 
 import (
+	"database/sql"
+	"errors"
 	"fmt"
 
 	"github.com/gobuffalo/pop/v6"
@@ -53,7 +55,7 @@ func (p *samlIDPMetadataPersister) Get(tenantID uuid.UUID, providerID uuid.UUID)
 	metadata := &models.SamlIDPMetadata{}
 	err := p.db.Where("tenant_id = ? AND provider_id = ?", tenantID, providerID).First(metadata)
 	if err != nil {
-		if err.Error() == "sql: no rows in result set" {
+		if errors.Is(err, sql.ErrNoRows) {
 			return nil, nil
 		}
 		return nil, fmt.Errorf("failed to get saml idp metadata: %w", err)

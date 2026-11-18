@@ -133,3 +133,27 @@ func (s *auditLogPersisterSuite) TestAuditLogPersister_BackfillActorUserIdToPubl
 	s.Equal(deletedUserID, *actorUserID(deletedUserLog))
 	s.Nil(actorUserID(anonymousLog))
 }
+func (s *auditLogPersisterSuite) TestAuditLogPersister_CreateStoresLongError() {
+	if testing.Short() {
+		s.T().Skip("skipping test in short mode.")
+	}
+	logError := strings.Repeat("e", 1000)
+	now := time.Now().UTC()
+	auditLog := models.AuditLog{
+		ID:                uuid.Must(uuid.NewV4()),
+		Type:              models.AuditLogThirdPartySignInSignUpFailed,
+		MetaHttpRequestId: uuid.Must(uuid.NewV4()).String(),
+		MetaSourceIp:      testSourceIP,
+		Error:             &logError,
+		TenantID:          uuid.FromStringOrNil(config.DefaultTenantID),
+		CreatedAt:         now,
+		UpdatedAt:         now,
+	}
+	err := s.Storage.GetAuditLogPersister().Create(auditLog)
+	s.Require().NoError(err)
+	stored, err := s.Storage.GetAuditLogPersister().Get(auditLog.ID, auditLog.TenantID)
+	s.Require().NoError(err)
+	s.Require().NotNil(stored)
+	s.Require().NotNil(stored.Error)
+	s.Equal(logError, *stored.Error)
+}

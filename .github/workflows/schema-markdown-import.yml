@@ -5,28 +5,35 @@ on:
     tags:
       - 'backend/*'
   workflow_dispatch:
+permissions:
+  contents: write
+  # The delay check lists this repository's workflow runs through the
+  # API, which needs actions read on the token.
+  actions: read
+
 
 jobs:
   import:
     runs-on: ubuntu-latest
     steps:
       - name: Set up Go
-        uses: actions/setup-go@v7
+        uses: actions/setup-go@v7.0.0
         with:
           go-version: '1.26'
 
-      - uses: actions/setup-node@v7
+      - uses: actions/setup-node@v7.1.0
         with:
           node-version: v24.11.1
           registry-url: https://registry.npmjs.org/
 
       - name: Checkout backend
-        uses: actions/checkout@v7
+        uses: actions/checkout@v7.0.1
         with:
+          persist-credentials: false
           path: hanko
 
       - name: Checkout backend wiki
-        uses: actions/checkout@v7
+        uses: actions/checkout@v7.0.1
         with:
           repository: ${{github.repository}}.wiki
           path: wiki

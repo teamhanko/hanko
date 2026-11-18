@@ -189,6 +189,7 @@ export const da: Translation = {
   },
   flowErrors: {
     technical_error: "Der opstod en teknisk fejl. Prøv venligst igen senere.",
+    request_timeout: "Anmodningen fik timeout. Prøv venligst igen.",
     flow_expired_error:
       "Sessionen er udløbet. Klik på knappen for at starte forfra.",
     value_invalid_error: "Den indtastede værdi er ugyldig.",

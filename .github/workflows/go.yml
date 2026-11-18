@@ -5,16 +5,21 @@ on:
     branches: [ main ]
   pull_request:
     branches: [ main ]
+permissions:
+  contents: read
+
 
 jobs:
 
   build:
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v7
+    - uses: actions/checkout@v7.0.1
+      with:
+        persist-credentials: false
 
     - name: Set up Go
-      uses: actions/setup-go@v7
+      uses: actions/setup-go@v7.0.0
       with:
         go-version: '1.26'
 

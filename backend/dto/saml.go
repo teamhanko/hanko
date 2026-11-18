@@ -13,7 +13,6 @@ type SamlRequest struct {
 }
 
 type SamlMetadataRequest struct {
-	SamlRequest
 	CertOnly bool `query:"cert_only" validate:"boolean"`
 }
 

@@ -22,6 +22,9 @@ type databaseHookSuite struct {
 }
 
 func (s *databaseHookSuite) TestNewDatabaseHook() {
+	if testing.Short() {
+		s.T().Skip("skipping test in short mode.")
+	}
 	hookId, err := uuid.NewV4()
 	s.Require().NoError(err)
 
@@ -37,6 +40,9 @@ func (s *databaseHookSuite) TestNewDatabaseHook() {
 }
 
 func (s *databaseHookSuite) TestDatabaseHook_DisableOnExpiryDate() {
+	if testing.Short() {
+		s.T().Skip("skipping test in short mode.")
+	}
 	hook, whPersister := s.loadWebhook("8b00da9a-cacf-45ea-b25d-c1ce0f0d7da3")
 	dbHook := NewDatabaseHook(hook, whPersister, nil)
 
@@ -50,6 +56,9 @@ func (s *databaseHookSuite) TestDatabaseHook_DisableOnExpiryDate() {
 	s.False(updatedHook.Enabled)
 }
 func (s *databaseHookSuite) TestDatabaseHook_DoNotDisableOnExpiryDate() {
+	if testing.Short() {
+		s.T().Skip("skipping test in short mode.")
+	}
 	hook, whPersister := s.loadWebhook("a47fe92a-1e4b-4119-8653-55ad82737c88")
 
 	dbHook := NewDatabaseHook(hook, whPersister, nil)
@@ -65,6 +74,9 @@ func (s *databaseHookSuite) TestDatabaseHook_DoNotDisableOnExpiryDate() {
 }
 
 func (s *databaseHookSuite) TestDatabaseHook_DisableOnFailure() {
+	if testing.Short() {
+		s.T().Skip("skipping test in short mode.")
+	}
 	hook, whPersister := s.loadWebhook("8b00da9a-cacf-45ea-b25d-c1ce0f0d7da2")
 
 	dbHook := NewDatabaseHook(hook, whPersister, nil)
@@ -78,6 +90,9 @@ func (s *databaseHookSuite) TestDatabaseHook_DisableOnFailure() {
 }
 
 func (s *databaseHookSuite) TestDatabaseHook_DoNotDisableOnFailure() {
+	if testing.Short() {
+		s.T().Skip("skipping test in short mode.")
+	}
 	hook, whPersister := s.loadWebhook("8b00da9a-cacf-45ea-b25d-c1ce0f0d7da3")
 
 	dbHook := NewDatabaseHook(hook, whPersister, nil)
@@ -91,6 +106,9 @@ func (s *databaseHookSuite) TestDatabaseHook_DoNotDisableOnFailure() {
 }
 
 func (s *databaseHookSuite) TestDatabaseHook_Reset() {
+	if testing.Short() {
+		s.T().Skip("skipping test in short mode.")
+	}
 	hook, whPersister := s.loadWebhook("8b00da9a-cacf-45ea-b25d-c1ce0f0d7da2")
 
 	dbHook := NewDatabaseHook(hook, whPersister, nil)
@@ -110,6 +128,9 @@ func (s *databaseHookSuite) TestDatabaseHook_Reset() {
 }
 
 func (s *databaseHookSuite) TestDatabaseHook_IsEnabled() {
+	if testing.Short() {
+		s.T().Skip("skipping test in short mode.")
+	}
 	hook, whPersister := s.loadWebhook("a47fe92a-1e4b-4119-8653-55ad82737c88")
 
 	dbHook := NewDatabaseHook(hook, whPersister, nil)
@@ -118,6 +139,9 @@ func (s *databaseHookSuite) TestDatabaseHook_IsEnabled() {
 }
 
 func (s *databaseHookSuite) TestDatabaseHook_IsDisabled() {
+	if testing.Short() {
+		s.T().Skip("skipping test in short mode.")
+	}
 	hook, whPersister := s.loadWebhook("279beae1-8a6d-4eaf-a791-1fa79d21d37a")
 
 	dbHook := NewDatabaseHook(hook, whPersister, nil)

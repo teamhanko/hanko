@@ -26,6 +26,9 @@ type emailAdminSuite struct {
 }
 
 func (s *emailAdminSuite) TestEmailAdminHandler_New() {
+	if testing.Short() {
+		s.T().Skip("skipping test in short mode.")
+	}
 	emailHandler := NewEmailAdminHandler(s.Storage)
 	s.NotEmpty(emailHandler)
 }

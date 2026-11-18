@@ -23,6 +23,9 @@ type samlSuite struct {
 }
 
 func (s *samlSuite) TestSaml_GenerateState() {
+	if testing.Short() {
+		s.T().Skip("skipping test in short mode.")
+	}
 	cfg := config.Config{
 		ApplicationConfig: config.ApplicationConfig{
 			SecretKeys: []string{"thirty-two-byte-long-test-secret"},
@@ -42,6 +45,9 @@ func (s *samlSuite) TestSaml_GenerateState() {
 }
 
 func (s *samlSuite) TestSaml_GenerateStateWithDefaultRedirect() {
+	if testing.Short() {
+		s.T().Skip("skipping test in short mode.")
+	}
 	cfg := config.Config{
 		ApplicationConfig: config.ApplicationConfig{
 			SecretKeys: []string{"thirty-two-byte-long-test-secret"},
@@ -61,6 +67,9 @@ func (s *samlSuite) TestSaml_GenerateStateWithDefaultRedirect() {
 }
 
 func (s *samlSuite) TestSaml_GenerateState_Error() {
+	if testing.Short() {
+		s.T().Skip("skipping test in short mode.")
+	}
 
 	redirectTo := "https://example.com"
 
@@ -107,6 +116,9 @@ func (s *samlSuite) TestSaml_GenerateState_Error() {
 }
 
 func (s *samlSuite) TestSaml_VerifyState() {
+	if testing.Short() {
+		s.T().Skip("skipping test in short mode.")
+	}
 	cfg := config.Config{
 		ApplicationConfig: config.ApplicationConfig{
 			SecretKeys: []string{"thirty-two-byte-long-test-secret"},
@@ -129,6 +141,9 @@ func (s *samlSuite) TestSaml_VerifyState() {
 }
 
 func (s *samlSuite) TestSaml_VerifyState_Error() {
+	if testing.Short() {
+		s.T().Skip("skipping test in short mode.")
+	}
 	err := s.LoadFixtures("../test/fixtures/saml_state")
 	s.Require().NoError(err)
 

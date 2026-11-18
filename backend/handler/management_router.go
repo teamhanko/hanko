@@ -20,6 +20,11 @@ func NewManagementRouter(cfg *config.Config, persister persistence.Persister) *e
 		panic(err)
 	}
 
+	// By default Echo only reads X-Forwarded-Proto from loopback, link-local and private peers. The legacy extractor reads
+	// it from any peer, so the pagination Link headers stay https behind a proxy that connects from a public address.
+	// Any client can set the header, so don't base security decisions on Scheme().
+	e.SchemeExtractor = echo.LegacySchemeExtractor()
+
 	e.HTTPErrorHandler = dto.NewHTTPErrorHandler(dto.HTTPErrorHandlerConfig{Debug: false, Logger: e.Logger})
 	e.Use(middleware.RequestID())
 	e.Use(hankoMiddleware.GetLoggerMiddleware())
@@ -55,6 +60,11 @@ func NewManagementRouter(cfg *config.Config, persister persistence.Persister) *e
 	samlProviders.GET("/:providerId", samlProviderHandler.Get)
 	samlProviders.PUT("/:providerId", samlProviderHandler.Update)
 	samlProviders.DELETE("/:providerId", samlProviderHandler.Delete)
+
+	samlCertificateHandler := NewSamlCertificateHandler(persister)
+
+	samlCertificate := saml.Group("/certificate")
+	samlCertificate.POST("/renew", samlCertificateHandler.Renew)
 
 	return e
 }

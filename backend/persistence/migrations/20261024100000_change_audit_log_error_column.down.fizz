@@ -1,0 +1,2 @@
+sql("UPDATE audit_logs SET error = LEFT(error, 255) WHERE LENGTH(error) > 255")
+change_column("audit_logs", "error", "string", {"null": true})

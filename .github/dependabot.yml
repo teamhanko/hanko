@@ -24,3 +24,11 @@ updates:
     directory: "/"
     schedule:
       interval: "weekly"
+    # One grouped pull request per week for the pinned actions, after a
+    # week of cooldown so a retagged or yanked release never lands first.
+    groups:
+      github-actions:
+        patterns:
+          - "*"
+    cooldown:
+      default-days: 7

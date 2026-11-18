@@ -38,7 +38,7 @@ func (p identityPersister) GetByID(identityID uuid.UUID, tenantID uuid.UUID) (*m
 
 	var samlProvider models.SamlProvider
 	if identity.SamlIdentity != nil {
-		q2 := p.db.RawQuery("select * from saml_providers where tenant_id = $1 and domain = $2", tenantID, identity.SamlIdentity.Domain)
+		q2 := p.db.Where("tenant_id = ? AND domain = ?", tenantID, identity.SamlIdentity.Domain)
 		if err := q2.First(&samlProvider); err != nil {
 			if errors.Is(err, sql.ErrNoRows) {
 				return nil, nil
@@ -63,7 +63,7 @@ func (p identityPersister) Get(providerUserID string, providerID string, tenantI
 
 	var samlProvider models.SamlProvider
 	if identity.SamlIdentity != nil {
-		q2 := p.db.RawQuery("select * from saml_providers where tenant_id = $1 and domain = $2", tenantID.String(), identity.SamlIdentity.Domain)
+		q2 := p.db.Where("tenant_id = ? AND domain = ?", tenantID.String(), identity.SamlIdentity.Domain)
 		if err := q2.First(&samlProvider); err != nil {
 			if errors.Is(err, sql.ErrNoRows) {
 				return nil, nil

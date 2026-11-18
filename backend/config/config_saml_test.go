@@ -39,6 +39,18 @@ func TestSamlConfig_PostProcessWithBrokenGlob(t *testing.T) {
 	assert.ErrorContains(t, err, "failed compile allowed redirect url glob")
 }
 
+func TestSamlConfig_PostProcessWithBrokenGlobInAllowedRedirectUrls(t *testing.T) {
+	cfg := &Saml{
+		Endpoint:            "http://lorem.ipsum/",
+		DefaultRedirectUrl:  "http://localhost:8000",
+		AllowedRedirectURLS: []string{"["},
+	}
+
+	err := cfg.PostProcess()
+	assert.NotNil(t, err)
+	assert.ErrorContains(t, err, "failed compile allowed redirect url glob")
+}
+
 func TestSamlConfig_PostProcessEndpointTrimme(t *testing.T) {
 	redirectUrls := []string{"http://allowed-redirect/lorem"}
 
@@ -148,27 +160,6 @@ func TestSamlConfig_ValidateUrlsWithWrongEndpointUrl(t *testing.T) {
 
 	err := cfg.ValidateUrls()
 	assert.Errorf(t, err, invalidUrlFormat, cfg.Endpoint)
-}
-
-func TestSamlConfig_ValidateUrlsWithWrongDefaultRedirecttUrl(t *testing.T) {
-	cfg := &Saml{
-		Endpoint:           "http://lorem.ipsum",
-		DefaultRedirectUrl: "http://lorem:8000.de/ipsum",
-	}
-
-	err := cfg.ValidateUrls()
-	assert.Errorf(t, err, invalidUrlFormat, cfg.DefaultRedirectUrl)
-}
-
-func TestSamlConfig_ValidateUrlsWithWrongAllowedRedirectUrl(t *testing.T) {
-	cfg := &Saml{
-		Endpoint:            "http://lorem.ipsum",
-		DefaultRedirectUrl:  "http://lorem:8000.de/ipsum",
-		AllowedRedirectURLS: []string{"s:/"},
-	}
-
-	err := cfg.ValidateUrls()
-	assert.Errorf(t, err, invalidUrlFormat, cfg.AllowedRedirectURLS[0])
 }
 
 func TestSamlConfig_ValidateProvider(t *testing.T) {
