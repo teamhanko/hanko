@@ -5,6 +5,7 @@ import (
 
 	"github.com/gofrs/uuid"
 	"github.com/stretchr/testify/suite"
+	"github.com/teamhanko/hanko/backend/v3/persistence/models"
 	"github.com/teamhanko/hanko/backend/v3/test"
 )
 
@@ -23,6 +24,7 @@ const (
 	identityPersisterSamlProviderID = "7c9e6679-7425-40de-944b-e07fc1f90ae8"
 	identityPersisterProviderID     = "saml_" + identityPersisterSamlProviderID
 	identityPersisterProviderUserID = "jane-doe-name-id"
+	identityPersisterSamlDomain     = "uni-a.example.com"
 )
 
 func (s *identityPersisterSuite) TestGet_AttachesSamlProvider() {
@@ -53,4 +55,37 @@ func (s *identityPersisterSuite) TestGetByID_AttachesSamlProvider() {
 	s.Require().NotNil(identity.SamlIdentity)
 	s.Require().NotNil(identity.SamlIdentity.SamlProvider)
 	s.Equal(identityPersisterSamlProviderID, identity.SamlIdentity.SamlProvider.ID.String())
+}
+
+func (s *identityPersisterSuite) TestDeleteAll_DeletesOnlyGivenIdentities() {
+	if testing.Short() {
+		s.T().Skip("skipping test in short mode.")
+	}
+	err := s.LoadFixtures("../test/fixtures/saml_provider_lookup")
+	s.Require().NoError(err)
+
+	tenantID := uuid.FromStringOrNil(identityPersisterTenantID)
+	persister := s.Storage.GetIdentityPersister()
+
+	other, err := models.NewIdentity("google", map[string]interface{}{"sub": "jane-doe-google"}, nil, nil, tenantID)
+	s.Require().NoError(err)
+	s.Require().NoError(persister.Create(*other))
+
+	err = persister.DeleteAll([]models.Identity{})
+	s.Require().NoError(err)
+
+	samlIdentities, err := persister.GetAllByDomain(tenantID, identityPersisterSamlDomain)
+	s.Require().NoError(err)
+	s.Require().Len(samlIdentities, 1)
+
+	err = persister.DeleteAll(samlIdentities)
+	s.Require().NoError(err)
+
+	deleted, err := persister.GetByID(uuid.FromStringOrNil(identityPersisterIdentityID), tenantID)
+	s.Require().NoError(err)
+	s.Nil(deleted)
+
+	remaining, err := persister.GetByID(other.ID, tenantID)
+	s.Require().NoError(err)
+	s.NotNil(remaining)
 }

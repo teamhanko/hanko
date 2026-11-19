@@ -127,7 +127,9 @@ func (p identityPersister) Delete(identity models.Identity) error {
 }
 
 func (p identityPersister) DeleteAll(identities []models.Identity) error {
-	err := p.db.Q().Delete(identities)
+	// Destroy deletes the given rows by ID. Query.Delete only takes the table name from its argument
+	// and, without a where clause, would delete the identities of all users of all tenants.
+	err := p.db.Destroy(&identities)
 	if err != nil {
 		return fmt.Errorf("failed to delete identities: %w", err)
 	}
