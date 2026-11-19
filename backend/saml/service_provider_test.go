@@ -134,3 +134,53 @@ func (s *samlProviderServiceSuite) TestGetAuthUrl_DoesNotSignTheRedirectUrlIfSig
 	s.False(authUrl.Query().Has("SigAlg"))
 	s.False(authUrl.Query().Has("Signature"))
 }
+
+// storeProviderForIssuerLookup stores a provider with the metadata of an identity provider and a service provider
+// certificate, with the given enabled state, and returns the tenant it belongs to.
+func (s *samlProviderServiceSuite) storeProviderForIssuerLookup(enabled bool) uuid.UUID {
+	s.Require().NoError(s.LoadFixtures("../test/fixtures/saml_sync"))
+	tenantID := uuid.FromStringOrNil("00000000-0000-0000-0000-000000000001")
+
+	providerID := storeTestProviderMetadata(&s.Suite, tenantID, testMetadataXMLWithSSOServices([2]string{"HTTP-Redirect", testRedirectSSOLocation}), testRedirectSSOLocation)
+
+	providerPersister := s.Storage.GetSamlProviderPersister()
+	provider, err := providerPersister.Get(tenantID, providerID)
+	s.Require().NoError(err)
+	provider.Enabled = enabled
+	s.Require().NoError(providerPersister.Update(*provider))
+
+	certificate, err := NewCertificateService(s.Storage).Generate(NewCertificateSubject("Test Service", ""), CertificateParams{})
+	s.Require().NoError(err)
+	certificate.TenantID = tenantID
+	s.Require().NoError(s.Storage.GetSamlCertificatePersister().Create(certificate))
+
+	return tenantID
+}
+
+// TestGetProviderByIssuer_ReturnsEnabledProvider ensures an enabled provider is found by the issuer of its metadata.
+func (s *samlProviderServiceSuite) TestGetProviderByIssuer_ReturnsEnabledProvider() {
+	if testing.Short() {
+		s.T().Skip("skipping test in short mode.")
+	}
+
+	tenantID := s.storeProviderForIssuerLookup(true)
+
+	_, providerConfig, err := NewSamlProviderService(s.Storage).GetProviderByIssuer(tenantID, config.TenantConfig{}, "https://idp.example.com/metadata")
+
+	s.Require().NoError(err)
+	s.Equal("example.com", providerConfig.Domain)
+}
+
+// TestGetProviderByIssuer_DoesNotReturnDisabledProvider ensures a disabled provider is not found by the issuer of its
+// metadata, as is the case for its domain.
+func (s *samlProviderServiceSuite) TestGetProviderByIssuer_DoesNotReturnDisabledProvider() {
+	if testing.Short() {
+		s.T().Skip("skipping test in short mode.")
+	}
+
+	tenantID := s.storeProviderForIssuerLookup(false)
+
+	_, _, err := NewSamlProviderService(s.Storage).GetProviderByIssuer(tenantID, config.TenantConfig{}, "https://idp.example.com/metadata")
+
+	s.ErrorContains(err, "no provider found for issuer")
+}

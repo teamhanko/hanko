@@ -61,10 +61,11 @@ func (s *defaultService) GetProviderByDomain(tenantID uuid.UUID, tenantConfig co
 	return samlProvider, providerConfig, nil
 }
 
-// GetProviderByIssuer retrieves a provider from DB by issuer and builds the runtime gosaml2 provider
+// GetProviderByIssuer attempts to retrieve an enabled provider for the given issuer from DB and builds the runtime
+// gosaml2 provider using the tenant configuration.
 func (s *defaultService) GetProviderByIssuer(tenantID uuid.UUID, tenantConfig config.TenantConfig, issuer string) (*saml2.SAMLServiceProvider, *ProviderConfig, error) {
 	// Query DB for provider by entity_id (which is the issuer)
-	providerModel, err := s.persister.GetSamlProviderPersister().GetByEntityID(tenantID, issuer)
+	providerModel, err := s.persister.GetSamlProviderPersister().GetEnabledByEntityID(tenantID, issuer)
 	if err != nil {
 		return nil, nil, fmt.Errorf("failed to get provider by issuer: %w", err)
 	}

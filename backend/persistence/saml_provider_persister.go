@@ -15,6 +15,7 @@ type SamlProviderPersister interface {
 	Update(provider models.SamlProvider) error
 	Get(tenantID uuid.UUID, providerID uuid.UUID) (*models.SamlProvider, error)
 	GetByEntityID(tenantID uuid.UUID, entityID string) (*models.SamlProvider, error)
+	GetEnabledByEntityID(tenantID uuid.UUID, entityID string) (*models.SamlProvider, error)
 	GetByDomain(tenantID uuid.UUID, domain string) (*models.SamlProvider, error)
 	GetEnabledByDomain(tenantID uuid.UUID, domain string) (*models.SamlProvider, error)
 	List(tenantID uuid.UUID) ([]models.SamlProvider, error)
@@ -71,6 +72,19 @@ func (p *samlProviderPersister) Get(tenantID uuid.UUID, providerID uuid.UUID) (*
 func (p *samlProviderPersister) GetByEntityID(tenantID uuid.UUID, entityID string) (*models.SamlProvider, error) {
 	provider := &models.SamlProvider{}
 	err := p.db.Where("tenant_id = ? AND entity_id = ?", tenantID, entityID).First(provider)
+	if err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			return nil, nil
+		}
+		return nil, fmt.Errorf("failed to get SAML provider by entity_id: %w", err)
+	}
+
+	return provider, nil
+}
+
+func (p *samlProviderPersister) GetEnabledByEntityID(tenantID uuid.UUID, entityID string) (*models.SamlProvider, error) {
+	provider := &models.SamlProvider{}
+	err := p.db.Where("tenant_id = ? AND entity_id = ? AND enabled = ?", tenantID, entityID, true).First(provider)
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
 			return nil, nil
