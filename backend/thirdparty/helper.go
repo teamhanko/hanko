@@ -10,6 +10,13 @@ import (
 )
 
 func IsAllowedRedirect(config config.ThirdParty, redirectTo string) bool {
+	return IsAllowedRedirectURL(config.AllowedRedirectURLMap, redirectTo, config.UnsafeWildcardRedirectURLAllowed)
+}
+
+// IsAllowedRedirectURL checks redirectTo against a map of configured allowlist
+// patterns (pattern string -> compiled glob). It is shared by the third party
+// (OAuth/OIDC) and SAML redirect checks.
+func IsAllowedRedirectURL(allowedRedirectURLMap map[string]glob.Glob, redirectTo string, unsafeWildcardRedirectURLAllowed bool) bool {
 	if redirectTo == "" {
 		return false
 	}
@@ -49,7 +56,7 @@ func IsAllowedRedirect(config config.ThirdParty, redirectTo string) bool {
 	// chosen pattern (including its scheme). Dangerous pseudo-schemes such as
 	// javascript:, data:, and file:/// are still rejected above, because they
 	// have no authority component and so fail the Hostname() == "" check.
-	for allowedRedirectPattern, pattern := range config.AllowedRedirectURLMap {
+	for allowedRedirectPattern, pattern := range allowedRedirectURLMap {
 		// Keep legacy semantics: the configured allowlist entry is still used
 		// as a glob against the full redirect URL string. This preserves support
 		// for existing patterns such as:
@@ -73,7 +80,7 @@ func IsAllowedRedirect(config config.ThirdParty, redirectTo string) bool {
 		//
 		// The glob may match as a string, but the parsed host is not actually
 		// 127.0.0.1, so it must be rejected.
-		if matchesAllowedRedirectHostBoundary(allowedRedirectPattern, redirectURL, config.UnsafeWildcardRedirectURLAllowed) {
+		if matchesAllowedRedirectHostBoundary(allowedRedirectPattern, redirectURL, unsafeWildcardRedirectURLAllowed) {
 			return true
 		}
 	}

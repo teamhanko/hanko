@@ -83,7 +83,9 @@ func (s *defaultService) GetProviderByIssuer(tenantID uuid.UUID, tenantConfig co
 
 // GetAuthUrl generates a SAML authentication URL for a given provider
 func (s *defaultService) GetAuthUrl(tenantID uuid.UUID, config config.Config, providerID uuid.UUID, redirectTo string, isFlow bool) (string, error) {
-	if ok := config.TenantConfig.Saml.IsAllowedRedirect(redirectTo); !ok {
+	// SAML has no unsafe_wildcard_redirect_url_allowed option, so wildcard-only
+	// patterns (e.g. "**", "https://**") are never accepted as redirect targets.
+	if ok := thirdparty.IsAllowedRedirectURL(config.TenantConfig.Saml.AllowedRedirectURLMap, redirectTo, false); !ok {
 		return "", thirdparty.ErrorInvalidRequest(fmt.Sprintf("redirect to '%s' not allowed", redirectTo))
 	}
 

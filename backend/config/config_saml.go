@@ -187,22 +187,6 @@ func (s *Saml) ValidateUrls() error {
 	return nil
 }
 
-func (s *Saml) IsAllowedRedirect(redirectTo string) bool {
-	if redirectTo == "" {
-		return false
-	}
-
-	redirectTo = strings.TrimSuffix(redirectTo, "/")
-
-	for _, pattern := range s.AllowedRedirectURLMap {
-		if pattern.Match(redirectTo) {
-			return true
-		}
-	}
-
-	return false
-}
-
 func (idp *IdentityProvider) Validate() error {
 	if strings.TrimSpace(idp.Domain) == "" {
 		return errors.New("domain must be set")

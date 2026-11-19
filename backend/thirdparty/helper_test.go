@@ -564,3 +564,58 @@ func TestGetErrorUrl(t *testing.T) {
 		})
 	}
 }
+
+func TestIsAllowedRedirectURL_Saml(t *testing.T) {
+	tests := []struct {
+		name                string
+		requestedRedirect   string
+		allowedRedirectURLs []string
+		want                bool
+	}{
+		{
+			name:                "Default redirect url allowed",
+			requestedRedirect:   "https://example.com/saml/callback",
+			allowedRedirectURLs: []string{},
+			want:                true,
+		},
+		{
+			name:                "Glob match allowed",
+			requestedRedirect:   "http://localhost:8888/foo",
+			allowedRedirectURLs: []string{"http://localhost:8888**"},
+			want:                true,
+		},
+		{
+			name:                "Host collision bypass rejected",
+			requestedRedirect:   "http://127.0.0.1.evil.com",
+			allowedRedirectURLs: []string{"http://127.0.0.1**"},
+			want:                false,
+		},
+		{
+			name:                "Userinfo bypass rejected",
+			requestedRedirect:   "http://localhost:8888@evil.com",
+			allowedRedirectURLs: []string{"http://localhost:8888**"},
+			want:                false,
+		},
+		{
+			name:                "Wildcard-only pattern rejected",
+			requestedRedirect:   "https://evil.com",
+			allowedRedirectURLs: []string{"**"},
+			want:                false,
+		},
+	}
+
+	for _, testData := range tests {
+		t.Run(testData.name, func(t *testing.T) {
+			cfg := config.Saml{
+				DefaultRedirectUrl:  "https://example.com/saml/callback",
+				AllowedRedirectURLS: testData.allowedRedirectURLs,
+			}
+
+			err := cfg.PostProcess()
+			require.NoError(t, err)
+
+			got := IsAllowedRedirectURL(cfg.AllowedRedirectURLMap, testData.requestedRedirect, false)
+			assert.Equal(t, testData.want, got)
+		})
+	}
+}
