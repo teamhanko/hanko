@@ -7,6 +7,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/gobuffalo/pop/v6"
 	"github.com/gofrs/uuid"
 	"github.com/teamhanko/hanko/backend/v3/config"
 	"github.com/teamhanko/hanko/backend/v3/crypto"
@@ -86,13 +87,18 @@ func GenerateState(config config.Config, persister persistence.SamlStatePersiste
 	return []byte(result), nil
 }
 
-func VerifyState(tenantID uuid.UUID, keys []string, persister persistence.SamlStatePersister, state string) (*State, error) {
+// VerifyState verifies the state sent back by the identity provider and deletes the stored state, so it can only be
+// used once. It must be called inside a transaction: the stored state stays locked until the transaction ends, which
+// keeps concurrent calls from verifying the same state. The stored state is only deleted if the state verifies.
+func VerifyState(tx *pop.Connection, tenantID uuid.UUID, keys []string, state string) (*State, error) {
 	decodedState, err := decodeState(keys, state)
 	if err != nil {
 		return nil, fmt.Errorf("could not decode state: %w", err)
 	}
 
-	expectedState, err := persister.GetByNonce(decodedState.Nonce, tenantID)
+	statePersister := persistence.NewSamlStatePersister(tx)
+
+	expectedState, err := statePersister.GetByNonce(decodedState.Nonce, tenantID)
 	if err != nil {
 		return nil, fmt.Errorf("could not fetch expected state from db: %w", err)
 	}
@@ -106,10 +112,12 @@ func VerifyState(tenantID uuid.UUID, keys []string, persister persistence.SamlSt
 		return nil, errors.New("could not verify state")
 	}
 
-	_ = persister.Delete(*expectedState)
-
 	if time.Now().UTC().After(decodedState.ExpiresAt) {
 		return nil, errors.New("state is expired")
+	}
+
+	if err := statePersister.Delete(*expectedState); err != nil {
+		return nil, fmt.Errorf("could not delete expected state from db: %w", err)
 	}
 
 	return decodedState, nil

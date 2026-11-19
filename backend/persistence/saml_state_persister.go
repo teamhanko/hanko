@@ -1,6 +1,7 @@
 package persistence
 
 import (
+	"errors"
 	"fmt"
 
 	"github.com/gobuffalo/pop/v6"
@@ -35,12 +36,16 @@ func (s samlStatePersister) Create(state models.SamlState) error {
 	return nil
 }
 
+// GetByNonce locks the state until the surrounding transaction ends, so it must be called inside one and returns an
+// error otherwise.
 func (s samlStatePersister) GetByNonce(nonce string, tenantID uuid.UUID) (*models.SamlState, error) {
+	if s.db.TX == nil {
+		return nil, errors.New("GetByNonce must be called inside a transaction")
+	}
+
 	state := models.SamlState{}
 
-	query := s.db.Where("nonce = ?", nonce)
-	query = query.Where("tenant_id = ?", tenantID)
-	err := query.First(&state)
+	err := s.db.RawQuery("SELECT * FROM saml_states WHERE nonce = ? AND tenant_id = ? FOR UPDATE", nonce, tenantID).First(&state)
 	if err != nil {
 		return nil, fmt.Errorf("failed to get state by nonce: %w", err)
 	}

@@ -5,6 +5,7 @@ import (
 	"testing"
 	"time"
 
+	"github.com/gobuffalo/pop/v6"
 	"github.com/gofrs/uuid"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -130,8 +131,12 @@ func (s *samlSuite) TestSaml_VerifyState() {
 
 	state := "HmD7wlGQ7bF_4MGtmFRQuuSGTshHETDs4RQa64JAx-6EsmNsUjaQwYNOnjWUs6qIOuQMBTKapDGVXVCk00pX2vSS-x-WVqdzZ8KyeQ-9IHu2mwb-AeRbb2QPE-GFnvp2wrbCskKvWvtOfipyeTsnYY5iM90DxssaUtvKnawaB5_MNNekfKyiOeepIkKjUfSJ6-yTR7AAA4B9jwOfDRB4zdV8kKPVJlGVBJFosL11YWJaLxRGQR69nah3Jf9Z6bSAGXxWp24PoBYhij-dH4JyDCcU7D-NeT2A8qFFFjQ1m28C8fsr6zqb4w=="
 
-	persister := s.Storage.GetSamlStatePersister()
-	validState, err := VerifyState(uuid.FromStringOrNil(config.DefaultTenantID), cfg.SecretKeys, persister, state)
+	var validState *State
+	err = s.Storage.Transaction(func(tx *pop.Connection) error {
+		var err error
+		validState, err = VerifyState(tx, uuid.FromStringOrNil(config.DefaultTenantID), cfg.SecretKeys, state)
+		return err
+	})
 	require.NoError(s.T(), err)
 	require.NotNil(s.T(), validState)
 	require.Equal(s.T(), "test-provider", validState.Provider)
@@ -181,11 +186,38 @@ func (s *samlSuite) TestSaml_VerifyState_Error() {
 				},
 			}
 
-			persister := s.Storage.GetSamlStatePersister()
-
-			_, err := VerifyState(uuid.FromStringOrNil(config.DefaultTenantID), cfg.SecretKeys, persister, testData.state)
+			err := s.Storage.Transaction(func(tx *pop.Connection) error {
+				_, err := VerifyState(tx, uuid.FromStringOrNil(config.DefaultTenantID), cfg.SecretKeys, testData.state)
+				return err
+			})
 			assert.NotNil(s.T(), err)
 			assert.True(s.T(), strings.Contains(err.Error(), testData.expectedError))
 		})
 	}
+}
+
+// A state verifies on its first use and fails on every later use.
+func (s *samlSuite) TestSaml_VerifyState_UsedOnce() {
+	cfg := config.Config{
+		ApplicationConfig: config.ApplicationConfig{
+			SecretKeys: []string{"thirty-two-byte-long-test-secret"},
+		},
+	}
+	tenantID := uuid.FromStringOrNil(config.DefaultTenantID)
+
+	generated, err := GenerateState(cfg, s.Storage.GetSamlStatePersister(), "test-provider", "https://example.com", tenantID)
+	s.Require().NoError(err)
+	state := strings.TrimPrefix(string(generated), StatePrefixServiceProviderInitiated)
+
+	err = s.Storage.Transaction(func(tx *pop.Connection) error {
+		_, err := VerifyState(tx, tenantID, cfg.SecretKeys, state)
+		return err
+	})
+	s.Require().NoError(err)
+
+	err = s.Storage.Transaction(func(tx *pop.Connection) error {
+		_, err := VerifyState(tx, tenantID, cfg.SecretKeys, state)
+		return err
+	})
+	s.Require().ErrorContains(err, "could not fetch expected state from db")
 }

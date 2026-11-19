@@ -296,7 +296,12 @@ func (handler *Handler) CallbackPost(c echo.Context) error {
 	if handler.isIDPInitiated(relayState) {
 		return handler.callbackPostIdPInitiated(c, samlResponse)
 	} else {
-		state, err := saml.VerifyState(tenant.ID, handler.appConfig.SecretKeys, handler.samlService.Persister().GetSamlStatePersister(), strings.TrimPrefix(relayState, saml.StatePrefixServiceProviderInitiated))
+		var state *saml.State
+		err := handler.samlService.Persister().Transaction(func(tx *pop.Connection) error {
+			var err error
+			state, err = saml.VerifyState(tx, tenant.ID, handler.appConfig.SecretKeys, strings.TrimPrefix(relayState, saml.StatePrefixServiceProviderInitiated))
+			return err
+		})
 
 		if err != nil {
 			return handler.redirectError(
