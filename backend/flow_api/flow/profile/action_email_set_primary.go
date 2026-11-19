@@ -100,6 +100,7 @@ func (a EmailSetPrimary) Execute(c flowpilot.ExecutionContext) error {
 	if deps.Cfg.SecurityNotifications.Notifications.EmailCreate.Enabled && existingPrimaryEmailAddress != "" {
 		deps.SecurityNotificationService.SendNotification(deps.Tx, services.SendSecurityNotificationParams{
 			TenantID:     deps.TenantID,
+			Cfg:          deps.Cfg.TenantConfig,
 			EmailAddress: existingPrimaryEmailAddress,
 			Template:     "primary_email_update",
 			HttpContext:  deps.HttpContext,

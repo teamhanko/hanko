@@ -89,6 +89,7 @@ func (a OTPCodeVerify) Execute(c flowpilot.ExecutionContext) error {
 			if deps.Cfg.SecurityNotifications.Notifications.MFACreate.Enabled {
 				deps.SecurityNotificationService.SendNotification(deps.Tx, services.SendSecurityNotificationParams{
 					TenantID:     deps.TenantID,
+					Cfg:          deps.Cfg.TenantConfig,
 					EmailAddress: userModel.Emails.GetPrimary().Address,
 					Template:     "mfa_create",
 					HttpContext:  deps.HttpContext,
