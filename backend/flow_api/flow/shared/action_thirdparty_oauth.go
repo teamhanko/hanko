@@ -73,6 +73,7 @@ func (a ThirdPartyOAuth) Execute(c flowpilot.ExecutionContext) error {
 
 	redirectTo := c.Input().Get("redirect_to").String()
 	if ok := thirdparty.IsAllowedRedirect(deps.Cfg.ThirdParty, redirectTo); !ok {
+		c.Input().SetError("redirect_to", ErrorRedirectURLNotAllowed)
 		return c.Error(flowpilot.ErrorFormDataInvalid)
 	}
 
