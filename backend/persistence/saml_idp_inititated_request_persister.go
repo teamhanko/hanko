@@ -21,7 +21,7 @@ type samlIDPInitiatedRequestPersister struct {
 
 func (p samlIDPInitiatedRequestPersister) GetByResponseIDAndIssuer(responseID, entityID string, tenantID uuid.UUID) (*models.SamlIDPInitiatedRequest, error) {
 	samlIDPInitiatedRequest := models.SamlIDPInitiatedRequest{}
-	query := p.db.Where("response_id = ? AND idp_entity_id = ?", responseID, entityID)
+	query := p.db.Where("response_id = ? AND issuer = ?", responseID, entityID)
 	query = query.Where("tenant_id = ?", tenantID)
 	err := query.First(&samlIDPInitiatedRequest)
 	if err != nil && errors.Is(err, sql.ErrNoRows) {

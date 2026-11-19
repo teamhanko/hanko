@@ -205,22 +205,50 @@ func (handler *Handler) callbackPostIdPInitiated(c echo.Context, samlResponse st
 		)
 	}
 
-	samlResponseIDAttr := responseElement.SelectAttr("ID")
-	if samlResponseIDAttr == nil {
+	assertion := assertionInfo.Assertions[0]
+
+	// The Response may be unsigned, so also reject an InResponseTo in the signed assertion.
+	if assertion.Subject != nil &&
+		assertion.Subject.SubjectConfirmation != nil &&
+		assertion.Subject.SubjectConfirmation.SubjectConfirmationData != nil &&
+		assertion.Subject.SubjectConfirmation.SubjectConfirmationData.InResponseTo != "" {
 		return handler.redirectError(
 			c,
-			thirdparty.ErrorInvalidRequest("invalid saml response: no ID for response present"),
+			thirdparty.ErrorInvalidRequest("saml request is not unsolicited"),
 			redirectTo.String(),
 		)
 	}
 
-	samlResponseID := samlResponseIDAttr.Value
+	// We use the assertion's ID and issuer to prevent replay attacks.
+	if assertion.ID == "" {
+		return handler.redirectError(
+			c,
+			thirdparty.ErrorInvalidRequest("invalid saml response: no ID for assertion present"),
+			redirectTo.String(),
+		)
+	}
+
+	if assertion.Issuer == nil || assertion.Issuer.Value == "" {
+		return handler.redirectError(
+			c,
+			thirdparty.ErrorInvalidRequest("invalid saml response: no issuer for assertion present"),
+			redirectTo.String(),
+		)
+	}
+
+	assertionID := assertion.ID
+	assertionIssuer := assertion.Issuer.Value
 
 	samlIDPInitiatedRequestPersister := handler.samlService.Persister().GetSamlIDPInitiatedRequestPersister()
 
-	// We use the SAML response's ID to prevent replay attacks by persisting every IDP initiated request and
-	// checking whether an IDP initiated request already exists for this request.
-	existingSamlIDPInitiatedRequest, err := samlIDPInitiatedRequestPersister.GetByResponseIDAndIssuer(samlResponseID, issuer, tenant.ID)
+	existingSamlIDPInitiatedRequest, err := samlIDPInitiatedRequestPersister.GetByResponseIDAndIssuer(assertionID, assertionIssuer, tenant.ID)
+	if err != nil {
+		return handler.redirectError(
+			c,
+			thirdparty.ErrorServer("could not look up saml idp initiated request").WithCause(err),
+			redirectTo.String(),
+		)
+	}
 	if existingSamlIDPInitiatedRequest != nil {
 		return handler.redirectError(
 			c,
@@ -229,10 +257,9 @@ func (handler *Handler) callbackPostIdPInitiated(c echo.Context, samlResponse st
 		)
 	}
 
-	// We assume only one assertion, and we assume it is present because we already validated it using the gosaml2
-	// library (which also consumes only one/the first assertion). We also assume assertion conditions are present
-	// because validation assures it is not nil (or else it returns an error).
-	expiresAtString := assertionInfo.Assertions[0].Conditions.NotOnOrAfter
+	// We assume assertion conditions are present because validation assures it is not nil (or else it
+	// returns an error).
+	expiresAtString := assertion.Conditions.NotOnOrAfter
 
 	expiresAt, err := time.Parse(time.RFC3339, expiresAtString)
 	if err != nil {
@@ -244,7 +271,7 @@ func (handler *Handler) callbackPostIdPInitiated(c echo.Context, samlResponse st
 	}
 
 	// If no request exists we create a new IDP initiated request model and persist it.
-	samlIDPInitiatedRequest, err := models.NewSamlIDPInitiatedRequest(tenant.ID, samlResponseID, issuer, expiresAt)
+	samlIDPInitiatedRequest, err := models.NewSamlIDPInitiatedRequest(tenant.ID, assertionID, assertionIssuer, expiresAt)
 	if err != nil {
 		return handler.redirectError(
 			c,
