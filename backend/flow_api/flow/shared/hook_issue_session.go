@@ -171,7 +171,7 @@ func (h IssueSession) Execute(c flowpilot.HookExecutionContext) error {
 			deps.Tx,
 			deps.HttpContext,
 			models.AuditLogLoginSuccess,
-			&models.User{ID: userId},
+			&models.User{ID: userId, PublicID: userModel.PublicID},
 			err,
 			deps.TenantID,
 			auditLogDetails...)

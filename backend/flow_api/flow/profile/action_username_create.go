@@ -87,7 +87,7 @@ func (a UsernameCreate) Execute(c flowpilot.ExecutionContext) error {
 		deps.Tx,
 		deps.HttpContext,
 		models.AuditLogUsernameChanged,
-		&models.User{ID: userModel.ID},
+		&models.User{ID: userModel.ID, PublicID: userModel.PublicID},
 		nil,
 		deps.TenantID,
 		auditlog.Detail("username", usernameModel.Username),
