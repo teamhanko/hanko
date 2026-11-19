@@ -10,7 +10,7 @@
     "vue-router": "^5.4.0"
   },
   "devDependencies": {
-    "@tsconfig/node24": "^24.0.5",
+    "@tsconfig/node24": "^24.0.6",
     "@types/node": "^24.10.1",
     "@vitejs/plugin-vue": "^6.0.10",
     "@vue/tsconfig": "^0.9.1",
