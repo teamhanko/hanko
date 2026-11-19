@@ -65,7 +65,15 @@ func (a OTPCodeValidate) Execute(c flowpilot.ExecutionContext) error {
 
 	code := c.Input().Get("otp_code").String()
 
-	matchedStep, err := deps.TOTPService.ValidateCode(code, userModel.OTPSecret, time.Now().UTC())
+	// The secret is locked until deps.Tx ends, so a concurrent flow of the same user waits here and then
+	// validates against the step this flow consumed. The preloaded userModel.OTPSecret may be stale by then.
+	otpSecretPersister := deps.Persister.GetOTPSecretPersisterWithConnection(deps.Tx)
+	otpSecret, err := otpSecretPersister.GetForUpdate(userModel.OTPSecret.ID, deps.TenantID)
+	if err != nil {
+		return fmt.Errorf("failed to lock otp secret: %w", err)
+	}
+
+	matchedStep, err := deps.TOTPService.ValidateCode(code, otpSecret, time.Now().UTC())
 	if err != nil {
 		if errors.Is(err, services.ErrTOTPCodeAlreadyUsed) {
 			deps.HttpContext.Logger().Warn(fmt.Errorf("totp replay attempt for user %s: %w", userID, err))
@@ -80,8 +88,8 @@ func (a OTPCodeValidate) Execute(c flowpilot.ExecutionContext) error {
 	}
 
 	// Persist the consumed step atomically within deps.Tx (same transaction as session creation).
-	userModel.OTPSecret.LastValidatedStep = nulls.NewInt64(matchedStep)
-	if err := deps.Persister.GetOTPSecretPersisterWithConnection(deps.Tx).Update(userModel.OTPSecret); err != nil {
+	otpSecret.LastValidatedStep = nulls.NewInt64(matchedStep)
+	if err := otpSecretPersister.Update(otpSecret); err != nil {
 		return fmt.Errorf("failed to update otp secret last validated step: %w", err)
 	}
 
