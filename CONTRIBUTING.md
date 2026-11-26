@@ -29,8 +29,8 @@ tracker for general support questions but use the above mentioned [communication
 
 ### Security
 
-Pursuant to our [security policy](./SECURITY.md), any security vulnerabilities should be reported directly to
-`security@hanko.io` instead of using the issue tracker.
+Do not report security vulnerabilities through the issue tracker. Report them privately as described in our
+[security policy](./SECURITY.md).
 
 ### Bugs
 
