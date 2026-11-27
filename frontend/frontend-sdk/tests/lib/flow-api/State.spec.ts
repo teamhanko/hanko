@@ -328,6 +328,31 @@ describe("Action", () => {
       expect(newState.name).toBe("nextState");
     });
 
+    it("marks the action as invoked before its request settles", async () => {
+      const action = new Action(actionDef, state);
+      let settle!: (response: unknown) => void;
+      (hankoMock.client.post as jest.Mock).mockReturnValue(
+        new Promise((resolve) => {
+          settle = resolve;
+        }),
+      );
+
+      const running = action.run();
+
+      // Callers that must not re-publish a consumed state (e.g. the delayed
+      // initial dispatch in hanko-elements' AppProvider) read `invokedAction`
+      // while the request is still pending.
+      expect(state.invokedAction).toEqual({
+        name: "continue_with_login_identifier",
+        relatedStateName: "login_init",
+      });
+
+      settle({
+        json: () => Promise.resolve({ ...mockResponse, name: "nextState" }),
+      });
+      await running;
+    });
+
     it("throws if action is disabled", async () => {
       const action = Action.createDisabled("disabledAction", state);
       await expect(action.run()).rejects.toThrow(
