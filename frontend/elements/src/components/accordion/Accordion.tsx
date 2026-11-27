@@ -41,6 +41,14 @@ const Accordion = function <T>({
     setCheckedItemID(id === checkedItemID ? null : id);
   };
 
+  // Radio inputs only react to the space key natively
+  const keyDownHandler = (event: KeyboardEvent) => {
+    if (event.key === "Enter" && event.target instanceof HTMLInputElement) {
+      event.preventDefault();
+      event.target.click();
+    }
+  };
+
   return (
     <div className={styles.accordion}>
       {data.map((item, itemIndex) => (
@@ -51,6 +59,7 @@ const Accordion = function <T>({
             id={`${name}-${itemIndex}`}
             name={name}
             onClick={clickHandler}
+            onKeyDown={keyDownHandler}
             value={itemIndex}
             checked={checked(itemIndex)}
           />
