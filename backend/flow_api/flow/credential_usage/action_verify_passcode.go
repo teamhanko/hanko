@@ -36,7 +36,11 @@ func (a VerifyPasscode) Execute(c flowpilot.ExecutionContext) error {
 	}
 
 	if !c.Stash().Get(shared.StashPathPasscodeID).Exists() {
-		return errors.New("passcode_id does not exist in the stash")
+		// No passcode was sent in this flow, for example because the passcode rate limit
+		// was reached. Treat the code like an unknown passcode so the user can request a
+		// new one when the limit allows it, instead of ending the flow with a technical error.
+		c.Input().SetError("code", shared.ErrorPasscodeInvalid)
+		return c.Error(flowpilot.ErrorFormDataInvalid)
 	}
 
 	passcodeID := uuid.FromStringOrNil(c.Stash().Get(shared.StashPathPasscodeID).String())
