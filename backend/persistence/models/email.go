@@ -82,6 +82,15 @@ func (emails *Emails) GetPrimary() *Email {
 	return nil
 }
 
+// GetPrimaryAddress returns the address of the primary email, or an empty
+// string if there is none (for example a user with only a username).
+func (emails *Emails) GetPrimaryAddress() string {
+	if primary := emails.GetPrimary(); primary != nil {
+		return primary.Address
+	}
+	return ""
+}
+
 func (emails *Emails) GetEmailByAddress(address string) *Email {
 	for _, email := range *emails {
 		if email.Address == address {

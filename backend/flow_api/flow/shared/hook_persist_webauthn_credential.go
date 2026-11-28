@@ -67,7 +67,7 @@ func (h WebauthnCredentialSave) Execute(c flowpilot.HookExecutionContext) error 
 		}
 
 		if userModel != nil {
-			emailAddress := userModel.Emails.GetPrimary().Address
+			emailAddress := userModel.Emails.GetPrimaryAddress()
 
 			if !isPasskey {
 				// Send user an email informing of new MFA method
