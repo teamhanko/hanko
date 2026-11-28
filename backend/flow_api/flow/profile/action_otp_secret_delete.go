@@ -61,7 +61,7 @@ func (a OTPSecretDelete) Execute(c flowpilot.ExecutionContext) error {
 		deps.SecurityNotificationService.SendNotification(deps.Tx, services.SendSecurityNotificationParams{
 			TenantID:     deps.TenantID,
 			Cfg:          deps.Cfg.TenantConfig,
-			EmailAddress: userModel.Emails.GetPrimary().Address,
+			EmailAddress: userModel.Emails.GetPrimaryAddress(),
 			Template:     "mfa_delete",
 			HttpContext:  deps.HttpContext,
 			UserContext:  *userModel,

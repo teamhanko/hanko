@@ -47,6 +47,11 @@ func NewSecurityNotificationService(emailService Email, persister persistence.Pe
 }
 
 func (s securityNotification) SendNotification(tx *pop.Connection, p SendSecurityNotificationParams) error {
+	// Users without an email address (e.g. username-only accounts) have nobody to notify.
+	if p.EmailAddress == "" {
+		return nil
+	}
+
 	language := p.HttpContext.Request().Header.Get("X-Language")
 
 	subject := s.emailService.RenderSubject(language, p.Template, map[string]interface{}{
